@@ -1,8 +1,12 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { buildGoogleMapsDirectionsUrl } from "@/app/components/maps/google-maps-url";
-import type { RoutePoint } from "@/app/components/maps/route-map-types";
+import type {
+	CommercialRoutePreviewResponse,
+	RoutePoint,
+} from "@/app/components/maps/route-map-types";
 
 // --------------------------------------------------------------------------
 // CARGA DINÁMICA DEL MAPA
@@ -25,57 +29,86 @@ type RouteMapCardProps = {
 	title?: string;
 	subtitle?: string;
 	className?: string;
-	startPoint?: RoutePoint | null;
-	endPoint?: RoutePoint | null;
-	waypoints?: RoutePoint[];
 };
 
-const DEFAULT_START_POINT: RoutePoint = {
-	id: "start",
-	label: "Almacén / Punto de salida",
-	lat: 36.5297,
-	lng: -6.2926,
-	description: "Punto inicial de la ruta comercial",
-};
-
-const DEFAULT_WAYPOINTS: RoutePoint[] = [
-	{
-		id: "wp-1",
-		label: "Cliente 1",
-		lat: 36.5164,
-		lng: -6.2807,
-		description: "Parada comercial de ejemplo",
-	},
-	{
-		id: "wp-2",
-		label: "Cliente 2",
-		lat: 36.5038,
-		lng: -6.2751,
-		description: "Parada comercial de ejemplo",
-	},
-];
-
-const DEFAULT_END_POINT: RoutePoint = {
-	id: "end",
-	label: "Fin de ruta",
-	lat: 36.5297,
-	lng: -6.2926,
-	description: "Punto final de la jornada",
+type ApiError = {
+	error?: string;
+	code?: string;
 };
 
 export default function RouteMapCard({
 	title = "Ruta diaria",
-	subtitle = "Vista previa del recorrido comercial",
+	subtitle = "Vista previa de la ruta calculada sobre tu cartera asignada",
 	className = "",
-	startPoint = DEFAULT_START_POINT,
-	waypoints = DEFAULT_WAYPOINTS,
-	endPoint = DEFAULT_END_POINT,
 }: RouteMapCardProps) {
-	const googleMapsUrl = buildGoogleMapsDirectionsUrl(
-		startPoint,
-		waypoints,
-		endPoint,
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
+	const [preview, setPreview] = useState<CommercialRoutePreviewResponse | null>(
+		null,
 	);
+
+	useEffect(() => {
+		let ignore = false;
+
+		async function loadPreview() {
+			try {
+				setLoading(true);
+				setError("");
+
+				const response = await fetch("/api/commercial/routes/preview", {
+					method: "GET",
+					cache: "no-store",
+				});
+
+				const data = (await response.json().catch(() => null)) as
+					| CommercialRoutePreviewResponse
+					| ApiError
+					| null;
+
+				if (!response.ok) {
+					throw new Error(
+						data && typeof data === "object" && "error" in data && data.error
+							? data.error
+							: "No se pudo cargar la ruta",
+					);
+				}
+
+				if (!ignore) {
+					setPreview(data as CommercialRoutePreviewResponse);
+				}
+			} catch (err) {
+				if (!ignore) {
+					setError(
+						err instanceof Error
+							? err.message
+							: "Error al cargar la ruta del comercial",
+					);
+				}
+			} finally {
+				if (!ignore) {
+					setLoading(false);
+				}
+			}
+		}
+
+		void loadPreview();
+
+		return () => {
+			ignore = true;
+		};
+	}, []);
+
+	const startPoint = preview?.startPoint ?? null;
+	const endPoint = preview?.endPoint ?? null;
+	const waypoints = preview?.waypoints ?? [];
+
+	const googleMapsUrl = useMemo(
+		() => buildGoogleMapsDirectionsUrl(startPoint, waypoints, endPoint),
+		[startPoint, waypoints, endPoint],
+	);
+
+	const hasEnoughPointsForMap =
+		(startPoint ? 1 : 0) + waypoints.length + (endPoint ? 1 : 0) >= 1;
 
 	return (
 		<div
@@ -100,11 +133,66 @@ export default function RouteMapCard({
 				</a>
 			</div>
 
-			<LeafletRouteMap
-				startPoint={startPoint}
-				waypoints={waypoints}
-				endPoint={endPoint}
-			/>
+			{loading ? (
+				<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+					Cargando vista previa de la ruta...
+				</div>
+			) : null}
+
+			{!loading && error ? (
+				<div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
+					{error}
+				</div>
+			) : null}
+
+			{!loading && !error && preview ? (
+				<div className="space-y-4">
+					<div className="flex flex-wrap gap-3 text-sm text-slate-600">
+						<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
+							<span className="font-semibold text-slate-900">
+								{preview.totalAssignedClients}
+							</span>{" "}
+							clientes asignados
+						</div>
+
+						<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
+							<span className="font-semibold text-slate-900">
+								{preview.mappedClients}
+							</span>{" "}
+							con coordenadas
+						</div>
+
+						<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
+							<span className="font-semibold text-slate-900">
+								{preview.skippedClients}
+							</span>{" "}
+							sin geolocalizar
+						</div>
+					</div>
+
+					{!preview.hasRouteStartConfig ? (
+						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+							Tu perfil comercial aún no tiene configurado un punto de salida.
+							La ruta se muestra solo con los clientes geolocalizados.
+						</div>
+					) : null}
+
+					{waypoints.length === 0 ? (
+						<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+							No hay clientes asignados con coordenadas suficientes para pintar
+							la ruta todavía.
+						</div>
+					) : null}
+
+					{hasEnoughPointsForMap ? (
+						<LeafletRouteMap
+							startPoint={startPoint}
+							waypoints={waypoints}
+							endPoint={endPoint}
+						/>
+					) : null}
+				</div>
+			) : null}
 		</div>
 	);
 }
