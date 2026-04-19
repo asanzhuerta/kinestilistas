@@ -3,10 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { buildGoogleMapsDirectionsUrl } from "@/app/components/maps/google-maps-url";
-import type {
-	CommercialRoutePreviewResponse,
-	RoutePoint,
-} from "@/app/components/maps/route-map-types";
+import type { CommercialRoutePreviewResponse } from "@/app/components/maps/route-map-types";
 
 // --------------------------------------------------------------------------
 // CARGA DINÁMICA DEL MAPA
@@ -36,6 +33,20 @@ type ApiError = {
 	code?: string;
 };
 
+type BrowserLocationState =
+	| {
+			status: "loading";
+	  }
+	| {
+			status: "granted";
+			lat: number;
+			lng: number;
+	  }
+	| {
+			status: "unavailable";
+			message: string;
+	  };
+
 export default function RouteMapCard({
 	title = "Ruta diaria",
 	subtitle = "Vista previa de la ruta calculada sobre tu cartera asignada",
@@ -47,15 +58,74 @@ export default function RouteMapCard({
 		null,
 	);
 
+	const [browserLocation, setBrowserLocation] = useState<BrowserLocationState>({
+		status: "loading",
+	});
+
+	// --------------------------------------------------------------------------
+	// OBTENCIÓN DE UBICACIÓN ACTUAL
+	// --------------------------------------------------------------------------
+	// Intentamos usar la ubicación real del comercial como inicio de ruta.
+	// Si falla, el backend usará el fallback configurado en perfil si existe.
+	useEffect(() => {
+		if (!("geolocation" in navigator)) {
+			setBrowserLocation({
+				status: "unavailable",
+				message: "Tu navegador no soporta geolocalización.",
+			});
+			return;
+		}
+
+		navigator.geolocation.getCurrentPosition(
+			(position) => {
+				setBrowserLocation({
+					status: "granted",
+					lat: position.coords.latitude,
+					lng: position.coords.longitude,
+				});
+			},
+			() => {
+				setBrowserLocation({
+					status: "unavailable",
+					message:
+						"No se pudo obtener tu ubicación actual. Se intentará usar el punto de salida guardado.",
+				});
+			},
+			{
+				enableHighAccuracy: true,
+				timeout: 10000,
+				maximumAge: 60000,
+			},
+		);
+	}, []);
+
+	// --------------------------------------------------------------------------
+	// CARGA DE PREVIEW
+	// --------------------------------------------------------------------------
+	// Esperamos a resolver el intento de geolocalización para pedir la preview.
 	useEffect(() => {
 		let ignore = false;
 
 		async function loadPreview() {
+			if (browserLocation.status === "loading") {
+				return;
+			}
+
 			try {
 				setLoading(true);
 				setError("");
 
-				const response = await fetch("/api/commercial/routes/preview", {
+				const url = new URL(
+					"/api/commercial/routes/preview",
+					window.location.origin,
+				);
+
+				if (browserLocation.status === "granted") {
+					url.searchParams.set("startLat", String(browserLocation.lat));
+					url.searchParams.set("startLng", String(browserLocation.lng));
+				}
+
+				const response = await fetch(url.toString(), {
 					method: "GET",
 					cache: "no-store",
 				});
@@ -96,7 +166,7 @@ export default function RouteMapCard({
 		return () => {
 			ignore = true;
 		};
-	}, []);
+	}, [browserLocation]);
 
 	const startPoint = preview?.startPoint ?? null;
 	const endPoint = preview?.endPoint ?? null;
@@ -132,6 +202,18 @@ export default function RouteMapCard({
 					Abrir en Google Maps
 				</a>
 			</div>
+
+			{browserLocation.status === "loading" ? (
+				<div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+					Intentando obtener tu ubicación actual para iniciar la ruta...
+				</div>
+			) : null}
+
+			{browserLocation.status === "unavailable" ? (
+				<div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+					{browserLocation.message}
+				</div>
+			) : null}
 
 			{loading ? (
 				<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
@@ -170,10 +252,32 @@ export default function RouteMapCard({
 						</div>
 					</div>
 
-					{!preview.hasRouteStartConfig ? (
+					{preview.usingCurrentLocation ? (
+						<div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+							La ruta se ha generado usando tu ubicación actual como punto de
+							inicio.
+						</div>
+					) : null}
+
+					{!preview.usingCurrentLocation && preview.usingSavedStartFallback ? (
 						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-							Tu perfil comercial aún no tiene configurado un punto de salida.
-							La ruta se muestra solo con los clientes geolocalizados.
+							No se pudo usar tu ubicación actual. Se ha utilizado el punto de
+							salida guardado en tu perfil como fallback.
+						</div>
+					) : null}
+
+					{!preview.usingCurrentLocation && !preview.usingSavedStartFallback ? (
+						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+							No hay punto de inicio disponible. Para mejorar la ruta, activa la
+							geolocalización o configura un punto de salida de respaldo en tu
+							perfil.
+						</div>
+					) : null}
+
+					{!preview.hasConfiguredEndPoint &&
+					!(preview.startPoint && preview.endPoint) ? (
+						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+							Aún no tienes configurado un punto final de ruta en tu perfil.
 						</div>
 					) : null}
 

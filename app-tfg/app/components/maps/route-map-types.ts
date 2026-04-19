@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------
-// Tipos base reutilizables para mapas y previews de ruta
+// Tipos base reutilizables para mapas y rutas
 // --------------------------------------------------------------------------
 export type RoutePoint = {
 	id: string;
@@ -16,6 +16,13 @@ export type CommercialRoutePreviewResponse = {
 	totalAssignedClients: number;
 	mappedClients: number;
 	skippedClients: number;
-	hasRouteStartConfig: boolean;
-	hasRouteEndConfig: boolean;
+
+	// Indica si se ha podido usar la ubicación actual del comercial
+	usingCurrentLocation: boolean;
+
+	// Indica si el punto de salida usado viene del fallback guardado en perfil
+	usingSavedStartFallback: boolean;
+
+	// Indica si existe un final de ruta configurable
+	hasConfiguredEndPoint: boolean;
 };

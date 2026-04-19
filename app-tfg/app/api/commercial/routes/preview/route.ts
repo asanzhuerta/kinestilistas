@@ -21,7 +21,7 @@ type SessionLike = {
 // Helpers
 // --------------------------------------------------------------------------
 
-// Convierte un valor string/number nullable de BBDD a número válido.
+// Convierte valores de BBDD o query string a número usable.
 function parseCoordinate(value: unknown) {
 	if (value === null || value === undefined || value === "") {
 		return null;
@@ -32,9 +32,8 @@ function parseCoordinate(value: unknown) {
 	return Number.isFinite(parsed) ? parsed : null;
 }
 
-// Distancia euclídea simple.
-// Para esta preview inicial es suficiente y rápida.
-// Más adelante se podrá sustituir por tiempos reales o matriz de distancias.
+// Distancia simple para una primera versión de preview.
+// Más adelante se puede sustituir por tiempos reales / matriz de distancias.
 function distanceBetween(
 	from: { lat: number; lng: number },
 	to: { lat: number; lng: number },
@@ -45,8 +44,8 @@ function distanceBetween(
 	return Math.sqrt(dLat * dLat + dLng * dLng);
 }
 
-// Ordena clientes con una heurística nearest-neighbor simple.
-// No es optimización avanzada, pero sirve como v1 funcional del preview.
+// Ordena clientes con heurística nearest-neighbor.
+// No pretende ser optimización avanzada, pero sirve como preview útil.
 function sortWaypointsByNearestNeighbor(
 	points: RoutePoint[],
 	startPoint: RoutePoint | null,
@@ -86,14 +85,14 @@ function sortWaypointsByNearestNeighbor(
 // --------------------------------------------------------------------------
 // GET /api/commercial/routes/preview
 // --------------------------------------------------------------------------
-// Devuelve una preview simple de ruta usando:
-// - clientes asignados al comercial
-// - coordenadas geolocalizadas del cliente
-// - configuración de origen/fin del comercial
+// Genera una preview de ruta para el comercial autenticado usando:
 //
-// Esta ruta no guarda nada en BD todavía: solo prepara datos para pintar
-// la ruta en el dashboard comercial y abrirla luego en Google Maps.
-export async function GET() {
+// 1. Ubicación actual enviada por query string (prioridad máxima)
+// 2. Punto de salida guardado en perfil comercial como fallback
+// 3. Punto final configurable del perfil comercial
+//
+// No guarda la ruta todavía: solo prepara datos para mapa y navegación.
+export async function GET(request: Request) {
 	try {
 		const session = (await auth()) as SessionLike;
 
@@ -104,33 +103,80 @@ export async function GET() {
 		const commercial = await requireCommercialByUserId(session.user.id);
 		const assignedClients = await listClientsByCommercialId(commercial.id);
 
-		const startLat = parseCoordinate(commercial.route_start_lat);
-		const startLng = parseCoordinate(commercial.route_start_lng);
+		const { searchParams } = new URL(request.url);
+
+		// ------------------------------------------------------------------
+		// Inicio de ruta
+		// ------------------------------------------------------------------
+		// Prioridad:
+		// 1. ubicación actual del navegador
+		// 2. fallback guardado en perfil
+		const currentStartLat = parseCoordinate(searchParams.get("startLat"));
+		const currentStartLng = parseCoordinate(searchParams.get("startLng"));
+
+		const savedStartLat = parseCoordinate(commercial.route_start_lat);
+		const savedStartLng = parseCoordinate(commercial.route_start_lng);
+
 		const endLat = parseCoordinate(commercial.route_end_lat);
 		const endLng = parseCoordinate(commercial.route_end_lng);
 
-		const startPoint: RoutePoint | null =
-			startLat !== null && startLng !== null
+		const usingCurrentLocation =
+			currentStartLat !== null && currentStartLng !== null;
+
+		const usingSavedStartFallback =
+			!usingCurrentLocation &&
+			savedStartLat !== null &&
+			savedStartLng !== null;
+
+		const startPoint: RoutePoint | null = usingCurrentLocation
+			? {
+					id: "route-start-current",
+					label: "Ubicación actual",
+					lat: currentStartLat!,
+					lng: currentStartLng!,
+					description: "Punto de inicio detectado desde el dispositivo",
+				}
+			: usingSavedStartFallback
 				? {
-						id: "route-start",
-						label: "Punto de salida",
-						lat: startLat,
-						lng: startLng,
-						description: commercial.route_start_address || "Inicio de jornada",
+						id: "route-start-fallback",
+						label: "Punto de salida guardado",
+						lat: savedStartLat!,
+						lng: savedStartLng!,
+						description:
+							commercial.route_start_address || "Fallback configurado en perfil",
 					}
 				: null;
 
-		const explicitEndPoint: RoutePoint | null =
+		// ------------------------------------------------------------------
+		// Fin de ruta
+		// ------------------------------------------------------------------
+		// Si return_to_start está activo y existe startPoint, el final será volver
+		// al punto de inicio real del día. Si no, usamos el final configurable.
+		const configuredEndPoint: RoutePoint | null =
 			endLat !== null && endLng !== null
 				? {
-						id: "route-end",
-						label: "Punto final",
+						id: "route-end-config",
+						label: "Punto final configurado",
 						lat: endLat,
 						lng: endLng,
-						description: commercial.route_end_address || "Fin de jornada",
+						description:
+							commercial.route_end_address || "Fin de jornada configurado",
 					}
 				: null;
 
+		const endPoint =
+			commercial.return_to_start && startPoint
+				? {
+						...startPoint,
+						id: "route-end-return",
+						label: "Regreso al punto de salida",
+						description: "Fin de ruta volviendo al punto de inicio del día",
+					}
+				: configuredEndPoint;
+
+		// ------------------------------------------------------------------
+		// Clientes asignados con coordenadas válidas
+		// ------------------------------------------------------------------
 		const mappedClients = assignedClients.flatMap((client) => {
 			const lat = parseCoordinate((client as { lat?: unknown }).lat);
 			const lng = parseCoordinate((client as { lng?: unknown }).lng);
@@ -158,15 +204,6 @@ export async function GET() {
 			startPoint,
 		);
 
-		const endPoint =
-			commercial.return_to_start && startPoint
-				? {
-						...startPoint,
-						id: "route-end-return",
-						label: "Regreso al punto de salida",
-					}
-				: explicitEndPoint;
-
 		const response: CommercialRoutePreviewResponse = {
 			startPoint,
 			endPoint,
@@ -174,8 +211,9 @@ export async function GET() {
 			totalAssignedClients: assignedClients.length,
 			mappedClients: orderedWaypoints.length,
 			skippedClients: assignedClients.length - orderedWaypoints.length,
-			hasRouteStartConfig: !!startPoint,
-			hasRouteEndConfig: !!endPoint,
+			usingCurrentLocation,
+			usingSavedStartFallback,
+			hasConfiguredEndPoint: !!configuredEndPoint,
 		};
 
 		return NextResponse.json(response, { status: 200 });
