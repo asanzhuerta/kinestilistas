@@ -218,8 +218,8 @@ export default auth((req) => {
 	const role = session?.user?.role;
 
 	const isAdminRoute = pathname.startsWith("/admin");
-	const isCommercialRoute = pathname.startsWith("/comerciales");
-	const isClientRoute = pathname.startsWith("/clientes");
+	const isCommercialRoute = pathname.startsWith("/commercials");
+	const isClientRoute = pathname.startsWith("/clients");
 
 	const isAuthRoute =
 		pathname.startsWith("/login") || pathname.startsWith("/register");
@@ -243,11 +243,11 @@ export default auth((req) => {
 		}
 
 		if (role === "commercial") {
-			return NextResponse.redirect(buildRedirectUrl(req, "/comerciales"));
+			return NextResponse.redirect(buildRedirectUrl(req, "/commercials"));
 		}
 
 		if (role === "client") {
-			return NextResponse.redirect(buildRedirectUrl(req, "/clientes"));
+			return NextResponse.redirect(buildRedirectUrl(req, "/clients"));
 		}
 	}
 
