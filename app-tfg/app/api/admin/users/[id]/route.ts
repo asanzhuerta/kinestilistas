@@ -2,13 +2,21 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getDataSource } from "@/lib/typeorm/data-source";
 import { User } from "@/lib/typeorm/entities/User";
-import {
-	updateUser,
-	UpdateUserError,
-} from "@/lib/typeorm/services/users/user";
+import { updateUser, UpdateUserError } from "@/lib/typeorm/services/users/user";
 
 type RouteContext = {
 	params: Promise<{ id: string }>;
+};
+
+type UpdateUserClientProfileBody = {
+	name?: string;
+	contact_name?: string | null;
+	tax_id?: string | null;
+	address?: string;
+	city?: string;
+	postal_code?: string | null;
+	province?: string | null;
+	notes?: string | null;
 };
 
 type UpdateUserRequestBody = {
@@ -21,6 +29,7 @@ type UpdateUserRequestBody = {
 	statusId?: number;
 	password?: string;
 	confirmPassword?: string;
+	clientProfile?: UpdateUserClientProfileBody | null;
 };
 
 export async function PATCH(request: Request, { params }: RouteContext) {
@@ -83,6 +92,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 			statusId: Number(body.statusId),
 			password: body.password ?? "",
 			confirmPassword: body.confirmPassword ?? "",
+			clientProfile: body.clientProfile ?? null,
 		});
 
 		return NextResponse.json(result, { status: 200 });

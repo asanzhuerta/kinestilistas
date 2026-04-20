@@ -7,6 +7,11 @@ import { UserStatus } from "@/lib/typeorm/entities/UserStatus";
 import { UserAdminActionType } from "@/lib/typeorm/entities/UserAdminActionType";
 import { UserManagementLog } from "@/lib/typeorm/entities/UserManagementLog";
 import { UserRequest } from "@/lib/typeorm/entities/UserRequest";
+import { Client } from "@/lib/typeorm/entities/Client";
+import {
+	geocodeAddress,
+	hasEnoughAddressToGeocode,
+} from "@/lib/geocoding/geocode-address";
 import { createClientFromUser } from "@/lib/typeorm/services/commercial/client-internal";
 import type { EntityManager } from "typeorm";
 import {
@@ -83,6 +88,17 @@ type RegisterUserByAdminInput = {
 	commercialId?: string | null;
 };
 
+type UpdateUserClientProfileInput = {
+	name?: string;
+	contact_name?: string | null;
+	tax_id?: string | null;
+	address?: string;
+	city?: string;
+	postal_code?: string | null;
+	province?: string | null;
+	notes?: string | null;
+};
+
 // Input para actualizar los datos de un usuario
 type UpdateUserInput = {
 	userId: string;
@@ -96,8 +112,8 @@ type UpdateUserInput = {
 	statusId: number;
 	password?: string;
 	confirmPassword?: string;
+	clientProfile?: UpdateUserClientProfileInput | null;
 };
-
 // Input para listar usuarios de forma paginada.
 // Se añade como alternativa al listado legacy para permitir búsquedas y limitar
 // el tamaño de respuesta en endpoints más sensibles o costosos.
@@ -536,6 +552,7 @@ export async function updateUser(input: UpdateUserInput) {
 	const statusId = Number(input.statusId);
 	const password = String(input.password ?? "");
 	const confirmPassword = String(input.confirmPassword ?? "");
+	const clientProfile = input.clientProfile ?? null;
 
 	if (!name || !email || !roleId || !statusId) {
 		throw new UpdateUserError("Datos inválidos", 400, "INVALID_DATA");
@@ -569,6 +586,7 @@ export async function updateUser(input: UpdateUserInput) {
 		const statusRepo = manager.getRepository(UserStatus);
 		const actionTypeRepo = manager.getRepository(UserAdminActionType);
 		const logRepo = manager.getRepository(UserManagementLog);
+		const clientRepo = manager.getRepository(Client);
 
 		const currentUser = await userRepo.findOne({
 			where: { id: input.userId },
@@ -691,6 +709,96 @@ export async function updateUser(input: UpdateUserInput) {
 			company,
 		});
 
+		// ----------------------------------------------------------------------
+		// Sincronización del perfil cliente cuando se edita desde admin
+		// ----------------------------------------------------------------------
+		// El formulario admin de usuario ya envía clientProfile, pero hasta ahora
+		// este servicio no estaba aplicando esos cambios a la tabla clients.
+		if (roleId === ROLE_IDS.CLIENT && clientProfile) {
+			const linkedClient = await clientRepo.findOne({
+				where: { id: currentUser.id },
+			});
+
+			if (!linkedClient) {
+				throw new UpdateUserError(
+					"Perfil de cliente no encontrado",
+					404,
+					"CLIENT_PROFILE_NOT_FOUND",
+				);
+			}
+
+			const nextClientName = normalizeText(clientProfile.name) || name;
+			const nextContactName = normalizeText(clientProfile.contact_name) || null;
+			const nextTaxId = normalizeText(clientProfile.tax_id) || null;
+			const nextAddress = normalizeText(clientProfile.address);
+			const nextCity = normalizeText(clientProfile.city);
+			const nextPostalCode = normalizeText(clientProfile.postal_code) || null;
+			const nextProvince = normalizeText(clientProfile.province) || null;
+			const nextNotes = normalizeText(clientProfile.notes) || null;
+
+			if (!nextClientName || !nextAddress || !nextCity) {
+				throw new UpdateUserError(
+					"Los datos del perfil cliente son incompletos",
+					400,
+					"INVALID_CLIENT_PROFILE_DATA",
+				);
+			}
+
+			const addressChanged =
+				linkedClient.address !== nextAddress ||
+				linkedClient.city !== nextCity ||
+				linkedClient.postal_code !== nextPostalCode ||
+				linkedClient.province !== nextProvince;
+
+			linkedClient.name = nextClientName;
+			linkedClient.contact_name = nextContactName;
+			linkedClient.tax_id = nextTaxId;
+			linkedClient.address = nextAddress;
+			linkedClient.city = nextCity;
+			linkedClient.postal_code = nextPostalCode;
+			linkedClient.province = nextProvince;
+			linkedClient.notes = nextNotes;
+			linkedClient.updated_at = new Date();
+
+			// ------------------------------------------------------------------
+			// Regeocodificación automática si cambia la dirección del cliente
+			// ------------------------------------------------------------------
+			if (addressChanged) {
+				if (
+					hasEnoughAddressToGeocode({
+						address: nextAddress,
+						city: nextCity,
+						postalCode: nextPostalCode,
+						province: nextProvince,
+					})
+				) {
+					try {
+						const geocoded = await geocodeAddress({
+							address: nextAddress,
+							city: nextCity,
+							postalCode: nextPostalCode,
+							province: nextProvince,
+						});
+
+						linkedClient.lat = geocoded?.lat ?? null;
+						linkedClient.lng = geocoded?.lng ?? null;
+					} catch (error) {
+						console.warn(
+							"[updateUser] No se pudo geocodificar la dirección del cliente:",
+							error,
+						);
+						linkedClient.lat = null;
+						linkedClient.lng = null;
+					}
+				} else {
+					linkedClient.lat = null;
+					linkedClient.lng = null;
+				}
+			}
+
+			await clientRepo.save(linkedClient);
+		}
+		
 		if (previousRoleId !== roleId && roleChangeActionId) {
 			await logRepo.save(
 				logRepo.create({
