@@ -31,13 +31,17 @@ type CreateClientInput = {
 
 type UpdateClientInput = {
 	clientId: string;
-	name: string;
+	name?: string;
 	contactName?: string | null;
 	taxId?: string | null;
-	address: string;
-	city: string;
+	address?: string;
+	city?: string;
 	postalCode?: string | null;
 	province?: string | null;
+	lat?: number | string | null;
+	lng?: number | string | null;
+	visitWindowStartTime?: string | null;
+	visitWindowEndTime?: string | null;
 	notes?: string | null;
 };
 

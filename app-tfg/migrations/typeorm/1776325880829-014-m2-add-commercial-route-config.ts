@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 export class M2AddCommercialRouteConfig1776325880829
 	implements MigrationInterface
 {
-	name = "018M2AddCommercialRouteConfig1776325880829";
+	name = "M2AddCommercialRouteConfig1776325880829";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`

@@ -28,7 +28,8 @@ type UpsertCommercialBody = {
 	notes?: string | null;
 	workdayStartTime?: string | null;
 	workdayEndTime?: string | null;
-	maxVisitDurationMinutes?: number | string | null;
+	deliveryVisitDurationMinutes?: number | string | null;
+	routineVisitDurationMinutes?: number | string | null;
 	routeStartAddress?: string | null;
 	routeEndAddress?: string | null;
 	returnToStart?: boolean;
@@ -81,13 +82,14 @@ export async function POST(request: Request) {
 		}
 
 		const commercial = await upsertCommercialProfile({
-			userId: body.userId,
+			userId: String(body.userId ?? ""),
 			employeeCode: body.employeeCode,
 			territory: body.territory,
 			notes: body.notes,
 			workdayStartTime: body.workdayStartTime,
 			workdayEndTime: body.workdayEndTime,
-			maxVisitDurationMinutes: body.maxVisitDurationMinutes,
+			deliveryVisitDurationMinutes: body.deliveryVisitDurationMinutes,
+			routineVisitDurationMinutes: body.routineVisitDurationMinutes,
 			routeStartAddress: body.routeStartAddress,
 			routeEndAddress: body.routeEndAddress,
 			returnToStart: body.returnToStart,

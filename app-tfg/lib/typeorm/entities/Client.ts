@@ -53,12 +53,23 @@ export class Client {
 	// --------------------------------------------------------------------------
 	// Geodatos básicos para mapas y rutas
 	// --------------------------------------------------------------------------
+
 	// PostgreSQL suele devolver numeric como string a través de TypeORM.
 	@Column({ type: "numeric", precision: 9, scale: 6, nullable: true })
 	lat!: string | null;
 
 	@Column({ type: "numeric", precision: 9, scale: 6, nullable: true })
 	lng!: string | null;
+
+	// --------------------------------------------------------------------------
+	// Franja horaria permitida para visitas comerciales
+	// --------------------------------------------------------------------------
+
+	@Column({ type: "time", nullable: true })
+	visit_window_start_time!: string | null;
+
+	@Column({ type: "time", nullable: true })
+	visit_window_end_time!: string | null;
 
 	@Column({ type: "text", nullable: true })
 	notes!: string | null;

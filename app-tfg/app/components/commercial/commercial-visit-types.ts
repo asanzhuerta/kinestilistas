@@ -1,4 +1,5 @@
 export type CommercialVisitStatusCode = "planned" | "completed" | "cancelled";
+export type CommercialVisitTypeCode = "delivery" | "routine";
 
 export type CommercialVisitClientUser = {
 	id: string;
@@ -14,6 +15,8 @@ export type CommercialVisitClient = {
 	contact_name: string | null;
 	city: string;
 	province: string | null;
+	visit_window_start_time: string | null;
+	visit_window_end_time: string | null;
 	user: CommercialVisitClientUser | null;
 };
 
@@ -37,16 +40,24 @@ export type CommercialVisitStatus = {
 	name?: string;
 };
 
+export type CommercialVisitType = {
+	id: number;
+	code?: CommercialVisitTypeCode;
+	name?: string;
+};
+
 export type CommercialVisit = {
 	id: string;
 	client_id: string;
 	commercial_id: string;
-	scheduled_at: string;
+	scheduled_for_date: string;
+	visit_type_id: number;
 	status_id: number;
 	notes: string | null;
 	result: string | null;
 	client: CommercialVisitClient | null;
 	commercial: CommercialVisitCommercial | null;
+	visitType: CommercialVisitType | null;
 	status: CommercialVisitStatus | null;
 };
 
@@ -54,6 +65,11 @@ export const COMMERCIAL_VISIT_STATUS_OPTIONS = [
 	{ id: 1, label: "Planificada" },
 	{ id: 2, label: "Completada" },
 	{ id: 3, label: "Cancelada" },
+] as const;
+
+export const COMMERCIAL_VISIT_TYPE_OPTIONS = [
+	{ id: 1, label: "Reparto" },
+	{ id: 2, label: "Rutinaria" },
 ] as const;
 
 export function getVisitStatusLabel(statusId: number) {
@@ -64,6 +80,17 @@ export function getVisitStatusLabel(statusId: number) {
 			return "Completada";
 		case 3:
 			return "Cancelada";
+		default:
+			return "Desconocido";
+	}
+}
+
+export function getVisitTypeLabel(visitTypeId: number) {
+	switch (visitTypeId) {
+		case 1:
+			return "Reparto";
+		case 2:
+			return "Rutinaria";
 		default:
 			return "Desconocido";
 	}
@@ -82,12 +109,12 @@ export function getVisitStatusClasses(statusId: number) {
 	}
 }
 
-export function formatVisitDateTime(value: string | null | undefined) {
+export function formatVisitDate(value: string | null | undefined) {
 	if (!value) {
 		return "-";
 	}
 
-	const date = new Date(value);
+	const date = new Date(`${value}T00:00:00`);
 
 	if (Number.isNaN(date.getTime())) {
 		return "-";
@@ -95,26 +122,5 @@ export function formatVisitDateTime(value: string | null | undefined) {
 
 	return new Intl.DateTimeFormat("es-ES", {
 		dateStyle: "medium",
-		timeStyle: "short",
 	}).format(date);
-}
-
-export function toDateTimeLocalValue(value: string | null | undefined) {
-	if (!value) {
-		return "";
-	}
-
-	const date = new Date(value);
-
-	if (Number.isNaN(date.getTime())) {
-		return "";
-	}
-
-	const year = date.getFullYear();
-	const month = String(date.getMonth() + 1).padStart(2, "0");
-	const day = String(date.getDate()).padStart(2, "0");
-	const hours = String(date.getHours()).padStart(2, "0");
-	const minutes = String(date.getMinutes()).padStart(2, "0");
-
-	return `${year}-${month}-${day}T${hours}:${minutes}`;
 }

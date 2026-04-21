@@ -41,14 +41,18 @@ export class Commercial {
 	// --------------------------------------------------------------------------
 	// Configuración operativa para planificación de rutas
 	// --------------------------------------------------------------------------
+
 	@Column({ type: "time", nullable: true })
 	workday_start_time!: string | null;
 
 	@Column({ type: "time", nullable: true })
 	workday_end_time!: string | null;
 
-	@Column({ type: "smallint", nullable: true })
-	max_visit_duration_minutes!: number | null;
+	@Column({ type: "smallint", default: 10 })
+	delivery_visit_duration_minutes!: number;
+
+	@Column({ type: "smallint", default: 35 })
+	routine_visit_duration_minutes!: number;
 
 	@Column({ type: "text", nullable: true })
 	route_start_address!: string | null;

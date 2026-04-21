@@ -7,16 +7,17 @@ import {
 	Index,
 } from "typeorm";
 import type { Relation } from "typeorm";
-
 import { Client } from "./Client";
 import { Commercial } from "./Commercial";
 import { CommercialVisitStatus } from "./CommercialVisitStatus";
+import { CommercialVisitType } from "./CommercialVisitType";
 
 @Entity("commercial_visits")
 @Index("commercial_visits_client_id_index", ["client_id"])
 @Index("commercial_visits_commercial_id_index", ["commercial_id"])
 @Index("commercial_visits_status_id_index", ["status_id"])
-@Index("commercial_visits_scheduled_at_index", ["scheduled_at"])
+@Index("commercial_visits_visit_type_id_index", ["visit_type_id"])
+@Index("commercial_visits_scheduled_for_date_index", ["scheduled_for_date"])
 export class CommercialVisit {
 	@PrimaryGeneratedColumn("uuid")
 	id!: string;
@@ -27,8 +28,11 @@ export class CommercialVisit {
 	@Column({ type: "uuid" })
 	commercial_id!: string;
 
-	@Column({ type: "timestamptz" })
-	scheduled_at!: Date;
+	@Column({ type: "date" })
+	scheduled_for_date!: string;
+
+	@Column({ type: "smallint" })
+	visit_type_id!: number;
 
 	@Column({ type: "smallint" })
 	status_id!: number;
@@ -40,6 +44,13 @@ export class CommercialVisit {
 	@ManyToOne(() => Commercial, { onDelete: "RESTRICT", onUpdate: "CASCADE" })
 	@JoinColumn({ name: "commercial_id" })
 	commercial!: Relation<Commercial>;
+
+	@ManyToOne(() => CommercialVisitType, {
+		onDelete: "RESTRICT",
+		onUpdate: "CASCADE",
+	})
+	@JoinColumn({ name: "visit_type_id" })
+	visitType!: Relation<CommercialVisitType>;
 
 	@ManyToOne(() => CommercialVisitStatus, {
 		onDelete: "RESTRICT",

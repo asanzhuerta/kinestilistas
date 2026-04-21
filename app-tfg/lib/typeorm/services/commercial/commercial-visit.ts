@@ -3,14 +3,54 @@ import { CommercialVisit } from "@/lib/typeorm/entities/CommercialVisit";
 import { Client } from "@/lib/typeorm/entities/Client";
 import { Commercial } from "@/lib/typeorm/entities/Commercial";
 import { Repository } from "typeorm";
-import { COMMERCIAL_VISIT_STATUS_IDS } from "@/lib/typeorm/constants/catalog-ids";
+import {
+	COMMERCIAL_VISIT_STATUS_IDS,
+	COMMERCIAL_VISIT_TYPE_IDS,
+} from "@/lib/typeorm/constants/catalog-ids";
 import { getActiveAssignmentByCommercialAndClient } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
 
 // --------------------------------------------------------------------------
 // Funciones auxiliares para normalización de datos
 // --------------------------------------------------------------------------
+
 function normalizeText(value: string | null | undefined) {
 	return String(value ?? "").trim();
+}
+
+function normalizeDateOnly(value: string | null | undefined) {
+	const normalized = String(value ?? "").trim();
+
+	if (!normalized) {
+		return null;
+	}
+
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+		throw new CreateCommercialVisitError(
+			"La fecha de la visita debe usar el formato YYYY-MM-DD",
+			400,
+			"INVALID_VISIT_DATE_FORMAT",
+		);
+	}
+
+	return normalized;
+}
+
+function normalizeDateOnlyForUpdate(value: string | null | undefined) {
+	const normalized = String(value ?? "").trim();
+
+	if (!normalized) {
+		return null;
+	}
+
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+		throw new UpdateCommercialVisitError(
+			"La fecha de la visita debe usar el formato YYYY-MM-DD",
+			400,
+			"INVALID_VISIT_DATE_FORMAT",
+		);
+	}
+
+	return normalized;
 }
 
 function buildCommercialVisitQuery(repo: Repository<CommercialVisit>) {
@@ -20,12 +60,19 @@ function buildCommercialVisitQuery(repo: Repository<CommercialVisit>) {
 		.leftJoinAndSelect("client.user", "user")
 		.leftJoinAndSelect("visit.commercial", "commercial")
 		.leftJoinAndSelect("commercial.user", "commercialUser")
+		.leftJoinAndSelect("visit.visitType", "visitType")
 		.leftJoinAndSelect("visit.status", "status");
 }
 
 function isValidCommercialVisitStatus(statusId: number) {
 	return Object.values(COMMERCIAL_VISIT_STATUS_IDS).includes(
 		statusId as (typeof COMMERCIAL_VISIT_STATUS_IDS)[keyof typeof COMMERCIAL_VISIT_STATUS_IDS],
+	);
+}
+
+function isValidCommercialVisitType(visitTypeId: number) {
+	return Object.values(COMMERCIAL_VISIT_TYPE_IDS).includes(
+		visitTypeId as (typeof COMMERCIAL_VISIT_TYPE_IDS)[keyof typeof COMMERCIAL_VISIT_TYPE_IDS],
 	);
 }
 
@@ -50,17 +97,20 @@ function canTransitionCommercialVisitStatus(
 // --------------------------------------------------------------------------
 // Tipos de datos para los inputs de los servicios
 // --------------------------------------------------------------------------
+
 type CreateCommercialVisitInput = {
 	clientId: string;
 	commercialId: string;
-	scheduledAt: Date;
+	scheduledForDate: string;
+	visitTypeId: number;
 	notes?: string | null;
 };
 
 type UpdateCommercialVisitInput = {
 	visitId: string;
 	commercialId: string;
-	scheduledAt?: Date;
+	scheduledForDate?: string;
+	visitTypeId?: number;
 	statusId?: number;
 	notes?: string | null;
 	result?: string | null;
@@ -70,13 +120,15 @@ type ListCommercialVisitsByCommercialInput = {
 	commercialId: string;
 	clientId?: string | null;
 	statusId?: number | null;
-	dateFrom?: Date | null;
-	dateTo?: Date | null;
+	visitTypeId?: number | null;
+	dateFrom?: string | null;
+	dateTo?: string | null;
 };
 
 // --------------------------------------------------------------------------
 // SERVICIOS
 // --------------------------------------------------------------------------
+
 export class CreateCommercialVisitError extends Error {
 	status: number;
 	code: string;
@@ -121,7 +173,8 @@ export async function createCommercialVisit(input: CreateCommercialVisitInput) {
 		if (
 			!input.clientId ||
 			!input.commercialId ||
-			!(input.scheduledAt instanceof Date)
+			!input.scheduledForDate ||
+			!input.visitTypeId
 		) {
 			throw new CreateCommercialVisitError(
 				"Faltan datos obligatorios",
@@ -130,11 +183,23 @@ export async function createCommercialVisit(input: CreateCommercialVisitInput) {
 			);
 		}
 
-		if (Number.isNaN(input.scheduledAt.getTime())) {
+		const normalizedScheduledForDate = normalizeDateOnly(
+			input.scheduledForDate,
+		);
+
+		if (!normalizedScheduledForDate) {
 			throw new CreateCommercialVisitError(
 				"La fecha de la visita no es válida",
 				400,
 				"INVALID_DATE",
+			);
+		}
+
+		if (!isValidCommercialVisitType(Number(input.visitTypeId))) {
+			throw new CreateCommercialVisitError(
+				"El tipo de visita indicado no es válido",
+				400,
+				"INVALID_VISIT_TYPE",
 			);
 		}
 
@@ -178,7 +243,8 @@ export async function createCommercialVisit(input: CreateCommercialVisitInput) {
 		const visit = visitRepo.create({
 			client_id: input.clientId,
 			commercial_id: input.commercialId,
-			scheduled_at: input.scheduledAt,
+			scheduled_for_date: normalizedScheduledForDate,
+			visit_type_id: Number(input.visitTypeId),
 			status_id: COMMERCIAL_VISIT_STATUS_IDS.PLANNED,
 			notes: normalizeText(input.notes) || null,
 			result: null,
@@ -233,11 +299,11 @@ export async function listCommercialVisitsByClient(clientId: string) {
 
 	return buildCommercialVisitQuery(repo)
 		.where("visit.client_id = :clientId", { clientId })
-		.orderBy("visit.scheduled_at", "DESC")
+		.orderBy("visit.scheduled_for_date", "DESC")
 		.getMany();
 }
 
-// Listar visitas de un comercial, con filtros opcionales por cliente, estado y rango de fechas.
+// Listar visitas de un comercial, con filtros opcionales por cliente, estado, tipo y rango de fechas.
 export async function listCommercialVisitsByCommercial(
 	input: ListCommercialVisitsByCommercialInput,
 ) {
@@ -248,7 +314,7 @@ export async function listCommercialVisitsByCommercial(
 		.where("visit.commercial_id = :commercialId", {
 			commercialId: input.commercialId,
 		})
-		.orderBy("visit.scheduled_at", "DESC");
+		.orderBy("visit.scheduled_for_date", "DESC");
 
 	if (input.clientId) {
 		query.andWhere("visit.client_id = :clientId", {
@@ -262,14 +328,20 @@ export async function listCommercialVisitsByCommercial(
 		});
 	}
 
+	if (input.visitTypeId) {
+		query.andWhere("visit.visit_type_id = :visitTypeId", {
+			visitTypeId: input.visitTypeId,
+		});
+	}
+
 	if (input.dateFrom) {
-		query.andWhere("visit.scheduled_at >= :dateFrom", {
+		query.andWhere("visit.scheduled_for_date >= :dateFrom", {
 			dateFrom: input.dateFrom,
 		});
 	}
 
 	if (input.dateTo) {
-		query.andWhere("visit.scheduled_at <= :dateTo", {
+		query.andWhere("visit.scheduled_for_date <= :dateTo", {
 			dateTo: input.dateTo,
 		});
 	}
@@ -299,11 +371,12 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 			);
 		}
 
-		if (input.scheduledAt !== undefined) {
-			if (
-				!(input.scheduledAt instanceof Date) ||
-				Number.isNaN(input.scheduledAt.getTime())
-			) {
+		if (input.scheduledForDate !== undefined) {
+			const normalizedScheduledForDate = normalizeDateOnlyForUpdate(
+				input.scheduledForDate,
+			);
+
+			if (!normalizedScheduledForDate) {
 				throw new UpdateCommercialVisitError(
 					"La fecha de la visita no es válida",
 					400,
@@ -319,7 +392,27 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 				);
 			}
 
-			visit.scheduled_at = input.scheduledAt;
+			visit.scheduled_for_date = normalizedScheduledForDate;
+		}
+
+		if (input.visitTypeId !== undefined) {
+			if (!isValidCommercialVisitType(Number(input.visitTypeId))) {
+				throw new UpdateCommercialVisitError(
+					"El tipo de visita indicado no es válido",
+					400,
+					"INVALID_VISIT_TYPE",
+				);
+			}
+
+			if (visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.PLANNED) {
+				throw new UpdateCommercialVisitError(
+					"Solo se puede cambiar el tipo de una visita planificada",
+					409,
+					"VISIT_TYPE_NOT_EDITABLE",
+				);
+			}
+
+			visit.visit_type_id = Number(input.visitTypeId);
 		}
 
 		const nextStatusId =

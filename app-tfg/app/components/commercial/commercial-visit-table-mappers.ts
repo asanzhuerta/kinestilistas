@@ -1,9 +1,9 @@
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
-
 import type { CommercialVisit } from "./commercial-visit-types";
 import {
-	formatVisitDateTime,
+	formatVisitDate,
 	getVisitStatusLabel,
+	getVisitTypeLabel,
 } from "./commercial-visit-types";
 
 export function mapCommercialVisitsToEntityTableItems(
@@ -25,12 +25,16 @@ export function mapCommercialVisitsToEntityTableItems(
 			imageUrl: visit.client?.user?.profile_image_url ?? null,
 			category: visit.client?.province || "Sin provincia",
 			status: getVisitStatusLabel(visit.status_id),
-			primaryDate: visit.scheduled_at,
+			primaryDate: visit.scheduled_for_date,
 			secondaryDate: null,
 			badges: [
 				{
-					label: formatVisitDateTime(visit.scheduled_at),
+					label: formatVisitDate(visit.scheduled_for_date),
 					className: "bg-slate-100 text-slate-700",
+				},
+				{
+					label: getVisitTypeLabel(visit.visit_type_id),
+					className: "bg-blue-50 text-blue-700",
 				},
 			],
 			fields: [
@@ -41,6 +45,10 @@ export function mapCommercialVisitsToEntityTableItems(
 				{
 					label: "Ubicación",
 					value: location,
+				},
+				{
+					label: "Tipo",
+					value: getVisitTypeLabel(visit.visit_type_id),
 				},
 				{
 					label: "Estado",
@@ -67,6 +75,7 @@ export function mapCommercialVisitsToEntityTableItems(
 				visit.notes,
 				visit.result,
 				getVisitStatusLabel(visit.status_id),
+				getVisitTypeLabel(visit.visit_type_id),
 			]
 				.filter(Boolean)
 				.join(" "),

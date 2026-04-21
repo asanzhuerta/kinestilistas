@@ -3,7 +3,9 @@ import { QueryRunner } from "typeorm";
 
 export class M1SeedDefaultUsers1774469861555 implements MigrationInterface {
 	name = "M1SeedDefaultUsers1774469861555";
-
+	// Passwords:
+	// Admin: admin
+	// Cambiar contraseña de cliente y comercial desde admin
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`
 			INSERT INTO public.users (

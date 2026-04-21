@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 import { auth } from "@/auth";
 import {
 	getCommercialVisitByIdForCommercial,
@@ -25,7 +24,8 @@ type RouteContext = {
 };
 
 type UpdateCommercialVisitBody = {
-	scheduledAt?: string;
+	scheduledForDate?: string;
+	visitTypeId?: number;
 	statusId?: number;
 	notes?: string | null;
 	result?: string | null;
@@ -84,7 +84,8 @@ export async function PATCH(request: Request, context: RouteContext) {
 		const visit = await updateCommercialVisit({
 			visitId: id,
 			commercialId: commercial.id,
-			scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : undefined,
+			scheduledForDate: body.scheduledForDate,
+			visitTypeId: body.visitTypeId,
 			statusId: body.statusId,
 			notes: body.notes,
 			result: body.result,

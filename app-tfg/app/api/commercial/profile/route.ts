@@ -16,7 +16,8 @@ type SessionLike = {
 type UpdateCommercialProfileBody = {
 	workdayStartTime?: string | null;
 	workdayEndTime?: string | null;
-	maxVisitDurationMinutes?: number | string | null;
+	deliveryVisitDurationMinutes?: number | string | null;
+	routineVisitDurationMinutes?: number | string | null;
 	routeStartAddress?: string | null;
 	routeEndAddress?: string | null;
 	returnToStart?: boolean;
@@ -68,7 +69,8 @@ export async function PATCH(request: Request) {
 			userId: session.user.id,
 			workdayStartTime: body.workdayStartTime,
 			workdayEndTime: body.workdayEndTime,
-			maxVisitDurationMinutes: body.maxVisitDurationMinutes,
+			deliveryVisitDurationMinutes: body.deliveryVisitDurationMinutes,
+			routineVisitDurationMinutes: body.routineVisitDurationMinutes,
 			routeStartAddress: body.routeStartAddress,
 			routeEndAddress: body.routeEndAddress,
 			returnToStart: body.returnToStart,

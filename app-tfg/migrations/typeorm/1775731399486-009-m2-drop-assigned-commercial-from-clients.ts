@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class M2DropAssignedCommercialFromClients1775731399486 implements MigrationInterface {
-	name = "009M2DropAssignedCommercialFromClients1775731399486";
+	name = "M2DropAssignedCommercialFromClients1775731399486";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`

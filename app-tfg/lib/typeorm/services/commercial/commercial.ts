@@ -80,7 +80,8 @@ type UpsertCommercialProfileInput = {
 	notes?: string | null;
 	workdayStartTime?: string | null;
 	workdayEndTime?: string | null;
-	maxVisitDurationMinutes?: number | string | null;
+	deliveryVisitDurationMinutes?: number | string | null;
+	routineVisitDurationMinutes?: number | string | null;
 	routeStartAddress?: string | null;
 	routeEndAddress?: string | null;
 	returnToStart?: boolean;
@@ -194,7 +195,8 @@ export async function upsertCommercialProfile(
 				notes: null,
 				workday_start_time: null,
 				workday_end_time: null,
-				max_visit_duration_minutes: null,
+				delivery_visit_duration_minutes: 10,
+				routine_visit_duration_minutes: 35,
 				route_start_address: null,
 				route_end_address: null,
 				return_to_start: true,
@@ -227,12 +229,40 @@ export async function upsertCommercialProfile(
 			commercial.workday_end_time = normalizeTimeValue(input.workdayEndTime);
 		}
 
-		if (input.maxVisitDurationMinutes !== undefined) {
-			commercial.max_visit_duration_minutes = normalizePositiveInteger(
-				input.maxVisitDurationMinutes,
-				"La duración máxima de visita",
-				"INVALID_MAX_VISIT_DURATION",
-			) as number | null;
+		if (input.deliveryVisitDurationMinutes !== undefined) {
+			const normalizedDeliveryDuration = normalizePositiveInteger(
+				input.deliveryVisitDurationMinutes,
+				"La duración de la visita de reparto",
+				"INVALID_DELIVERY_VISIT_DURATION",
+			);
+
+			if (typeof normalizedDeliveryDuration !== "number") {
+				throw new CommercialProfileError(
+					"La duración de la visita de reparto no es válida",
+					400,
+					"DELIVERY_VISIT_DURATION_REQUIRED",
+				);
+			}
+
+			commercial.delivery_visit_duration_minutes = normalizedDeliveryDuration;
+		}
+
+		if (input.routineVisitDurationMinutes !== undefined) {
+			const normalizedRoutineDuration = normalizePositiveInteger(
+				input.routineVisitDurationMinutes,
+				"La duración de la visita rutinaria",
+				"INVALID_ROUTINE_VISIT_DURATION",
+			);
+
+			if (typeof normalizedRoutineDuration !== "number") {
+				throw new CommercialProfileError(
+					"La duración de la visita rutinaria no es válida",
+					400,
+					"ROUTINE_VISIT_DURATION_REQUIRED",
+				);
+			}
+
+			commercial.routine_visit_duration_minutes = normalizedRoutineDuration;
 		}
 
 		if (input.routeStartAddress !== undefined) {

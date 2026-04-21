@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import "dotenv/config";
 import { DataSource } from "typeorm";
-
 import { Role } from "./entities/Role";
 import { UserStatus } from "./entities/UserStatus";
 import { RequestStatus } from "./entities/RequestStatus";
@@ -14,6 +13,7 @@ import { UserRequest } from "./entities/UserRequest";
 import { UserManagementLog } from "./entities/UserManagementLog";
 import { UserAccessLog } from "./entities/UserAccessLog";
 import { CommercialVisitStatus } from "./entities/CommercialVisitStatus";
+import { CommercialVisitType } from "./entities/CommercialVisitType";
 import { CommercialRouteStatus } from "./entities/CommercialRouteStatus";
 import { Client } from "./entities/Client";
 import { Commercial } from "./entities/Commercial";
@@ -35,6 +35,7 @@ export const entities = [
 	UserManagementLog,
 	UserAccessLog,
 	CommercialVisitStatus,
+	CommercialVisitType,
 	CommercialRouteStatus,
 	Client,
 	Commercial,
@@ -78,5 +79,6 @@ export async function getDataSource(): Promise<DataSource> {
 	}
 
 	await productionInitPromise;
+
 	return AppDataSource;
 }

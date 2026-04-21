@@ -6,11 +6,11 @@ import PageTransition from "@/app/components/animations/PageTransition";
 import EntityTable from "@/app/components/entity-table/EntityTable";
 import SafeForm from "@/app/components/forms/SafeForm";
 import SubmitButton from "@/app/components/forms/SubmitButton";
-
 import type { CommercialClient } from "./commercial-client-types";
 import type { CommercialVisit } from "./commercial-visit-types";
 import {
 	COMMERCIAL_VISIT_STATUS_OPTIONS,
+	COMMERCIAL_VISIT_TYPE_OPTIONS,
 	getVisitStatusLabel,
 } from "./commercial-visit-types";
 import { mapCommercialVisitsToEntityTableItems } from "./commercial-visit-table-mappers";
@@ -20,19 +20,10 @@ type ApiErrorResponse = {
 	code?: string;
 };
 
-function toApiDateStart(value: string) {
-	if (!value) return null;
-	return `${value}T00:00:00`;
-}
-
-function toApiDateEnd(value: string) {
-	if (!value) return null;
-	return `${value}T23:59:59`;
-}
-
 function buildVisitsQuery(params: {
 	clientId?: string;
 	statusId?: string;
+	visitTypeId?: string;
 	dateFrom?: string;
 	dateTo?: string;
 }) {
@@ -46,18 +37,16 @@ function buildVisitsQuery(params: {
 		searchParams.set("statusId", params.statusId);
 	}
 
+	if (params.visitTypeId) {
+		searchParams.set("visitTypeId", params.visitTypeId);
+	}
+
 	if (params.dateFrom) {
-		const parsed = toApiDateStart(params.dateFrom);
-		if (parsed) {
-			searchParams.set("dateFrom", parsed);
-		}
+		searchParams.set("dateFrom", params.dateFrom);
 	}
 
 	if (params.dateTo) {
-		const parsed = toApiDateEnd(params.dateTo);
-		if (parsed) {
-			searchParams.set("dateTo", parsed);
-		}
+		searchParams.set("dateTo", params.dateTo);
 	}
 
 	const query = searchParams.toString();
@@ -78,7 +67,8 @@ export default function CommercialVisitsList() {
 	// Formulario de creación
 	// --------------------------------------------------------------------------
 	const [clientId, setClientId] = useState("");
-	const [scheduledAt, setScheduledAt] = useState("");
+	const [scheduledForDate, setScheduledForDate] = useState("");
+	const [visitTypeId, setVisitTypeId] = useState("2");
 	const [notes, setNotes] = useState("");
 
 	// --------------------------------------------------------------------------
@@ -86,6 +76,7 @@ export default function CommercialVisitsList() {
 	// --------------------------------------------------------------------------
 	const [filterClientId, setFilterClientId] = useState("");
 	const [filterStatusId, setFilterStatusId] = useState("");
+	const [filterVisitTypeId, setFilterVisitTypeId] = useState("");
 	const [filterDateFrom, setFilterDateFrom] = useState("");
 	const [filterDateTo, setFilterDateTo] = useState("");
 
@@ -113,6 +104,7 @@ export default function CommercialVisitsList() {
 	async function loadVisits(filters?: {
 		clientId?: string;
 		statusId?: string;
+		visitTypeId?: string;
 		dateFrom?: string;
 		dateTo?: string;
 	}) {
@@ -120,6 +112,7 @@ export default function CommercialVisitsList() {
 			buildVisitsQuery({
 				clientId: filters?.clientId ?? filterClientId,
 				statusId: filters?.statusId ?? filterStatusId,
+				visitTypeId: filters?.visitTypeId ?? filterVisitTypeId,
 				dateFrom: filters?.dateFrom ?? filterDateFrom,
 				dateTo: filters?.dateTo ?? filterDateTo,
 			}),
@@ -180,6 +173,7 @@ export default function CommercialVisitsList() {
 				const visitsData = await loadVisits({
 					clientId: filterClientId,
 					statusId: filterStatusId,
+					visitTypeId: filterVisitTypeId,
 					dateFrom: filterDateFrom,
 					dateTo: filterDateTo,
 				});
@@ -205,7 +199,13 @@ export default function CommercialVisitsList() {
 		return () => {
 			ignore = true;
 		};
-	}, [filterClientId, filterStatusId, filterDateFrom, filterDateTo]);
+	}, [
+		filterClientId,
+		filterStatusId,
+		filterVisitTypeId,
+		filterDateFrom,
+		filterDateTo,
+	]);
 
 	const tableItems = useMemo(
 		() => mapCommercialVisitsToEntityTableItems(visits),
@@ -225,7 +225,7 @@ export default function CommercialVisitsList() {
 		};
 	}, [visits]);
 
-	async function handleCreateVisit(event: React.FormEvent<HTMLFormElement>) {
+	async function handleCreateVisit(event: React.FormEvent) {
 		event.preventDefault();
 
 		try {
@@ -240,7 +240,8 @@ export default function CommercialVisitsList() {
 				},
 				body: JSON.stringify({
 					clientId,
-					scheduledAt,
+					scheduledForDate,
+					visitTypeId: Number(visitTypeId),
 					notes,
 				}),
 			});
@@ -258,13 +259,15 @@ export default function CommercialVisitsList() {
 			}
 
 			setClientId("");
-			setScheduledAt("");
+			setScheduledForDate("");
+			setVisitTypeId("2");
 			setNotes("");
 			setFormSuccess("Visita creada correctamente.");
 
 			const refreshedVisits = await loadVisits({
 				clientId: filterClientId,
 				statusId: filterStatusId,
+				visitTypeId: filterVisitTypeId,
 				dateFrom: filterDateFrom,
 				dateTo: filterDateTo,
 			});
@@ -282,6 +285,7 @@ export default function CommercialVisitsList() {
 	function handleClearFilters() {
 		setFilterClientId("");
 		setFilterStatusId("");
+		setFilterVisitTypeId("");
 		setFilterDateFrom("");
 		setFilterDateTo("");
 	}
@@ -290,46 +294,53 @@ export default function CommercialVisitsList() {
 		<PageTransition>
 			<div className="space-y-6">
 				<H1Title
-					title="Mis visitas"
-					subtitle="Planifica nuevas visitas comerciales, consulta tu histórico y filtra el trabajo diario desde un único listado."
+					title="Visitas comerciales"
+					subtitle="Planifica las visitas por día y gestiona su seguimiento operativo."
 				/>
 
 				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-					<div className="mb-5 flex flex-wrap gap-3 text-sm text-slate-600">
-						<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-							<span className="font-semibold text-slate-900">
+					<div className="grid gap-4 md:grid-cols-4">
+						<div className="rounded-2xl border border-slate-200 bg-white p-4">
+							<p className="text-sm text-slate-500">Visitas mostradas</p>
+							<p className="mt-1 text-2xl font-semibold text-slate-900">
 								{stats.total}
-							</span>{" "}
-							visitas mostradas
+							</p>
 						</div>
 
-						<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-							<span className="font-semibold text-slate-900">
+						<div className="rounded-2xl border border-slate-200 bg-white p-4">
+							<p className="text-sm text-slate-500">
+								Clientes asignados disponibles
+							</p>
+							<p className="mt-1 text-2xl font-semibold text-slate-900">
 								{clients.length}
-							</span>{" "}
-							clientes asignados disponibles para programar visitas
+							</p>
 						</div>
 
-						<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-							<span className="font-semibold text-slate-900">
+						<div className="rounded-2xl border border-slate-200 bg-white p-4">
+							<p className="text-sm text-slate-500">Planificadas</p>
+							<p className="mt-1 text-2xl font-semibold text-amber-700">
 								{stats.planned}
-							</span>{" "}
-							planificadas
+							</p>
 						</div>
 
-						<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-							<span className="font-semibold text-slate-900">
+						<div className="rounded-2xl border border-slate-200 bg-white p-4">
+							<p className="text-sm text-slate-500">Completadas</p>
+							<p className="mt-1 text-2xl font-semibold text-emerald-700">
 								{stats.completed}
-							</span>{" "}
-							completadas
+							</p>
 						</div>
+					</div>
+				</section>
 
-						<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-							<span className="font-semibold text-slate-900">
-								{stats.cancelled}
-							</span>{" "}
-							canceladas
-						</div>
+				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
+					<div className="mb-5">
+						<h2 className="text-lg font-semibold text-slate-900">
+							Crear visita
+						</h2>
+						<p className="mt-1 text-sm text-slate-600">
+							La visita queda planificada por día. La hora aproximada se
+							calculará más adelante con la ruta.
+						</p>
 					</div>
 
 					<SafeForm
@@ -357,12 +368,30 @@ export default function CommercialVisitsList() {
 
 						<div>
 							<label className="mb-2 block text-sm font-medium text-slate-700">
-								Fecha y hora
+								Tipo de visita
+							</label>
+							<select
+								value={visitTypeId}
+								onChange={(e) => setVisitTypeId(e.target.value)}
+								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+								required
+							>
+								{COMMERCIAL_VISIT_TYPE_OPTIONS.map((visitType) => (
+									<option key={visitType.id} value={String(visitType.id)}>
+										{visitType.label}
+									</option>
+								))}
+							</select>
+						</div>
+
+						<div>
+							<label className="mb-2 block text-sm font-medium text-slate-700">
+								Día de la visita
 							</label>
 							<input
-								type="datetime-local"
-								value={scheduledAt}
-								onChange={(e) => setScheduledAt(e.target.value)}
+								type="date"
+								value={scheduledForDate}
+								onChange={(e) => setScheduledForDate(e.target.value)}
 								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 								required
 							/>
@@ -410,12 +439,11 @@ export default function CommercialVisitsList() {
 								Filtros del listado
 							</h2>
 							<p className="mt-1 text-sm text-slate-600">
-								Filtra por cliente, estado y rango de fechas sin salir del
-								listado.
+								Filtra por cliente, estado, tipo y rango de días.
 							</p>
 						</div>
 
-						<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+						<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
 							<div>
 								<label className="mb-2 block text-sm font-medium text-slate-700">
 									Cliente
@@ -447,6 +475,24 @@ export default function CommercialVisitsList() {
 									{COMMERCIAL_VISIT_STATUS_OPTIONS.map((status) => (
 										<option key={status.id} value={String(status.id)}>
 											{status.label}
+										</option>
+									))}
+								</select>
+							</div>
+
+							<div>
+								<label className="mb-2 block text-sm font-medium text-slate-700">
+									Tipo
+								</label>
+								<select
+									value={filterVisitTypeId}
+									onChange={(e) => setFilterVisitTypeId(e.target.value)}
+									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+								>
+									<option value="">Todos los tipos</option>
+									{COMMERCIAL_VISIT_TYPE_OPTIONS.map((visitType) => (
+										<option key={visitType.id} value={String(visitType.id)}>
+											{visitType.label}
 										</option>
 									))}
 								</select>

@@ -1,7 +1,6 @@
 // -----------------------------------------------------------------------------
 // M1. Gestión de acceso, alta y autorización de usuarios
 // -----------------------------------------------------------------------------
-
 // Identificadores de los roles disponibles dentro del sistema.
 // Estos valores deben coincidir con los registros sembrados
 // en la tabla de roles de la base de datos.
@@ -60,6 +59,13 @@ export const COMMERCIAL_VISIT_STATUS_IDS = {
 	PLANNED: 1,
 	COMPLETED: 2,
 	CANCELLED: 3,
+} as const;
+
+// Identificadores de los tipos de visita comercial.
+// Se utilizan para distinguir visitas rutinarias de visitas de reparto.
+export const COMMERCIAL_VISIT_TYPE_IDS = {
+	DELIVERY: 1,
+	ROUTINE: 2,
 } as const;
 
 // Identificadores de los estados posibles de una ruta comercial.

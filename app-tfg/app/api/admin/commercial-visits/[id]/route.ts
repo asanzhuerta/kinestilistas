@@ -13,7 +13,8 @@ type RouteContext = {
 };
 
 type UpdateCommercialVisitBody = {
-	scheduledAt?: string;
+	scheduledForDate?: string;
+	visitTypeId?: number;
 	statusId?: number;
 	notes?: string | null;
 	result?: string | null;
@@ -62,16 +63,27 @@ export async function PATCH(request: Request, context: RouteContext) {
 		const { id } = await context.params;
 		const body = (await request.json()) as UpdateCommercialVisitBody;
 
+		const existingVisit = await getCommercialVisitById(id);
+
+		if (!existingVisit) {
+			return NextResponse.json(
+				{ error: "Visita no encontrada" },
+				{ status: 404 },
+			);
+		}
+
 		const updatedVisit = await updateCommercialVisit({
 			visitId: id,
-			scheduledAt:
-				body.scheduledAt !== undefined
-					? new Date(String(body.scheduledAt))
+			commercialId: existingVisit.commercial_id,
+			scheduledForDate:
+				body.scheduledForDate !== undefined
+					? String(body.scheduledForDate)
 					: undefined,
+			visitTypeId:
+				body.visitTypeId !== undefined ? Number(body.visitTypeId) : undefined,
 			statusId: body.statusId !== undefined ? Number(body.statusId) : undefined,
 			notes: body.notes,
 			result: body.result,
-			commercialId: "",
 		});
 
 		return NextResponse.json(updatedVisit, { status: 200 });

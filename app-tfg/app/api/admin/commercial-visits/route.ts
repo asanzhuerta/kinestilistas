@@ -9,7 +9,8 @@ import {
 type CreateCommercialVisitBody = {
 	clientId?: string;
 	commercialId?: string;
-	scheduledAt?: string;
+	scheduledForDate?: string;
+	visitTypeId?: number;
 	notes?: string | null;
 };
 
@@ -59,7 +60,8 @@ export async function POST(request: Request) {
 		const createdVisit = await createCommercialVisit({
 			clientId: String(body.clientId ?? ""),
 			commercialId: String(body.commercialId ?? ""),
-			scheduledAt: new Date(String(body.scheduledAt ?? "")),
+			scheduledForDate: String(body.scheduledForDate ?? ""),
+			visitTypeId: Number(body.visitTypeId),
 			notes: body.notes ?? null,
 		});
 

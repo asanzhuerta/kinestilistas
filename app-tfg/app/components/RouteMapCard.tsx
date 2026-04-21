@@ -49,7 +49,7 @@ type BrowserLocationState =
 
 export default function RouteMapCard({
 	title = "Ruta diaria",
-	subtitle = "Vista previa de la ruta calculada sobre tu cartera asignada",
+	subtitle = "Vista previa de la ruta calculada con tus visitas planificadas para hoy",
 	className = "",
 }: RouteMapCardProps) {
 	const [loading, setLoading] = useState(true);
@@ -234,7 +234,7 @@ export default function RouteMapCard({
 							<span className="font-semibold text-slate-900">
 								{preview.totalAssignedClients}
 							</span>{" "}
-							clientes asignados
+							clientes con visita hoy
 						</div>
 
 						<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">

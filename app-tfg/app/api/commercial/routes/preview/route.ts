@@ -1,6 +1,9 @@
+// app/api/commercial/routes/preview/route.ts
+
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { listClientsByCommercialId } from "@/lib/typeorm/services/commercial/client";
+import { COMMERCIAL_VISIT_STATUS_IDS } from "@/lib/typeorm/constants/catalog-ids";
+import { listCommercialVisitsByCommercial } from "@/lib/typeorm/services/commercial/commercial-visit";
 import {
 	CommercialProfileError,
 	requireCommercialByUserId,
@@ -17,6 +20,22 @@ type SessionLike = {
 	};
 } | null;
 
+type RoutePreviewVisitClient = {
+	id: string;
+	name: string;
+	address?: string | null;
+	city?: string | null;
+	lat?: unknown;
+	lng?: unknown;
+	user?: {
+		email?: string | null;
+	} | null;
+};
+
+type RoutePreviewVisit = {
+	client?: RoutePreviewVisitClient | null;
+};
+
 // --------------------------------------------------------------------------
 // Helpers
 // --------------------------------------------------------------------------
@@ -32,20 +51,69 @@ function parseCoordinate(value: unknown) {
 	return Number.isFinite(parsed) ? parsed : null;
 }
 
-// Distancia simple para una primera versión de preview.
-// Más adelante se puede sustituir por tiempos reales / matriz de distancias.
+// Devuelve la fecha actual "vista desde Madrid".
+function getMadridDateParts(date: Date) {
+	const parts = new Intl.DateTimeFormat("en-CA", {
+		timeZone: "Europe/Madrid",
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	}).formatToParts(date);
+
+	return {
+		year: parts.find((part) => part.type === "year")?.value ?? "1970",
+		month: parts.find((part) => part.type === "month")?.value ?? "01",
+		day: parts.find((part) => part.type === "day")?.value ?? "01",
+	};
+}
+
+// Obtiene el offset actual de Madrid en formato +HH:MM o -HH:MM.
+
+// Rango del día actual en Europe/Madrid.
+// Esto evita errores si el servidor no está en la misma zona horaria.
+function getTodayRangeInMadrid() {
+	const now = new Date();
+	const { year, month, day } = getMadridDateParts(now);
+	const today = `${year}-${month}-${day}`;
+
+	return {
+		dateFrom: today,
+		dateTo: today,
+	};
+}
+
+// Distancia Haversine para una heurística local algo mejor que restar lat/lng.
+function toRadians(value: number) {
+	return (value * Math.PI) / 180;
+}
+
 function distanceBetween(
 	from: { lat: number; lng: number },
 	to: { lat: number; lng: number },
 ) {
-	const dLat = from.lat - to.lat;
-	const dLng = from.lng - to.lng;
+	const earthRadiusKm = 6371;
 
-	return Math.sqrt(dLat * dLat + dLng * dLng);
+	const dLat = toRadians(to.lat - from.lat);
+	const dLng = toRadians(to.lng - from.lng);
+
+	const fromLat = toRadians(from.lat);
+	const toLat = toRadians(to.lat);
+
+	const a =
+		Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+		Math.cos(fromLat) *
+			Math.cos(toLat) *
+			Math.sin(dLng / 2) *
+			Math.sin(dLng / 2);
+
+	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+	return earthRadiusKm * c;
 }
 
 // Ordena clientes con heurística nearest-neighbor.
-// No pretende ser optimización avanzada, pero sirve como preview útil.
+// Sigue sin ser optimización real por tiempo de carretera, pero mejora
+// bastante frente al orden aleatorio y no requiere servicios externos.
 function sortWaypointsByNearestNeighbor(
 	points: RoutePoint[],
 	startPoint: RoutePoint | null,
@@ -75,8 +143,13 @@ function sortWaypointsByNearestNeighbor(
 		}
 
 		const [nextPoint] = remaining.splice(nearestIndex, 1);
+
 		ordered.push(nextPoint);
-		current = { lat: nextPoint.lat, lng: nextPoint.lng };
+
+		current = {
+			lat: nextPoint.lat,
+			lng: nextPoint.lng,
+		};
 	}
 
 	return ordered;
@@ -85,11 +158,13 @@ function sortWaypointsByNearestNeighbor(
 // --------------------------------------------------------------------------
 // GET /api/commercial/routes/preview
 // --------------------------------------------------------------------------
-// Genera una preview de ruta para el comercial autenticado usando:
+
+// Genera una preview de la ruta diaria del comercial autenticado usando:
 //
 // 1. Ubicación actual enviada por query string (prioridad máxima)
 // 2. Punto de salida guardado en perfil comercial como fallback
 // 3. Punto final configurable del perfil comercial
+// 4. SOLO clientes con visita planificada HOY
 //
 // No guarda la ruta todavía: solo prepara datos para mapa y navegación.
 export async function GET(request: Request) {
@@ -101,16 +176,12 @@ export async function GET(request: Request) {
 		}
 
 		const commercial = await requireCommercialByUserId(session.user.id);
-		const assignedClients = await listClientsByCommercialId(commercial.id);
-
 		const { searchParams } = new URL(request.url);
 
 		// ------------------------------------------------------------------
 		// Inicio de ruta
 		// ------------------------------------------------------------------
-		// Prioridad:
-		// 1. ubicación actual del navegador
-		// 2. fallback guardado en perfil
+
 		const currentStartLat = parseCoordinate(searchParams.get("startLat"));
 		const currentStartLng = parseCoordinate(searchParams.get("startLng"));
 
@@ -124,9 +195,7 @@ export async function GET(request: Request) {
 			currentStartLat !== null && currentStartLng !== null;
 
 		const usingSavedStartFallback =
-			!usingCurrentLocation &&
-			savedStartLat !== null &&
-			savedStartLng !== null;
+			!usingCurrentLocation && savedStartLat !== null && savedStartLng !== null;
 
 		const startPoint: RoutePoint | null = usingCurrentLocation
 			? {
@@ -143,15 +212,15 @@ export async function GET(request: Request) {
 						lat: savedStartLat!,
 						lng: savedStartLng!,
 						description:
-							commercial.route_start_address || "Fallback configurado en perfil",
+							commercial.route_start_address ||
+							"Fallback configurado en perfil",
 					}
 				: null;
 
 		// ------------------------------------------------------------------
 		// Fin de ruta
 		// ------------------------------------------------------------------
-		// Si return_to_start está activo y existe startPoint, el final será volver
-		// al punto de inicio real del día. Si no, usamos el final configurable.
+
 		const configuredEndPoint: RoutePoint | null =
 			endLat !== null && endLng !== null
 				? {
@@ -175,42 +244,83 @@ export async function GET(request: Request) {
 				: configuredEndPoint;
 
 		// ------------------------------------------------------------------
-		// Clientes asignados con coordenadas válidas
+		// Visitas planificadas de HOY
 		// ------------------------------------------------------------------
-		const mappedClients = assignedClients.flatMap((client) => {
-			const lat = parseCoordinate((client as { lat?: unknown }).lat);
-			const lng = parseCoordinate((client as { lng?: unknown }).lng);
 
-			if (lat === null || lng === null) {
-				return [];
+		const { dateFrom, dateTo } = getTodayRangeInMadrid();
+
+		const visits = await listCommercialVisitsByCommercial({
+			commercialId: commercial.id,
+			statusId: COMMERCIAL_VISIT_STATUS_IDS.PLANNED,
+			dateFrom,
+			dateTo,
+		});
+
+		// ------------------------------------------------------------------
+		// Deduplicado por cliente del día
+		// ------------------------------------------------------------------
+
+		const clientsOfTheDay = new Map<
+			string,
+			{
+				client: RoutePreviewVisitClient;
+				point: RoutePoint | null;
+			}
+		>();
+
+		for (const visit of visits) {
+			const client = visit.client;
+
+			if (!client) {
+				continue;
 			}
 
-			return [
-				{
-					id: client.id,
-					label: client.name,
-					lat,
-					lng,
-					description:
-						client.address && client.city
-							? `${client.address} · ${client.city}`
-							: client.user?.email || "Cliente asignado",
-				},
-			] satisfies RoutePoint[];
-		});
+			if (clientsOfTheDay.has(client.id)) {
+				continue;
+			}
+
+			const lat = parseCoordinate(client.lat);
+			const lng = parseCoordinate(client.lng);
+
+			const point =
+				lat !== null && lng !== null
+					? {
+							id: client.id,
+							label: client.name,
+							lat,
+							lng,
+							description:
+								client.address && client.city
+									? `${client.address} · ${client.city}`
+									: client.user?.email || "Cliente con visita hoy",
+						}
+					: null;
+
+			clientsOfTheDay.set(client.id, {
+				client,
+				point,
+			});
+		}
+
+		const mappedClients = Array.from(clientsOfTheDay.values())
+			.map((entry) => entry.point)
+			.filter((point): point is RoutePoint => point !== null);
 
 		const orderedWaypoints = sortWaypointsByNearestNeighbor(
 			mappedClients,
 			startPoint,
 		);
 
+		const totalClientsToday = clientsOfTheDay.size;
+		const totalMappedClients = orderedWaypoints.length;
+
 		const response: CommercialRoutePreviewResponse = {
 			startPoint,
 			endPoint,
 			waypoints: orderedWaypoints,
-			totalAssignedClients: assignedClients.length,
-			mappedClients: orderedWaypoints.length,
-			skippedClients: assignedClients.length - orderedWaypoints.length,
+			totalAssignedClients: totalClientsToday,
+			mappedClients: totalMappedClients,
+			skippedClients: totalClientsToday - totalMappedClients,
 			usingCurrentLocation,
 			usingSavedStartFallback,
 			hasConfiguredEndPoint: !!configuredEndPoint,

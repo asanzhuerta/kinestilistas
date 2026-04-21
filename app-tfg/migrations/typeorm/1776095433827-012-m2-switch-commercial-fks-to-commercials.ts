@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 export class M2SwitchCommercialFksToCommercials1776095433827
 	implements MigrationInterface
 {
-	name = "012M2SwitchCommercialFksToCommercials1776095433827";
+	name = "M2SwitchCommercialFksToCommercials1776095433827";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`

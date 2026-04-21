@@ -13,7 +13,9 @@ import { User } from "./entities/User";
 import { UserRequest } from "./entities/UserRequest";
 import { UserManagementLog } from "./entities/UserManagementLog";
 import { UserAccessLog } from "./entities/UserAccessLog";
+
 import { CommercialVisitStatus } from "./entities/CommercialVisitStatus";
+import { CommercialVisitType } from "./entities/CommercialVisitType";
 import { CommercialRouteStatus } from "./entities/CommercialRouteStatus";
 import { Client } from "./entities/Client";
 import { Commercial } from "./entities/Commercial";
@@ -25,6 +27,8 @@ import { RouteVisit } from "./entities/RouteVisit";
 export default new DataSource({
 	type: "postgres",
 	url: process.env.DATABASE_URL,
+	synchronize: false,
+	logging: true,
 	entities: [
 		Role,
 		UserStatus,
@@ -38,6 +42,7 @@ export default new DataSource({
 		UserManagementLog,
 		UserAccessLog,
 		CommercialVisitStatus,
+		CommercialVisitType,
 		CommercialRouteStatus,
 		Client,
 		Commercial,
@@ -46,8 +51,5 @@ export default new DataSource({
 		CommercialRoute,
 		RouteVisit,
 	],
-	migrations: [process.cwd() + "/migrations/typeorm/*.{ts,js}"],
-	migrationsTableName: "typeorm_migrations",
-	synchronize: false,
-	logging: false,
+	migrations: ["migrations/typeorm/*.ts"],
 });

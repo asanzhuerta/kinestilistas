@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 import { auth } from "@/auth";
 import {
 	createCommercialVisit,
@@ -20,7 +19,8 @@ type SessionLike = {
 
 type CreateCommercialVisitBody = {
 	clientId?: string;
-	scheduledAt?: string;
+	scheduledForDate?: string;
+	visitTypeId?: number;
 	notes?: string | null;
 };
 
@@ -33,10 +33,11 @@ export async function GET(request: Request) {
 		}
 
 		const commercial = await requireCommercialByUserId(session.user.id);
-
 		const { searchParams } = new URL(request.url);
+
 		const clientId = searchParams.get("clientId");
 		const statusId = searchParams.get("statusId");
+		const visitTypeId = searchParams.get("visitTypeId");
 		const dateFrom = searchParams.get("dateFrom");
 		const dateTo = searchParams.get("dateTo");
 
@@ -44,8 +45,9 @@ export async function GET(request: Request) {
 			commercialId: commercial.id,
 			clientId: clientId || null,
 			statusId: statusId ? Number(statusId) : null,
-			dateFrom: dateFrom ? new Date(dateFrom) : null,
-			dateTo: dateTo ? new Date(dateTo) : null,
+			visitTypeId: visitTypeId ? Number(visitTypeId) : null,
+			dateFrom: dateFrom || null,
+			dateTo: dateTo || null,
 		});
 
 		return NextResponse.json(visits, { status: 200 });
@@ -77,9 +79,11 @@ export async function POST(request: Request) {
 		const commercial = await requireCommercialByUserId(session.user.id);
 		const body = (await request.json()) as CreateCommercialVisitBody;
 
-		if (!body.clientId || !body.scheduledAt) {
+		if (!body.clientId || !body.scheduledForDate || !body.visitTypeId) {
 			return NextResponse.json(
-				{ error: "clientId y scheduledAt son obligatorios" },
+				{
+					error: "clientId, scheduledForDate y visitTypeId son obligatorios",
+				},
 				{ status: 400 },
 			);
 		}
@@ -87,7 +91,8 @@ export async function POST(request: Request) {
 		const visit = await createCommercialVisit({
 			clientId: String(body.clientId),
 			commercialId: commercial.id,
-			scheduledAt: new Date(String(body.scheduledAt)),
+			scheduledForDate: String(body.scheduledForDate),
+			visitTypeId: Number(body.visitTypeId),
 			notes: body.notes ?? null,
 		});
 
