@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import PageTransition from "@/app/components/animations/PageTransition";
 import UserAvatar from "@/app/components/users/UserAvatar";
 import { formatDate, formatDateShort } from "@/lib/utils/user-utils";
-import ClientLocationPickerMap from "@/app/components/maps/ClientLocationPickerMap";
 import CommercialClientInfoItem from "./CommercialClientInfoItem";
 import CommercialClientInfoSection from "./CommercialClientInfoSection";
 import {

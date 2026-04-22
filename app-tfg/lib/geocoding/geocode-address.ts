@@ -31,6 +31,11 @@ export type GeocodeAddressResult = {
 	displayName: string | null;
 };
 
+export type GeocodeFreeTextInput = {
+	query?: string | null;
+	country?: string | null;
+};
+
 type NominatimSearchResult = {
 	lat?: string;
 	lon?: string;
@@ -260,4 +265,34 @@ export async function geocodeAddress(
 	}
 
 	return null;
+}
+
+export async function geocodeFreeTextAddress(
+	input: GeocodeFreeTextInput,
+): Promise<GeocodeAddressResult | null> {
+	const query = normalizeText(input.query);
+
+	if (!query) {
+		return null;
+	}
+
+	const config = getGeocodingConfig({ country: input.country });
+	const params = new URLSearchParams({
+		format: "jsonv2",
+		limit: "1",
+		addressdetails: "1",
+		q: query,
+		countrycodes: config.countryCode,
+	});
+
+	if (config.contactEmail) {
+		params.set("email", config.contactEmail);
+	}
+
+	const data = await fetchNominatimSearch(
+		`${config.baseUrl}/search?${params.toString()}`,
+		config.userAgent,
+	);
+
+	return mapFirstNominatimResult(data);
 }

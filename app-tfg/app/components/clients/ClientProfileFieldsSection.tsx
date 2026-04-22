@@ -1,7 +1,19 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { ClientFormDataState } from "./client-profile-types";
-import ClientLocationPickerMap from "@/app/components/maps/ClientLocationPickerMap";
+
+const ClientLocationPickerMap = dynamic(
+	() => import("@/app/components/maps/ClientLocationPickerMap"),
+	{
+		ssr: false,
+		loading: () => (
+			<div className="h-[420px] rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+				Cargando mapa...
+			</div>
+		),
+	},
+);
 
 // ----------------------------------------------------------------------------
 // PROPS
@@ -227,7 +239,7 @@ export default function ClientProfileFieldsSection({
 								Ubicación en mapa
 							</h4>
 							<p className="mt-1 text-sm text-slate-600">
-								Selecciona manualmente la ubicación exacta del establecimiento.
+								Busca la dirección y ajusta el marcador si hace falta.
 							</p>
 						</div>
 
@@ -236,6 +248,14 @@ export default function ClientProfileFieldsSection({
 								clientId={clientId}
 								initialLat={initialLat ? Number(initialLat) : null}
 								initialLng={initialLng ? Number(initialLng) : null}
+								initialSearchQuery={[
+									formData.address,
+									formData.city,
+									formData.postal_code,
+									formData.province,
+								]
+									.filter(Boolean)
+									.join(", ")}
 							/>
 						) : (
 							<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
