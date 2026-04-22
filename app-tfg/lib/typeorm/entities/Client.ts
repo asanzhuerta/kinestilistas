@@ -74,6 +74,12 @@ export class Client {
 	@Column({ type: "text", nullable: true })
 	notes!: string | null;
 
+	@Column({ type: "text", default: "pending" })
+	geolocation_status!: string;
+
+	@Column({ type: "timestamptz", nullable: true })
+	geolocation_verified_at!: Date | null;
+
 	@CreateDateColumn({ type: "timestamptz" })
 	created_at!: Date;
 

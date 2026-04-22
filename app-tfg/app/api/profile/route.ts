@@ -198,8 +198,10 @@ export async function PATCH(request: Request) {
 
 			// Si el usuario autenticado es de tipo cliente y el formulario envía
 			// datos de perfil cliente, actualizamos también su registro enlazado.
-			// OJO: aquí ya NO actualizamos el cliente "a mano", sino reutilizando
-			// la lógica compartida que también regeocodifica dirección -> lat/lng.
+			// Regla nueva:
+			// - se guarda la dirección escrita
+			// - si cambia la dirección, la geolocalización pasa a "pending"
+			// - no se geocodifica automáticamente aquí
 			if (user.role.code === "client" && body.clientProfile) {
 				const client = await clientRepo.findOne({
 					where: { id: user.id },
@@ -249,13 +251,13 @@ export async function PATCH(request: Request) {
 			);
 		}
 
-		if (error instanceof Error && error.message === "USER_NOT_FOUND") {
+		if (error instanceof UpdateClientError) {
 			return NextResponse.json(
 				{
-					message: "Usuario no encontrado",
-					code: "USER_NOT_FOUND",
+					message: error.message,
+					code: "INVALID_CLIENT_PROFILE_DATA",
 				},
-				{ status: 404 },
+				{ status: error.status },
 			);
 		}
 

@@ -9,9 +9,9 @@ import { UserManagementLog } from "@/lib/typeorm/entities/UserManagementLog";
 import { UserRequest } from "@/lib/typeorm/entities/UserRequest";
 import { Client } from "@/lib/typeorm/entities/Client";
 import {
-	geocodeAddress,
-	hasEnoughAddressToGeocode,
-} from "@/lib/geocoding/geocode-address";
+	applyClientUpdate,
+	UpdateClientError,
+} from "@/lib/typeorm/services/commercial/client";
 import { createClientFromUser } from "@/lib/typeorm/services/commercial/client-internal";
 import type { EntityManager } from "typeorm";
 import {
@@ -712,8 +712,10 @@ export async function updateUser(input: UpdateUserInput) {
 		// ----------------------------------------------------------------------
 		// Sincronización del perfil cliente cuando se edita desde admin
 		// ----------------------------------------------------------------------
-		// El formulario admin de usuario ya envía clientProfile, pero hasta ahora
-		// este servicio no estaba aplicando esos cambios a la tabla clients.
+		// Regla nueva:
+		// - se guarda la dirección escrita
+		// - si cambia la dirección, la geolocalización pasa a "pending"
+		// - no se geocodifica automáticamente aquí
 		if (roleId === ROLE_IDS.CLIENT && clientProfile) {
 			const linkedClient = await clientRepo.findOne({
 				where: { id: currentUser.id },
@@ -727,78 +729,32 @@ export async function updateUser(input: UpdateUserInput) {
 				);
 			}
 
-			const nextClientName = normalizeText(clientProfile.name) || name;
-			const nextContactName = normalizeText(clientProfile.contact_name) || null;
-			const nextTaxId = normalizeText(clientProfile.tax_id) || null;
-			const nextAddress = normalizeText(clientProfile.address);
-			const nextCity = normalizeText(clientProfile.city);
-			const nextPostalCode = normalizeText(clientProfile.postal_code) || null;
-			const nextProvince = normalizeText(clientProfile.province) || null;
-			const nextNotes = normalizeText(clientProfile.notes) || null;
-
-			if (!nextClientName || !nextAddress || !nextCity) {
-				throw new UpdateUserError(
-					"Los datos del perfil cliente son incompletos",
-					400,
-					"INVALID_CLIENT_PROFILE_DATA",
-				);
-			}
-
-			const addressChanged =
-				linkedClient.address !== nextAddress ||
-				linkedClient.city !== nextCity ||
-				linkedClient.postal_code !== nextPostalCode ||
-				linkedClient.province !== nextProvince;
-
-			linkedClient.name = nextClientName;
-			linkedClient.contact_name = nextContactName;
-			linkedClient.tax_id = nextTaxId;
-			linkedClient.address = nextAddress;
-			linkedClient.city = nextCity;
-			linkedClient.postal_code = nextPostalCode;
-			linkedClient.province = nextProvince;
-			linkedClient.notes = nextNotes;
-			linkedClient.updated_at = new Date();
-
-			// ------------------------------------------------------------------
-			// Regeocodificación automática si cambia la dirección del cliente
-			// ------------------------------------------------------------------
-			if (addressChanged) {
-				if (
-					hasEnoughAddressToGeocode({
-						address: nextAddress,
-						city: nextCity,
-						postalCode: nextPostalCode,
-						province: nextProvince,
-					})
-				) {
-					try {
-						const geocoded = await geocodeAddress({
-							address: nextAddress,
-							city: nextCity,
-							postalCode: nextPostalCode,
-							province: nextProvince,
-						});
-
-						linkedClient.lat = geocoded?.lat ?? null;
-						linkedClient.lng = geocoded?.lng ?? null;
-					} catch (error) {
-						console.warn(
-							"[updateUser] No se pudo geocodificar la dirección del cliente:",
-							error,
-						);
-						linkedClient.lat = null;
-						linkedClient.lng = null;
-					}
-				} else {
-					linkedClient.lat = null;
-					linkedClient.lng = null;
+			try {
+				await applyClientUpdate(linkedClient, {
+					name: clientProfile.name ?? name,
+					contactName: clientProfile.contact_name,
+					taxId: clientProfile.tax_id,
+					address: clientProfile.address,
+					city: clientProfile.city,
+					postalCode: clientProfile.postal_code,
+					province: clientProfile.province,
+					notes: clientProfile.notes,
+				});
+			} catch (error) {
+				if (error instanceof UpdateClientError) {
+					throw new UpdateUserError(
+						error.message,
+						error.status,
+						"INVALID_CLIENT_PROFILE_DATA",
+					);
 				}
+
+				throw error;
 			}
 
 			await clientRepo.save(linkedClient);
 		}
-		
+
 		if (previousRoleId !== roleId && roleChangeActionId) {
 			await logRepo.save(
 				logRepo.create({
