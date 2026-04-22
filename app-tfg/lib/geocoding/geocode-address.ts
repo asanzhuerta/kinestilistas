@@ -8,10 +8,14 @@
 // - preparado para cambiar de proveedor más adelante
 // - pensado para ejecutarse desde backend al crear/editar clientes
 //
-// Nota:
-// Nominatim soporta búsqueda estructurada con campos como street, city,
-// postalcode y state. Para este proyecto partimos de esa opción porque encaja
-// bien con el modelo actual de dirección del cliente.
+// Mejora introducida:
+// - antes solo se intentaba una búsqueda estructurada muy estricta
+// - ahora aplicamos varios fallbacks progresivos para tolerar:
+//   * calles escritas con tipo de vía distinto (Calle vs Camino)
+//   * códigos postales dudosos o demasiado restrictivos
+//   * números de portal que no existan en OpenStreetMap
+//   * registros que necesiten búsqueda libre en vez de estructurada
+// -----------------------------------------------------------------------------
 
 export type GeocodeAddressInput = {
 	address?: string | null;
@@ -59,52 +63,39 @@ export function buildFullAddressLabel(input: GeocodeAddressInput) {
 		.join(", ");
 }
 
-// Geocodifica usando Nominatim público.
-// Si más adelante cambias de proveedor, lo ideal es bifurcar aquí por env.
-export async function geocodeAddress(
-	input: GeocodeAddressInput,
-): Promise<GeocodeAddressResult | null> {
-	if (!hasEnoughAddressToGeocode(input)) {
-		return null;
-	}
+// Quita el número final del portal para poder lanzar una búsqueda algo más laxa.
+// Ejemplo: "Calle del Agua 43" -> "Calle del Agua"
+function stripTrailingStreetNumber(address: string) {
+	return address.replace(/\s+\d+[A-Za-zºª/-]*\s*$/, "").trim();
+}
 
+// Construye el bloque común de configuración del proveedor.
+function getGeocodingConfig(input: GeocodeAddressInput) {
 	const provider = normalizeText(process.env.GEOCODING_PROVIDER).toLowerCase();
 
 	if (provider && provider !== "nominatim") {
 		throw new Error("Proveedor de geocodificación no soportado");
 	}
 
-	const baseUrl =
-		normalizeText(process.env.GEOCODING_BASE_URL) ||
-		"https://nominatim.openstreetmap.org";
+	return {
+		baseUrl:
+			normalizeText(process.env.GEOCODING_BASE_URL) ||
+			"https://nominatim.openstreetmap.org",
+		countryCode:
+			normalizeText(process.env.GEOCODING_COUNTRY_CODE).toLowerCase() || "es",
+		countryName: normalizeText(process.env.GEOCODING_COUNTRY_NAME) || "España",
+		contactEmail: normalizeText(process.env.GEOCODING_EMAIL) || "",
+		userAgent:
+			normalizeText(process.env.GEOCODING_USER_AGENT) || "KinestilistasTFG/1.0",
+		resolvedCountry: normalizeText(input.country),
+	};
+}
 
-	const countryCode =
-		normalizeText(process.env.GEOCODING_COUNTRY_CODE).toLowerCase() || "es";
-
-	const countryName =
-		normalizeText(process.env.GEOCODING_COUNTRY_NAME) || "España";
-
-	const contactEmail = normalizeText(process.env.GEOCODING_EMAIL) || "";
-	const userAgent =
-		normalizeText(process.env.GEOCODING_USER_AGENT) || "KinestilistasTFG/1.0";
-
-	const params = new URLSearchParams({
-		format: "jsonv2",
-		limit: "1",
-		addressdetails: "1",
-		street: normalizeText(input.address),
-		city: normalizeText(input.city),
-		postalcode: normalizeText(input.postalCode),
-		state: normalizeText(input.province),
-		country: normalizeText(input.country) || countryName,
-		countrycodes: countryCode,
-	});
-
-	if (contactEmail) {
-		params.set("email", contactEmail);
-	}
-
-	const response = await fetch(`${baseUrl}/search?${params.toString()}`, {
+async function fetchNominatimSearch(
+	url: string,
+	userAgent: string,
+): Promise<NominatimSearchResult[] | null> {
+	const response = await fetch(url, {
 		method: "GET",
 		headers: {
 			Accept: "application/json",
@@ -123,6 +114,14 @@ export async function geocodeAddress(
 		return null;
 	}
 
+	return data;
+}
+
+function mapFirstNominatimResult(data: NominatimSearchResult[] | null) {
+	if (!data || data.length === 0) {
+		return null;
+	}
+
 	const first = data[0];
 	const lat = normalizeText(first.lat);
 	const lng = normalizeText(first.lon);
@@ -135,5 +134,130 @@ export async function geocodeAddress(
 		lat,
 		lng,
 		displayName: normalizeText(first.display_name) || null,
-	};
+	} satisfies GeocodeAddressResult;
+}
+
+async function tryStructuredSearch(
+	input: GeocodeAddressInput,
+	options?: {
+		addressOverride?: string;
+		includePostalCode?: boolean;
+	},
+) {
+	const config = getGeocodingConfig(input);
+
+	const params = new URLSearchParams({
+		format: "jsonv2",
+		limit: "1",
+		addressdetails: "1",
+		street: normalizeText(options?.addressOverride ?? input.address),
+		city: normalizeText(input.city),
+		state: normalizeText(input.province),
+		country: config.resolvedCountry || config.countryName,
+		countrycodes: config.countryCode,
+	});
+
+	if (options?.includePostalCode !== false) {
+		params.set("postalcode", normalizeText(input.postalCode));
+	}
+
+	if (config.contactEmail) {
+		params.set("email", config.contactEmail);
+	}
+
+	const data = await fetchNominatimSearch(
+		`${config.baseUrl}/search?${params.toString()}`,
+		config.userAgent,
+	);
+
+	return mapFirstNominatimResult(data);
+}
+
+async function tryFreeTextSearch(
+	input: GeocodeAddressInput,
+	options?: {
+		addressOverride?: string;
+		includePostalCode?: boolean;
+	},
+) {
+	const config = getGeocodingConfig(input);
+
+	const q = [
+		normalizeText(options?.addressOverride ?? input.address),
+		normalizeText(input.city),
+		options?.includePostalCode === false ? "" : normalizeText(input.postalCode),
+		normalizeText(input.province),
+		config.resolvedCountry || config.countryName,
+	]
+		.filter(Boolean)
+		.join(", ");
+
+	const params = new URLSearchParams({
+		format: "jsonv2",
+		limit: "1",
+		addressdetails: "1",
+		q,
+		countrycodes: config.countryCode,
+	});
+
+	if (config.contactEmail) {
+		params.set("email", config.contactEmail);
+	}
+
+	const data = await fetchNominatimSearch(
+		`${config.baseUrl}/search?${params.toString()}`,
+		config.userAgent,
+	);
+
+	return mapFirstNominatimResult(data);
+}
+
+// Geocodifica usando Nominatim público.
+// Estrategia:
+// 1. Búsqueda estructurada exacta
+// 2. Búsqueda estructurada sin código postal
+// 3. Búsqueda estructurada quitando el número
+// 4. Búsqueda libre con dirección completa
+// 5. Búsqueda libre sin CP
+// 6. Búsqueda libre sin número y sin CP
+export async function geocodeAddress(
+	input: GeocodeAddressInput,
+): Promise<GeocodeAddressResult | null> {
+	if (!hasEnoughAddressToGeocode(input)) {
+		return null;
+	}
+
+	const normalizedAddress = normalizeText(input.address);
+	const addressWithoutNumber = stripTrailingStreetNumber(normalizedAddress);
+
+	const attempts: Array<() => Promise<GeocodeAddressResult | null>> = [
+		() => tryStructuredSearch(input),
+		() => tryStructuredSearch(input, { includePostalCode: false }),
+		() =>
+			addressWithoutNumber && addressWithoutNumber !== normalizedAddress
+				? tryStructuredSearch(input, {
+						addressOverride: addressWithoutNumber,
+						includePostalCode: false,
+					})
+				: Promise.resolve(null),
+		() => tryFreeTextSearch(input),
+		() => tryFreeTextSearch(input, { includePostalCode: false }),
+		() =>
+			addressWithoutNumber && addressWithoutNumber !== normalizedAddress
+				? tryFreeTextSearch(input, {
+						addressOverride: addressWithoutNumber,
+						includePostalCode: false,
+					})
+				: Promise.resolve(null),
+	];
+
+	for (const attempt of attempts) {
+		const result = await attempt();
+
+		if (result) {
+			return result;
+		}
+	}
+
+	return null;
 }
