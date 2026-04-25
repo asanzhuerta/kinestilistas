@@ -76,13 +76,15 @@ export default async function ProfilePage() {
 												name: user.linkedClient.name,
 												contact_name: user.linkedClient.contact_name,
 												tax_id: user.linkedClient.tax_id,
-												address: user.linkedClient.address,
-												city: user.linkedClient.city,
-												postal_code: user.linkedClient.postal_code,
-												province: user.linkedClient.province,
-												visit_window_start_time:
-													user.linkedClient.visit_window_start_time,
-												visit_window_end_time:
+											address: user.linkedClient.address,
+											city: user.linkedClient.city,
+											postal_code: user.linkedClient.postal_code,
+											province: user.linkedClient.province,
+											lat: user.linkedClient.lat,
+											lng: user.linkedClient.lng,
+											visit_window_start_time:
+												user.linkedClient.visit_window_start_time,
+											visit_window_end_time:
 													user.linkedClient.visit_window_end_time,
 												notes: user.linkedClient.notes,
 											}

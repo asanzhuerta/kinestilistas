@@ -18,6 +18,13 @@ import {
 	toDateString,
 } from "@/app/components/users/profile/user-profile-card-utils";
 
+const CLIENT_ADDRESS_FIELDS: Array<keyof ClientFormDataState> = [
+	"address",
+	"city",
+	"postal_code",
+	"province",
+];
+
 export default function UserProfileCard({
 	user,
 	clientProfile = null,
@@ -31,9 +38,6 @@ export default function UserProfileCard({
 	submitUrl,
 	allowPasswordChange = false,
 }: UserProfileCardProps) {
-	// ============================================================================
-	// MODO ACTIVO Y FLAGS DERIVADOS
-	// ============================================================================
 	const isViewMode = mode === "view";
 	const isSelfEditMode = mode === "edit";
 	const isAdminEditMode = mode === "admin-edit";
@@ -43,9 +47,6 @@ export default function UserProfileCard({
 	const showPasswordSection =
 		isAdminEditMode || (isSelfEditMode && allowPasswordChange);
 
-	// ============================================================================
-	// ESTADO LOCAL DE LA TARJETA
-	// ============================================================================
 	const [isSaving, setIsSaving] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -58,9 +59,6 @@ export default function UserProfileCard({
 	);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-	// ============================================================================
-	// DATOS DERIVADOS
-	// ============================================================================
 	const createdAt = toDateString(user.created_at);
 	const lastLoginAt = toDateString(user.last_login_at);
 
@@ -78,26 +76,58 @@ export default function UserProfileCard({
 				? "Ningún archivo seleccionado"
 				: null;
 
-	// ============================================================================
-	// HELPERS DE FORMULARIO
-	// ============================================================================
 	const handleChange =
 		(field: keyof FormDataState) =>
 		(
-			e: React.ChangeEvent<
+			event: React.ChangeEvent<
 				HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
 			>,
 		) => {
 			const value =
 				field === "roleId" || field === "statusId"
-					? Number(e.target.value)
-					: e.target.value;
+					? Number(event.target.value)
+					: event.target.value;
 
 			setFormData((prev) => ({
 				...prev,
 				[field]: value,
 			}));
 		};
+
+	const handleClientFieldChange =
+		(field: keyof ClientFormDataState) =>
+		(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+			const value = event.target.value;
+
+			setFormData((prev) => {
+				const nextState: FormDataState = {
+					...prev,
+					[field]: value,
+				};
+
+				if (
+					CLIENT_ADDRESS_FIELDS.includes(field) &&
+					String(prev[field] ?? "") !== value
+				) {
+					nextState.lat = "";
+					nextState.lng = "";
+				}
+
+				return nextState;
+			});
+		};
+
+	const handleClientLocationConfirmed = (lat: number, lng: number) => {
+		setFormData((prev) => ({
+			...prev,
+			lat: lat.toFixed(6),
+			lng: lng.toFixed(6),
+		}));
+		setErrorMessage(null);
+		setSuccessMessage(
+			"Ubicación confirmada en el mapa. Guarda los cambios para aplicarla al perfil.",
+		);
+	};
 
 	const resetForm = () => {
 		setFormData(buildInitialFormData(user, clientProfile));
@@ -111,11 +141,13 @@ export default function UserProfileCard({
 	};
 
 	const handleProfileImageUpload = async (
-		e: React.ChangeEvent<HTMLInputElement>,
+		event: React.ChangeEvent<HTMLInputElement>,
 	) => {
-		const file = e.target.files?.[0];
+		const file = event.target.files?.[0];
 
-		if (!file) return;
+		if (!file) {
+			return;
+		}
 
 		try {
 			setSelectedImageName(file.name);
@@ -145,9 +177,11 @@ export default function UserProfileCard({
 			setSuccessMessage(
 				"Imagen subida correctamente. Guarda los cambios para aplicarla al perfil.",
 			);
-		} catch (error) {
+		} catch (uploadError) {
 			setErrorMessage(
-				error instanceof Error ? error.message : "No se pudo subir la imagen",
+				uploadError instanceof Error
+					? uploadError.message
+					: "No se pudo subir la imagen",
 			);
 			setSelectedImageName(null);
 		} finally {
@@ -163,13 +197,27 @@ export default function UserProfileCard({
 		fileInputRef.current?.click();
 	};
 
-	// ============================================================================
-	// PAYLOAD SEGÚN MODO
-	// ============================================================================
 	const requestPayload = useMemo(() => {
 		if (isViewMode) {
 			return null;
 		}
+
+		const clientPayload = isClientUser
+			? {
+					name: formData.client_name,
+					contact_name: formData.contact_name,
+					tax_id: formData.tax_id,
+					address: formData.address,
+					city: formData.city,
+					postal_code: formData.postal_code,
+					province: formData.province,
+					lat: formData.lat || null,
+					lng: formData.lng || null,
+					visit_window_start_time: formData.visit_window_start_time,
+					visit_window_end_time: formData.visit_window_end_time,
+					notes: formData.notes,
+				}
+			: null;
 
 		if (isSelfEditMode) {
 			return {
@@ -180,20 +228,7 @@ export default function UserProfileCard({
 				profile_image_url: formData.profile_image_url,
 				password: showPasswordSection ? formData.password : "",
 				confirmPassword: showPasswordSection ? formData.confirmPassword : "",
-				clientProfile: isClientUser
-						? {
-								name: formData.client_name,
-								contact_name: formData.contact_name,
-								tax_id: formData.tax_id,
-								address: formData.address,
-								city: formData.city,
-								postal_code: formData.postal_code,
-								province: formData.province,
-								visit_window_start_time: formData.visit_window_start_time,
-								visit_window_end_time: formData.visit_window_end_time,
-								notes: formData.notes,
-							}
-						: null,
+				clientProfile: clientPayload,
 			};
 		}
 
@@ -208,40 +243,26 @@ export default function UserProfileCard({
 				statusId: formData.statusId,
 				password: formData.password,
 				confirmPassword: formData.confirmPassword,
-				clientProfile: isClientUser
-						? {
-								name: formData.client_name,
-								contact_name: formData.contact_name,
-								tax_id: formData.tax_id,
-								address: formData.address,
-								city: formData.city,
-								postal_code: formData.postal_code,
-								province: formData.province,
-								visit_window_start_time: formData.visit_window_start_time,
-								visit_window_end_time: formData.visit_window_end_time,
-								notes: formData.notes,
-							}
-						: null,
+				clientProfile: clientPayload,
 			};
 		}
 
 		return null;
 	}, [
 		formData,
-		isViewMode,
-		isSelfEditMode,
 		isAdminEditMode,
-		showPasswordSection,
 		isClientUser,
+		isSelfEditMode,
+		isViewMode,
+		showPasswordSection,
 	]);
 
-	// ============================================================================
-	// ENVÍO DEL FORMULARIO
-	// ============================================================================
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
 
-		if (!submitUrl || !requestPayload) return;
+		if (!submitUrl || !requestPayload) {
+			return;
+		}
 
 		try {
 			setIsSaving(true);
@@ -274,9 +295,11 @@ export default function UserProfileCard({
 				password: "",
 				confirmPassword: "",
 			}));
-		} catch (error) {
+		} catch (submitError) {
 			setErrorMessage(
-				error instanceof Error ? error.message : "No se pudo guardar",
+				submitError instanceof Error
+					? submitError.message
+					: "No se pudo guardar",
 			);
 		} finally {
 			setIsSaving(false);
@@ -285,9 +308,6 @@ export default function UserProfileCard({
 
 	return (
 		<div className="mx-auto mt-6 w-full max-w-4xl">
-			{/* ==================================================================== */}
-			{/* CABECERA OPCIONAL DE LA TARJETA                                       */}
-			{/* ==================================================================== */}
 			{title || subtitle ? (
 				<div className="mb-4">
 					{title ? (
@@ -332,9 +352,6 @@ export default function UserProfileCard({
 					userPhone={user.phone}
 				/>
 
-				{/* ==================================================================== */}
-				{/* BLOQUE DE DATOS DE CLIENTE                                           */}
-				{/* ==================================================================== */}
 				{isClientUser ? (
 					<ClientProfileFieldsSection
 						formData={{
@@ -345,13 +362,18 @@ export default function UserProfileCard({
 							city: formData.city,
 							postal_code: formData.postal_code,
 							province: formData.province,
+							lat: formData.lat,
+							lng: formData.lng,
 							visit_window_start_time: formData.visit_window_start_time,
 							visit_window_end_time: formData.visit_window_end_time,
-								notes: formData.notes,
-							}}
-						onChange={(field: keyof ClientFormDataState) => handleChange(field)}
+							notes: formData.notes,
+						}}
+						onChange={handleClientFieldChange}
+						onConfirmLocation={handleClientLocationConfirmed}
 						isEditable={isEditableMode}
 						isAdminEditMode={isAdminEditMode}
+						clientId={clientProfile?.id ?? user.id}
+						allowLocationEdit={isSelfEditMode || isAdminEditMode}
 					/>
 				) : null}
 

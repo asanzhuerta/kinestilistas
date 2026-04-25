@@ -26,6 +26,8 @@ type UpdateProfileRequestBody = {
 		city?: string | null;
 		postal_code?: string | null;
 		province?: string | null;
+		lat?: number | string | null;
+		lng?: number | string | null;
 		visit_window_start_time?: string | null;
 		visit_window_end_time?: string | null;
 		notes?: string | null;
@@ -222,6 +224,8 @@ export async function PATCH(request: Request) {
 								: body.clientProfile.city,
 						postalCode: body.clientProfile.postal_code,
 						province: body.clientProfile.province,
+						lat: body.clientProfile.lat,
+						lng: body.clientProfile.lng,
 						visitWindowStartTime: body.clientProfile.visit_window_start_time,
 						visitWindowEndTime: body.clientProfile.visit_window_end_time,
 						notes: body.clientProfile.notes,

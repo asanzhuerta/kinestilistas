@@ -267,6 +267,14 @@ export async function applyClientUpdateOrThrow(
 		input.visitWindowEndTime !== undefined
 			? normalizeTimeValue(input.visitWindowEndTime)
 			: client.visit_window_end_time;
+	const normalizedLat =
+		input.lat !== undefined
+			? normalizeCoordinate(input.lat, -90, 90, "La latitud")
+			: undefined;
+	const normalizedLng =
+		input.lng !== undefined
+			? normalizeCoordinate(input.lng, -180, 180, "La longitud")
+			: undefined;
 
 	if (!nextName) {
 		throw new UpdateClientError("El nombre del establecimiento es obligatorio");
@@ -325,38 +333,57 @@ export async function applyClientUpdateOrThrow(
 	client.notes = nextNotes;
 	client.updated_at = new Date();
 
+	if (
+		(normalizedLat === null && normalizedLng !== null) ||
+		(normalizedLng === null && normalizedLat !== null) ||
+		(normalizedLat === undefined && normalizedLng !== undefined) ||
+		(normalizedLng === undefined && normalizedLat !== undefined)
+	) {
+		throw new UpdateClientError(
+			"Debes indicar latitud y longitud juntas para confirmar la ubicación",
+		);
+	}
+
 	// ----------------------------------------------------------------------
 	// Coordenadas manuales: solo se usan si NO cambia la dirección.
 	// ----------------------------------------------------------------------
 	if (!addressChanged) {
 		clientDebugLog("La dirección NO ha cambiado");
 
-		if (input.lat !== undefined) {
-			client.lat =
-				normalizeCoordinate(input.lat, -90, 90, "La latitud") ?? null;
+		if (normalizedLat !== undefined) {
+			client.lat = normalizedLat ?? null;
 		}
 
-		if (input.lng !== undefined) {
-			client.lng =
-				normalizeCoordinate(input.lng, -180, 180, "La longitud") ?? null;
+		if (normalizedLng !== undefined) {
+			client.lng = normalizedLng ?? null;
 		}
 	}
 
 	// ----------------------------------------------------------------------
-	// Si cambia la dirección, se fuerza geocodificación válida
+	// Si cambia la dirección, usamos primero coordenadas confirmadas manualmente.
+	// Si no existen, se fuerza geocodificación válida.
 	// ----------------------------------------------------------------------
 	if (addressChanged) {
-		clientDebugLog("La dirección ha cambiado, se fuerza geocodificación");
+		if (normalizedLat && normalizedLng) {
+			clientDebugLog(
+				"La dirección ha cambiado, se conservan coordenadas confirmadas manualmente",
+			);
 
-		const geocoded = await geocodeAddressOrThrow({
-			address: nextAddress,
-			city: nextCity,
-			postalCode: nextPostalCode,
-			province: nextProvince,
-		});
+			client.lat = normalizedLat;
+			client.lng = normalizedLng;
+		} else {
+			clientDebugLog("La dirección ha cambiado, se fuerza geocodificación");
 
-		client.lat = geocoded.lat;
-		client.lng = geocoded.lng;
+			const geocoded = await geocodeAddressOrThrow({
+				address: nextAddress,
+				city: nextCity,
+				postalCode: nextPostalCode,
+				province: nextProvince,
+			});
+
+			client.lat = geocoded.lat;
+			client.lng = geocoded.lng;
+		}
 
 		clientDebugLog("Lat/Lng finales asignadas:", {
 			lat: client.lat,

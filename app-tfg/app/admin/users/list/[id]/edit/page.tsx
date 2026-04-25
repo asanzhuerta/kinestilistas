@@ -52,6 +52,8 @@ export default async function EditUsuarioPage({ params }: Props) {
 								city: usuario.linkedClient.city,
 								postal_code: usuario.linkedClient.postal_code,
 								province: usuario.linkedClient.province,
+								lat: usuario.linkedClient.lat,
+								lng: usuario.linkedClient.lng,
 								visit_window_start_time:
 									usuario.linkedClient.visit_window_start_time,
 								visit_window_end_time:

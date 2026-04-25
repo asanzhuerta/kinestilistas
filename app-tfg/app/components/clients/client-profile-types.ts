@@ -18,6 +18,8 @@ export type ClientProfileData = {
 	city?: string | null;
 	postal_code?: string | null;
 	province?: string | null;
+	lat?: string | null;
+	lng?: string | null;
 	visit_window_start_time?: string | null;
 	visit_window_end_time?: string | null;
 	notes?: string | null;
@@ -33,6 +35,8 @@ export type ClientFormDataState = {
 	city: string;
 	postal_code: string;
 	province: string;
+	lat: string;
+	lng: string;
 	visit_window_start_time: string;
 	visit_window_end_time: string;
 	notes: string;
@@ -59,6 +63,8 @@ export function buildInitialClientFormData(
 		city: client?.city ?? "",
 		postal_code: client?.postal_code ?? "",
 		province: client?.province ?? "",
+		lat: client?.lat ?? "",
+		lng: client?.lng ?? "",
 		visit_window_start_time: normalizeTimeForForm(
 			client?.visit_window_start_time,
 		),
