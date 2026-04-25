@@ -26,3 +26,18 @@ export async function requireUserSession() {
 
 	return session;
 }
+
+// Función de utilidad para proteger rutas exclusivas del área comercial.
+export async function requireCommercialSession() {
+	const session = await auth();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	if (session.user?.role !== "commercial") {
+		redirect("/");
+	}
+
+	return session;
+}

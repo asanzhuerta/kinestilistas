@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import PageTransition from "@/app/components/animations/PageTransition";
 import UserProfileCard from "@/app/components/users/UserProfileCard";
 import { getUserById } from "@/lib/typeorm/services/users/user";
@@ -17,6 +16,14 @@ export default async function ProfilePage() {
 
 	const user = await getUserById(session.user.id);
 	const role = user?.role.code;
+	const landingPage =
+		role === "admin"
+			? "/admin"
+			: role === "commercial"
+				? "/commercials"
+				: role === "client"
+					? "/clients"
+					: "/";
 	// Si el usuario no existe o su rol no es válido, se redirige a la página de inicio.
 	if (!user) {
 		redirect("/");
@@ -83,7 +90,13 @@ export default async function ProfilePage() {
 				</PageTransition>
 			</div>
 
-			<BottomNav props={{ LandingPage: role === "admin" ? "/admin" : "/" }} />
+			<BottomNav
+				props={{
+					LandingPage: landingPage,
+					settingsHref:
+						role === "commercial" ? "/commercials/settings" : null,
+				}}
+			/>
 		</main>
 	);
 }

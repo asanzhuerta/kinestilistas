@@ -15,7 +15,7 @@ export default function ClientLayout({
 				<PageTransition>{children}</PageTransition>
 			</section>
 
-			<BottomNav />
+			<BottomNav props={{ LandingPage: "/clients" }} />
 		</main>
 	);
 }
