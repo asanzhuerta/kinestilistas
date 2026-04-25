@@ -96,6 +96,8 @@ type UpdateUserClientProfileInput = {
 	city?: string;
 	postal_code?: string | null;
 	province?: string | null;
+	visit_window_start_time?: string | null;
+	visit_window_end_time?: string | null;
 	notes?: string | null;
 };
 
@@ -739,6 +741,8 @@ export async function updateUser(input: UpdateUserInput) {
 					city: clientProfile.city,
 					postalCode: clientProfile.postal_code,
 					province: clientProfile.province,
+					visitWindowStartTime: clientProfile.visit_window_start_time,
+					visitWindowEndTime: clientProfile.visit_window_end_time,
 					notes: clientProfile.notes,
 				});
 			} catch (error) {

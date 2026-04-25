@@ -26,6 +26,8 @@ type UpdateProfileRequestBody = {
 		city?: string | null;
 		postal_code?: string | null;
 		province?: string | null;
+		visit_window_start_time?: string | null;
+		visit_window_end_time?: string | null;
 		notes?: string | null;
 	} | null;
 };
@@ -220,6 +222,8 @@ export async function PATCH(request: Request) {
 								: body.clientProfile.city,
 						postalCode: body.clientProfile.postal_code,
 						province: body.clientProfile.province,
+						visitWindowStartTime: body.clientProfile.visit_window_start_time,
+						visitWindowEndTime: body.clientProfile.visit_window_end_time,
 						notes: body.clientProfile.notes,
 					});
 

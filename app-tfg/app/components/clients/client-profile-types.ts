@@ -18,6 +18,8 @@ export type ClientProfileData = {
 	city?: string | null;
 	postal_code?: string | null;
 	province?: string | null;
+	visit_window_start_time?: string | null;
+	visit_window_end_time?: string | null;
 	notes?: string | null;
 };
 
@@ -31,8 +33,18 @@ export type ClientFormDataState = {
 	city: string;
 	postal_code: string;
 	province: string;
+	visit_window_start_time: string;
+	visit_window_end_time: string;
 	notes: string;
 };
+
+function normalizeTimeForForm(value?: string | null) {
+	if (!value) {
+		return "";
+	}
+
+	return value.slice(0, 5);
+}
 
 // Construye el estado inicial del bloque cliente a partir de los datos
 // persistidos. Si no existen datos todavía, devuelve strings vacíos.
@@ -47,6 +59,10 @@ export function buildInitialClientFormData(
 		city: client?.city ?? "",
 		postal_code: client?.postal_code ?? "",
 		province: client?.province ?? "",
+		visit_window_start_time: normalizeTimeForForm(
+			client?.visit_window_start_time,
+		),
+		visit_window_end_time: normalizeTimeForForm(client?.visit_window_end_time),
 		notes: client?.notes ?? "",
 	};
 }

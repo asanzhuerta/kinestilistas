@@ -63,6 +63,10 @@ export default async function UsuarioDetallePage({ params }: Props) {
 									city: user.linkedClient.city,
 									postal_code: user.linkedClient.postal_code,
 									province: user.linkedClient.province,
+									visit_window_start_time:
+										user.linkedClient.visit_window_start_time,
+									visit_window_end_time:
+										user.linkedClient.visit_window_end_time,
 									notes: user.linkedClient.notes,
 								}
 							: null

@@ -44,6 +44,8 @@ export function buildInitialFormData(
 		city: clientData.city,
 		postal_code: clientData.postal_code,
 		province: clientData.province,
+		visit_window_start_time: clientData.visit_window_start_time,
+		visit_window_end_time: clientData.visit_window_end_time,
 		notes: clientData.notes,
 	};
 }

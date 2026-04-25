@@ -25,6 +25,8 @@ type UpdateClientBody = {
 	province?: string | null;
 	lat?: number | string | null;
 	lng?: number | string | null;
+	visitWindowStartTime?: string | null;
+	visitWindowEndTime?: string | null;
 	notes?: string | null;
 };
 
@@ -35,6 +37,15 @@ type SessionLike = {
 	};
 } | null;
 
+type ClientAccessTarget = {
+	user?: {
+		id?: string | null;
+	} | null;
+	linkedUser?: {
+		id?: string | null;
+	} | null;
+};
+
 // --------------------------------------------------------------------------
 // Helpers
 // --------------------------------------------------------------------------
@@ -42,14 +53,13 @@ type SessionLike = {
 // Compatibilidad temporal:
 // - client.user?.id -> modelo nuevo (PK compartida con users.id)
 // - client.linkedUser?.id -> modelo anterior
-function getClientOwnerUserId(client: any) {
+function getClientOwnerUserId(client: ClientAccessTarget) {
 	return client?.user?.id ?? client?.linkedUser?.id ?? null;
 }
 
 async function canReadClient(
 	session: SessionLike,
-	client: any,
-	_clientId: string,
+	client: ClientAccessTarget,
 ) {
 	if (!session?.user) {
 		return false;
@@ -70,7 +80,7 @@ async function canReadClient(
 	return false;
 }
 
-function canUpdateClient(session: SessionLike, client: any) {
+function canUpdateClient(session: SessionLike, client: ClientAccessTarget) {
 	if (!session?.user) {
 		return false;
 	}
@@ -108,7 +118,7 @@ export async function GET(_: Request, context: RouteContext) {
 			);
 		}
 
-		const allowed = await canReadClient(session, client, id);
+		const allowed = await canReadClient(session, client);
 
 		if (!allowed) {
 			return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -164,6 +174,10 @@ export async function PATCH(request: Request, context: RouteContext) {
 			province: body.province ?? existingClient.province,
 			lat: body.lat ?? existingClient.lat,
 			lng: body.lng ?? existingClient.lng,
+			visitWindowStartTime:
+				body.visitWindowStartTime ?? existingClient.visit_window_start_time,
+			visitWindowEndTime:
+				body.visitWindowEndTime ?? existingClient.visit_window_end_time,
 			notes: body.notes ?? existingClient.notes,
 		});
 

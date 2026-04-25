@@ -16,6 +16,8 @@ type UpdateUserClientProfileBody = {
 	city?: string;
 	postal_code?: string | null;
 	province?: string | null;
+	visit_window_start_time?: string | null;
+	visit_window_end_time?: string | null;
 	notes?: string | null;
 };
 

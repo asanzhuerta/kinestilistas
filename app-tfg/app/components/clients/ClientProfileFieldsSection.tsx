@@ -33,7 +33,7 @@ export default function ClientProfileFieldsSection({
 					Datos del cliente profesional
 				</h3>
 				<p className="mt-1 text-sm text-slate-600">
-					Información comercial y de localización asociada al perfil cliente.
+					Información comercial, de localización y de disponibilidad para visitas.
 				</p>
 			</div>
 
@@ -177,6 +177,44 @@ export default function ClientProfileFieldsSection({
 					) : (
 						<p className="mt-1 text-sm text-slate-800">
 							{formData.province || "-"}
+						</p>
+					)}
+				</div>
+
+				<div className="rounded-xl bg-slate-50 p-4">
+					<label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+						Inicio de visitas
+					</label>
+
+					{isEditable ? (
+						<input
+							type="time"
+							value={formData.visit_window_start_time}
+							onChange={onChange("visit_window_start_time")}
+							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
+						/>
+					) : (
+						<p className="mt-1 text-sm text-slate-800">
+							{formData.visit_window_start_time || "-"}
+						</p>
+					)}
+				</div>
+
+				<div className="rounded-xl bg-slate-50 p-4">
+					<label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+						Fin de visitas
+					</label>
+
+					{isEditable ? (
+						<input
+							type="time"
+							value={formData.visit_window_end_time}
+							onChange={onChange("visit_window_end_time")}
+							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
+						/>
+					) : (
+						<p className="mt-1 text-sm text-slate-800">
+							{formData.visit_window_end_time || "-"}
 						</p>
 					)}
 				</div>

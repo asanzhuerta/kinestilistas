@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import SafeForm from "@/app/components/forms/SafeForm";
 import ClientProfileFieldsSection from "@/app/components/clients/ClientProfileFieldsSection";
+import type { ClientFormDataState } from "@/app/components/clients/client-profile-types";
 import ProfileIdentitySection from "@/app/components/users/profile/ProfileIdentitySection";
 import ProfileDetailsSection from "@/app/components/users/profile/ProfileDetailsSection";
 import ProfilePasswordSection from "@/app/components/users/profile/ProfilePasswordSection";
@@ -180,17 +181,19 @@ export default function UserProfileCard({
 				password: showPasswordSection ? formData.password : "",
 				confirmPassword: showPasswordSection ? formData.confirmPassword : "",
 				clientProfile: isClientUser
-					? {
-							name: formData.client_name,
-							contact_name: formData.contact_name,
-							tax_id: formData.tax_id,
-							address: formData.address,
-							city: formData.city,
-							postal_code: formData.postal_code,
-							province: formData.province,
-							notes: formData.notes,
-						}
-					: null,
+						? {
+								name: formData.client_name,
+								contact_name: formData.contact_name,
+								tax_id: formData.tax_id,
+								address: formData.address,
+								city: formData.city,
+								postal_code: formData.postal_code,
+								province: formData.province,
+								visit_window_start_time: formData.visit_window_start_time,
+								visit_window_end_time: formData.visit_window_end_time,
+								notes: formData.notes,
+							}
+						: null,
 			};
 		}
 
@@ -206,17 +209,19 @@ export default function UserProfileCard({
 				password: formData.password,
 				confirmPassword: formData.confirmPassword,
 				clientProfile: isClientUser
-					? {
-							name: formData.client_name,
-							contact_name: formData.contact_name,
-							tax_id: formData.tax_id,
-							address: formData.address,
-							city: formData.city,
-							postal_code: formData.postal_code,
-							province: formData.province,
-							notes: formData.notes,
-						}
-					: null,
+						? {
+								name: formData.client_name,
+								contact_name: formData.contact_name,
+								tax_id: formData.tax_id,
+								address: formData.address,
+								city: formData.city,
+								postal_code: formData.postal_code,
+								province: formData.province,
+								visit_window_start_time: formData.visit_window_start_time,
+								visit_window_end_time: formData.visit_window_end_time,
+								notes: formData.notes,
+							}
+						: null,
 			};
 		}
 
@@ -340,9 +345,11 @@ export default function UserProfileCard({
 							city: formData.city,
 							postal_code: formData.postal_code,
 							province: formData.province,
-							notes: formData.notes,
-						}}
-						onChange={handleChange as any}
+							visit_window_start_time: formData.visit_window_start_time,
+							visit_window_end_time: formData.visit_window_end_time,
+								notes: formData.notes,
+							}}
+						onChange={(field: keyof ClientFormDataState) => handleChange(field)}
 						isEditable={isEditableMode}
 						isAdminEditMode={isAdminEditMode}
 					/>
