@@ -2,10 +2,7 @@ import { getDataSource } from "@/lib/typeorm/data-source";
 import { ROLE_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { Commercial } from "@/lib/typeorm/entities/Commercial";
 import { User } from "@/lib/typeorm/entities/User";
-
-function normalizeText(value: string | null | undefined) {
-	return String(value ?? "").trim();
-}
+import { normalizeText } from "@/lib/utils/text";
 
 function normalizeTimeValue(value: string | null | undefined) {
 	const normalized = String(value ?? "").trim();

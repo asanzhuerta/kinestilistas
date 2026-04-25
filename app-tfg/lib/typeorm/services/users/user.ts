@@ -26,20 +26,11 @@ import {
 	USER_STATUS_IDS,
 	ROLE_IDS,
 } from "@/lib/typeorm/constants/catalog-ids";
+import { normalizeEmail, normalizeText } from "@/lib/utils/text";
 
 // --------------------------------------------------------------------------
 // Funciones auxiliares para normalización de datos
 // --------------------------------------------------------------------------
-function normalizeText(value: string | null | undefined) {
-	return String(value ?? "").trim();
-}
-
-function normalizeEmail(value: string | null | undefined) {
-	return String(value ?? "")
-		.trim()
-		.toLowerCase();
-}
-
 type SyncRoleProfileInput = {
 	userId: string;
 	roleId: number;

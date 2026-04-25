@@ -1,5 +1,6 @@
 import { EntityManager } from "typeorm";
 import { Commercial } from "@/lib/typeorm/entities/Commercial";
+import { normalizeText } from "@/lib/utils/text";
 
 // --------------------------------------------------------------------------
 // Servicio interno: creación automática de perfil comercial desde usuario
@@ -10,10 +11,6 @@ type CreateCommercialFromUserInput = {
 	territory?: string | null;
 	notes?: string | null;
 };
-
-function normalizeText(value: string | null | undefined) {
-	return String(value ?? "").trim();
-}
 
 // Este servicio NO valida roles ni permisos.
 // Se usa internamente dentro de otros servicios (ej: registerUserByAdmin).

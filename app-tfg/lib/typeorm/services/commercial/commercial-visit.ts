@@ -8,14 +8,12 @@ import {
 	COMMERCIAL_VISIT_TYPE_IDS,
 } from "@/lib/typeorm/constants/catalog-ids";
 import { getActiveAssignmentByCommercialAndClient } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
+import { normalizeText } from "@/lib/utils/text";
+import { parseTimeToMinutes } from "@/lib/utils/time";
 
 // --------------------------------------------------------------------------
 // Funciones auxiliares para normalización de datos
 // --------------------------------------------------------------------------
-
-function normalizeText(value: string | null | undefined) {
-	return String(value ?? "").trim();
-}
 
 function normalizeDateOnly(value: string | null | undefined) {
 	const normalized = String(value ?? "").trim();
@@ -51,36 +49,6 @@ function normalizeDateOnlyForUpdate(value: string | null | undefined) {
 	}
 
 	return normalized;
-}
-
-function parseTimeToMinutes(value: string | null | undefined) {
-	const normalized = String(value ?? "").trim();
-
-	if (!normalized) {
-		return null;
-	}
-
-	const match = normalized.match(/^(\d{2}):(\d{2})(?::\d{2})?$/);
-
-	if (!match) {
-		return null;
-	}
-
-	const hours = Number(match[1]);
-	const minutes = Number(match[2]);
-
-	if (
-		!Number.isInteger(hours) ||
-		!Number.isInteger(minutes) ||
-		hours < 0 ||
-		hours > 23 ||
-		minutes < 0 ||
-		minutes > 59
-	) {
-		return null;
-	}
-
-	return hours * 60 + minutes;
 }
 
 function getMadridClock(date = new Date()) {

@@ -1,4 +1,4 @@
-import type { RoutePoint } from "./route-map-types";
+import type { RoutePoint } from "@/lib/contracts/commercial-route";
 
 // --------------------------------------------------------------------------
 // GOOGLE MAPS URL

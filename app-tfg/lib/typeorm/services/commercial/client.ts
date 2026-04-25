@@ -6,6 +6,7 @@ import {
 	geocodeAddress,
 	hasEnoughAddressToGeocode,
 } from "@/lib/geocoding/geocode-address";
+import { normalizeText } from "@/lib/utils/text";
 
 // --------------------------------------------------------------------------
 // Flags de depuración
@@ -22,10 +23,6 @@ function clientDebugLog(...args: unknown[]) {
 // --------------------------------------------------------------------------
 // Funciones auxiliares para normalización de datos
 // --------------------------------------------------------------------------
-
-function normalizeText(value: string | null | undefined) {
-	return String(value ?? "").trim();
-}
 
 // Normaliza texto para comparaciones lógicas.
 // Así evitamos considerar cambio real algo como:

@@ -10,8 +10,9 @@ import {
 	useMap,
 } from "react-leaflet";
 import L, { LatLngExpression } from "leaflet";
+import { formatTimeLabel } from "@/lib/utils/time";
 import { ensureLeafletDefaultIcon } from "./leaflet-default-icon";
-import type { RoutePoint } from "./route-map-types";
+import type { RoutePoint } from "@/lib/contracts/commercial-route";
 
 type LeafletRouteMapProps = {
 	startPoint?: RoutePoint | null;
@@ -270,8 +271,8 @@ export default function LeafletRouteMap({
 									) : null}
 									{point.visitWindowStartTime && point.visitWindowEndTime ? (
 										<p className="text-slate-600">
-											Franja: {point.visitWindowStartTime.slice(0, 5)} -{" "}
-											{point.visitWindowEndTime.slice(0, 5)}
+											Franja: {formatTimeLabel(point.visitWindowStartTime)} -{" "}
+											{formatTimeLabel(point.visitWindowEndTime)}
 										</p>
 									) : null}
 									{typeof point.stopDurationMinutes === "number" ? (

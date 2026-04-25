@@ -2,14 +2,11 @@ import { EntityManager, IsNull } from "typeorm";
 import { Client } from "@/lib/typeorm/entities/Client";
 import { Commercial } from "@/lib/typeorm/entities/Commercial";
 import { ClientCommercialAssignment } from "@/lib/typeorm/entities/ClientCommercialAssignment";
+import { normalizeText } from "@/lib/utils/text";
 
 // --------------------------------------------------------------------------
 // Servicio interno: asignación comercial-cliente dentro de transacciones
 // --------------------------------------------------------------------------
-
-function normalizeText(value: string | null | undefined) {
-	return String(value ?? "").trim();
-}
 
 export class AssignClientToCommercialInternalError extends Error {
 	status: number;

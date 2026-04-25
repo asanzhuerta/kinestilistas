@@ -1,7 +1,7 @@
 import {
 	buildInitialClientFormData,
 	ClientProfileData,
-} from "@/app/components/clients/client-profile-types";
+} from "@/lib/contracts/client-profile";
 import {
 	FormDataState,
 	UserProfileCardUser,

@@ -8,6 +8,7 @@
 // - numeros de portal no reconocidos por el proveedor
 // - necesidad de pasar de busqueda estructurada a libre
 // -----------------------------------------------------------------------------
+import { normalizeText } from "@/lib/utils/text";
 
 export type GeocodeAddressInput = {
 	address?: string | null;
@@ -60,10 +61,6 @@ export class GeocodingError extends Error {
 		this.code = code;
 		this.retryable = retryable;
 	}
-}
-
-function normalizeText(value: string | null | undefined) {
-	return String(value ?? "").trim();
 }
 
 function isGeocodingDebugEnabled() {

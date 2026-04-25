@@ -2,9 +2,9 @@ import { COMMERCIAL_VISIT_TYPE_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import type {
 	CommercialRouteTimingSummary,
 	RoutePoint,
-} from "@/app/components/maps/route-map-types";
+} from "@/lib/contracts/commercial-route";
+import { MADRID_TIME_ZONE, parseTimeToMinutes } from "@/lib/utils/time";
 
-const MADRID_TIME_ZONE = "Europe/Madrid";
 const APPROX_TRAVEL_SPEED_KMH = 28;
 
 export type RoutePlanningCommercial = {
@@ -69,36 +69,6 @@ export function parseCoordinate(value: unknown) {
 	const parsed = Number(value);
 
 	return Number.isFinite(parsed) ? parsed : null;
-}
-
-export function parseTimeToMinutes(value: string | null | undefined) {
-	const normalized = String(value ?? "").trim();
-
-	if (!normalized) {
-		return null;
-	}
-
-	const match = normalized.match(/^(\d{2}):(\d{2})(?::\d{2})?$/);
-
-	if (!match) {
-		return null;
-	}
-
-	const hours = Number(match[1]);
-	const minutes = Number(match[2]);
-
-	if (
-		!Number.isInteger(hours) ||
-		!Number.isInteger(minutes) ||
-		hours < 0 ||
-		hours > 23 ||
-		minutes < 0 ||
-		minutes > 59
-	) {
-		return null;
-	}
-
-	return hours * 60 + minutes;
 }
 
 function formatMinutesAsTimeLabel(value: number) {

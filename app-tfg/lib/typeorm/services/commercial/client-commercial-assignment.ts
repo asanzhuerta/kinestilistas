@@ -3,10 +3,7 @@ import { getDataSource } from "@/lib/typeorm/data-source";
 import { Client } from "@/lib/typeorm/entities/Client";
 import { Commercial } from "@/lib/typeorm/entities/Commercial";
 import { ClientCommercialAssignment } from "@/lib/typeorm/entities/ClientCommercialAssignment";
-
-function normalizeText(value: string | null | undefined) {
-	return String(value ?? "").trim();
-}
+import { normalizeText } from "@/lib/utils/text";
 
 type AssignClientToCommercialInput = {
 	clientId: string;

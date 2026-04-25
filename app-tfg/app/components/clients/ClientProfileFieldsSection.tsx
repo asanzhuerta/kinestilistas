@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { ClientFormDataState } from "./client-profile-types";
+import type { ClientFormDataState } from "@/lib/contracts/client-profile";
 
 const ClientLocationPickerMap = dynamic(
 	() => import("@/app/components/maps/ClientLocationPickerMap"),

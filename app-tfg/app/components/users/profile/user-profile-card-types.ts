@@ -1,7 +1,7 @@
 import {
 	ClientFormDataState,
 	ClientProfileData,
-} from "@/app/components/clients/client-profile-types";
+} from "@/lib/contracts/client-profile";
 
 // ----------------------------------------------------------------------------
 // TIPOS DEL USER PROFILE CARD
