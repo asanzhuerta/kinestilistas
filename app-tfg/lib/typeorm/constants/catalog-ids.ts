@@ -59,6 +59,7 @@ export const COMMERCIAL_VISIT_STATUS_IDS = {
 	PLANNED: 1,
 	COMPLETED: 2,
 	CANCELLED: 3,
+	POSTPONED: 4,
 } as const;
 
 // Identificadores de los tipos de visita comercial.

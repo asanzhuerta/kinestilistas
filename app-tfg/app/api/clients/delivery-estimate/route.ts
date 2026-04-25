@@ -67,18 +67,20 @@ export async function GET() {
 		const commercial = activeAssignment.commercial;
 		const visits = (await listCommercialVisitsByCommercial({
 			commercialId: commercial.id,
-			statusId: COMMERCIAL_VISIT_STATUS_IDS.PLANNED,
 			dateFrom,
 			dateTo,
-		})) as RoutePlanningVisit[];
+		})) as (RoutePlanningVisit & { status_id: number })[];
 
-		const hasDeliveryToday = visits.some(
-			(visit) =>
-				visit.client?.id === userId &&
-				visit.visit_type_id === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY,
-		);
+		const clientPendingDeliveryVisit =
+			visits.find(
+				(visit) =>
+					visit.client?.id === userId &&
+					visit.visit_type_id === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
+					(visit.status_id === COMMERCIAL_VISIT_STATUS_IDS.PLANNED ||
+						visit.status_id === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED),
+			) ?? null;
 
-		if (!hasDeliveryToday) {
+		if (!clientPendingDeliveryVisit) {
 			const response: DeliveryEstimateResponse = {
 				status: "no_delivery_today",
 				date: dateFrom,
@@ -92,6 +94,32 @@ export async function GET() {
 
 			return NextResponse.json(response, { status: 200 });
 		}
+
+		if (
+			clientPendingDeliveryVisit.status_id ===
+			COMMERCIAL_VISIT_STATUS_IDS.POSTPONED
+		) {
+			const response: DeliveryEstimateResponse = {
+				status: "outside_visit_window",
+				date: dateFrom,
+				message:
+					"Tu reparto de hoy ha quedado aplazado porque ya se ha superado tu franja de visita.",
+				estimatedArrivalTime: null,
+				sequence: null,
+				windowStartTime:
+					clientPendingDeliveryVisit.client?.visit_window_start_time ?? null,
+				windowEndTime:
+					clientPendingDeliveryVisit.client?.visit_window_end_time ?? null,
+				commercialName: commercial.user?.name ?? null,
+			};
+
+			return NextResponse.json(response, { status: 200 });
+		}
+
+		const plannedVisits = visits.filter(
+			(visit) =>
+				visit.status_id === COMMERCIAL_VISIT_STATUS_IDS.PLANNED,
+		);
 
 		const savedStartLat = parseCoordinate(commercial.route_start_lat);
 		const savedStartLng = parseCoordinate(commercial.route_start_lng);
@@ -109,7 +137,7 @@ export async function GET() {
 
 		const routePlan = buildCommercialDailyRoutePlan({
 			commercial,
-			visits,
+			visits: plannedVisits,
 			startPoint,
 		});
 

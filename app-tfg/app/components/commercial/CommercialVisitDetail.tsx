@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import DataTable from "@/app/components/DataTable";
 import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
@@ -66,7 +66,7 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 	const [notes, setNotes] = useState("");
 	const [result, setResult] = useState("");
 
-	async function loadVisit() {
+	const loadVisit = useCallback(async () => {
 		try {
 			setLoading(true);
 			setError("");
@@ -103,13 +103,16 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 		} finally {
 			setLoading(false);
 		}
-	}
+	}, [visitId]);
 
 	useEffect(() => {
 		void loadVisit();
-	}, [visitId]);
+	}, [loadVisit]);
 
-	const canEditPlanning = useMemo(() => visit?.status_id === 1, [visit]);
+	const canEditPlanning = useMemo(
+		() => visit?.status_id === 1 || visit?.status_id === 4,
+		[visit],
+	);
 
 	const visitRows = useMemo(() => {
 		if (!visit) {

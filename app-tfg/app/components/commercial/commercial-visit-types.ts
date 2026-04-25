@@ -1,4 +1,8 @@
-export type CommercialVisitStatusCode = "planned" | "completed" | "cancelled";
+export type CommercialVisitStatusCode =
+	| "planned"
+	| "completed"
+	| "cancelled"
+	| "postponed";
 export type CommercialVisitTypeCode = "delivery" | "routine";
 
 export type CommercialVisitClientUser = {
@@ -65,6 +69,7 @@ export const COMMERCIAL_VISIT_STATUS_OPTIONS = [
 	{ id: 1, label: "Planificada" },
 	{ id: 2, label: "Completada" },
 	{ id: 3, label: "Cancelada" },
+	{ id: 4, label: "Aplazada" },
 ] as const;
 
 export const COMMERCIAL_VISIT_TYPE_OPTIONS = [
@@ -80,6 +85,8 @@ export function getVisitStatusLabel(statusId: number) {
 			return "Completada";
 		case 3:
 			return "Cancelada";
+		case 4:
+			return "Aplazada";
 		default:
 			return "Desconocido";
 	}
@@ -104,6 +111,8 @@ export function getVisitStatusClasses(statusId: number) {
 			return "bg-emerald-50 text-emerald-700";
 		case 3:
 			return "bg-rose-50 text-rose-700";
+		case 4:
+			return "bg-orange-50 text-orange-700";
 		default:
 			return "bg-slate-100 text-slate-700";
 	}

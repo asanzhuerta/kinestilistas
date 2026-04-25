@@ -53,6 +53,61 @@ function normalizeDateOnlyForUpdate(value: string | null | undefined) {
 	return normalized;
 }
 
+function parseTimeToMinutes(value: string | null | undefined) {
+	const normalized = String(value ?? "").trim();
+
+	if (!normalized) {
+		return null;
+	}
+
+	const match = normalized.match(/^(\d{2}):(\d{2})(?::\d{2})?$/);
+
+	if (!match) {
+		return null;
+	}
+
+	const hours = Number(match[1]);
+	const minutes = Number(match[2]);
+
+	if (
+		!Number.isInteger(hours) ||
+		!Number.isInteger(minutes) ||
+		hours < 0 ||
+		hours > 23 ||
+		minutes < 0 ||
+		minutes > 59
+	) {
+		return null;
+	}
+
+	return hours * 60 + minutes;
+}
+
+function getMadridClock(date = new Date()) {
+	const parts = new Intl.DateTimeFormat("en-GB", {
+		timeZone: "Europe/Madrid",
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: false,
+	}).formatToParts(date);
+
+	const year = parts.find((part) => part.type === "year")?.value ?? "1970";
+	const month = parts.find((part) => part.type === "month")?.value ?? "01";
+	const day = parts.find((part) => part.type === "day")?.value ?? "01";
+	const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
+	const minute = Number(
+		parts.find((part) => part.type === "minute")?.value ?? "0",
+	);
+
+	return {
+		date: `${year}-${month}-${day}`,
+		totalMinutes: hour * 60 + minute,
+	};
+}
+
 function buildCommercialVisitQuery(repo: Repository<CommercialVisit>) {
 	return repo
 		.createQueryBuilder("visit")
@@ -86,12 +141,28 @@ function canTransitionCommercialVisitStatus(
 
 	if (currentStatusId === COMMERCIAL_VISIT_STATUS_IDS.PLANNED) {
 		return (
+			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED ||
+			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.COMPLETED ||
+			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.CANCELLED
+		);
+	}
+
+	if (currentStatusId === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED) {
+		return (
+			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.PLANNED ||
 			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.COMPLETED ||
 			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.CANCELLED
 		);
 	}
 
 	return false;
+}
+
+function canEditCommercialVisitPlanning(statusId: number) {
+	return (
+		statusId === COMMERCIAL_VISIT_STATUS_IDS.PLANNED ||
+		statusId === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED
+	);
 }
 
 // --------------------------------------------------------------------------
@@ -159,6 +230,59 @@ export class UpdateCommercialVisitError extends Error {
 		this.status = status;
 		this.code = code;
 	}
+}
+
+export async function autoPostponeExpiredPlannedVisitsByCommercial(
+	commercialId: string,
+) {
+	const ds = await getDataSource();
+	const repo = ds.getRepository(CommercialVisit);
+	const madridClock = getMadridClock();
+
+	const candidateVisits = await buildCommercialVisitQuery(repo)
+		.where("visit.commercial_id = :commercialId", { commercialId })
+		.andWhere("visit.status_id = :plannedStatusId", {
+			plannedStatusId: COMMERCIAL_VISIT_STATUS_IDS.PLANNED,
+		})
+		.andWhere("visit.scheduled_for_date <= :todayDate", {
+			todayDate: madridClock.date,
+		})
+		.getMany();
+
+	const expiredVisitIds = candidateVisits
+		.filter((visit) => {
+			if (visit.scheduled_for_date < madridClock.date) {
+				return true;
+			}
+
+			const endMinutes = parseTimeToMinutes(
+				visit.client?.visit_window_end_time ?? null,
+			);
+
+			if (endMinutes === null) {
+				return false;
+			}
+
+			return madridClock.totalMinutes > endMinutes;
+		})
+		.map((visit) => visit.id);
+
+	if (expiredVisitIds.length === 0) {
+		return 0;
+	}
+
+	await repo
+		.createQueryBuilder()
+		.update(CommercialVisit)
+		.set({
+			status_id: COMMERCIAL_VISIT_STATUS_IDS.POSTPONED,
+		})
+		.where("id IN (:...visitIds)", {
+			visitIds: expiredVisitIds,
+		})
+		.execute();
+
+	return expiredVisitIds.length;
 }
 
 // Crear visita comercial validando cliente y comercial.
@@ -286,6 +410,8 @@ export async function getCommercialVisitByIdForCommercial(
 	const ds = await getDataSource();
 	const repo = ds.getRepository(CommercialVisit);
 
+	await autoPostponeExpiredPlannedVisitsByCommercial(commercialId);
+
 	return buildCommercialVisitQuery(repo)
 		.where("visit.id = :visitId", { visitId })
 		.andWhere("visit.commercial_id = :commercialId", { commercialId })
@@ -309,6 +435,8 @@ export async function listCommercialVisitsByCommercial(
 ) {
 	const ds = await getDataSource();
 	const repo = ds.getRepository(CommercialVisit);
+
+	await autoPostponeExpiredPlannedVisitsByCommercial(input.commercialId);
 
 	const query = buildCommercialVisitQuery(repo)
 		.where("visit.commercial_id = :commercialId", {
@@ -353,6 +481,8 @@ export async function listCommercialVisitsByCommercial(
 export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 	const ds = await getDataSource();
 
+	await autoPostponeExpiredPlannedVisitsByCommercial(input.commercialId);
+
 	return ds.transaction(async (manager) => {
 		const repo = manager.getRepository(CommercialVisit);
 
@@ -384,9 +514,9 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 				);
 			}
 
-			if (visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.PLANNED) {
+			if (!canEditCommercialVisitPlanning(visit.status_id)) {
 				throw new UpdateCommercialVisitError(
-					"Solo se puede reprogramar una visita planificada",
+					"Solo se puede reprogramar una visita planificada o aplazada",
 					409,
 					"VISIT_NOT_EDITABLE",
 				);
@@ -404,9 +534,9 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 				);
 			}
 
-			if (visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.PLANNED) {
+			if (!canEditCommercialVisitPlanning(visit.status_id)) {
 				throw new UpdateCommercialVisitError(
-					"Solo se puede cambiar el tipo de una visita planificada",
+					"Solo se puede cambiar el tipo de una visita planificada o aplazada",
 					409,
 					"VISIT_TYPE_NOT_EDITABLE",
 				);
@@ -415,8 +545,16 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 			visit.visit_type_id = Number(input.visitTypeId);
 		}
 
-		const nextStatusId =
+		let nextStatusId =
 			input.statusId !== undefined ? Number(input.statusId) : visit.status_id;
+
+		if (
+			input.scheduledForDate !== undefined &&
+			visit.status_id === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED &&
+			input.statusId === undefined
+		) {
+			nextStatusId = COMMERCIAL_VISIT_STATUS_IDS.PLANNED;
+		}
 
 		const nextResult =
 			input.result !== undefined
