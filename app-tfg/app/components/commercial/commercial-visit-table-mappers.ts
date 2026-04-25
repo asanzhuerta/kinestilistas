@@ -6,14 +6,53 @@ import {
 	getVisitTypeLabel,
 } from "./commercial-visit-types";
 
+export type VisitRouteMetadata = {
+	sequence?: number | null;
+	estimatedArrivalTime?: string | null;
+	isPastVisitWindow?: boolean;
+};
+
 export function mapCommercialVisitsToEntityTableItems(
 	visits: CommercialVisit[],
+	routeMetadataByClientId?: Map<string, VisitRouteMetadata>,
 ): EntityTableItem[] {
 	return visits.map((visit) => {
 		const location =
-			[visit.client?.city, visit.client?.province]
-				.filter(Boolean)
-				.join(" · ") || "-";
+			[visit.client?.city, visit.client?.province].filter(Boolean).join(" · ") ||
+			"-";
+		const routeMetadata = visit.client_id
+			? routeMetadataByClientId?.get(visit.client_id)
+			: undefined;
+		const routeLabel =
+			routeMetadata?.sequence && routeMetadata.estimatedArrivalTime
+				? `#${routeMetadata.sequence} · ${routeMetadata.estimatedArrivalTime}`
+				: routeMetadata?.sequence
+					? `#${routeMetadata.sequence}`
+					: routeMetadata?.estimatedArrivalTime || null;
+		const badges = [
+			{
+				label: formatVisitDate(visit.scheduled_for_date),
+				className: "bg-slate-100 text-slate-700",
+			},
+			{
+				label: getVisitTypeLabel(visit.visit_type_id),
+				className: "bg-blue-50 text-blue-700",
+			},
+		];
+
+		if (routeLabel) {
+			badges.push({
+				label: routeLabel,
+				className: "bg-sky-50 text-sky-700",
+			});
+		}
+
+		if (routeMetadata?.isPastVisitWindow) {
+			badges.push({
+				label: "Fuera de franja",
+				className: "bg-rose-50 text-rose-700",
+			});
+		}
 
 		return {
 			id: visit.id,
@@ -27,23 +66,14 @@ export function mapCommercialVisitsToEntityTableItems(
 			status: getVisitStatusLabel(visit.status_id),
 			primaryDate: visit.scheduled_for_date,
 			secondaryDate: null,
-			badges: [
-				{
-					label: formatVisitDate(visit.scheduled_for_date),
-					className: "bg-slate-100 text-slate-700",
-				},
-				{
-					label: getVisitTypeLabel(visit.visit_type_id),
-					className: "bg-blue-50 text-blue-700",
-				},
-			],
+			badges,
 			fields: [
 				{
 					label: "Correo",
 					value: visit.client?.user?.email || "-",
 				},
 				{
-					label: "Ubicación",
+					label: "Ubicacion",
 					value: location,
 				},
 				{
@@ -53,6 +83,10 @@ export function mapCommercialVisitsToEntityTableItems(
 				{
 					label: "Estado",
 					value: getVisitStatusLabel(visit.status_id),
+				},
+				{
+					label: "Ruta",
+					value: routeLabel || "-",
 				},
 				{
 					label: "Notas",
@@ -76,6 +110,7 @@ export function mapCommercialVisitsToEntityTableItems(
 				visit.result,
 				getVisitStatusLabel(visit.status_id),
 				getVisitTypeLabel(visit.visit_type_id),
+				routeLabel,
 			]
 				.filter(Boolean)
 				.join(" "),

@@ -4,6 +4,7 @@ import AssistantCard from "../components/AssistantCard";
 import NavCard from "../components/NavCard";
 import HeaderTitle from "../components/basics/HeaderTitle";
 import PageTransition from "../components/animations/PageTransition";
+import ClientDeliveryEstimateCard from "../components/clients/ClientDeliveryEstimateCard";
 import {
 	AgendaIcon,
 	AppointmentIcon,
@@ -37,6 +38,10 @@ export default function ClientsHome() {
 
 			<div className="mb-6">
 				<AssistantCard />
+			</div>
+
+			<div className="mb-6">
+				<ClientDeliveryEstimateCard />
 			</div>
 
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

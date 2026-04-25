@@ -5,11 +5,6 @@ import dynamic from "next/dynamic";
 import { buildGoogleMapsDirectionsUrl } from "@/app/components/maps/google-maps-url";
 import type { CommercialRoutePreviewResponse } from "@/app/components/maps/route-map-types";
 
-// --------------------------------------------------------------------------
-// CARGA DINAMICA DEL MAPA
-// --------------------------------------------------------------------------
-// Leaflet depende de window/document, asi que no puede renderizarse en SSR.
-// Lo cargamos solo en cliente para evitar el error "window is not defined".
 const LeafletRouteMap = dynamic(
 	() => import("@/app/components/maps/LeafletRouteMap"),
 	{
@@ -74,6 +69,19 @@ function formatTimeLabel(value: string | null | undefined) {
 	return value.slice(0, 5);
 }
 
+function buildCommittedTimeDescription(
+	travelMinutes: number,
+	waitingMinutes: number,
+) {
+	const parts = [`${formatMinutes(travelMinutes)} en trayectos`];
+
+	if (waitingMinutes > 0) {
+		parts.push(`${formatMinutes(waitingMinutes)} de espera`);
+	}
+
+	return parts.join(" · ");
+}
+
 export default function RouteMapCard({
 	title = "Ruta diaria",
 	subtitle = "Vista previa de la ruta calculada con tus visitas planificadas para hoy",
@@ -84,21 +92,15 @@ export default function RouteMapCard({
 	const [preview, setPreview] = useState<CommercialRoutePreviewResponse | null>(
 		null,
 	);
-
 	const [browserLocation, setBrowserLocation] = useState<BrowserLocationState>({
 		status: "loading",
 	});
 
-	// --------------------------------------------------------------------------
-	// OBTENCION DE UBICACION ACTUAL
-	// --------------------------------------------------------------------------
-	// Intentamos usar la ubicacion real del comercial como inicio de ruta.
-	// Si falla, el backend usara el fallback configurado en perfil si existe.
 	useEffect(() => {
 		if (!("geolocation" in navigator)) {
 			setBrowserLocation({
 				status: "unavailable",
-				message: "Tu navegador no soporta geolocalización.",
+				message: "Tu navegador no soporta geolocalizacion.",
 			});
 			return;
 		}
@@ -115,7 +117,7 @@ export default function RouteMapCard({
 				setBrowserLocation({
 					status: "unavailable",
 					message:
-						"No se pudo obtener tu ubicación actual. Se intentará usar el punto de salida guardado.",
+						"No se pudo obtener tu ubicacion actual. Se intentara usar el punto de salida guardado.",
 				});
 			},
 			{
@@ -126,10 +128,6 @@ export default function RouteMapCard({
 		);
 	}, []);
 
-	// --------------------------------------------------------------------------
-	// CARGA DE PREVIEW
-	// --------------------------------------------------------------------------
-	// Esperamos a resolver el intento de geolocalizacion para pedir la preview.
 	useEffect(() => {
 		let ignore = false;
 
@@ -197,21 +195,20 @@ export default function RouteMapCard({
 
 	const startPoint = preview?.startPoint ?? null;
 	const endPoint = preview?.endPoint ?? null;
-	const previewWaypoints = preview?.waypoints;
-	const waypoints = previewWaypoints ?? [];
+	const waypoints = useMemo(() => preview?.waypoints ?? [], [preview?.waypoints]);
 	const timingSummary = preview?.timingSummary ?? null;
 
 	const googleMapsUrl = useMemo(
-		() => buildGoogleMapsDirectionsUrl(startPoint, previewWaypoints ?? [], endPoint),
-		[startPoint, previewWaypoints, endPoint],
+		() => buildGoogleMapsDirectionsUrl(startPoint, waypoints, endPoint),
+		[startPoint, waypoints, endPoint],
 	);
 
 	const hasEnoughPointsForMap =
 		(startPoint ? 1 : 0) + waypoints.length + (endPoint ? 1 : 0) >= 1;
-
 	const hasValidWorkdayRange = Boolean(timingSummary?.hasValidWorkdayRange);
 	const hasWorkdayConfig = Boolean(timingSummary?.hasWorkdayConfig);
 	const overbookedMinutes = timingSummary?.overbookedMinutes ?? null;
+	const pastWindowStopsCount = timingSummary?.pastWindowStopsCount ?? 0;
 
 	return (
 		<div
@@ -238,7 +235,7 @@ export default function RouteMapCard({
 
 			{browserLocation.status === "loading" ? (
 				<div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-					Intentando obtener tu ubicación actual para iniciar la ruta...
+					Intentando obtener tu ubicacion actual para iniciar la ruta...
 				</div>
 			) : null}
 
@@ -307,7 +304,7 @@ export default function RouteMapCard({
 								</p>
 								<p className="mt-1 text-sm text-slate-600">
 									{hasValidWorkdayRange
-										? `${formatMinutes(timingSummary.totalWorkdayMinutes)} disponibles`
+										? `${formatMinutes(timingSummary.totalWorkdayMinutes)} totales · ahora ${timingSummary.currentTimeLabel}`
 										: hasWorkdayConfig
 											? "El fin de jornada debe ser posterior al inicio."
 											: "Configura tu horario habitual en Ajustes."}
@@ -319,11 +316,17 @@ export default function RouteMapCard({
 									Tiempo comprometido
 								</p>
 								<p className="mt-2 text-lg font-semibold text-slate-900">
-									{formatMinutes(timingSummary.totalPlannedVisitMinutes)}
+									{formatMinutes(timingSummary.totalCommittedRouteMinutes)}
 								</p>
 								<p className="mt-1 text-sm text-slate-600">
 									{timingSummary.deliveryVisitsCount} reparto ·{" "}
 									{timingSummary.routineVisitsCount} rutinarias
+								</p>
+								<p className="mt-1 text-sm text-slate-500">
+									{buildCommittedTimeDescription(
+										timingSummary.approxTravelMinutes,
+										timingSummary.totalWaitingMinutes,
+									)}
 								</p>
 							</div>
 
@@ -341,7 +344,7 @@ export default function RouteMapCard({
 											: "text-slate-500"
 									}`}
 								>
-									Margen del día
+									Margen del dia
 								</p>
 								<p
 									className={`mt-2 text-lg font-semibold ${
@@ -353,7 +356,9 @@ export default function RouteMapCard({
 									{hasValidWorkdayRange
 										? (overbookedMinutes ?? 0) > 0
 											? `${formatMinutes(overbookedMinutes)} de exceso`
-											: formatMinutes(timingSummary.remainingWorkdayMinutes)
+											: formatMinutes(
+													timingSummary.remainingOperationalMarginMinutes,
+												)
 										: "Pendiente"}
 								</p>
 								<p
@@ -365,8 +370,8 @@ export default function RouteMapCard({
 								>
 									{hasValidWorkdayRange
 										? (overbookedMinutes ?? 0) > 0
-											? "La planificación supera la jornada base actual."
-											: "Tiempo restante antes de agotar la jornada base."
+											? `La ruta ya supera la jornada disponible desde las ${timingSummary.currentTimeLabel}.`
+											: `Quedan ${formatMinutes(timingSummary.remainingWorkdayMinutes)} de jornada real desde ahora.`
 										: "Completa tu horario para calcular el margen real."}
 								</p>
 							</div>
@@ -375,20 +380,20 @@ export default function RouteMapCard({
 
 					{timingSummary && !hasWorkdayConfig ? (
 						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-							Aún no has definido tu jornada base. Configúrala en{" "}
+							Aun no has definido tu jornada base. Configurala en{" "}
 							<a
 								href="/commercials/settings"
 								className="font-semibold underline underline-offset-2"
 							>
 								Ajustes
 							</a>{" "}
-							para que el sistema calcule el tiempo máximo disponible en ruta.
+							para que el sistema calcule el tiempo maximo disponible en ruta.
 						</div>
 					) : null}
 
 					{timingSummary && hasWorkdayConfig && !hasValidWorkdayRange ? (
 						<div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-							El horario base no es válido. Revisa en Ajustes que el fin de
+							El horario base no es valido. Revisa en Ajustes que el fin de
 							jornada sea posterior al inicio para poder calcular el margen de
 							ruta.
 						</div>
@@ -398,22 +403,30 @@ export default function RouteMapCard({
 					hasValidWorkdayRange &&
 					(overbookedMinutes ?? 0) > 0 ? (
 						<div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-							Con la duración actual de visitas, la planificación de hoy excede
-							tu jornada base. La hora exacta seguirá ajustándose después según
-							la disponibilidad diaria de cada peluquería.
+							La planificacion actual supera la jornada disponible desde este
+							momento por <strong>{formatMinutes(overbookedMinutes)}</strong>.
+							Conviene reordenar o liberar paradas antes de salir a ruta.
+						</div>
+					) : null}
+
+					{timingSummary && pastWindowStopsCount > 0 ? (
+						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+							Hay <strong>{pastWindowStopsCount}</strong> parada
+							{pastWindowStopsCount === 1 ? "" : "s"} cuya llegada estimada ya
+							queda fuera de la franja de visita del cliente.
 						</div>
 					) : null}
 
 					{preview.usingCurrentLocation ? (
 						<div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-							La ruta se ha generado usando tu ubicación actual como punto de
+							La ruta se ha generado usando tu ubicacion actual como punto de
 							inicio.
 						</div>
 					) : null}
 
 					{!preview.usingCurrentLocation && preview.usingSavedStartFallback ? (
 						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-							No se pudo usar tu ubicación actual. Se ha utilizado el punto de
+							No se pudo usar tu ubicacion actual. Se ha utilizado el punto de
 							salida guardado en tu perfil como fallback.
 						</div>
 					) : null}
@@ -421,7 +434,7 @@ export default function RouteMapCard({
 					{!preview.usingCurrentLocation && !preview.usingSavedStartFallback ? (
 						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
 							No hay punto de inicio disponible. Para mejorar la ruta, activa la
-							geolocalización o configura un punto de salida de respaldo en tu
+							geolocalizacion o configura un punto de salida de respaldo en tu
 							perfil.
 						</div>
 					) : null}
@@ -429,14 +442,14 @@ export default function RouteMapCard({
 					{!preview.hasConfiguredEndPoint &&
 					!(preview.startPoint && preview.endPoint) ? (
 						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-							Aún no tienes configurado un punto final de ruta en tu perfil.
+							Aun no tienes configurado un punto final de ruta en tu perfil.
 						</div>
 					) : null}
 
 					{waypoints.length === 0 ? (
 						<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
 							No hay clientes asignados con coordenadas suficientes para pintar
-							la ruta todavía.
+							la ruta todavia.
 						</div>
 					) : null}
 

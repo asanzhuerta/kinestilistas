@@ -1,19 +1,19 @@
-// app/api/commercial/routes/preview/route.ts
-
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import {
-	COMMERCIAL_VISIT_STATUS_IDS,
-	COMMERCIAL_VISIT_TYPE_IDS,
-} from "@/lib/typeorm/constants/catalog-ids";
+import { COMMERCIAL_VISIT_STATUS_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { listCommercialVisitsByCommercial } from "@/lib/typeorm/services/commercial/commercial-visit";
 import {
 	CommercialProfileError,
 	requireCommercialByUserId,
 } from "@/lib/typeorm/services/commercial/commercial";
+import {
+	buildCommercialDailyRoutePlan,
+	getTodayRangeInMadrid,
+	parseCoordinate,
+	type RoutePlanningVisit,
+} from "@/lib/commercial/daily-route-planning";
 import type {
 	CommercialRoutePreviewResponse,
-	CommercialRouteTimingSummary,
 	RoutePoint,
 } from "@/app/components/maps/route-map-types";
 
@@ -24,249 +24,80 @@ type SessionLike = {
 	};
 } | null;
 
-type RoutePreviewVisitClient = {
-	id: string;
-	name: string;
-	address?: string | null;
-	city?: string | null;
-	lat?: unknown;
-	lng?: unknown;
-	user?: {
-		email?: string | null;
-	} | null;
-};
+function buildStartPoint(input: {
+	currentStartLat: number | null;
+	currentStartLng: number | null;
+	savedStartLat: number | null;
+	savedStartLng: number | null;
+	savedStartAddress: string | null;
+}) {
+	const usingCurrentLocation =
+		input.currentStartLat !== null && input.currentStartLng !== null;
+	const usingSavedStartFallback =
+		!usingCurrentLocation &&
+		input.savedStartLat !== null &&
+		input.savedStartLng !== null;
 
-type RoutePreviewVisit = {
-	visit_type_id?: number | null;
-	client?: RoutePreviewVisitClient | null;
-};
-
-// --------------------------------------------------------------------------
-// Helpers
-// --------------------------------------------------------------------------
-
-// Convierte valores de BBDD o query string a número usable.
-function parseCoordinate(value: unknown) {
-	if (value === null || value === undefined || value === "") {
-		return null;
-	}
-
-	const parsed = Number(value);
-
-	return Number.isFinite(parsed) ? parsed : null;
-}
-
-function parseTimeToMinutes(value: string | null | undefined) {
-	const normalized = String(value ?? "").trim();
-
-	if (!normalized) {
-		return null;
-	}
-
-	const match = normalized.match(/^(\d{2}):(\d{2})(?::\d{2})?$/);
-
-	if (!match) {
-		return null;
-	}
-
-	const hours = Number(match[1]);
-	const minutes = Number(match[2]);
-
-	if (
-		!Number.isInteger(hours) ||
-		!Number.isInteger(minutes) ||
-		hours < 0 ||
-		hours > 23 ||
-		minutes < 0 ||
-		minutes > 59
-	) {
-		return null;
-	}
-
-	return hours * 60 + minutes;
-}
-
-function buildTimingSummary(
-	commercial: {
-		workday_start_time: string | null;
-		workday_end_time: string | null;
-		delivery_visit_duration_minutes: number;
-		routine_visit_duration_minutes: number;
-	},
-	visits: RoutePreviewVisit[],
-): CommercialRouteTimingSummary {
-	const workdayStartTime = commercial.workday_start_time;
-	const workdayEndTime = commercial.workday_end_time;
-
-	const startMinutes = parseTimeToMinutes(workdayStartTime);
-	const endMinutes = parseTimeToMinutes(workdayEndTime);
-
-	const hasWorkdayConfig = Boolean(workdayStartTime && workdayEndTime);
-	const hasValidWorkdayRange =
-		startMinutes !== null && endMinutes !== null && endMinutes > startMinutes;
-
-	let deliveryVisitsCount = 0;
-	let routineVisitsCount = 0;
-	let totalPlannedVisitMinutes = 0;
-
-	for (const visit of visits) {
-		if (visit.visit_type_id === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) {
-			deliveryVisitsCount += 1;
-			totalPlannedVisitMinutes += commercial.delivery_visit_duration_minutes;
-			continue;
-		}
-
-		if (visit.visit_type_id === COMMERCIAL_VISIT_TYPE_IDS.ROUTINE) {
-			routineVisitsCount += 1;
-			totalPlannedVisitMinutes += commercial.routine_visit_duration_minutes;
-		}
-	}
-
-	const totalWorkdayMinutes = hasValidWorkdayRange
-		? endMinutes! - startMinutes!
-		: null;
-
-	const remainingWorkdayMinutes =
-		totalWorkdayMinutes === null
-			? null
-			: Math.max(totalWorkdayMinutes - totalPlannedVisitMinutes, 0);
-
-	const overbookedMinutes =
-		totalWorkdayMinutes === null
-			? null
-			: Math.max(totalPlannedVisitMinutes - totalWorkdayMinutes, 0);
-
-	return {
-		hasWorkdayConfig,
-		hasValidWorkdayRange,
-		workdayStartTime,
-		workdayEndTime,
-		totalWorkdayMinutes,
-		plannedVisitsCount: visits.length,
-		deliveryVisitsCount,
-		routineVisitsCount,
-		totalPlannedVisitMinutes,
-		remainingWorkdayMinutes,
-		overbookedMinutes,
-	};
-}
-
-// Devuelve la fecha actual "vista desde Madrid".
-function getMadridDateParts(date: Date) {
-	const parts = new Intl.DateTimeFormat("en-CA", {
-		timeZone: "Europe/Madrid",
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-	}).formatToParts(date);
-
-	return {
-		year: parts.find((part) => part.type === "year")?.value ?? "1970",
-		month: parts.find((part) => part.type === "month")?.value ?? "01",
-		day: parts.find((part) => part.type === "day")?.value ?? "01",
-	};
-}
-
-// Obtiene el offset actual de Madrid en formato +HH:MM o -HH:MM.
-
-// Rango del día actual en Europe/Madrid.
-// Esto evita errores si el servidor no está en la misma zona horaria.
-function getTodayRangeInMadrid() {
-	const now = new Date();
-	const { year, month, day } = getMadridDateParts(now);
-	const today = `${year}-${month}-${day}`;
-
-	return {
-		dateFrom: today,
-		dateTo: today,
-	};
-}
-
-// Distancia Haversine para una heurística local algo mejor que restar lat/lng.
-function toRadians(value: number) {
-	return (value * Math.PI) / 180;
-}
-
-function distanceBetween(
-	from: { lat: number; lng: number },
-	to: { lat: number; lng: number },
-) {
-	const earthRadiusKm = 6371;
-
-	const dLat = toRadians(to.lat - from.lat);
-	const dLng = toRadians(to.lng - from.lng);
-
-	const fromLat = toRadians(from.lat);
-	const toLat = toRadians(to.lat);
-
-	const a =
-		Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-		Math.cos(fromLat) *
-			Math.cos(toLat) *
-			Math.sin(dLng / 2) *
-			Math.sin(dLng / 2);
-
-	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-	return earthRadiusKm * c;
-}
-
-// Ordena clientes con heurística nearest-neighbor.
-// Sigue sin ser optimización real por tiempo de carretera, pero mejora
-// bastante frente al orden aleatorio y no requiere servicios externos.
-function sortWaypointsByNearestNeighbor(
-	points: RoutePoint[],
-	startPoint: RoutePoint | null,
-) {
-	if (points.length <= 1) {
-		return points;
-	}
-
-	const remaining = [...points];
-	const ordered: RoutePoint[] = [];
-
-	let current = startPoint
-		? { lat: startPoint.lat, lng: startPoint.lng }
-		: { lat: remaining[0].lat, lng: remaining[0].lng };
-
-	while (remaining.length > 0) {
-		let nearestIndex = 0;
-		let nearestDistance = distanceBetween(current, remaining[0]);
-
-		for (let i = 1; i < remaining.length; i += 1) {
-			const candidateDistance = distanceBetween(current, remaining[i]);
-
-			if (candidateDistance < nearestDistance) {
-				nearestDistance = candidateDistance;
-				nearestIndex = i;
+	const startPoint: RoutePoint | null = usingCurrentLocation
+		? {
+				id: "route-start-current",
+				label: "Ubicación actual",
+				lat: input.currentStartLat!,
+				lng: input.currentStartLng!,
+				description: "Punto de inicio detectado desde el dispositivo",
 			}
-		}
+		: usingSavedStartFallback
+			? {
+					id: "route-start-fallback",
+					label: "Punto de salida guardado",
+					lat: input.savedStartLat!,
+					lng: input.savedStartLng!,
+					description:
+						input.savedStartAddress || "Fallback configurado en perfil",
+				}
+			: null;
 
-		const [nextPoint] = remaining.splice(nearestIndex, 1);
-
-		ordered.push(nextPoint);
-
-		current = {
-			lat: nextPoint.lat,
-			lng: nextPoint.lng,
-		};
-	}
-
-	return ordered;
+	return {
+		startPoint,
+		usingCurrentLocation,
+		usingSavedStartFallback,
+	};
 }
 
-// --------------------------------------------------------------------------
-// GET /api/commercial/routes/preview
-// --------------------------------------------------------------------------
+function buildEndPoint(input: {
+	endLat: number | null;
+	endLng: number | null;
+	endAddress: string | null;
+	returnToStart: boolean;
+	startPoint: RoutePoint | null;
+}) {
+	const configuredEndPoint: RoutePoint | null =
+		input.endLat !== null && input.endLng !== null
+			? {
+					id: "route-end-config",
+					label: "Punto final configurado",
+					lat: input.endLat,
+					lng: input.endLng,
+					description: input.endAddress || "Fin de jornada configurado",
+				}
+			: null;
 
-// Genera una preview de la ruta diaria del comercial autenticado usando:
-//
-// 1. Ubicación actual enviada por query string (prioridad máxima)
-// 2. Punto de salida guardado en perfil comercial como fallback
-// 3. Punto final configurable del perfil comercial
-// 4. SOLO clientes con visita planificada HOY
-//
-// No guarda la ruta todavía: solo prepara datos para mapa y navegación.
+	const endPoint =
+		input.returnToStart && input.startPoint
+			? {
+					...input.startPoint,
+					id: "route-end-return",
+					label: "Regreso al punto de salida",
+					description: "Fin de ruta volviendo al punto de inicio del día",
+				}
+			: configuredEndPoint;
+
+	return {
+		endPoint,
+		hasConfiguredEndPoint: Boolean(configuredEndPoint),
+	};
+}
+
 export async function GET(request: Request) {
 	try {
 		const session = (await auth()) as SessionLike;
@@ -277,156 +108,55 @@ export async function GET(request: Request) {
 
 		const commercial = await requireCommercialByUserId(session.user.id);
 		const { searchParams } = new URL(request.url);
-
-		// ------------------------------------------------------------------
-		// Inicio de ruta
-		// ------------------------------------------------------------------
-
 		const currentStartLat = parseCoordinate(searchParams.get("startLat"));
 		const currentStartLng = parseCoordinate(searchParams.get("startLng"));
-
 		const savedStartLat = parseCoordinate(commercial.route_start_lat);
 		const savedStartLng = parseCoordinate(commercial.route_start_lng);
-
 		const endLat = parseCoordinate(commercial.route_end_lat);
 		const endLng = parseCoordinate(commercial.route_end_lng);
 
-		const usingCurrentLocation =
-			currentStartLat !== null && currentStartLng !== null;
+		const { startPoint, usingCurrentLocation, usingSavedStartFallback } =
+			buildStartPoint({
+				currentStartLat,
+				currentStartLng,
+				savedStartLat,
+				savedStartLng,
+				savedStartAddress: commercial.route_start_address,
+			});
 
-		const usingSavedStartFallback =
-			!usingCurrentLocation && savedStartLat !== null && savedStartLng !== null;
-
-		const startPoint: RoutePoint | null = usingCurrentLocation
-			? {
-					id: "route-start-current",
-					label: "Ubicación actual",
-					lat: currentStartLat!,
-					lng: currentStartLng!,
-					description: "Punto de inicio detectado desde el dispositivo",
-				}
-			: usingSavedStartFallback
-				? {
-						id: "route-start-fallback",
-						label: "Punto de salida guardado",
-						lat: savedStartLat!,
-						lng: savedStartLng!,
-						description:
-							commercial.route_start_address ||
-							"Fallback configurado en perfil",
-					}
-				: null;
-
-		// ------------------------------------------------------------------
-		// Fin de ruta
-		// ------------------------------------------------------------------
-
-		const configuredEndPoint: RoutePoint | null =
-			endLat !== null && endLng !== null
-				? {
-						id: "route-end-config",
-						label: "Punto final configurado",
-						lat: endLat,
-						lng: endLng,
-						description:
-							commercial.route_end_address || "Fin de jornada configurado",
-					}
-				: null;
-
-		const endPoint =
-			commercial.return_to_start && startPoint
-				? {
-						...startPoint,
-						id: "route-end-return",
-						label: "Regreso al punto de salida",
-						description: "Fin de ruta volviendo al punto de inicio del día",
-					}
-				: configuredEndPoint;
-
-		// ------------------------------------------------------------------
-		// Visitas planificadas de HOY
-		// ------------------------------------------------------------------
+		const { endPoint, hasConfiguredEndPoint } = buildEndPoint({
+			endLat,
+			endLng,
+			endAddress: commercial.route_end_address,
+			returnToStart: commercial.return_to_start,
+			startPoint,
+		});
 
 		const { dateFrom, dateTo } = getTodayRangeInMadrid();
-
 		const visits = (await listCommercialVisitsByCommercial({
 			commercialId: commercial.id,
 			statusId: COMMERCIAL_VISIT_STATUS_IDS.PLANNED,
 			dateFrom,
 			dateTo,
-		})) as RoutePreviewVisit[];
+		})) as RoutePlanningVisit[];
 
-		const timingSummary = buildTimingSummary(commercial, visits);
-
-		// ------------------------------------------------------------------
-		// Deduplicado por cliente del día
-		// ------------------------------------------------------------------
-
-		const clientsOfTheDay = new Map<
-			string,
-			{
-				client: RoutePreviewVisitClient;
-				point: RoutePoint | null;
-			}
-		>();
-
-		for (const visit of visits) {
-			const client = visit.client;
-
-			if (!client) {
-				continue;
-			}
-
-			if (clientsOfTheDay.has(client.id)) {
-				continue;
-			}
-
-			const lat = parseCoordinate(client.lat);
-			const lng = parseCoordinate(client.lng);
-
-			const point =
-				lat !== null && lng !== null
-					? {
-							id: client.id,
-							label: client.name,
-							lat,
-							lng,
-							description:
-								client.address && client.city
-									? `${client.address} · ${client.city}`
-									: client.user?.email || "Cliente con visita hoy",
-						}
-					: null;
-
-			clientsOfTheDay.set(client.id, {
-				client,
-				point,
-			});
-		}
-
-		const mappedClients = Array.from(clientsOfTheDay.values())
-			.map((entry) => entry.point)
-			.filter((point): point is RoutePoint => point !== null);
-
-		const orderedWaypoints = sortWaypointsByNearestNeighbor(
-			mappedClients,
+		const routePlan = buildCommercialDailyRoutePlan({
+			commercial,
+			visits,
 			startPoint,
-		);
-
-		const totalClientsToday = clientsOfTheDay.size;
-		const totalMappedClients = orderedWaypoints.length;
+		});
 
 		const response: CommercialRoutePreviewResponse = {
 			startPoint,
 			endPoint,
-			waypoints: orderedWaypoints,
-			totalAssignedClients: totalClientsToday,
-			mappedClients: totalMappedClients,
-			skippedClients: totalClientsToday - totalMappedClients,
-			timingSummary,
+			waypoints: routePlan.waypoints,
+			totalAssignedClients: routePlan.totalAssignedClients,
+			mappedClients: routePlan.mappedClients,
+			skippedClients: routePlan.skippedClients,
+			timingSummary: routePlan.timingSummary,
 			usingCurrentLocation,
 			usingSavedStartFallback,
-			hasConfiguredEndPoint: !!configuredEndPoint,
+			hasConfiguredEndPoint,
 		};
 
 		return NextResponse.json(response, { status: 200 });
