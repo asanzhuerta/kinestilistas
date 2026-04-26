@@ -13,6 +13,8 @@ import {
 	updateCommercialVisit,
 } from "@/lib/typeorm/services/commercial/commercial-visit";
 
+// GET /api/admin/commercial-visits/[id]
+// Obtiene el detalle de una visita comercial concreta desde el panel de administracion.
 export async function GET(_: Request, context: RouteContext) {
 	const user = await requireRoleUser("admin");
 
@@ -35,6 +37,8 @@ export async function GET(_: Request, context: RouteContext) {
 	}
 }
 
+// PATCH /api/admin/commercial-visits/[id]
+// Actualiza una visita comercial concreta desde administracion.
 export async function PATCH(request: Request, context: RouteContext) {
 	const user = await requireRoleUser("admin");
 

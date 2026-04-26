@@ -14,6 +14,8 @@ import {
 } from "@/lib/typeorm/services/commercial/commercial-visit";
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
 
+// GET /api/commercial/visits/[id]
+// Obtiene el detalle de una visita concreta perteneciente al comercial autenticado.
 export async function GET(_: Request, context: RouteContext) {
 	const user = await requireRoleUser("commercial");
 
@@ -37,6 +39,8 @@ export async function GET(_: Request, context: RouteContext) {
 	}
 }
 
+// PATCH /api/commercial/visits/[id]
+// Actualiza el estado o los datos editables de una visita concreta del comercial autenticado.
 export async function PATCH(request: Request, context: RouteContext) {
 	const user = await requireRoleUser("commercial");
 

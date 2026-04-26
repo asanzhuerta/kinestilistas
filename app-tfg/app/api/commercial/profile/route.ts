@@ -11,6 +11,8 @@ import {
 	upsertCommercialProfile,
 } from "@/lib/typeorm/services/commercial/commercial";
 
+// GET /api/commercial/profile
+// Obtiene la configuracion operativa del comercial autenticado.
 export async function GET() {
 	const user = await requireRoleUser("commercial");
 
@@ -27,6 +29,8 @@ export async function GET() {
 	}
 }
 
+// PATCH /api/commercial/profile
+// Actualiza la configuracion de jornada, duraciones y puntos de ruta del comercial autenticado.
 export async function PATCH(request: Request) {
 	const user = await requireRoleUser("commercial");
 

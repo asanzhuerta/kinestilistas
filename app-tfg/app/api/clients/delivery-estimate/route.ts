@@ -18,6 +18,8 @@ import {
 import { getActiveAssignmentByClientId } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
 import { listCommercialVisitsByCommercial } from "@/lib/typeorm/services/commercial/commercial-visit";
 
+// GET /api/clients/delivery-estimate
+// Devuelve al cliente la hora estimada de llegada de su reparto planificado para hoy.
 export async function GET() {
 	const user = await requireRoleUser("client");
 

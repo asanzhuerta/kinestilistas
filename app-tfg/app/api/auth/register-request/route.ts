@@ -10,6 +10,8 @@ type RegisterRequestBody = {
 	roleId?: number;
 };
 
+// POST /api/auth/register-request
+// Registra una nueva solicitud de alta pendiente de revision administrativa.
 export async function POST(request: Request) {
 	try {
 		const body = (await request.json()) as RegisterRequestBody;

@@ -15,6 +15,8 @@ import {
 } from "@/lib/typeorm/services/commercial/commercial-visit";
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
 
+// GET /api/commercial/visits?clientId=&statusId=&visitTypeId=&dateFrom=&dateTo=
+// Lista las visitas del comercial autenticado aplicando filtros opcionales de cliente, estado, tipo y fechas.
 export async function GET(request: Request) {
 	const user = await requireRoleUser("commercial");
 
@@ -45,6 +47,8 @@ export async function GET(request: Request) {
 	}
 }
 
+// POST /api/commercial/visits
+// Crea una nueva visita comercial en la agenda del comercial autenticado.
 export async function POST(request: Request) {
 	const user = await requireRoleUser("commercial");
 

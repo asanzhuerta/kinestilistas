@@ -11,6 +11,8 @@ import { getClientById } from "@/lib/typeorm/services/commercial/client";
 import { canCommercialAccessClient } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
 
+// GET /api/commercial/clients/[id]
+// Obtiene el detalle operativo de un cliente concreto dentro de la cartera del comercial autenticado.
 export async function GET(_: Request, context: RouteContext) {
 	const user = await requireRoleUser("commercial");
 

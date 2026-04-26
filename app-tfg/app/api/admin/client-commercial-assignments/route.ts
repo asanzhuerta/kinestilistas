@@ -16,6 +16,9 @@ import {
 	unassignClientFromCommercial,
 } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
 
+// GET /api/admin/client-commercial-assignments?clientId=...
+// GET /api/admin/client-commercial-assignments?commercialId=...
+// Consulta asignaciones activas o historicas entre clientes y comerciales segun el filtro indicado.
 export async function GET(request: Request) {
 	const user = await requireRoleUser("admin");
 
@@ -45,6 +48,8 @@ export async function GET(request: Request) {
 	}
 }
 
+// POST /api/admin/client-commercial-assignments
+// Crea o reasigna la vinculacion entre un cliente y un comercial desde administracion.
 export async function POST(request: Request) {
 	const user = await requireRoleUser("admin");
 

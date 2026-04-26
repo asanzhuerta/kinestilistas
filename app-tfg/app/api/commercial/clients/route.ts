@@ -7,6 +7,8 @@ import {
 import { listClientsByCommercialId } from "@/lib/typeorm/services/commercial/client";
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
 
+// GET /api/commercial/clients
+// Lista los clientes actualmente asignados al comercial autenticado.
 export async function GET() {
 	const user = await requireRoleUser("commercial");
 

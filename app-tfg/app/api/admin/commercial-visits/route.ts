@@ -13,6 +13,8 @@ import {
 	listCommercialVisitsByClient,
 } from "@/lib/typeorm/services/commercial/commercial-visit";
 
+// GET /api/admin/commercial-visits?clientId=123
+// Lista visitas comerciales de administracion con filtros opcionales por cliente y metadatos relacionados.
 export async function GET(request: Request) {
 	const user = await requireRoleUser("admin");
 
@@ -37,6 +39,8 @@ export async function GET(request: Request) {
 	}
 }
 
+// POST /api/admin/commercial-visits
+// Crea una visita comercial desde administracion para el comercial y cliente indicados.
 export async function POST(request: Request) {
 	const user = await requireRoleUser("admin");
 

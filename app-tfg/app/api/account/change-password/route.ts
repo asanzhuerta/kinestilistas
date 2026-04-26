@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { getPasswordValidationMessage } from "@/lib/utils/password-utils";
 import { changeUserPassword } from "@/lib/typeorm/services/users/password";
 
+// POST /api/account/change-password
 // Cambia la contraseña del usuario autenticado
 export async function POST(request: Request) {
 	const session = await auth();
