@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { auth } from "@/auth";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import PageTransition from "@/app/components/animations/PageTransition";
 import UserAvatar from "@/app/components/users/UserAvatar";
+import { requireAdminSession } from "@/lib/auth/require-session";
 import { getClientById } from "@/lib/typeorm/services/commercial/client";
 
 type PageProps = {
@@ -27,15 +27,7 @@ function formatDate(value?: Date | string | null) {
 }
 
 export default async function AdminClientDetailPage({ params }: PageProps) {
-	const session = await auth();
-
-	if (!session?.user) {
-		redirect("/login");
-	}
-
-	if (session.user.role !== "admin") {
-		redirect("/");
-	}
+	await requireAdminSession();
 
 	const { id } = await params;
 	const client = await getClientById(id);

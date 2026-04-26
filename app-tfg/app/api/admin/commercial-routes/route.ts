@@ -1,30 +1,37 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import {
+	badRequestError,
+	jsonFromError,
+	readJsonBody,
+	requireRoleUser,
+	unauthorizedError,
+} from "@/lib/api/server";
 import { createCommercialRoute } from "@/lib/typeorm/services/commercial/commercial-route";
 
-// Types
-// Body type for creating a commercial route
 type CreateCommercialRouteBody = {
 	commercialId?: string;
 	date?: string;
 	name?: string;
 };
 
-// POST /api/admin/commercial-routes
 export async function POST(request: Request) {
-	try {
-		const session = await auth();
+	const user = await requireRoleUser("admin");
 
-		if (!session || session.user.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+	if (!user) {
+		return unauthorizedError();
+	}
+
+	try {
+		const body = await readJsonBody<CreateCommercialRouteBody>(request);
+
+		if (!body.commercialId || !body.date || !body.name) {
+			return badRequestError("commercialId, date y name son obligatorios");
 		}
 
-		const body = (await request.json()) as CreateCommercialRouteBody;
-
 		const createdRoute = await createCommercialRoute({
-			commercialId: String(body.commercialId ?? ""),
-			date: String(body.date ?? ""),
-			name: String(body.name ?? ""),
+			commercialId: String(body.commercialId),
+			date: String(body.date),
+			name: String(body.name),
 		});
 
 		return NextResponse.json(
@@ -36,10 +43,6 @@ export async function POST(request: Request) {
 		);
 	} catch (error) {
 		console.error("[admin/commercial-routes][POST] error:", error);
-
-		return NextResponse.json(
-			{ error: "Error al crear la ruta comercial" },
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error al crear la ruta comercial");
 	}
 }

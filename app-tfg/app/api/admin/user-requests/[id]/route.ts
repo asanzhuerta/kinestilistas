@@ -1,42 +1,36 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import type { RouteContext } from "@/lib/contracts/api";
+import {
+	forbiddenError,
+	getSessionUser,
+	jsonFromError,
+	notFoundError,
+	unauthorizedError,
+} from "@/lib/api/server";
 import { getUserRequestById } from "@/lib/typeorm/services/users/request";
 
-type Context = {
-	params: Promise<{ id: string }>;
-};
+export async function GET(_: Request, context: RouteContext) {
+	const user = await getSessionUser();
 
-// Devuelve el detalle de una solicitud concreta.
-// Solo accesible para administradores.
-export async function GET(_: Request, context: Context) {
+	if (!user) {
+		return unauthorizedError("No autenticado");
+	}
+
+	if (user.role !== "admin") {
+		return forbiddenError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session) {
-			return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-		}
-
-		if (session.user?.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-		}
-
 		const { id } = await context.params;
 		const request = await getUserRequestById(id);
 
 		if (!request) {
-			return NextResponse.json(
-				{ error: "Solicitud no encontrada" },
-				{ status: 404 },
-			);
+			return notFoundError("Solicitud no encontrada");
 		}
 
-		return NextResponse.json(request);
+		return NextResponse.json(request, { status: 200 });
 	} catch (error) {
 		console.error("Error getting user request by id:", error);
-
-		return NextResponse.json(
-			{ error: "Error interno del servidor" },
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error interno del servidor");
 	}
 }

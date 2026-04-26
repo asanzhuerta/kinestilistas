@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import type { RouteContext } from "@/lib/contracts/api";
 import {
-	deactivateUser,
-	DeactivateUserError,
-} from "@/lib/typeorm/services/users/user";
+	getSessionUser,
+	unauthorizedError,
+} from "@/lib/api/server";
+import { deactivateUser } from "@/lib/typeorm/services/users/user";
 
-type Props = {
-	params: Promise<{ id: string }>;
-};
+export async function POST(request: Request, { params }: RouteContext) {
+	const user = await getSessionUser();
 
-export async function POST(request: Request, { params }: Props) {
-	const session = await auth();
-
-	if (!session || session.user.role !== "admin") {
-		return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+	if (!user || user.role !== "admin") {
+		return unauthorizedError();
 	}
 
 	const { id } = await params;
@@ -21,23 +18,28 @@ export async function POST(request: Request, { params }: Props) {
 	try {
 		await deactivateUser({
 			userId: id,
-			performedByUserId: session.user.id,
-			performedByEmail: session.user.email,
+			performedByUserId: user.id,
+			performedByEmail: user.email ?? null,
 		});
 
 		return NextResponse.redirect(new URL("/admin/users/usuarios", request.url));
 	} catch (error) {
-		if (error instanceof DeactivateUserError) {
-			if (error.code === "USER_NOT_FOUND") {
+		console.error("Error desactivando usuario:", error);
+
+		if (
+			error instanceof Error &&
+			(error.name === "DeactivateUserError" || "code" in error)
+		) {
+			const code = "code" in error ? error.code : null;
+
+			if (code === "USER_NOT_FOUND") {
 				return NextResponse.json({ error: error.message }, { status: 404 });
 			}
 
-			if (error.code === "SELF_DEACTIVATION_NOT_ALLOWED") {
+			if (code === "SELF_DEACTIVATION_NOT_ALLOWED") {
 				return NextResponse.json({ error: error.message }, { status: 400 });
 			}
 		}
-
-		console.error("Error desactivando usuario:", error);
 
 		return NextResponse.json(
 			{ error: "Error al desactivar el usuario" },

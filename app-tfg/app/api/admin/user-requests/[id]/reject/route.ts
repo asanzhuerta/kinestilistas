@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import type { RouteContext } from "@/lib/contracts/api";
+import {
+	badRequestError,
+	getSessionUser,
+	jsonFromError,
+	unauthorizedError,
+} from "@/lib/api/server";
 import { rejectUserRequest } from "@/lib/typeorm/services/users/request";
-
-type Props = {
-	params: Promise<{ id: string }>;
-};
 
 async function getReasonFromRequest(request: Request) {
 	const contentType = request.headers.get("content-type") ?? "";
@@ -25,37 +27,25 @@ async function getReasonFromRequest(request: Request) {
 	return "";
 }
 
-export async function POST(request: Request, { params }: Props) {
+export async function POST(request: Request, { params }: RouteContext) {
+	const user = await getSessionUser();
+
+	if (!user || user.role !== "admin") {
+		return unauthorizedError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session || session.user.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-		}
-
 		const { id } = await params;
 		const reason = await getReasonFromRequest(request);
 
 		if (!reason) {
-			return NextResponse.json(
-				{ error: "Debes indicar un motivo de rechazo" },
-				{ status: 400 },
-			);
+			return badRequestError("Debes indicar un motivo de rechazo");
 		}
 
-		await rejectUserRequest(id, session.user.id, reason);
-
-		return NextResponse.json({ ok: true });
+		await rejectUserRequest(id, user.id, reason);
+		return NextResponse.json({ ok: true }, { status: 200 });
 	} catch (error) {
 		console.error("Error rejecting user request:", error);
-
-		if (error instanceof Error) {
-			return NextResponse.json({ error: error.message }, { status: 400 });
-		}
-
-		return NextResponse.json(
-			{ error: "Error al rechazar la solicitud" },
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error al rechazar la solicitud");
 	}
 }

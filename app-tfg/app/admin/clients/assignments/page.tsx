@@ -2,80 +2,29 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import {
+	fetchAdminCommercialOptions,
+	getAdminCommercialLabel,
+	type AdminCommercialOption,
+} from "@/app/admin/users/_shared/admin-commercial-options";
 import PageTransition from "@/app/components/animations/PageTransition";
-
-// --------------------------------------------------------------------------
-// Tipos de datos
-// --------------------------------------------------------------------------
-
-type ClientItem = {
-	id: string;
-	name: string;
-	contact_name?: string | null;
-	address?: string | null;
-	city?: string | null;
-	province?: string | null;
-	postal_code?: string | null;
-	notes?: string | null;
-	user?: {
-		id: string;
-		name?: string | null;
-		email?: string | null;
-	} | null;
-};
-
-type CommercialItem = {
-	id: string;
-	employee_code?: string | null;
-	territory?: string | null;
-	notes?: string | null;
-	user?: {
-		id: string;
-		name?: string | null;
-		email?: string | null;
-	} | null;
-};
-
-type AssignmentItem = {
-	id: string;
-	client_id: string;
-	commercial_id: string;
-	assigned_at: string;
-	unassigned_at?: string | null;
-	notes?: string | null;
-	client?: ClientItem | null;
-	commercial?: CommercialItem | null;
-};
-
-type ApiError = {
-	error?: string;
-	code?: string;
-};
-
-// --------------------------------------------------------------------------
-// Helpers
-// --------------------------------------------------------------------------
-
-async function readJsonOrThrow<T>(response: Response): Promise<T> {
-	const data = (await response.json().catch(() => null)) as T | ApiError | null;
-
-	if (!response.ok) {
-		const errorMessage =
-			data && typeof data === "object" && "error" in data && data.error
-				? data.error
-				: "Error inesperado";
-		throw new Error(errorMessage);
-	}
-
-	return data as T;
-}
+import { requestJson } from "@/lib/api/client";
+import type { CommercialClient } from "@/lib/contracts/commercial-client";
+import type {
+	ClientCommercialAssignment,
+	UpsertClientCommercialAssignmentBody,
+} from "@/lib/contracts/client-commercial-assignment";
 
 function formatDateTime(value?: string | null) {
-	if (!value) return "—";
+	if (!value) {
+		return "--";
+	}
 
 	const date = new Date(value);
 
-	if (Number.isNaN(date.getTime())) return value;
+	if (Number.isNaN(date.getTime())) {
+		return value;
+	}
 
 	return date.toLocaleString("es-ES", {
 		dateStyle: "medium",
@@ -83,43 +32,28 @@ function formatDateTime(value?: string | null) {
 	});
 }
 
-function getCommercialLabel(commercial: CommercialItem) {
-	const name = commercial.user?.name?.trim() || "Comercial sin nombre";
-	const email = commercial.user?.email?.trim();
-	const territory = commercial.territory?.trim();
-	const employeeCode = commercial.employee_code?.trim();
-
-	const parts = [name];
-
-	if (employeeCode) parts.push(`Cod: ${employeeCode}`);
-	if (territory) parts.push(`Zona: ${territory}`);
-	if (email) parts.push(email);
-
-	return parts.join(" · ");
-}
-
-function getClientLabel(client: ClientItem) {
+function getClientLabel(client: CommercialClient) {
 	const parts = [client.name];
 
-	if (client.city?.trim()) parts.push(client.city.trim());
-	if (client.province?.trim()) parts.push(client.province.trim());
+	if (client.city?.trim()) {
+		parts.push(client.city.trim());
+	}
+
+	if (client.province?.trim()) {
+		parts.push(client.province.trim());
+	}
 
 	return parts.join(" · ");
 }
-
-// --------------------------------------------------------------------------
-// Página
-// --------------------------------------------------------------------------
 
 export default function AdminClientCommercialAssignmentsPage() {
 	const searchParams = useSearchParams();
-
-	const [clients, setClients] = useState<ClientItem[]>([]);
-	const [commercials, setCommercials] = useState<CommercialItem[]>([]);
+	const [clients, setClients] = useState<CommercialClient[]>([]);
+	const [commercials, setCommercials] = useState<AdminCommercialOption[]>([]);
 	const [selectedClientId, setSelectedClientId] = useState("");
 	const [selectedCommercialId, setSelectedCommercialId] = useState("");
 	const [currentAssignment, setCurrentAssignment] =
-		useState<AssignmentItem | null>(null);
+		useState<ClientCommercialAssignment | null>(null);
 	const [clientSearch, setClientSearch] = useState("");
 	const [commercialSearch, setCommercialSearch] = useState("");
 	const [notes, setNotes] = useState("");
@@ -134,7 +68,9 @@ export default function AdminClientCommercialAssignmentsPage() {
 	const filteredClients = useMemo(() => {
 		const term = clientSearch.trim().toLowerCase();
 
-		if (!term) return clients;
+		if (!term) {
+			return clients;
+		}
 
 		return clients.filter((client) =>
 			[
@@ -153,7 +89,9 @@ export default function AdminClientCommercialAssignmentsPage() {
 	const filteredCommercials = useMemo(() => {
 		const term = commercialSearch.trim().toLowerCase();
 
-		if (!term) return commercials;
+		if (!term) {
+			return commercials;
+		}
 
 		return commercials.filter((commercial) =>
 			[
@@ -169,16 +107,14 @@ export default function AdminClientCommercialAssignmentsPage() {
 
 	const selectedClient =
 		clients.find((client) => client.id === selectedClientId) ?? null;
-
 	const selectedCommercial =
 		commercials.find((commercial) => commercial.id === selectedCommercialId) ??
 		null;
-
 	const currentCommercialId = currentAssignment?.commercial_id ?? "";
-	const hasCurrentAssignment = !!currentAssignment;
+	const hasCurrentAssignment = Boolean(currentAssignment);
 	const sameCommercialSelected = Boolean(
 		hasCurrentAssignment &&
-		selectedCommercialId !== "" &&
+		selectedCommercialId &&
 		selectedCommercialId === currentCommercialId,
 	);
 
@@ -190,17 +126,17 @@ export default function AdminClientCommercialAssignmentsPage() {
 				setLoadingBaseData(true);
 				setError("");
 
-				const [clientsResponse, commercialsResponse] = await Promise.all([
-					fetch("/api/admin/clients", { cache: "no-store" }),
-					fetch("/api/admin/commercials", { cache: "no-store" }),
-				]);
-
 				const [clientsData, commercialsData] = await Promise.all([
-					readJsonOrThrow<ClientItem[]>(clientsResponse),
-					readJsonOrThrow<CommercialItem[]>(commercialsResponse),
+					requestJson<CommercialClient[]>("/api/admin/clients", {
+						cache: "no-store",
+						fallbackMessage: "No se pudieron cargar los clientes",
+					}),
+					fetchAdminCommercialOptions(),
 				]);
 
-				if (ignore) return;
+				if (ignore) {
+					return;
+				}
 
 				const safeClients = Array.isArray(clientsData) ? clientsData : [];
 				const safeCommercials = Array.isArray(commercialsData)
@@ -209,19 +145,29 @@ export default function AdminClientCommercialAssignmentsPage() {
 
 				setClients(safeClients);
 				setCommercials(safeCommercials);
+				setSelectedClientId((currentClientId) => {
+					if (currentClientId) {
+						return currentClientId;
+					}
 
-				if (!selectedClientId && safeClients.length > 0) {
+					if (safeClients.length === 0) {
+						return "";
+					}
+
 					const requestedClientExists = safeClients.some(
 						(client) => client.id === initialClientId,
 					);
 
-					setSelectedClientId(
-						requestedClientExists ? initialClientId : safeClients[0].id,
+					return requestedClientExists ? initialClientId : safeClients[0].id;
+				});
+			} catch (loadError) {
+				if (!ignore) {
+					setError(
+						loadError instanceof Error
+							? loadError.message
+							: "Error al cargar datos",
 					);
 				}
-			} catch (err) {
-				if (ignore) return;
-				setError(err instanceof Error ? err.message : "Error al cargar datos");
 			} finally {
 				if (!ignore) {
 					setLoadingBaseData(false);
@@ -234,7 +180,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 		return () => {
 			ignore = true;
 		};
-	}, [selectedClientId, initialClientId]);
+	}, [initialClientId]);
 
 	useEffect(() => {
 		let ignore = false;
@@ -252,24 +198,30 @@ export default function AdminClientCommercialAssignmentsPage() {
 				setError("");
 				setSuccess("");
 
-				const response = await fetch(
+				const assignment = await requestJson<ClientCommercialAssignment | null>(
 					`/api/admin/client-commercial-assignments?clientId=${selectedClientId}`,
-					{ cache: "no-store" },
+					{
+						cache: "no-store",
+						fallbackMessage: "Error al cargar la asignacion actual",
+					},
 				);
 
-				const data = await readJsonOrThrow<AssignmentItem | null>(response);
+				if (ignore) {
+					return;
+				}
 
-				if (ignore) return;
+				setCurrentAssignment(assignment ?? null);
+				setSelectedCommercialId(assignment?.commercial_id ?? "");
+				setNotes(assignment?.notes ?? "");
+			} catch (loadError) {
+				if (ignore) {
+					return;
+				}
 
-				setCurrentAssignment(data ?? null);
-				setSelectedCommercialId(data?.commercial_id ?? "");
-				setNotes(data?.notes ?? "");
-			} catch (err) {
-				if (ignore) return;
 				setError(
-					err instanceof Error
-						? err.message
-						: "Error al cargar la asignación actual",
+					loadError instanceof Error
+						? loadError.message
+						: "Error al cargar la asignacion actual",
 				);
 				setCurrentAssignment(null);
 				setSelectedCommercialId("");
@@ -299,7 +251,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 		}
 
 		if (sameCommercialSelected) {
-			setError("Ese comercial ya está asignado actualmente a este cliente");
+			setError("Ese comercial ya esta asignado actualmente a este cliente");
 			return;
 		}
 
@@ -309,33 +261,36 @@ export default function AdminClientCommercialAssignmentsPage() {
 			setSuccess("");
 
 			const mode = hasCurrentAssignment ? "reassign" : "assign";
-
-			const response = await fetch("/api/admin/client-commercial-assignments", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
+			const assignment = await requestJson<ClientCommercialAssignment>(
+				"/api/admin/client-commercial-assignments",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						mode,
+						clientId: selectedClientId,
+						commercialId: selectedCommercialId,
+						notes: notes.trim() || null,
+					} satisfies UpsertClientCommercialAssignmentBody),
+					fallbackMessage: "No se pudo guardar la asignacion",
 				},
-				body: JSON.stringify({
-					mode,
-					clientId: selectedClientId,
-					commercialId: selectedCommercialId,
-					notes: notes.trim() || null,
-				}),
-			});
+			);
 
-			const data = await readJsonOrThrow<AssignmentItem>(response);
-
-			setCurrentAssignment(data);
-			setSelectedCommercialId(data.commercial_id);
-			setNotes(data.notes ?? "");
+			setCurrentAssignment(assignment);
+			setSelectedCommercialId(assignment.commercial_id);
+			setNotes(assignment.notes ?? "");
 			setSuccess(
 				mode === "assign"
 					? "Comercial asignado correctamente"
 					: "Comercial reasignado correctamente",
 			);
-		} catch (err) {
+		} catch (submitError) {
 			setError(
-				err instanceof Error ? err.message : "No se pudo guardar la asignación",
+				submitError instanceof Error
+					? submitError.message
+					: "No se pudo guardar la asignacion",
 			);
 		} finally {
 			setSubmitting(false);
@@ -349,7 +304,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 		}
 
 		if (!currentAssignment) {
-			setError("El cliente no tiene una asignación activa");
+			setError("El cliente no tiene una asignacion activa");
 			return;
 		}
 
@@ -358,8 +313,9 @@ export default function AdminClientCommercialAssignmentsPage() {
 			setError("");
 			setSuccess("");
 
-			await readJsonOrThrow<AssignmentItem>(
-				await fetch("/api/admin/client-commercial-assignments", {
+			await requestJson<ClientCommercialAssignment>(
+				"/api/admin/client-commercial-assignments",
+				{
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -368,18 +324,19 @@ export default function AdminClientCommercialAssignmentsPage() {
 						mode: "unassign",
 						clientId: selectedClientId,
 						notes: notes.trim() || null,
-					}),
-				}),
+					} satisfies UpsertClientCommercialAssignmentBody),
+					fallbackMessage: "No se pudo eliminar la asignacion",
+				},
 			);
 
 			setCurrentAssignment(null);
 			setSelectedCommercialId("");
-			setSuccess("Asignación eliminada correctamente");
-		} catch (err) {
+			setSuccess("Asignacion eliminada correctamente");
+		} catch (submitError) {
 			setError(
-				err instanceof Error
-					? err.message
-					: "No se pudo eliminar la asignación",
+				submitError instanceof Error
+					? submitError.message
+					: "No se pudo eliminar la asignacion",
 			);
 		} finally {
 			setSubmitting(false);
@@ -453,7 +410,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 								</div>
 							) : filteredClients.length === 0 ? (
 								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-									No hay clientes que coincidan con la búsqueda.
+									No hay clientes que coincidan con la busqueda.
 								</div>
 							) : (
 								filteredClients.map((client) => {
@@ -515,7 +472,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 									Comercial asignado
 								</h2>
 								<p className="mt-1 text-sm text-slate-600">
-									Esta asignación define la cartera del comercial y la base para
+									Esta asignacion define la cartera del comercial y la base para
 									sus visitas y futuras rutas.
 								</p>
 							</div>
@@ -529,7 +486,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 										{selectedClient.name}
 									</div>
 									<div className="mt-2 text-sm text-slate-600">
-										{selectedClient.address || "Dirección sin definir"}
+										{selectedClient.address || "Direccion sin definir"}
 										{selectedClient.city ? ` · ${selectedClient.city}` : ""}
 										{selectedClient.province
 											? ` · ${selectedClient.province}`
@@ -555,7 +512,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 
 								{loadingAssignment ? (
 									<div className="mt-3 text-sm text-slate-600">
-										Cargando asignación actual...
+										Cargando asignacion actual...
 									</div>
 								) : currentAssignment ? (
 									<div className="mt-3 space-y-2">
@@ -609,7 +566,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 									<option value="">Selecciona un comercial</option>
 									{filteredCommercials.map((commercial) => (
 										<option key={commercial.id} value={commercial.id}>
-											{getCommercialLabel(commercial)}
+											{getAdminCommercialLabel(commercial)}
 										</option>
 									))}
 								</select>
@@ -636,7 +593,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 										</div>
 										<div className="mt-1">
 											<strong className="font-medium text-slate-900">
-												Código:
+												Codigo:
 											</strong>{" "}
 											{selectedCommercial.employee_code || "No definido"}
 										</div>
@@ -646,7 +603,7 @@ export default function AdminClientCommercialAssignmentsPage() {
 
 							<div>
 								<label className="mb-2 block text-sm font-medium text-slate-900">
-									Notas de la asignación
+									Notas de la asignacion
 								</label>
 								<textarea
 									value={notes}
@@ -682,13 +639,13 @@ export default function AdminClientCommercialAssignmentsPage() {
 									disabled={submitting || !currentAssignment}
 									className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
 								>
-									Quitar asignación actual
+									Quitar asignacion actual
 								</button>
 							</div>
 
 							<p className="text-xs text-slate-500">
-								Esta relación define la cartera activa del comercial y
-								condiciona la gestión de clientes, visitas y futuras rutas.
+								Esta relacion define la cartera activa del comercial y
+								condiciona la gestion de clientes, visitas y futuras rutas.
 							</p>
 						</div>
 					</section>

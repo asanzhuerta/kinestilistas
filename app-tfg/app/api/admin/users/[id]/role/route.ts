@@ -1,44 +1,53 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { updateUserStatus } from "@/lib/typeorm/services/users/status";
+import { NextResponse } from "next/server";
+import type { RouteContext } from "@/lib/contracts/api";
+import {
+	badRequestError,
+	forbiddenError,
+	getSessionUser,
+	jsonFromError,
+	readJsonBody,
+	unauthorizedError,
+} from "@/lib/api/server";
+import { updateUserRole } from "@/lib/typeorm/services/users/role";
 
-type Context = {
-	params: Promise<{ id: string }>;
+type UpdateUserRoleBody = {
+	roleId?: number | string;
+	newRoleId?: number | string;
+	reason?: string | null;
+	notes?: string | null;
 };
 
-export async function PATCH(request: NextRequest, context: Context) {
+export async function PATCH(request: Request, context: RouteContext) {
+	const user = await getSessionUser();
+
+	if (!user) {
+		return unauthorizedError("No autenticado");
+	}
+
+	if (user.role !== "admin") {
+		return forbiddenError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session) {
-			return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-		}
-
-		if (session.user?.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-		}
-
 		const { id } = await context.params;
-		const body = await request.json();
+		const body = await readJsonBody<UpdateUserRoleBody>(request);
+		const nextRoleId = Number(body.roleId ?? body.newRoleId);
 
-		const updatedUser = await updateUserStatus({
+		if (!Number.isInteger(nextRoleId) || nextRoleId <= 0) {
+			return badRequestError("El nuevo rol es obligatorio");
+		}
+
+		const updatedUser = await updateUserRole({
 			userId: id,
-			newStatusId: Number(body.statusId),
-			performedByUserId: session.user.id,
+			newRoleId: nextRoleId,
+			performedByUserId: user.id,
 			reason: body.reason ?? null,
 			notes: body.notes ?? null,
 		});
 
-		return NextResponse.json(updatedUser);
+		return NextResponse.json(updatedUser, { status: 200 });
 	} catch (error) {
-		console.error("Error updating user status:", error);
-
-		return NextResponse.json(
-			{
-				error:
-					error instanceof Error ? error.message : "Error interno del servidor",
-			},
-			{ status: 500 },
-		);
+		console.error("Error updating user role:", error);
+		return jsonFromError(error, "Error interno del servidor");
 	}
 }

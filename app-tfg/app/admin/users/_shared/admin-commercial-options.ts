@@ -1,25 +1,14 @@
-export type AdminCommercialOption = {
-	id: string;
-	employee_code?: string | null;
-	territory?: string | null;
-	user?: {
-		id: string;
-		name?: string | null;
-		email?: string | null;
-	} | null;
-};
+import { requestJson } from "@/lib/api/client";
+import type { CommercialSummary } from "@/lib/contracts/commercial-client";
+
+export type AdminCommercialOption = CommercialSummary;
 
 export async function fetchAdminCommercialOptions() {
-	const response = await fetch("/api/admin/commercials", {
+	const data = await requestJson<AdminCommercialOption[]>("/api/admin/commercials", {
 		method: "GET",
 		cache: "no-store",
+		fallbackMessage: "No se pudieron cargar los comerciales",
 	});
-
-	const data = await response.json();
-
-	if (!response.ok) {
-		throw new Error(data.error || "No se pudieron cargar los comerciales");
-	}
 
 	return Array.isArray(data) ? (data as AdminCommercialOption[]) : [];
 }

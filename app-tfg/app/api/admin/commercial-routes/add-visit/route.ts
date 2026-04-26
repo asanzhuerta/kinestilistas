@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import {
+	badRequestError,
+	jsonFromError,
+	readJsonBody,
+	requireRoleUser,
+	unauthorizedError,
+} from "@/lib/api/server";
 import { addVisitToRoute } from "@/lib/typeorm/services/commercial/commercial-route";
 
 type AddVisitToRouteBody = {
@@ -8,36 +14,35 @@ type AddVisitToRouteBody = {
 	order?: number;
 };
 
-// POST /api/admin/commercial-routes/add-visit
 export async function POST(request: Request) {
-	try {
-		const session = await auth();
+	const user = await requireRoleUser("admin");
 
-		if (!session || session.user.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+	if (!user) {
+		return unauthorizedError();
+	}
+
+	try {
+		const body = await readJsonBody<AddVisitToRouteBody>(request);
+
+		if (!body.routeId || !body.visitId || body.order === undefined) {
+			return badRequestError("routeId, visitId y order son obligatorios");
 		}
 
-		const body = (await request.json()) as AddVisitToRouteBody;
-
 		const createdRouteVisit = await addVisitToRoute({
-			routeId: String(body.routeId ?? ""),
-			visitId: String(body.visitId ?? ""),
-			order: Number(body.order ?? 0),
+			routeId: String(body.routeId),
+			visitId: String(body.visitId),
+			order: Number(body.order),
 		});
 
 		return NextResponse.json(
 			{
-				message: "Visita añadida a la ruta correctamente",
+				message: "Visita anadida a la ruta correctamente",
 				routeVisitId: createdRouteVisit.id,
 			},
 			{ status: 201 },
 		);
 	} catch (error) {
 		console.error("[admin/commercial-routes/add-visit][POST] error:", error);
-
-		return NextResponse.json(
-			{ error: "Error al añadir la visita a la ruta" },
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error al anadir la visita a la ruta");
 	}
 }

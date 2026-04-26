@@ -1,49 +1,43 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import type { RouteContext } from "@/lib/contracts/api";
+import {
+	forbiddenError,
+	getSessionUser,
+	jsonFromError,
+	readJsonBody,
+	unauthorizedError,
+} from "@/lib/api/server";
 import { approveUserRequest } from "@/lib/typeorm/services/users/request";
-
-type Context = {
-	params: Promise<{ id: string }>;
-};
 
 type ApproveUserRequestBody = {
 	commercialId?: string | null;
 };
 
-// Aprueba una solicitud concreta y crea el usuario asociado.
-export async function POST(request: Request, context: Context) {
+export async function POST(request: Request, context: RouteContext) {
+	const user = await getSessionUser();
+
+	if (!user) {
+		return unauthorizedError("No autenticado");
+	}
+
+	if (user.role !== "admin") {
+		return forbiddenError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session) {
-			return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-		}
-
-		if (session.user?.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-		}
-
 		const { id } = await context.params;
-		const body = (await request
-			.json()
-			.catch(() => ({}))) as ApproveUserRequestBody;
-
+		const body = (await readJsonBody<ApproveUserRequestBody>(request).catch(
+			() => null,
+		)) as ApproveUserRequestBody | null;
 		const result = await approveUserRequest(
 			id,
-			session.user.id,
-			body.commercialId ?? null,
+			user.id,
+			body?.commercialId ?? null,
 		);
 
-		return NextResponse.json(result);
+		return NextResponse.json(result, { status: 200 });
 	} catch (error) {
 		console.error("Error approving user request:", error);
-
-		return NextResponse.json(
-			{
-				error:
-					error instanceof Error ? error.message : "Error interno del servidor",
-			},
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error interno del servidor");
 	}
 }

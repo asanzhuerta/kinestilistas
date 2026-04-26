@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import {
+	jsonFromError,
+	readJsonBody,
+	requireRoleUser,
+	unauthorizedError,
+} from "@/lib/api/server";
 import {
 	createClient,
-	CreateClientError,
 	listClients,
 } from "@/lib/typeorm/services/commercial/client";
-
-// --------------------------------------------------------------------------
-// Tipos
-// --------------------------------------------------------------------------
 
 type CreateClientBody = {
 	name?: string;
@@ -22,44 +22,31 @@ type CreateClientBody = {
 	notes?: string | null;
 };
 
-// --------------------------------------------------------------------------
-// GET /api/admin/clients
-// --------------------------------------------------------------------------
-
 export async function GET() {
+	const user = await requireRoleUser("admin");
+
+	if (!user) {
+		return unauthorizedError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session || session.user.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-		}
-
 		const clients = await listClients();
-
 		return NextResponse.json(clients, { status: 200 });
 	} catch (error) {
 		console.error("[admin/clients][GET] error:", error);
-
-		return NextResponse.json(
-			{ error: "Error al listar los clientes" },
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error al listar los clientes");
 	}
 }
 
-// --------------------------------------------------------------------------
-// POST /api/admin/clients
-// --------------------------------------------------------------------------
-
 export async function POST(request: Request) {
+	const user = await requireRoleUser("admin");
+
+	if (!user) {
+		return unauthorizedError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session || session.user.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-		}
-
-		const body = (await request.json()) as CreateClientBody;
+		const body = await readJsonBody<CreateClientBody>(request);
 
 		const createdClient = await createClient({
 			name: String(body.name ?? ""),
@@ -82,14 +69,6 @@ export async function POST(request: Request) {
 		);
 	} catch (error) {
 		console.error("[admin/clients][POST] error:", error);
-
-		if (error instanceof CreateClientError) {
-			return NextResponse.json({ error: error.message }, { status: 400 });
-		}
-
-		return NextResponse.json(
-			{ error: "Error al crear el cliente" },
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error al crear el cliente");
 	}
 }

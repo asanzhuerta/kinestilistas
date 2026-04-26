@@ -1,36 +1,31 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import {
+	badRequestError,
+	getRequestSearchParams,
+	jsonFromError,
+	readJsonBody,
+	requireRoleUser,
+	unauthorizedError,
+} from "@/lib/api/server";
+import type { CreateCommercialVisitBody } from "@/lib/contracts/commercial-visit";
 import {
 	createCommercialVisit,
-	CreateCommercialVisitError,
 	listCommercialVisitsByClient,
 } from "@/lib/typeorm/services/commercial/commercial-visit";
 
-type CreateCommercialVisitBody = {
-	clientId?: string;
-	commercialId?: string;
-	scheduledForDate?: string;
-	visitTypeId?: number;
-	notes?: string | null;
-};
-
-// GET /api/admin/commercial-visits?clientId=...
 export async function GET(request: Request) {
+	const user = await requireRoleUser("admin");
+
+	if (!user) {
+		return unauthorizedError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session || session.user.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-		}
-
-		const { searchParams } = new URL(request.url);
+		const searchParams = getRequestSearchParams(request);
 		const clientId = String(searchParams.get("clientId") ?? "");
 
 		if (!clientId) {
-			return NextResponse.json(
-				{ error: "El parámetro clientId es obligatorio" },
-				{ status: 400 },
-			);
+			return badRequestError("El parámetro clientId es obligatorio");
 		}
 
 		const visits = await listCommercialVisitsByClient(clientId);
@@ -38,24 +33,19 @@ export async function GET(request: Request) {
 		return NextResponse.json(visits, { status: 200 });
 	} catch (error) {
 		console.error("[admin/commercial-visits][GET] error:", error);
-
-		return NextResponse.json(
-			{ error: "Error al listar las visitas comerciales" },
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error al listar las visitas comerciales");
 	}
 }
 
-// POST /api/admin/commercial-visits
 export async function POST(request: Request) {
+	const user = await requireRoleUser("admin");
+
+	if (!user) {
+		return unauthorizedError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session || session.user.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-		}
-
-		const body = (await request.json()) as CreateCommercialVisitBody;
+		const body = await readJsonBody<CreateCommercialVisitBody>(request);
 
 		const createdVisit = await createCommercialVisit({
 			clientId: String(body.clientId ?? ""),
@@ -74,17 +64,6 @@ export async function POST(request: Request) {
 		);
 	} catch (error) {
 		console.error("[admin/commercial-visits][POST] error:", error);
-
-		if (error instanceof CreateCommercialVisitError) {
-			return NextResponse.json(
-				{ error: error.message, code: error.code },
-				{ status: error.status },
-			);
-		}
-
-		return NextResponse.json(
-			{ error: "Error al crear la visita comercial" },
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error al crear la visita comercial");
 	}
 }

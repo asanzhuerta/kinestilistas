@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import {
-	registerUserByAdmin,
-	RegisterUserByAdminError,
-} from "@/lib/typeorm/services/users/user";
+	badRequestError,
+	jsonFromError,
+	readJsonBody,
+	requireRoleUser,
+	unauthorizedError,
+} from "@/lib/api/server";
+import type { RegisterAdminUserBody } from "@/lib/contracts/admin-user";
 import { ROLE_IDS } from "@/lib/typeorm/constants/catalog-ids";
-
-type RegisterUserBody = {
-	name?: string;
-	email?: string;
-	password?: string;
-	company?: string | null;
-	phone?: string | null;
-	type?: string;
-	commercialId?: string | null;
-};
+import { registerUserByAdmin } from "@/lib/typeorm/services/users/user";
 
 function resolveRoleIdFromType(type: string | undefined) {
 	if (type === "comercial") {
@@ -29,21 +23,19 @@ function resolveRoleIdFromType(type: string | undefined) {
 }
 
 export async function POST(request: Request) {
+	const user = await requireRoleUser("admin");
+
+	if (!user) {
+		return unauthorizedError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session || session.user.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-		}
-
-		const body = (await request.json()) as RegisterUserBody;
-
+		const body = await readJsonBody<RegisterAdminUserBody>(request);
 		const roleId = resolveRoleIdFromType(body.type);
 
 		if (roleId === ROLE_IDS.CLIENT && !String(body.commercialId ?? "").trim()) {
-			return NextResponse.json(
-				{ error: "Debes indicar el comercial asignado para crear un cliente" },
-				{ status: 400 },
+			return badRequestError(
+				"Debes indicar el comercial asignado para crear un cliente",
 			);
 		}
 
@@ -55,13 +47,13 @@ export async function POST(request: Request) {
 			phone: body.phone ?? null,
 			roleId,
 			commercialId: body.commercialId ?? null,
-			performedByUserId: session.user.id,
+			performedByUserId: user.id,
 		});
 
 		if (!createdUser) {
-			return NextResponse.json(
-				{ error: "No se pudo recuperar el usuario creado" },
-				{ status: 500 },
+			return jsonFromError(
+				{ message: "No se pudo recuperar el usuario creado", status: 500 },
+				"Error al crear el usuario",
 			);
 		}
 
@@ -74,17 +66,6 @@ export async function POST(request: Request) {
 		);
 	} catch (error) {
 		console.error("[admin/register-user] error:", error);
-
-		if (error instanceof RegisterUserByAdminError) {
-			return NextResponse.json(
-				{ error: error.message, code: error.code },
-				{ status: error.status },
-			);
-		}
-
-		return NextResponse.json(
-			{ error: "Error al crear el usuario" },
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error al crear el usuario");
 	}
 }

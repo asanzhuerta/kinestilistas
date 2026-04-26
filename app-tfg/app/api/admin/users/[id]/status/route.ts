@@ -1,44 +1,46 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { NextResponse } from "next/server";
+import type { RouteContext } from "@/lib/contracts/api";
+import {
+	forbiddenError,
+	getSessionUser,
+	jsonFromError,
+	readJsonBody,
+	unauthorizedError,
+} from "@/lib/api/server";
 import { updateUserStatus } from "@/lib/typeorm/services/users/status";
 
-type Context = {
-	params: Promise<{ id: string }>;
+type UpdateUserStatusBody = {
+	statusId?: number | string;
+	reason?: string | null;
+	notes?: string | null;
 };
 
-export async function PATCH(request: NextRequest, context: Context) {
+export async function PATCH(request: Request, context: RouteContext) {
+	const user = await getSessionUser();
+
+	if (!user) {
+		return unauthorizedError("No autenticado");
+	}
+
+	if (user.role !== "admin") {
+		return forbiddenError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session) {
-			return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-		}
-
-		if (session.user?.role !== "admin") {
-			return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-		}
-
 		const { id } = await context.params;
-		const body = await request.json();
+		const body = await readJsonBody<UpdateUserStatusBody>(request);
 
 		const updatedUser = await updateUserStatus({
 			userId: id,
 			newStatusId: Number(body.statusId),
-			performedByUserId: session.user.id,
+			performedByUserId: user.id,
 			reason: body.reason ?? null,
 			notes: body.notes ?? null,
 		});
 
-		return NextResponse.json(updatedUser);
+		return NextResponse.json(updatedUser, { status: 200 });
 	} catch (error) {
 		console.error("Error updating user status:", error);
-
-		return NextResponse.json(
-			{
-				error:
-					error instanceof Error ? error.message : "Error interno del servidor",
-			},
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error interno del servidor");
 	}
 }

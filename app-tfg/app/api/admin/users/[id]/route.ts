@@ -1,68 +1,64 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import type { RouteContext } from "@/lib/contracts/api";
+import type { UpdateAdminUserBody } from "@/lib/contracts/user-profile";
+import {
+	forbiddenError,
+	getSessionUser,
+	jsonFromError,
+	notFoundError,
+	readJsonBody,
+	unauthorizedError,
+} from "@/lib/api/server";
 import { getDataSource } from "@/lib/typeorm/data-source";
 import { User } from "@/lib/typeorm/entities/User";
-import { updateUser, UpdateUserError } from "@/lib/typeorm/services/users/user";
-
-type RouteContext = {
-	params: Promise<{ id: string }>;
-};
-
-type UpdateUserClientProfileBody = {
-	name?: string;
-	contact_name?: string | null;
-	tax_id?: string | null;
-	address?: string;
-	city?: string;
-	postal_code?: string | null;
-	province?: string | null;
-	lat?: number | string | null;
-	lng?: number | string | null;
-	visit_window_start_time?: string | null;
-	visit_window_end_time?: string | null;
-	notes?: string | null;
-};
-
-type UpdateUserRequestBody = {
-	name?: string;
-	email?: string;
-	company?: string | null;
-	phone?: string | null;
-	profile_image_url?: string | null;
-	roleId?: number;
-	statusId?: number;
-	password?: string;
-	confirmPassword?: string;
-	clientProfile?: UpdateUserClientProfileBody | null;
-};
+import { updateUser } from "@/lib/typeorm/services/users/user";
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+	const sessionUser = await getSessionUser();
+
+	if (!sessionUser) {
+		return unauthorizedError("No autenticado");
+	}
+
+	if (sessionUser.role !== "admin") {
+		return forbiddenError();
+	}
+
 	try {
-		const session = await auth();
-
-		if (!session) {
-			return NextResponse.json({ message: "No autenticado" }, { status: 401 });
-		}
-
-		if (session.user?.role !== "admin") {
-			return NextResponse.json({ message: "No autorizado" }, { status: 403 });
-		}
-
-		if (!session.user?.id) {
-			return NextResponse.json({ message: "Sesión inválida" }, { status: 401 });
-		}
-
 		const { id } = await params;
-		const body = (await request.json()) as UpdateUserRequestBody;
+		const body = await readJsonBody<UpdateAdminUserBody>(request);
+		const clientProfile = body.clientProfile
+			? {
+					name:
+						body.clientProfile.name === null
+							? undefined
+							: body.clientProfile.name,
+					contact_name: body.clientProfile.contact_name,
+					tax_id: body.clientProfile.tax_id,
+					address:
+						body.clientProfile.address === null
+							? undefined
+							: body.clientProfile.address,
+					city:
+						body.clientProfile.city === null
+							? undefined
+							: body.clientProfile.city,
+					postal_code: body.clientProfile.postal_code,
+					province: body.clientProfile.province,
+					lat: body.clientProfile.lat,
+					lng: body.clientProfile.lng,
+					visit_window_start_time:
+						body.clientProfile.visit_window_start_time,
+					visit_window_end_time: body.clientProfile.visit_window_end_time,
+					notes: body.clientProfile.notes,
+				}
+			: null;
 
-		// Impide que un administrador se cambie su propio rol desde este endpoint.
-		// Si el usuario objetivo es el mismo que el de la sesión, se conserva el rol actual.
 		let safeRoleId = Number(body.roleId);
 
-		if (id === session.user.id) {
+		if (id === sessionUser.id) {
 			const ds = await getDataSource();
 			const userRepo = ds.getRepository(User);
-
 			const currentUser = await userRepo.findOne({
 				where: { id },
 				select: {
@@ -72,13 +68,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 			});
 
 			if (!currentUser) {
-				return NextResponse.json(
-					{
-						message: "Usuario no encontrado",
-						code: "USER_NOT_FOUND",
-					},
-					{ status: 404 },
-				);
+				return notFoundError("Usuario no encontrado", "USER_NOT_FOUND");
 			}
 
 			safeRoleId = currentUser.role_id;
@@ -86,7 +76,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
 		const result = await updateUser({
 			userId: id,
-			performedByUserId: session.user.id,
+			performedByUserId: sessionUser.id,
 			name: body.name ?? "",
 			email: body.email ?? "",
 			company: body.company ?? null,
@@ -96,29 +86,12 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 			statusId: Number(body.statusId),
 			password: body.password ?? "",
 			confirmPassword: body.confirmPassword ?? "",
-			clientProfile: body.clientProfile ?? null,
+			clientProfile,
 		});
 
 		return NextResponse.json(result, { status: 200 });
 	} catch (error) {
-		if (error instanceof UpdateUserError) {
-			return NextResponse.json(
-				{
-					message: error.message,
-					code: error.code,
-				},
-				{ status: error.status },
-			);
-		}
-
 		console.error("Error al actualizar usuario:", error);
-
-		return NextResponse.json(
-			{
-				message: "Error interno del servidor",
-				code: "INTERNAL_SERVER_ERROR",
-			},
-			{ status: 500 },
-		);
+		return jsonFromError(error, "Error interno del servidor");
 	}
 }

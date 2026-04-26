@@ -1,10 +1,9 @@
 import { getDataSource } from "@/lib/typeorm/data-source";
+import { Role } from "@/lib/typeorm/entities/Role";
 import { User } from "@/lib/typeorm/entities/User";
 import { UserManagementLog } from "@/lib/typeorm/entities/UserManagementLog";
 import { USER_ADMIN_ACTION_TYPE_IDS } from "@/lib/typeorm/constants/catalog-ids";
-import { Role } from "@/lib/typeorm/entities/Role";
 
-// Servicio para listar los roles de usuario disponibles en el sistema, ordenados por ID ascendente.
 export async function listRoles() {
 	const ds = await getDataSource();
 	const repo = ds.getRepository(Role);
@@ -16,53 +15,81 @@ export async function listRoles() {
 	});
 }
 
-// Servicio para actualizar el estado de un usuario, con registro de la acción en el log de administración de usuarios.
-type UpdateUserStatusInput = {
+type UpdateUserRoleInput = {
 	userId: string;
-	newStatusId: number;
+	newRoleId: number;
 	performedByUserId: string;
 	reason?: string | null;
 	notes?: string | null;
 };
 
-export async function updateUserStatus(input: UpdateUserStatusInput) {
+export class UpdateUserRoleError extends Error {
+	status: number;
+	code: string;
+
+	constructor(message: string, status = 400, code = "UPDATE_USER_ROLE_ERROR") {
+		super(message);
+		this.name = "UpdateUserRoleError";
+		this.status = status;
+		this.code = code;
+	}
+}
+
+export async function updateUserRole(input: UpdateUserRoleInput) {
 	const ds = await getDataSource();
 
 	return ds.transaction(async (manager) => {
 		const userRepo = manager.getRepository(User);
+		const roleRepo = manager.getRepository(Role);
 		const logRepo = manager.getRepository(UserManagementLog);
 
-		const user = await userRepo.findOne({
-			where: { id: input.userId },
-			relations: {
-				role: true,
-				status: true,
-			},
-		});
+		const [user, nextRole] = await Promise.all([
+			userRepo.findOne({
+				where: { id: input.userId },
+				relations: {
+					role: true,
+					status: true,
+				},
+			}),
+			roleRepo.findOne({
+				where: { id: input.newRoleId },
+			}),
+		]);
 
 		if (!user) {
-			throw new Error("Usuario no encontrado");
+			throw new UpdateUserRoleError(
+				"Usuario no encontrado",
+				404,
+				"USER_NOT_FOUND",
+			);
 		}
 
-		if (user.status_id === input.newStatusId) {
+		if (!nextRole) {
+			throw new UpdateUserRoleError(
+				"Rol no encontrado",
+				404,
+				"ROLE_NOT_FOUND",
+			);
+		}
+
+		if (user.role_id === input.newRoleId) {
 			return user;
 		}
 
-		const previousStatusId = user.status_id;
-
-		user.status_id = input.newStatusId;
+		const previousRoleId = user.role_id;
+		user.role_id = input.newRoleId;
 		await userRepo.save(user);
 
 		const log = logRepo.create({
 			target_user_id: user.id,
 			performed_by: input.performedByUserId,
-			action_type_id: USER_ADMIN_ACTION_TYPE_IDS.STATUS_CHANGE,
-			previous_status_id: previousStatusId,
-			new_status_id: input.newStatusId,
-			previous_role_id: null,
-			new_role_id: null,
+			action_type_id: USER_ADMIN_ACTION_TYPE_IDS.ROLE_CHANGE,
+			previous_status_id: null,
+			new_status_id: null,
+			previous_role_id: previousRoleId,
+			new_role_id: input.newRoleId,
 			reason: input.reason ?? null,
-			notes: input.notes ?? "Cambio de estado realizado por administrador",
+			notes: input.notes ?? "Cambio de rol realizado por administrador",
 		});
 
 		await logRepo.save(log);
