@@ -291,7 +291,7 @@ La \autoref{fig:mcd-m2} muestra el modelo conceptual correspondiente al módulo 
 
 \subsubsection{Clase Cliente}
 
-La clase \textit{Cliente} representa a cada establecimiento profesional atendido por el distribuidor. En ella se almacena la información necesaria para identificar al cliente como entidad comercial, registrar los datos propios del establecimiento, mantener su vinculación con el usuario de acceso correspondiente dentro del sistema y facilitar la consulta de la información de contacto y localización necesaria para la planificación de visitas y rutas comerciales.
+La clase \textit{Cliente} representa a cada establecimiento profesional atendido por el distribuidor. En ella se almacena la información necesaria para identificar al cliente como entidad comercial, registrar los datos propios del establecimiento, mantener su vinculación con el usuario de acceso correspondiente dentro del sistema y facilitar la consulta de la información de contacto, localización y disponibilidad horaria necesaria para la planificación de visitas y rutas comerciales.
 
 \textbf{Atributos}
 
@@ -313,10 +313,16 @@ La clase \textit{Cliente} representa a cada establecimiento profesional atendido
             Código postal del establecimiento.
       \item \textit{province}
             Provincia o zona geográfica del cliente.
-      \item \textit{assigned\_commercial}
-            Usuario comercial responsable del cliente.
       \item \textit{linked\_user}
             Usuario asociado al cliente dentro del sistema.
+      \item \textit{lat}
+            Coordenada de latitud del establecimiento.
+      \item \textit{lng}
+            Coordenada de longitud del establecimiento.
+      \item \textit{visit\_window\_start\_time}
+            Hora de inicio de la franja admitida para visitas comerciales.
+      \item \textit{visit\_window\_end\_time}
+            Hora de fin de la franja admitida para visitas comerciales.
       \item \textit{notes}
             Observaciones o notas comerciales asociadas al cliente.
       \item \textit{created\_at}
@@ -332,22 +338,130 @@ La clase \textit{Cliente} representa a cada establecimiento profesional atendido
 
       \item \textbf{RT-C1 — Identificación obligatoria del cliente}
             Todo cliente debe disponer de información suficiente para su identificación dentro del sistema.
-      \item \textbf{RT-C2 — Comercial responsable válido}
-            Todo cliente debe estar asociado a un usuario válido del sistema que actúe como comercial responsable.
-      \item \textbf{RT-C3 — Vinculación obligatoria con usuario}
+      \item \textbf{RT-C2 — Vinculación obligatoria con usuario}
             Todo cliente debe estar asociado a un único usuario del sistema que represente su cuenta de acceso a la plataforma.
-      \item \textbf{RT-C4 — Correspondencia entre cliente y usuario cliente}
+      \item \textbf{RT-C3 — Correspondencia entre cliente y usuario cliente}
             Todo usuario con rol cliente debe corresponder a una única entidad \textit{Cliente} dentro del sistema.
-      \item \textbf{RT-C5 — Coherencia temporal del registro del cliente}
+      \item \textbf{RT-C4 — Consistencia de geolocalización}
+            Si el cliente dispone de latitud o longitud registradas, ambas coordenadas deben estar informadas conjuntamente.
+      \item \textbf{RT-C5 — Coherencia de ventana de visita}
+            Si se define una franja horaria de visita para el cliente, la hora de fin debe ser posterior a la hora de inicio.
+      \item \textbf{RT-C6 — Coherencia temporal del registro del cliente}
             Si el atributo \textit{updated\_at} tiene valor, este debe ser posterior o igual a la fecha de creación del cliente.
-      \item \textbf{RT-C6 — Identificación fiscal consistente}
+      \item \textbf{RT-C7 — Identificación fiscal consistente}
             Si un cliente dispone de un identificador fiscal, este debe ser válido.
+
+\end{itemize}
+
+\subsubsection{Clase Comercial}
+
+La clase \textit{Comercial} representa el perfil operativo de un usuario con funciones comerciales dentro del sistema. Su finalidad es complementar la información general del usuario con datos específicos de trabajo de campo, tales como su territorio, los parámetros base de la jornada y la configuración utilizada para calcular rutas diarias.
+
+\textbf{Atributos}
+
+\begin{itemize}
+
+      \item \textit{id}
+            Identificador único del comercial.
+      \item \textit{user}
+            Usuario del sistema asociado al perfil comercial.
+      \item \textit{employee\_code}
+            Código interno del comercial, cuando exista.
+      \item \textit{territory}
+            Zona o territorio comercial asignado.
+      \item \textit{notes}
+            Observaciones internas asociadas al perfil comercial.
+      \item \textit{workday\_start\_time}
+            Hora de inicio de la jornada de trabajo.
+      \item \textit{workday\_end\_time}
+            Hora de fin de la jornada de trabajo.
+      \item \textit{delivery\_visit\_duration\_minutes}
+            Duración base estimada para visitas de reparto.
+      \item \textit{routine\_visit\_duration\_minutes}
+            Duración base estimada para visitas rutinarias o comerciales.
+      \item \textit{route\_start\_address}
+            Dirección textual del punto de inicio configurado.
+      \item \textit{route\_end\_address}
+            Dirección textual del punto final configurado.
+      \item \textit{return\_to\_start}
+            Indicador de regreso al punto inicial al finalizar la ruta.
+      \item \textit{route\_start\_lat}
+            Latitud del punto de inicio configurado.
+      \item \textit{route\_start\_lng}
+            Longitud del punto de inicio configurado.
+      \item \textit{route\_end\_lat}
+            Latitud del punto final configurado.
+      \item \textit{route\_end\_lng}
+            Longitud del punto final configurado.
+      \item \textit{created\_at}
+            Fecha de creación del perfil comercial.
+      \item \textit{updated\_at}
+            Fecha de última actualización del perfil comercial.
+
+\end{itemize}
+
+\textbf{Restricciones textuales}
+
+\begin{itemize}
+
+      \item \textbf{RT-CO1 — Vinculación obligatoria con usuario comercial}
+            Todo perfil comercial debe estar asociado a un único usuario del sistema con rol comercial.
+      \item \textbf{RT-CO2 — Coherencia de jornada laboral}
+            Si se define el inicio y fin de la jornada, la hora de fin debe ser posterior a la hora de inicio.
+      \item \textbf{RT-CO3 — Duraciones operativas positivas}
+            Las duraciones base de visita utilizadas para la planificación deben ser mayores que cero.
+      \item \textbf{RT-CO4 — Consistencia de coordenadas de ruta}
+            Si se registran coordenadas de inicio o fin de ruta, cada punto debe disponer de latitud y longitud conjuntamente.
+      \item \textbf{RT-CO5 — Coherencia temporal del perfil comercial}
+            Si el atributo \textit{updated\_at} tiene valor, este debe ser posterior o igual a la fecha de creación del perfil comercial.
+
+\end{itemize}
+
+\subsubsection{Clase Asignación comercial-cliente}
+
+La clase \textit{Asignación comercial-cliente} representa la relación operativa entre un cliente profesional y un comercial. Su objetivo es permitir la trazabilidad de altas, bajas y reasignaciones, evitando que la responsabilidad comercial quede embebida como un único dato fijo dentro de la ficha del cliente.
+
+\textbf{Atributos}
+
+\begin{itemize}
+
+      \item \textit{id}
+            Identificador único de la asignación.
+      \item \textit{client}
+            Cliente profesional asociado a la asignación.
+      \item \textit{commercial}
+            Comercial asociado a la asignación.
+      \item \textit{assigned\_at}
+            Fecha y hora en la que la asignación pasa a estar activa.
+      \item \textit{unassigned\_at}
+            Fecha y hora en la que la asignación deja de estar activa.
+      \item \textit{assigned\_by\_user}
+            Usuario que realiza la asignación, cuando corresponda.
+      \item \textit{unassigned\_by\_user}
+            Usuario que realiza la desasignación, cuando corresponda.
+      \item \textit{notes}
+            Observaciones asociadas a la asignación o reasignación.
+
+\end{itemize}
+
+\textbf{Restricciones textuales}
+
+\begin{itemize}
+
+      \item \textbf{RT-AC1 — Asociación obligatoria}
+            Toda asignación debe estar asociada a un cliente y a un comercial existentes.
+      \item \textbf{RT-AC2 — Unicidad de asignación activa por cliente}
+            Un mismo cliente no puede tener más de una asignación comercial activa simultáneamente.
+      \item \textbf{RT-AC3 — Coherencia temporal de desasignación}
+            Si existe fecha de desasignación, esta debe ser posterior o igual a la fecha de asignación.
+      \item \textbf{RT-AC4 — Trazabilidad de cambios}
+            Toda reasignación debe conservar el historial de la asignación previa y crear una nueva relación activa cuando corresponda.
 
 \end{itemize}
 
 \subsubsection{Clase Visita comercial}
 
-La clase \textit{Visita comercial} representa cada visita planificada o realizada por un agente comercial a un cliente profesional. Permite registrar tanto la planificación previa de la visita como la información obtenida tras su realización, así como formar parte del historial comercial consultable asociado a cada cliente.
+La clase \textit{Visita comercial} representa cada visita planificada o realizada por un agente comercial a un cliente profesional. Permite registrar tanto la planificación previa de la visita como la información obtenida tras su realización y sirve como base para la planificación diaria de la ruta.
 
 \textbf{Atributos}
 
@@ -358,8 +472,10 @@ La clase \textit{Visita comercial} representa cada visita planificada o realizad
             Cliente asociado a la visita.
       \item \textit{commercial}
             Usuario comercial que realiza la visita.
-      \item \textit{scheduled\_at}
-            Fecha y hora previstas para la visita.
+      \item \textit{scheduled\_for\_date}
+            Fecha prevista para la visita.
+      \item \textit{visit\_type}
+            Tipo de visita comercial.
       \item \textit{status}
             Estado de la visita.
       \item \textit{notes}
@@ -373,17 +489,23 @@ La clase \textit{Visita comercial} representa cada visita planificada o realizad
 \begin{itemize}
       \item \textbf{RT-V1 — Asociación obligatoria de la visita}
             Toda visita comercial debe estar asociada a un cliente y a un usuario comercial.
-      \item \textbf{RT-V2 — Estado válido de la visita}
+      \item \textbf{RT-V2 — Asignación activa para planificar visitas}
+            Solo se deben crear visitas comerciales para clientes que mantengan una asignación activa con el comercial correspondiente.
+      \item \textbf{RT-V3 — Fecha obligatoria de planificación}
+            Toda visita comercial debe registrar una fecha prevista de realización.
+      \item \textbf{RT-V4 — Estado válido de la visita}
             El estado de una visita solo puede tomar valores definidos por el sistema.
-      \item \textbf{RT-V3 — Resultado asociado a visitas realizadas}
+      \item \textbf{RT-V5 — Resultado asociado a visitas realizadas}
             Solo deben registrarse resultados de visita cuando esta haya sido efectivamente realizada.
-      \item \textbf{RT-V4 — Integración de la visita en el historial comercial}
+      \item \textbf{RT-V6 — Hora derivada de planificación}
+            La hora prevista de atención de una visita debe derivarse de la planificación diaria y de la disponibilidad del cliente, no de un atributo horario fijo almacenado en la visita.
+      \item \textbf{RT-V7 — Integración de la visita en el historial comercial}
             Toda visita comercial asociada a un cliente debe poder ser considerada parte de su historial comercial dentro del sistema.
 \end{itemize}
 
 \subsubsection{Clase Ruta comercial}
 
-La clase \textit{Ruta comercial} representa la planificación de trabajo de un agente comercial para una jornada o recorrido determinado. Permite organizar el conjunto de visitas que debe realizar un comercial en una fecha concreta y sirve de base para consultar la información de contacto y localización de los clientes incluidos en la ruta y apoyar la obtención de indicaciones de navegación mediante servicios externos.
+La clase \textit{Ruta comercial} representa la planificación persistida de trabajo de un agente comercial para una jornada o recorrido determinado. Permite organizar un conjunto ordenado de visitas en una fecha concreta y sirve de soporte para composiciones de ruta que el sistema puede conservar, aun cuando parte de la operativa diaria se calcule dinámicamente en tiempo de ejecución.
 
 \textbf{Atributos}
 

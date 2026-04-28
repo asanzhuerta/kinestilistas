@@ -82,23 +82,24 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 % ------------------------------------------------------------------------------
 
 \vspace{-0.75em}
-\subsubsection{RF-M2-01 Gestión de clientes profesionales (perfiles)}
+\subsubsection{RF-M2-01 Gestión de clientes profesionales y asignaciones comerciales}
 \vspace{-1em}
 
 \begin{itemize}
     \item El sistema debe permitir registrar y gestionar la información básica de los clientes profesionales.
-    \item El sistema debe permitir consultar y actualizar los datos asociados a cada cliente, tales como identificación, localización o comercial asignado.
+    \item El sistema debe permitir consultar y actualizar los datos asociados a cada cliente, tales como identificación, localización, geolocalización confirmada o franja horaria permitida para visitas.
+    \item El sistema debe permitir asignar, desasignar y reasignar clientes a usuarios comerciales manteniendo trazabilidad sobre dichas acciones.
     \item El sistema debe permitir visualizar la información comercial relevante de cada cliente desde una ficha unificada.
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M2-02 Consulta del historial comercial}
+\subsubsection{RF-M2-02 Consulta operativa del cliente}
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir consultar el historial comercial asociado a cada cliente profesional.
-    \item Dicho historial debe incluir información como pedidos realizados, productos adquiridos, visitas comerciales realizadas o cualquier otra información relevante para el seguimiento comercial.
-    \item El sistema debe facilitar la consulta rápida de esta información para apoyar la actividad del comercial durante las visitas a los clientes.
+    \item El sistema debe permitir consultar la ficha operativa de cada cliente profesional con la información necesaria para su seguimiento comercial.
+    \item Dicha consulta debe incluir, al menos, datos de contacto, localización, observaciones, asignación comercial activa y contexto de planificación necesario para la jornada.
+    \item El sistema debe facilitar la consulta rápida de esta información tanto al comercial durante sus visitas como al cliente profesional cuando exista una previsión de reparto para su establecimiento.
 \end{itemize}
 
 \vspace{-0.75em}
@@ -106,31 +107,36 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir planificar y registrar visitas comerciales a los clientes profesionales.
-    \item El sistema debe permitir asociar dichas visitas a un agente comercial y a un cliente determinado.
-    \item El sistema debe permitir registrar observaciones o resultados asociados a cada visita realizada.
+    \item El sistema debe permitir planificar y registrar visitas comerciales a los clientes profesionales por fecha, tipo de visita y comercial responsable.
+    \item El sistema debe permitir asociar dichas visitas únicamente a clientes que se encuentren asignados al comercial correspondiente.
+    \item El sistema debe permitir registrar observaciones, resultados y cambios de estado asociados a cada visita realizada.
+    \item El sistema debe considerar la hora exacta de la visita como una información dinámica derivada de la planificación diaria, en lugar de como un dato fijo almacenado en la propia visita.
+    \item Si la franja horaria permitida para visitar a un cliente ya se ha superado, el sistema debe poder aplazar la visita para su posterior replanificación.
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M2-04 Planificación de rutas comerciales}
+\subsubsection{RF-M2-04 Planificación y previsualización de rutas comerciales}
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir organizar y consultar las rutas de visitas de los agentes comerciales.
-    \item El sistema debe facilitar la visualización de los clientes asignados a una jornada o recorrido determinado.
+    \item El sistema debe permitir organizar y consultar las rutas de visitas de los agentes comerciales a partir de las visitas planificadas para una jornada.
+    \item El sistema debe facilitar la visualización de los clientes asignados a una jornada o recorrido determinado, mostrando su orden previsto dentro de la ruta.
     \item El sistema debe permitir consultar la información de contacto y localización de los clientes incluidos en cada ruta comercial.
+    \item El sistema debe permitir calcular y mostrar tiempos aproximados de desplazamiento, espera y llegada a cada punto de la ruta.
+    \item El sistema debe permitir calcular el margen operativo restante de la jornada en función de la hora actual y de la configuración de trabajo del comercial.
     \item El sistema debe permitir seleccionar la ubicación de un cliente en particular para generar indicaciones de navegación desde la ubicación actual del agente comercial.
-    \item Además, el sistema deberá estar integrado con un servicio externo de navegación para facilitar la localización de los clientes durante las visitas comerciales. Esta integración permitirá generar rutas optimizadas y proporcionar indicaciones en tiempo real a los agentes comerciales durante sus desplazamientos.
+    \item Además, el sistema deberá estar integrado con un servicio externo de navegación para facilitar la localización de los clientes durante las visitas comerciales.
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M2-05 Registro de actividad comercial}
+\subsubsection{RF-M2-05 Configuración operativa y seguimiento diario del comercial}
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir registrar la actividad comercial realizada por los agentes durante su jornada de trabajo.
-    \item Esta actividad podrá incluir visitas realizadas, pedidos gestionados, ventas registradas o cobros efectuados.
-    \item El sistema debe permitir consultar esta información para generar resúmenes o partes de trabajo asociados a la actividad diaria del comercial.
+    \item El sistema debe permitir a cada comercial definir su configuración operativa de trabajo, incluyendo inicio y fin de jornada, duración prevista de visitas, puntos de salida y llegada y criterio de regreso al origen.
+    \item El sistema debe utilizar dicha configuración para calcular automáticamente el tiempo disponible de trabajo y la viabilidad temporal de la ruta del día.
+    \item El sistema debe permitir consultar un resumen operativo diario con el número de visitas previstas, el tiempo comprometido, el margen restante y las incidencias de planificación detectadas.
+    \item El sistema debe permitir que el cliente profesional consulte su hora aproximada de reparto cuando exista una visita de entrega planificada para la jornada.
 \end{itemize}
 
 

@@ -116,7 +116,7 @@ Los datos asociados a un registro de acceso incluyen:
 
 \subsubsection*{Cliente}
 
-El sistema debe almacenar la información básica de cada cliente profesional atendido por el distribuidor. Esta información permite identificar cada establecimiento, registrar los datos comerciales relevantes, mantener la relación entre la peluquería como entidad de negocio y su cuenta de acceso en la plataforma, y facilitar al agente comercial la consulta de los datos de contacto y localización necesarios para la planificación de visitas y rutas comerciales.
+El sistema debe almacenar la información básica de cada cliente profesional atendido por el distribuidor. Esta información permite identificar cada establecimiento, registrar los datos comerciales relevantes, mantener la relación entre la peluquería como entidad de negocio y su cuenta de acceso en la plataforma y facilitar al agente comercial la consulta de los datos de contacto y localización necesarios para la planificación de visitas y rutas comerciales.
 
 Los datos asociados a un cliente incluyen:
 
@@ -129,18 +129,60 @@ Los datos asociados a un cliente incluyen:
     \item Localidad o ciudad.
     \item Código postal.
     \item Provincia o zona.
-    \item Usuario comercial responsable del cliente.
     \item Usuario asociado al cliente dentro del sistema.
+    \item Latitud y longitud del establecimiento, cuando hayan sido confirmadas.
+    \item Hora de inicio de la franja permitida para visitas comerciales, cuando se configure.
+    \item Hora de fin de la franja permitida para visitas comerciales, cuando se configure.
     \item Observaciones o notas comerciales.
     \item Fecha de creación del registro del cliente.
     \item Fecha de última actualización de la información del cliente.
 \end{itemize}
 
-Esta información podrá ser utilizada por el sistema para mostrar al comercial los datos necesarios para localizar al cliente durante la planificación y ejecución de rutas comerciales.
+Esta información podrá ser utilizada por el sistema para mostrar al comercial los datos necesarios para localizar al cliente durante la planificación y ejecución de rutas comerciales y para calcular si la llegada estimada a dicho establecimiento se encuentra dentro de su ventana horaria válida.
+
+\subsubsection*{Comercial}
+
+El sistema debe almacenar la información operativa asociada a cada usuario comercial. Esta información sirve de apoyo para configurar la jornada de trabajo, el punto de inicio y fin de ruta y las duraciones base utilizadas por el algoritmo de planificación diaria.
+
+Los datos asociados a un comercial incluyen:
+
+\begin{itemize}
+    \item Identificador del comercial.
+    \item Usuario del sistema asociado al perfil comercial.
+    \item Código interno de empleado, cuando corresponda.
+    \item Territorio o zona comercial, cuando se utilice.
+    \item Observaciones internas del perfil comercial.
+    \item Hora de inicio de la jornada de trabajo.
+    \item Hora de fin de la jornada de trabajo.
+    \item Duración prevista de las visitas de reparto.
+    \item Duración prevista de las visitas rutinarias o comerciales.
+    \item Dirección y coordenadas del punto de salida configurado.
+    \item Dirección y coordenadas del punto final configurado.
+    \item Indicador de regreso al punto de salida al finalizar la jornada.
+    \item Fecha de creación del perfil comercial.
+    \item Fecha de última actualización del perfil comercial.
+\end{itemize}
+
+\subsubsection*{Asignación comercial-cliente}
+
+El sistema debe permitir almacenar la relación entre clientes y comerciales de forma trazable, de modo que la asignación activa de un cliente pueda cambiar a lo largo del tiempo sin perder el historial de movimientos.
+
+Los datos asociados a una asignación comercial-cliente incluyen:
+
+\begin{itemize}
+    \item Identificador de la asignación.
+    \item Cliente asociado.
+    \item Comercial asociado.
+    \item Fecha y hora de asignación.
+    \item Fecha y hora de desasignación, cuando la relación deje de estar activa.
+    \item Usuario que realizó la asignación, cuando corresponda.
+    \item Usuario que realizó la desasignación, cuando corresponda.
+    \item Observaciones asociadas a la asignación.
+\end{itemize}
 
 \subsubsection*{Visita comercial}
 
-El sistema debe permitir registrar las visitas comerciales realizadas por los agentes a los clientes profesionales. Estas visitas permiten documentar la actividad comercial y registrar observaciones o resultados obtenidos durante la interacción con el cliente.
+El sistema debe permitir registrar las visitas comerciales realizadas por los agentes a los clientes profesionales. Estas visitas permiten documentar la actividad comercial, registrar observaciones o resultados obtenidos durante la interacción con el cliente y servir de entrada para la planificación diaria de rutas.
 
 Los datos asociados a una visita comercial incluyen:
 
@@ -148,17 +190,18 @@ Los datos asociados a una visita comercial incluyen:
     \item Identificador de la visita.
     \item Cliente visitado.
     \item Usuario comercial que realiza la visita.
-    \item Fecha y hora de la visita.
-    \item Estado de la visita (planificada, realizada o cancelada).
+    \item Fecha prevista de la visita.
+    \item Tipo de visita comercial.
+    \item Estado de la visita (planificada, aplazada, realizada o cancelada).
     \item Observaciones registradas durante la visita.
     \item Resultado o conclusión de la visita.
 \end{itemize}
 
-Esta información podrá ser utilizada por el sistema para mostrar al comercial los datos necesarios para localizar al cliente durante la planificación y ejecución de rutas comerciales.
+La hora concreta de atención no se almacena como un campo fijo de la visita, sino que se deriva diariamente a partir del algoritmo de planificación, la configuración del comercial y la franja horaria admitida por el cliente.
 
 \subsubsection*{Ruta comercial}
 
-El sistema debe permitir organizar las rutas de trabajo de los agentes comerciales. Una ruta representa la planificación de visitas que un comercial debe realizar durante una jornada o recorrido determinado. Para ello, el sistema debe permitir consultar la información de contacto y localización de los clientes incluidos en la ruta y servir de apoyo a la generación de indicaciones de navegación mediante servicios externos.
+El sistema debe permitir organizar las rutas de trabajo de los agentes comerciales. Una ruta representa la planificación persistida de visitas que un comercial debe realizar durante una jornada o recorrido determinado y sirve de soporte para composiciones de ruta mantenidas por el sistema.
 
 Los datos asociados a una ruta comercial incluyen:
 
@@ -182,6 +225,25 @@ Los datos asociados a una visita dentro de una ruta incluyen:
     \item Ruta comercial asociada.
     \item Visita comercial incluida en la ruta.
     \item Orden previsto de la visita dentro de la ruta.
+\end{itemize}
+
+\subsubsection*{Planificación diaria de ruta}
+
+El sistema debe gestionar también información derivada de planificación diaria, calculada dinámicamente a partir de las visitas previstas, la configuración operativa del comercial y la geolocalización de los clientes. Esta información no tiene por qué almacenarse como entidad persistente independiente, pero sí debe poder ser consultada y presentada a los usuarios.
+
+Los datos gestionados dentro de una planificación diaria incluyen:
+
+\begin{itemize}
+    \item Punto de inicio de la ruta utilizado para el cálculo.
+    \item Punto final previsto de la jornada.
+    \item Conjunto de paradas ordenadas de la ruta.
+    \item Orden previsto de visita para cada cliente.
+    \item Hora estimada de llegada y salida para cada parada.
+    \item Tiempo aproximado de desplazamiento y espera entre paradas.
+    \item Franja horaria permitida del cliente y detección de llegadas fuera de ventana.
+    \item Número de visitas previstas y su tipología.
+    \item Tiempo total comprometido de la jornada.
+    \item Margen operativo restante y minutos de sobrecarga, cuando existan.
 \end{itemize}
 
 % ------------------------------------------------------------------------------
