@@ -25,7 +25,10 @@ export async function POST(request: Request, { params }: RouteContext) {
 			performedByEmail: user.email ?? null,
 		});
 
-		return NextResponse.redirect(new URL("/admin/users/usuarios", request.url));
+		return NextResponse.redirect(
+			new URL("/admin/users/list", request.url),
+			303,
+		);
 	} catch (error) {
 		console.error("Error desactivando usuario:", error);
 

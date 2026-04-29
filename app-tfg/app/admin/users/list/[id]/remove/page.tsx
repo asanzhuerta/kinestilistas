@@ -75,7 +75,7 @@ export default async function RemoveUserPage({ params }: Props) {
 							</SubmitButton>
 
 							<Link
-								href={`/admin/users/usuarios/${id}`}
+								href={`/admin/users/list/${id}`}
 								className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
 							>
 								Cancelar
@@ -86,7 +86,7 @@ export default async function RemoveUserPage({ params }: Props) {
 					{isSelf || isAlreadyInactive ? (
 						<div className="mt-6">
 							<Link
-								href={`/admin/users/usuarios/${id}`}
+								href={`/admin/users/list/${id}`}
 								className="inline-flex rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
 							>
 								Volver al usuario

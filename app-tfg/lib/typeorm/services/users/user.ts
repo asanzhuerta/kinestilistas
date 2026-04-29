@@ -7,6 +7,7 @@ import { UserStatus } from "@/lib/typeorm/entities/UserStatus";
 import { UserAdminActionType } from "@/lib/typeorm/entities/UserAdminActionType";
 import { UserManagementLog } from "@/lib/typeorm/entities/UserManagementLog";
 import { UserRequest } from "@/lib/typeorm/entities/UserRequest";
+import { UserAccessLog } from "@/lib/typeorm/entities/UserAccessLog";
 import { Client } from "@/lib/typeorm/entities/Client";
 import {
 	applyClientUpdateOrThrow,
@@ -182,6 +183,7 @@ export async function deactivateUser(input: DeactivateUserInput) {
 		const statusRepo = manager.getRepository(UserStatus);
 		const logRepo = manager.getRepository(UserManagementLog);
 		const actionTypeRepo = manager.getRepository(UserAdminActionType);
+		const accessLogRepo = manager.getRepository(UserAccessLog);
 
 		const user = await userRepo.findOne({
 			where: { id: input.userId },
@@ -235,6 +237,19 @@ export async function deactivateUser(input: DeactivateUserInput) {
 		user.updated_at = new Date();
 
 		await userRepo.save(user);
+
+		// Revoca cualquier sesion activa para que la desactivacion
+		// tenga efecto inmediato y no dependa de la expiracion del JWT.
+		await accessLogRepo
+			.createQueryBuilder()
+			.update()
+			.set({
+				revoked_at: () => "NOW()",
+			})
+			.where("user_id = :userId", { userId: user.id })
+			.andWhere("session_token IS NOT NULL")
+			.andWhere("revoked_at IS NULL")
+			.execute();
 
 		const log = logRepo.create({
 			target_user_id: user.id,
