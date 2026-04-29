@@ -1,4 +1,5 @@
 import { getDataSource } from "@/lib/typeorm/data-source";
+import { geocodeFreeTextAddress } from "@/lib/geocoding/geocode-address";
 import { ROLE_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { Commercial } from "@/lib/typeorm/entities/Commercial";
 import { User } from "@/lib/typeorm/entities/User";
@@ -204,6 +205,9 @@ export async function upsertCommercialProfile(
 			});
 		}
 
+		const previousRouteStartAddress = commercial.route_start_address;
+		const previousRouteEndAddress = commercial.route_end_address;
+
 		if (input.employeeCode !== undefined) {
 			commercial.employee_code = normalizeText(input.employeeCode) || null;
 		}
@@ -265,11 +269,21 @@ export async function upsertCommercialProfile(
 		if (input.routeStartAddress !== undefined) {
 			commercial.route_start_address =
 				normalizeText(input.routeStartAddress) || null;
+
+			if (!commercial.route_start_address) {
+				commercial.route_start_lat = null;
+				commercial.route_start_lng = null;
+			}
 		}
 
 		if (input.routeEndAddress !== undefined) {
 			commercial.route_end_address =
 				normalizeText(input.routeEndAddress) || null;
+
+			if (!commercial.route_end_address) {
+				commercial.route_end_lat = null;
+				commercial.route_end_lng = null;
+			}
 		}
 
 		if (input.returnToStart !== undefined) {
@@ -314,6 +328,58 @@ export async function upsertCommercialProfile(
 				"La longitud final",
 				"INVALID_ROUTE_END_LNG",
 			);
+		}
+
+		const shouldGeocodeStartPoint =
+			input.routeStartAddress !== undefined &&
+			Boolean(commercial.route_start_address) &&
+			input.routeStartLat === undefined &&
+			input.routeStartLng === undefined &&
+			(commercial.route_start_address !== previousRouteStartAddress ||
+				!commercial.route_start_lat ||
+				!commercial.route_start_lng);
+
+		if (shouldGeocodeStartPoint) {
+			const geocodedStartPoint = await geocodeFreeTextAddress({
+				query: commercial.route_start_address,
+			});
+
+			if (!geocodedStartPoint) {
+				throw new CommercialProfileError(
+					"No se pudo localizar el punto de salida indicado",
+					400,
+					"ROUTE_START_GEOCODING_FAILED",
+				);
+			}
+
+			commercial.route_start_lat = geocodedStartPoint.lat;
+			commercial.route_start_lng = geocodedStartPoint.lng;
+		}
+
+		const shouldGeocodeEndPoint =
+			input.routeEndAddress !== undefined &&
+			Boolean(commercial.route_end_address) &&
+			input.routeEndLat === undefined &&
+			input.routeEndLng === undefined &&
+			(commercial.route_end_address !== previousRouteEndAddress ||
+				!commercial.route_end_lat ||
+				!commercial.route_end_lng);
+
+		if (shouldGeocodeEndPoint) {
+			const geocodedEndPoint = await geocodeFreeTextAddress({
+				query: commercial.route_end_address,
+			});
+
+			if (!geocodedEndPoint) {
+				throw new CommercialProfileError(
+					"No se pudo localizar el punto final indicado",
+					400,
+					"ROUTE_END_GEOCODING_FAILED",
+				);
+			}
+
+			commercial.route_end_lat = geocodedEndPoint.lat;
+			commercial.route_end_lng = geocodedEndPoint.lng;
 		}
 
 		await commercialRepo.save(commercial);

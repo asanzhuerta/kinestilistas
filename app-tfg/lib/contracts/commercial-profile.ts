@@ -4,6 +4,13 @@ export type CommercialProfileResponse = {
 	workday_end_time: string | null;
 	delivery_visit_duration_minutes: number;
 	routine_visit_duration_minutes: number;
+	route_start_address: string | null;
+	route_end_address: string | null;
+	return_to_start: boolean;
+	route_start_lat: string | null;
+	route_start_lng: string | null;
+	route_end_lat: string | null;
+	route_end_lng: string | null;
 };
 
 export type AdminUpsertCommercialProfileBody = {

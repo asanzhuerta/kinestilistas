@@ -15,20 +15,18 @@ import {
 	TrainingIcon,
 } from "../components/IconsSVGs";
 
-// Opciones de navegación para clientes
 const navItems = [
-	{ title: "Coloración", icon: <ColorIcon className="h-6 w-6" /> },
-	{ title: "Catálogos", icon: <CatalogIcon className="h-6 w-6" /> },
-	{ title: "Agenda", icon: <AgendaIcon className="h-6 w-6" /> },
-	{ title: "Citas", icon: <AppointmentIcon className="h-6 w-6" /> },
-	{ title: "Pedido Abierto", icon: <OrderIcon className="h-6 w-6" /> },
-	{ title: "Tarifas", icon: <PricesIcon className="h-6 w-6" /> },
-	{ title: "Productos", icon: <ProductsIcon className="h-6 w-6" /> },
-	{ title: "Simulador", icon: <SimulatorIcon className="h-6 w-6" /> },
-	{ title: "Formaciones", icon: <TrainingIcon className="h-6 w-6" /> },
+	{ title: "Coloracion", icon: <ColorIcon className="h-6 w-6" />, disabled: true },
+	{ title: "Catalogos", icon: <CatalogIcon className="h-6 w-6" />, disabled: true },
+	{ title: "Agenda", icon: <AgendaIcon className="h-6 w-6" />, disabled: true },
+	{ title: "Citas", icon: <AppointmentIcon className="h-6 w-6" />, disabled: true },
+	{ title: "Pedido abierto", icon: <OrderIcon className="h-6 w-6" />, disabled: true },
+	{ title: "Tarifas", icon: <PricesIcon className="h-6 w-6" />, disabled: true },
+	{ title: "Productos", icon: <ProductsIcon className="h-6 w-6" />, disabled: true },
+	{ title: "Simulador", icon: <SimulatorIcon className="h-6 w-6" />, disabled: true },
+	{ title: "Formaciones", icon: <TrainingIcon className="h-6 w-6" />, disabled: true },
 ];
 
-// Página principal para profesionales
 export default function ClientsHome() {
 	return (
 		<PageTransition>
@@ -42,13 +40,19 @@ export default function ClientsHome() {
 				<ClientDeliveryEstimateCard />
 			</div>
 
+			<div className="mb-4 rounded-2xl border border-slate-200 bg-white/75 px-4 py-3 text-sm text-slate-600 shadow-sm">
+				Los accesos mostrados a continuacion forman parte de modulos
+				previstos para siguientes iteraciones. En esta version ya tienes
+				operativa la prevision de reparto y la gestion de tu perfil.
+			</div>
+
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 				{navItems.map((item) => (
 					<NavCard
 						key={item.title}
 						title={item.title}
 						icon={item.icon}
-						href="#"
+						disabled={item.disabled}
 					/>
 				))}
 			</div>

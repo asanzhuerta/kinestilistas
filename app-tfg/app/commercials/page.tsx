@@ -17,9 +17,20 @@ import {
 	ReportsIcon,
 } from "../components/IconsSVGs";
 
-const sections = [
+type DashboardSectionItem = {
+	title: string;
+	icon: React.ReactNode;
+	href?: string;
+	disabled?: boolean;
+};
+
+const sections: Array<{
+	title: string;
+	module: string;
+	items: DashboardSectionItem[];
+}> = [
 	{
-		title: "Gestión comercial",
+		title: "Gestion comercial",
 		module: "M2",
 		items: [
 			{
@@ -45,54 +56,54 @@ const sections = [
 		],
 	},
 	{
-		title: "Catálogo y operativa comercial",
+		title: "Catalogo y operativa comercial",
 		module: "M3 · M4",
 		items: [
 			{
-				title: "Catálogo",
+				title: "Catalogo",
 				icon: <CatalogIcon className="h-6 w-6" />,
-				href: "/commercials/catalog",
+				disabled: true,
 			},
 			{
-				title: "Coloración",
+				title: "Coloracion",
 				icon: <ColorIcon className="h-6 w-6" />,
-				href: "/commercials/color",
+				disabled: true,
 			},
 			{
 				title: "Productos",
 				icon: <ProductsIcon className="h-6 w-6" />,
-				href: "/commercials/products",
+				disabled: true,
 			},
 			{
 				title: "Pedidos",
 				icon: <OrderIcon className="h-6 w-6" />,
-				href: "/commercials/orders",
+				disabled: true,
 			},
 			{
 				title: "Cobros",
 				icon: <PaymentsIcon className="h-6 w-6" />,
-				href: "/commercials/payments",
+				disabled: true,
 			},
 		],
 	},
 	{
-		title: "Comunicación y seguimiento",
+		title: "Comunicacion y seguimiento",
 		module: "M6 · M7",
 		items: [
 			{
 				title: "Promociones",
 				icon: <PromotionsIcon className="h-6 w-6" />,
-				href: "/commercials/promotions",
+				disabled: true,
 			},
 			{
 				title: "Formaciones",
 				icon: <TrainingIcon className="h-6 w-6" />,
-				href: "/commercials/training",
+				disabled: true,
 			},
 			{
 				title: "Informes",
 				icon: <ReportsIcon className="h-6 w-6" />,
-				href: "/commercials/reports",
+				disabled: true,
 			},
 		],
 	},
@@ -125,6 +136,7 @@ export default function CommercialsHome() {
 									title={item.title}
 									icon={item.icon}
 									href={item.href}
+									disabled={item.disabled}
 								/>
 							))}
 						</div>
