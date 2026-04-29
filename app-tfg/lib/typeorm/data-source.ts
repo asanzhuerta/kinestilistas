@@ -21,6 +21,14 @@ import { ClientCommercialAssignment } from "./entities/ClientCommercialAssignmen
 import { CommercialVisit } from "./entities/CommercialVisit";
 import { CommercialRoute } from "./entities/CommercialRoute";
 import { RouteVisit } from "./entities/RouteVisit";
+import { ProductStatus } from "./entities/ProductStatus";
+import { SupportResourceType } from "./entities/SupportResourceType";
+import { ProductCategory } from "./entities/ProductCategory";
+import { ProductLine } from "./entities/ProductLine";
+import { Product } from "./entities/Product";
+import { SupportResource } from "./entities/SupportResource";
+import { ColorChart } from "./entities/ColorChart";
+import { ColorReference } from "./entities/ColorReference";
 
 export const entities = [
 	Role,
@@ -43,6 +51,14 @@ export const entities = [
 	CommercialVisit,
 	CommercialRoute,
 	RouteVisit,
+	ProductStatus,
+	SupportResourceType,
+	ProductCategory,
+	ProductLine,
+	Product,
+	SupportResource,
+	ColorChart,
+	ColorReference,
 ];
 
 function createDataSource() {

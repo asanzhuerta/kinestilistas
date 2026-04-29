@@ -23,8 +23,16 @@ import { ClientCommercialAssignment } from "./entities/ClientCommercialAssignmen
 import { CommercialVisit } from "./entities/CommercialVisit";
 import { CommercialRoute } from "./entities/CommercialRoute";
 import { RouteVisit } from "./entities/RouteVisit";
+import { ProductStatus } from "./entities/ProductStatus";
+import { SupportResourceType } from "./entities/SupportResourceType";
+import { ProductCategory } from "./entities/ProductCategory";
+import { ProductLine } from "./entities/ProductLine";
+import { Product } from "./entities/Product";
+import { SupportResource } from "./entities/SupportResource";
+import { ColorChart } from "./entities/ColorChart";
+import { ColorReference } from "./entities/ColorReference";
 
-export default new DataSource({
+const CliDataSource = new DataSource({
 	type: "postgres",
 	url: process.env.DATABASE_URL,
 	synchronize: false,
@@ -50,6 +58,16 @@ export default new DataSource({
 		CommercialVisit,
 		CommercialRoute,
 		RouteVisit,
+		ProductStatus,
+		SupportResourceType,
+		ProductCategory,
+		ProductLine,
+		Product,
+		SupportResource,
+		ColorChart,
+		ColorReference,
 	],
 	migrations: ["migrations/typeorm/*.ts"],
 });
+
+export default CliDataSource;
