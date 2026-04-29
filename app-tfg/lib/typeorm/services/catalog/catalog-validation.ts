@@ -6,6 +6,7 @@ import type {
 	AdminUpsertProductLineBody,
 	AdminUpsertSupportResourceBody,
 } from "@/lib/contracts/product-catalog";
+import { isValidCloudinaryImageUrl } from "@/lib/cloudinary";
 import { normalizeText } from "@/lib/utils/text";
 
 const UUID_PATTERN =
@@ -111,6 +112,24 @@ function normalizeOptionalTextField(value: string | null | undefined) {
 	}
 
 	return normalizeText(value) || null;
+}
+
+function normalizeOptionalCloudinaryImageField(
+	value: string | null | undefined,
+	fieldName: string,
+	code: string,
+) {
+	const normalized = normalizeOptionalTextField(value);
+
+	if (normalized === undefined || normalized === null) {
+		return normalized;
+	}
+
+	if (!isValidCloudinaryImageUrl(normalized)) {
+		throw new CatalogValidationError(`${fieldName} no es valida`, 400, code);
+	}
+
+	return normalized;
 }
 
 function normalizeUuidField(
@@ -308,7 +327,11 @@ export function normalizeProductLineWriteInput(
 			"INVALID_PRODUCT_LINE_CATEGORY_ID",
 			options,
 		),
-		imageUrl: normalizeOptionalTextField(input.imageUrl),
+		imageUrl: normalizeOptionalCloudinaryImageField(
+			input.imageUrl,
+			"La imagen de la linea comercial",
+			"INVALID_PRODUCT_LINE_IMAGE_URL",
+		),
 		displayOrder: normalizeNonNegativeIntegerField(
 			input.displayOrder,
 			"El orden de visualizacion de la linea comercial",
@@ -351,7 +374,11 @@ export function normalizeProductWriteInput(
 			"INVALID_PRODUCT_LINE_ID",
 			options,
 		),
-		imageUrl: normalizeOptionalTextField(input.imageUrl),
+		imageUrl: normalizeOptionalCloudinaryImageField(
+			input.imageUrl,
+			"La imagen del producto",
+			"INVALID_PRODUCT_IMAGE_URL",
+		),
 		technicalInfo: normalizeOptionalTextField(input.technicalInfo),
 		statusId: normalizeLookupIdField(
 			input.statusId,
@@ -444,7 +471,11 @@ export function normalizeColorChartWriteInput(
 			"INVALID_COLOR_CHART_PRODUCT_LINE_ID",
 			options,
 		),
-		imageUrl: normalizeOptionalTextField(input.imageUrl),
+		imageUrl: normalizeOptionalCloudinaryImageField(
+			input.imageUrl,
+			"La imagen de la carta de color",
+			"INVALID_COLOR_CHART_IMAGE_URL",
+		),
 	};
 }
 
@@ -476,7 +507,11 @@ export function normalizeColorReferenceWriteInput(
 				  )
 				: undefined,
 		description: normalizeOptionalTextField(input.description),
-		imageUrl: normalizeOptionalTextField(input.imageUrl),
+		imageUrl: normalizeOptionalCloudinaryImageField(
+			input.imageUrl,
+			"La imagen de la referencia de color",
+			"INVALID_COLOR_REFERENCE_IMAGE_URL",
+		),
 		displayOrder: normalizeNonNegativeIntegerField(
 			input.displayOrder,
 			"El orden de visualizacion de la referencia de color",
