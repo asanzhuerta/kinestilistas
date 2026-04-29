@@ -232,11 +232,17 @@ export async function deactivateUser(input: DeactivateUserInput) {
 
 		const previousStatusId = user.status_id;
 		const previousRoleId = user.role_id;
+		const updatedAt = new Date();
 
-		user.status_id = inactiveStatus.id;
-		user.updated_at = new Date();
-
-		await userRepo.save(user);
+		await userRepo
+			.createQueryBuilder()
+			.update(User)
+			.set({
+				status_id: inactiveStatus.id,
+				updated_at: updatedAt,
+			})
+			.where("id = :id", { id: user.id })
+			.execute();
 
 		// Revoca cualquier sesion activa para que la desactivacion
 		// tenga efecto inmediato y no dependa de la expiracion del JWT.

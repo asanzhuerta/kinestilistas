@@ -59,7 +59,6 @@ export type UserProfileCardProps = {
 	title?: string;
 	subtitle?: string;
 	roles?: CatalogOption[];
-	statuses?: CatalogOption[];
 	backHref?: string;
 	submitLabel?: string;
 	submitUrl?: string;

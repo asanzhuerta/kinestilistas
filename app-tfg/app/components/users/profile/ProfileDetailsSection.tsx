@@ -9,7 +9,6 @@ type Props = {
 	isEditableMode: boolean;
 	isAdminEditMode: boolean;
 	roles: CatalogOption[];
-	statuses: CatalogOption[];
 	createdAt: string | null;
 	lastLoginAt: string | null;
 	onChange: (
@@ -28,7 +27,6 @@ export default function ProfileDetailsSection({
 	isEditableMode,
 	isAdminEditMode,
 	roles,
-	statuses,
 	createdAt,
 	lastLoginAt,
 	onChange,
@@ -96,26 +94,6 @@ export default function ProfileDetailsSection({
 						</select>
 					</div>
 
-					<div className="rounded-xl bg-slate-50 p-4">
-						<label
-							htmlFor="profile-status"
-							className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-						>
-							Estado
-						</label>
-						<select
-							id="profile-status"
-							value={String(formData.statusId)}
-							onChange={onChange("statusId")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						>
-							{statuses.map((status) => (
-								<option key={status.id} value={status.id}>
-									{status.name}
-								</option>
-							))}
-						</select>
-					</div>
 				</>
 			) : null}
 

@@ -39,6 +39,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 				select: {
 					id: true,
 					role_id: true,
+					status_id: true,
 				},
 			});
 
@@ -47,6 +48,20 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 			}
 
 			safeRoleId = currentUser.role_id;
+		}
+
+		const ds = await getDataSource();
+		const userRepo = ds.getRepository(User);
+		const currentUser = await userRepo.findOne({
+			where: { id },
+			select: {
+				id: true,
+				status_id: true,
+			},
+		});
+
+		if (!currentUser) {
+			return notFoundError("Usuario no encontrado", "USER_NOT_FOUND");
 		}
 
 		const result = await updateUser({
@@ -58,7 +73,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 			phone: body.phone ?? null,
 			profile_image_url: body.profile_image_url ?? null,
 			roleId: safeRoleId,
-			statusId: Number(body.statusId),
+			statusId: currentUser.status_id,
 			password: body.password ?? "",
 			confirmPassword: body.confirmPassword ?? "",
 			clientProfile,

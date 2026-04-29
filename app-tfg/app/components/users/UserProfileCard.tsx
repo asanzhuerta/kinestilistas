@@ -42,7 +42,6 @@ export default function UserProfileCard({
 	title,
 	subtitle,
 	roles = EMPTY_CATALOG_OPTIONS,
-	statuses = EMPTY_CATALOG_OPTIONS,
 	backHref,
 	submitLabel,
 	submitUrl,
@@ -347,7 +346,6 @@ export default function UserProfileCard({
 					isEditableMode={isEditableMode}
 					isAdminEditMode={isAdminEditMode}
 					roles={roles}
-					statuses={statuses}
 					createdAt={createdAt}
 					lastLoginAt={lastLoginAt}
 					onChange={handleChange}

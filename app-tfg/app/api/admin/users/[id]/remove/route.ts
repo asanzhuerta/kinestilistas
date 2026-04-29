@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
 	requireRoleUser,
@@ -24,6 +25,10 @@ export async function POST(request: Request, { params }: RouteContext) {
 			performedByUserId: user.id,
 			performedByEmail: user.email ?? null,
 		});
+
+		revalidatePath("/admin/users/list");
+		revalidatePath(`/admin/users/list/${id}`);
+		revalidatePath("/admin/audit");
 
 		return NextResponse.redirect(
 			new URL("/admin/users/list", request.url),

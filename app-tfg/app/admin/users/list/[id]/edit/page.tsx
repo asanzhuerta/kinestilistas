@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import UserProfileCard from "@/app/components/users/UserProfileCard";
 import { getUserById } from "@/lib/typeorm/services/users/user";
 import { listRoles } from "@/lib/typeorm/services/users/role";
-import { listUserStatuses } from "@/lib/typeorm/services/users/status";
 import PageTransition from "@/app/components/animations/PageTransition";
 
 // Recibe el ID del usuario a editar a través de los parámetros de la URL.
@@ -23,11 +22,9 @@ export default async function EditUsuarioPage({ params }: Props) {
 	// Carga en paralelo:
 	// - el usuario seleccionado
 	// - los roles disponibles para el selector
-	// - los estados disponibles para el selector
-	const [usuario, roles, statuses] = await Promise.all([
+	const [usuario, roles] = await Promise.all([
 		getUserById(id),
 		listRoles(),
-		listUserStatuses(),
 	]);
 
 	// Si el usuario no existe, se muestra la página de "No encontrado".
@@ -65,10 +62,6 @@ export default async function EditUsuarioPage({ params }: Props) {
 				roles={roles.map((role) => ({
 					id: role.id,
 					name: role.name,
-				}))}
-				statuses={statuses.map((status) => ({
-					id: status.id,
-					name: status.name,
 				}))}
 				user={{
 					id: usuario.id,
