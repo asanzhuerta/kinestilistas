@@ -1,13 +1,114 @@
-Las instrucciones de uso del software se detallan a continuación. Este manual se dirige al usuario final del software objetivo de este proyecto.
+Las instrucciones de uso del software se detallan a continuación. Este manual se dirige al usuario final y describe únicamente las funcionalidades que forman parte del alcance operativo actual de la aplicación.
 
 \section{Introducción}
-Resumen de los principales objetivos, ámbito, características y alcance del software desarrollado.
+
+KinEstilistas es una aplicación web para coordinar la relación entre un distribuidor y sus clientes profesionales. En la versión actual el sistema cubre de forma efectiva la gestión de acceso y usuarios del módulo \texttt{M1}, así como la base operativa del módulo \texttt{M2}: clientes, asignaciones, visitas, configuración diaria del comercial y estimación de reparto.
+
+La aplicación diferencia tres perfiles de uso:
+
+\begin{itemize}
+    \item \texttt{admin}
+    \item \texttt{commercial}
+    \item \texttt{client}
+\end{itemize}
 
 \section{Instalación}
-Se detallarán los pasos necesarios para la obtención e instalación del software, así como los requisitos previos de hardware y software.
+
+Para el uso habitual del sistema desplegado solo se requiere:
+
+\begin{itemize}
+    \item un navegador moderno compatible,
+    \item credenciales válidas o una solicitud de alta aprobada.
+\end{itemize}
+
+El sistema redirige automáticamente a una página informativa si detecta un navegador por debajo del soporte mínimo definido en el proyecto.
+
+Si se desea ejecutar la aplicación en local para evaluación, deben seguirse los pasos técnicos descritos en la guía de desarrollador: levantar PostgreSQL con Docker, configurar variables de entorno, ejecutar migraciones e iniciar \texttt{Next.js}.
 
 \section{Uso del sistema}
-Describir todos los aspectos necesarios para una utilización efectiva y eficiente de las características del sistema por parte de los usuarios.
 
+\subsection{Acceso inicial}
 
+\begin{enumerate}
+    \item El usuario accede a \texttt{/login} si ya dispone de cuenta.
+    \item Si todavía no está dado de alta, utiliza \texttt{/register} para enviar una solicitud.
+    \item Tras autenticarse correctamente, el sistema redirige al panel correspondiente según su rol.
+\end{enumerate}
 
+\subsection{Uso como administrador}
+
+El panel de administración concentra dos áreas:
+
+\begin{itemize}
+    \item \textbf{Gestión de usuarios}: revisión de solicitudes, alta manual de cuentas, consulta de usuarios y cambio de estado.
+    \item \textbf{Gestión de clientes}: consulta de clientes y asignaciones entre clientes y comerciales.
+\end{itemize}
+
+Las operaciones más habituales para este rol son:
+
+\begin{enumerate}
+    \item revisar solicitudes de registro pendientes;
+    \item aprobar, denegar o bloquear cuentas;
+    \item crear usuarios desde administración;
+    \item acceder al detalle de cliente para revisar sus datos;
+    \item asignar o reasignar clientes a un comercial;
+    \item consultar la vista de auditoría de accesos y acciones administrativas.
+\end{enumerate}
+
+\subsection{Uso como comercial}
+
+El panel comercial muestra actualmente una tarjeta principal de ruta diaria y varios accesos operativos del módulo \texttt{M2}.
+
+Los flujos ya disponibles son:
+
+\begin{enumerate}
+    \item consultar la vista previa de la ruta del día, con clientes mapeados, tiempos aproximados y margen restante;
+    \item acceder al listado de clientes asignados;
+    \item abrir la ficha de un cliente para consultar su información operativa;
+    \item consultar, crear y actualizar visitas comerciales;
+    \item ajustar la jornada base, los puntos de salida y la duración estimada de visitas en \texttt{/commercials/settings};
+    \item abrir la página \texttt{/commercials/routes} para visualizar la ruta en una vista dedicada.
+\end{enumerate}
+
+La información de ruta se apoya en la geolocalización del dispositivo cuando está disponible. Si el navegador no concede permiso, el sistema intenta utilizar el punto de salida guardado para el comercial.
+
+\subsection{Uso como cliente}
+
+En el estado actual del proyecto, el área cliente se centra en dos capacidades reales:
+
+\begin{itemize}
+    \item consultar la tarjeta de estimación de reparto del día;
+    \item consultar y editar su propio perfil.
+\end{itemize}
+
+La tarjeta de reparto indica, cuando existe una visita de entrega planificada:
+
+\begin{itemize}
+    \item hora aproximada de llegada,
+    \item orden previsto dentro de la ruta,
+    \item franja de visita registrada,
+    \item comercial asignado,
+    \item estado de la previsión.
+\end{itemize}
+
+Si no existe reparto para ese día, o si la visita ha quedado fuera de la franja horaria permitida, el sistema lo comunica expresamente.
+
+\subsection{Perfil y datos personales}
+
+Todos los roles pueden acceder a \texttt{/profile} para editar sus datos personales. Desde esta pantalla es posible:
+
+\begin{itemize}
+    \item modificar nombre, correo, empresa y teléfono;
+    \item subir o reemplazar la imagen de perfil;
+    \item cambiar la contraseña cumpliendo las reglas de validación;
+    \item en el caso del cliente, editar la información de su ficha y confirmar la ubicación exacta del establecimiento sobre mapa.
+\end{itemize}
+
+\subsection{Observaciones sobre el alcance actual}
+
+Aunque la navegación ya anticipa futuros módulos del sistema, no todas las tarjetas visibles representan funcionalidades completas en esta versión. En particular:
+
+\begin{itemize}
+    \item la previsualización de ruta existe tanto en el panel comercial principal como en una página independiente de rutas;
+    \item varias tarjetas del panel cliente quedan reservadas para módulos futuros como catálogo, pedidos o formaciones.
+\end{itemize}

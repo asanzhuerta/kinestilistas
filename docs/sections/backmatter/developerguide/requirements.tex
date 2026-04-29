@@ -1,187 +1,120 @@
 \section{Preparación del entorno de trabajo}
 
-En esta sección se describen los requisitos hardware y software necesarios para el desarrollo del proyecto, así como la configuración del entorno de trabajo adoptado.
-
-La aplicación se ha desarrollado siguiendo una arquitectura full-stack monolítica basada en Next.js, donde el frontend y la lógica de servidor (API Routes) conviven dentro del mismo proyecto. Para la persistencia de datos se emplea PostgreSQL, ejecutado como servicio independiente mediante contenedores Docker.
-
-Asimismo, se documenta la configuración del sistema de control de versiones y el entorno de documentación utilizado para la redacción de esta memoria.
+En esta sección se describen los requisitos reales necesarios para desarrollar y ejecutar el proyecto en local.
 
 \subsection{Requisitos hardware}
 
-El desarrollo del proyecto se realizó en dos equipos con las siguientes características:
+No se requieren características especiales más allá de un equipo capaz de ejecutar herramientas modernas de desarrollo web y contenedores Docker. La configuración utilizada durante el desarrollo se ha movido cómodamente en el siguiente rango:
 
 \begin{itemize}
-    \item Sistema operativo: Windows 11 64 bits
-    \item Procesador: Intel Core i5 8600K (equipo de sobremesa) / Intel Core i5 11400H (portátil)
-    \item Memoria RAM: 16 GB
-    \item Espacio en disco disponible: superior a 10 GB
+    \item sistema operativo Windows 11 de 64 bits,
+    \item 16 GB de memoria RAM,
+    \item al menos 10 GB de espacio libre,
+    \item procesador de gama media actual.
 \end{itemize}
-
-No se requieren características hardware especiales más allá de las necesarias para ejecutar herramientas modernas de desarrollo web y contenedores Docker para la virtualización de servicios.
 
 \subsection{Requisitos software}
 
-Las herramientas utilizadas durante el desarrollo del proyecto han sido las siguientes:
-
-\subsubsection*{Entorno de desarrollo}
+\subsubsection*{Base del entorno}
 
 \begin{itemize}
-    \item Node.js v24.13.1
-    \item npm 11.10.1 (incluido con Node.js)
-    \item Next.js 16.1.6
-    \item React 19.x
-    \item next-pwa 5.x (integración como Progressive Web App)
-    \item cloudflare/cloudflared (ejecutado mediante Docker para túnel HTTPS de pruebas)
-    \item PostgreSQL 16 (ejecutado en contenedor Docker)
-    \item Docker Desktop 4.62.0
-    \item Paquete \texttt{pg} (cliente oficial de PostgreSQL para Node.js)
+    \item \texttt{Node.js 20} o superior
+    \item \texttt{npm}
+    \item \texttt{Docker Desktop} o equivalente
+    \item \texttt{Git}
 \end{itemize}
 
-Next.js permite integrar en un único proyecto tanto la interfaz de usuario como la lógica de servidor mediante su sistema de rutas y API interna. Esto elimina la necesidad de un backend independiente basado en frameworks como Express, simplificando la arquitectura general del sistema.
+\subsubsection*{Dependencias principales del proyecto}
 
-\subsubsection*{Herramientas adicionales}
+La aplicación utiliza actualmente:
 
 \begin{itemize}
-    \item Git 2.34.0.windows.1
-    \item GitHub Desktop 3.5.4
-    \item Visual Studio Code 1.109.5
-    \item MiKTeX 26.1 (distribución \LaTeX)
-    \item Strawberry Perl v5.42.0 (necesario para la ejecución de \texttt{latexmk})
+    \item \texttt{Next.js 16.1.6}
+    \item \texttt{React 19.2.3}
+    \item \texttt{TypeScript 5}
+    \item \texttt{Tailwind CSS 4}
+    \item \texttt{Framer Motion}
+    \item \texttt{Auth.js / NextAuth 5 beta}
+    \item \texttt{TypeORM 0.3.28}
+    \item \texttt{PostgreSQL 16}
+    \item \texttt{Cloudinary}
+    \item \texttt{Leaflet} y \texttt{react-leaflet}
 \end{itemize}
 
-\subsection{Instalación del entorno local}
-
-\subsubsection*{Node.js y npm}
-
-Se instaló la versión LTS de Node.js desde su sitio oficial.  
-Tras la instalación, se verificó su correcta integración en el sistema mediante:
-
-\begin{lstlisting}[language=bash]
-node -v
-npm -v
-\end{lstlisting}
-
-\subsubsection*{Creación del proyecto Next.js}
-
-El proyecto se inicializó mediante el comando:
-
-\begin{lstlisting}[language=bash]
-npx create-next-app@latest nombre-proyecto
-\end{lstlisting}
-
-Este comando genera automáticamente la estructura base del proyecto e instala las dependencias principales:
+\subsubsection*{Herramientas auxiliares}
 
 \begin{itemize}
-    \item next
-    \item react
-    \item react-dom
+    \item \texttt{Visual Studio Code} para edición y depuración
+    \item \texttt{MiKTeX} y \texttt{latexmk} para compilar la memoria
 \end{itemize}
 
-Asimismo, configura los scripts de desarrollo y compilación en el archivo \texttt{package.json}.
+\subsection{Configuración local}
 
-Para iniciar el servidor de desarrollo se ejecuta:
+\subsubsection*{Base de datos}
 
-\begin{lstlisting}[language=bash]
-npm run dev
-\end{lstlisting}
-
-El servidor queda accesible en:
-
-\begin{center}
-\texttt{http://localhost:3000}
-\end{center}
-
-\subsubsection*{Configuración de la base de datos PostgreSQL}
-
-La base de datos PostgreSQL se ejecuta mediante un contenedor Docker definido en el archivo \texttt{docker-compose.yml}, ubicado en la raíz del repositorio.
-
-El servicio se inicia mediante:
+El servicio PostgreSQL se define en \texttt{docker-compose.yml} en la raiz del repositorio. Para arrancarlo:
 
 \begin{lstlisting}[language=bash]
 docker compose up -d
 \end{lstlisting}
 
-El servidor de base de datos queda disponible en el puerto 5432.  
-Los scripts de inicialización de la base de datos se encuentran en el directorio \texttt{db/init}, permitiendo la creación automática de tablas y datos de prueba durante la primera ejecución del contenedor.
+Por defecto queda expuesto en el puerto \texttt{5432}. El repositorio mantiene también una carpeta \texttt{db/init/} con scripts auxiliares de inicialización.
 
-Para detener el servicio se utiliza:
+\subsubsection*{Aplicación web}
+
+Una vez levantada la base de datos, la aplicación se prepara desde la carpeta \texttt{app-tfg/}:
 
 \begin{lstlisting}[language=bash]
-docker compose down
+cd app-tfg
+npm install
 \end{lstlisting}
 
-En caso de requerir una reinicialización completa de la base de datos (incluyendo la eliminación de volúmenes persistentes), se ejecuta:
+\subsubsection*{Variables de entorno}
+
+Las variables mínimas necesarias son:
 
 \begin{lstlisting}[language=bash]
-docker compose down -v
+DATABASE_URL=postgres://kin:kin@localhost:5432/kin
+AUTH_SECRET=valor-seguro
 \end{lstlisting}
 
-\subsubsection*{Conexión entre Next.js y PostgreSQL}
+Variables opcionales según integración:
 
-La comunicación entre la aplicación y la base de datos se realiza mediante el paquete oficial \texttt{pg}, instalado con:
+\begin{itemize}
+    \item \texttt{CLOUDINARY\_*} para la subida de imágenes de perfil.
+    \item \texttt{GEOCODING\_*} para personalizar el comportamiento de geocodificación.
+    \item \texttt{NEXT\_PUBLIC\_OSRM\_BASE\_URL} para sustituir el proveedor de rutas.
+\end{itemize}
+
+\subsubsection*{Migraciones y arranque}
+
+Tras definir el entorno:
 
 \begin{lstlisting}[language=bash]
-npm install pg
+npm run migration:run
+npm run dev
 \end{lstlisting}
 
-La conexión se gestiona mediante un Pool reutilizable configurado a través de variables de entorno definidas en el archivo \texttt{.env.local}.  
+La aplicación queda disponible en \texttt{http://localhost:3000}.
 
-Las consultas a la base de datos se implementan dentro de las API Routes de Next.js, integrando así la capa de acceso a datos dentro del propio proyecto full-stack.
+\subsection{Compilación y comprobaciones}
 
-\subsubsection*{Configuración y pruebas como Progressive Web App (PWA)}
-
-Con el objetivo de probar la aplicación en dispositivos móviles como aplicación instalable, se configuró el proyecto como Progressive Web App (PWA) mediante el paquete \texttt{next-pwa}:
+Los comandos recomendados durante el desarrollo son:
 
 \begin{lstlisting}[language=bash]
-npm install next-pwa
-\end{lstlisting}
-
-Para permitir su instalación en dispositivos móviles es necesario ejecutar la aplicación en modo producción:
-
-\begin{lstlisting}[language=bash]
+npm run lint
+npm run typecheck
 npm run build
-npm run start
 \end{lstlisting}
 
-En Android, la instalación se realiza desde cualquier navegador que no sea Google Chrome mediante la opción \textit{Instalar aplicación}.  
-En iOS, la instalación debe realizarse desde Safari seleccionando \textit{Añadir a pantalla de inicio}.
+El proyecto no dispone todavía de una batería completa de tests funcionales automatizados, de modo que estas comprobaciones deben acompañarse de validación manual de los flujos por rol.
 
-\subsubsection*{Túnel HTTPS para pruebas móviles}
+\subsection{Documentación técnica}
 
-Para poder instalar la aplicación como PWA en dispositivos móviles, es necesario servirla bajo HTTPS. Durante el desarrollo se utilizó Cloudflare Tunnel ejecutado como contenedor Docker, evitando instalaciones adicionales en el sistema.
-
-El servicio se inicia mediante:
-
-\begin{lstlisting}[language=bash]
-docker compose up -d cloudflared
-\end{lstlisting}
-
-El contenedor genera una URL HTTPS temporal que permite acceder a la aplicación desde el smartphone y realizar el proceso de instalación para pruebas.
-
-\subsubsection*{Control de versiones}
-
-El control de versiones se configuró mediante Git, inicializando el repositorio local con:
-
-\begin{lstlisting}[language=bash]
-git init
-git add .
-git commit -m "Initial commit"
-\end{lstlisting}
-
-Posteriormente, el repositorio fue vinculado a un repositorio remoto alojado en GitHub.
-
-\subsubsection*{Entorno de documentación en \LaTeX}
-
-La memoria se desarrolló en \LaTeX utilizando la distribución MiKTeX junto con Strawberry Perl, necesario para la ejecución de \texttt{latexmk}. La edición y compilación se realizaron en Visual Studio Code mediante la extensión \textit{LaTeX Workshop}.
-
-La compilación del documento se realiza mediante:
+La memoria del TFG se mantiene en \texttt{docs/}. Su compilación puede realizarse mediante:
 
 \begin{lstlisting}[language=bash]
 latexmk -pdf -shell-escape main.tex
 \end{lstlisting}
 
-También es posible compilarlo mediante la función integrada en el editor.
-
-\paragraph{Configuración del PATH}
-
-Durante la instalación fue necesario añadir manualmente al \texttt{PATH} del sistema las rutas correspondientes a MiKTeX y Strawberry Perl, ya que inicialmente el comando \texttt{latexmk} no era reconocido por la terminal. Tras actualizar la variable de entorno y reiniciar la sesión, el entorno quedó correctamente configurado.
+La carpeta de documentación debe evolucionar en paralelo al código cuando se incorporen nuevas funcionalidades o se reorganicen módulos ya existentes.

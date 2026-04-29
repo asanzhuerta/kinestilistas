@@ -1,20 +1,63 @@
-% ------------------------------------------------------------------------------
-% Este fichero es parte de la plantilla LaTeX para la realización de Proyectos
-% Final de Grado, protegido bajo los términos de la licencia GFDL.
-% Para más información, la licencia completa viene incluida en el
-% fichero fdl-1.3.tex
-
-% Copyright (C) 2012 SPI-FM. Universidad de Cádiz
-% ------------------------------------------------------------------------------
-
-Este capítulo trata sobre todos los aspectos relacionados con la implementación del sistema en código, haciendo uso de un determinado entorno tecnológico.
+Este capítulo describe la implementación real del sistema, centrada en la aplicación web desarrollada en \texttt{Next.js}, la capa de persistencia basada en \texttt{TypeORM} y la evolución ya materializada de los módulos \texttt{M1} y \texttt{M2}.
 
 \section{Entorno de Construcción}
 \label{sec:ConstructionEnvironment}
 \input{./sections/development/implementation/constructionenvironment.tex}
 
 \section{Código Fuente}
-Organización del código fuente, describiendo la utilidad de los diferentes ficheros y su distribución en paquetes o directorios. Asimismo, se incluirá algún extracto significativo de código fuente que sea de interés para ilustrar algún algoritmo o funcionalidad específica del sistema.
+
+La implementación actual del proyecto se concentra en la carpeta \texttt{app-tfg/}, mientras que la carpeta \texttt{docs/} almacena la memoria técnica en \LaTeX. Dentro de la aplicación principal se distinguen los siguientes bloques:
+
+\begin{itemize}
+    \item \texttt{app/}: páginas, layouts, \textit{Route Handlers} y componentes de interfaz.
+    \item \texttt{app/api/}: endpoints internos para autenticación, perfil, administración, clientes y operativa comercial.
+    \item \texttt{app/components/}: componentes reutilizables de interfaz, mapas, formularios y vistas por rol.
+    \item \texttt{app/hooks/api/}: hooks cliente para encapsular llamadas HTTP, estado de carga y mensajes de error.
+    \item \texttt{lib/}: contratos compartidos, lógica de negocio, integraciones externas, seguridad y acceso a datos.
+    \item \texttt{migrations/typeorm/}: migraciones versionadas de base de datos para los módulos \texttt{M1} y \texttt{M2}.
+\end{itemize}
+
+\subsection{Implementación del módulo M1}
+
+El módulo \texttt{M1} se apoya principalmente en \texttt{auth.ts}, \texttt{proxy.ts}, los endpoints de \texttt{/api/auth/*}, los servicios de usuario de \texttt{lib/typeorm/services/users/} y las entidades de seguridad y trazabilidad.
+
+Las piezas más relevantes son las siguientes:
+
+\begin{itemize}
+    \item Autenticación mediante proveedor de credenciales de \texttt{Auth.js}, con sesión \texttt{JWT}.
+    \item Control de acceso por rol en \texttt{proxy.ts}, que protege las rutas \texttt{/admin}, \texttt{/commercials} y \texttt{/clients}.
+    \item Registro de solicitudes de alta y gestión administrativa de estados de cuenta.
+    \item Registro de eventos de acceso y trazabilidad de sesiones exitosas o fallidas.
+    \item Gestión y edición del perfil propio, incluyendo cambio de contraseña y subida de imagen a \texttt{Cloudinary}.
+\end{itemize}
+
+\subsection{Implementación del módulo M2}
+
+El módulo \texttt{M2} se reparte entre las rutas de administración de clientes, la zona comercial, la zona cliente y la lógica de planificación diaria ubicada en \texttt{lib/commercial/}.
+
+Actualmente ya están implementados:
+
+\begin{itemize}
+    \item Gestión de clientes profesionales y de sus datos de ficha.
+    \item Asignación, desasignación y reasignación de clientes a comerciales.
+    \item Geolocalización de establecimientos mediante búsqueda de dirección y confirmación manual sobre mapa.
+    \item Configuración operativa del comercial para jornada base, puntos de salida y duración de visitas.
+    \item Alta, consulta y seguimiento de visitas comerciales por fecha, tipo y estado.
+    \item Previsualización de ruta diaria con orden previsto, tiempos estimados, margen disponible e incidencias de franja horaria.
+    \item Consulta por parte del cliente de la hora aproximada de reparto cuando existe una visita de entrega planificada para el día.
+\end{itemize}
+
+La lógica temporal de rutas y estimaciones no reside en la capa visual, sino que se centraliza en \texttt{lib/commercial/daily-route-planning.ts}. Esta decisión permite reutilizar el mismo cálculo tanto en el panel comercial como en la tarjeta de ETA que visualiza el cliente.
 
 \section{Scripts de Base de datos}
-Organización del código fuente, describiendo la utilidad de los diferentes ficheros y su distribución en paquetes o directorios. Asimismo, se incluirá el script de algún disparador o un procedimiento almacenado, que sea de interés para ilustrar algún aspecto concreto de la gestión de la base de datos.
+
+La persistencia se gestiona mediante migraciones de \texttt{TypeORM}. No se han empleado procedimientos almacenados ni disparadores específicos; la lógica de negocio se mantiene en servicios TypeScript, lo que simplifica su trazabilidad junto al resto del código fuente.
+
+La serie de migraciones actual queda organizada del siguiente modo:
+
+\begin{itemize}
+    \item Migraciones \texttt{001} a \texttt{005}: tablas base del módulo \texttt{M1}, catálogos de roles y estados, usuarios, solicitudes, logs de acceso y datos semilla iniciales.
+    \item Migraciones \texttt{006} a \texttt{018}: tablas y ajustes del módulo \texttt{M2}, incluyendo clientes, comerciales, asignaciones, configuración de ruta, geodatos, tipos de visita, modelo de visitas por jornada y estado aplazado.
+\end{itemize}
+
+Esta estrategia permite reconstruir el esquema de forma controlada en cualquier entorno, auditar los cambios estructurales del sistema y extender el proyecto sin depender de modificaciones manuales sobre la base de datos.
