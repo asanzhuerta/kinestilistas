@@ -5,8 +5,7 @@ import {
 	unauthorizedError,
 } from "@/lib/api/server";
 import {
-	deleteImageByPublicId,
-	extractPublicIdFromUrl,
+	deleteReplacedCloudinaryImage,
 	uploadCatalogImage,
 } from "@/lib/cloudinary";
 
@@ -46,11 +45,13 @@ export async function POST(request: Request) {
 		const buffer = Buffer.from(arrayBuffer);
 		const base64File = `data:${file.type};base64,${buffer.toString("base64")}`;
 		const uploadResult = await uploadCatalogImage(base64File);
-		const previousPublicId = extractPublicIdFromUrl(previousImageUrl);
 
-		if (previousPublicId && previousPublicId !== uploadResult.public_id) {
+		if (previousImageUrl) {
 			try {
-				await deleteImageByPublicId(previousPublicId);
+				await deleteReplacedCloudinaryImage(
+					previousImageUrl,
+					uploadResult.secure_url,
+				);
 			} catch (error) {
 				console.error("[admin/catalog/upload-image] delete previous error:", error);
 			}

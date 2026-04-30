@@ -7,6 +7,7 @@ import { ColorChart } from "@/lib/typeorm/entities/ColorChart";
 import { ColorReference } from "@/lib/typeorm/entities/ColorReference";
 import { normalizeColorChartWriteInput, normalizeColorReferenceWriteInput } from "./catalog-validation";
 import {
+	cleanupCatalogImageReplacement,
 	requireColorChart,
 	requireColorReference,
 	requireProductLine,
@@ -108,6 +109,7 @@ export async function updateColorChart(
 		const updatedColorChart = await ds.transaction(async (manager) => {
 			const repo = manager.getRepository(ColorChart);
 			const colorChart = await requireColorChart(manager, input.colorChartId);
+			const previousImageUrl = colorChart.image_url;
 
 			if (normalized.productLineId !== undefined) {
 				await requireProductLine(manager, normalized.productLineId);
@@ -126,8 +128,20 @@ export async function updateColorChart(
 				colorChart.image_url = normalized.imageUrl;
 			}
 
-			return repo.save(colorChart);
+			const savedColorChart = await repo.save(colorChart);
+
+			return {
+				id: savedColorChart.id,
+				previousImageUrl,
+				nextImageUrl: savedColorChart.image_url,
+			};
 		});
+
+		await cleanupCatalogImageReplacement(
+			updatedColorChart.previousImageUrl,
+			updatedColorChart.nextImageUrl,
+			"catalog/color-chart",
+		);
 
 		return getColorChartById(updatedColorChart.id);
 	} catch (error) {
@@ -233,6 +247,7 @@ export async function updateColorReference(
 				manager,
 				input.colorReferenceId,
 			);
+			const previousImageUrl = colorReference.image_url;
 			const nextColorChartId =
 				normalized.colorChartId ?? colorReference.color_chart_id;
 
@@ -262,8 +277,20 @@ export async function updateColorReference(
 				colorReference.display_order = normalized.displayOrder;
 			}
 
-			return repo.save(colorReference);
+			const savedColorReference = await repo.save(colorReference);
+
+			return {
+				id: savedColorReference.id,
+				previousImageUrl,
+				nextImageUrl: savedColorReference.image_url,
+			};
 		});
+
+		await cleanupCatalogImageReplacement(
+			updatedColorReference.previousImageUrl,
+			updatedColorReference.nextImageUrl,
+			"catalog/color-reference",
+		);
 
 		return getColorReferenceById(updatedColorReference.id);
 	} catch (error) {

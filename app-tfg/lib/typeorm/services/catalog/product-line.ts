@@ -4,6 +4,7 @@ import { ProductLine } from "@/lib/typeorm/entities/ProductLine";
 import { normalizeProductLineWriteInput } from "./catalog-validation";
 import {
 	CatalogServiceError,
+	cleanupCatalogImageReplacement,
 	requireProductCategory,
 	rethrowCatalogPersistenceError,
 } from "./catalog-internal";
@@ -109,6 +110,8 @@ export async function updateProductLine(
 				);
 			}
 
+			const previousImageUrl = productLine.image_url;
+
 			if (normalized.productCategoryId !== undefined) {
 				await requireProductCategory(
 					manager,
@@ -133,8 +136,20 @@ export async function updateProductLine(
 				productLine.display_order = normalized.displayOrder;
 			}
 
-			return repo.save(productLine);
+			const savedProductLine = await repo.save(productLine);
+
+			return {
+				id: savedProductLine.id,
+				previousImageUrl,
+				nextImageUrl: savedProductLine.image_url,
+			};
 		});
+
+		await cleanupCatalogImageReplacement(
+			updatedProductLine.previousImageUrl,
+			updatedProductLine.nextImageUrl,
+			"catalog/product-line",
+		);
 
 		return getProductLineById(updatedProductLine.id);
 	} catch (error) {

@@ -6,7 +6,10 @@ import {
 	readJsonBody,
 	unauthorizedError,
 } from "@/lib/api/server";
-import { isValidCloudinaryImageUrl } from "@/lib/cloudinary";
+import {
+	deleteReplacedCloudinaryImage,
+	isValidCloudinaryImageUrl,
+} from "@/lib/cloudinary";
 import type { UpdateOwnProfileBody } from "@/lib/contracts/user-profile";
 import { getPasswordValidationMessage } from "@/lib/utils/password-utils";
 import { isValidEmail, normalizeEmail, normalizeText } from "@/lib/utils/text";
@@ -108,7 +111,7 @@ export async function PATCH(request: Request) {
 
 		const ds = await getDataSource();
 
-		await ds.transaction(async (manager) => {
+		const profileImageChange = await ds.transaction(async (manager) => {
 			const userRepo = manager.getRepository(User);
 			const clientRepo = manager.getRepository(Client);
 
@@ -137,6 +140,7 @@ export async function PATCH(request: Request) {
 				}
 			}
 
+			const previousProfileImageUrl = user.profile_image_url;
 			user.name = name;
 			user.email = email;
 			user.company = company;
@@ -180,7 +184,24 @@ export async function PATCH(request: Request) {
 					await clientRepo.save(client);
 				}
 			}
+
+			return {
+				previousProfileImageUrl,
+				nextProfileImageUrl: user.profile_image_url,
+			};
 		});
+
+		try {
+			await deleteReplacedCloudinaryImage(
+				profileImageChange.previousProfileImageUrl,
+				profileImageChange.nextProfileImageUrl,
+			);
+		} catch (cleanupError) {
+			console.error(
+				"[profile] Error borrando la imagen anterior de Cloudinary:",
+				cleanupError,
+			);
+		}
 
 		return NextResponse.json(
 			{

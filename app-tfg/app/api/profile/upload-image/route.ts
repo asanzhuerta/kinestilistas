@@ -6,8 +6,7 @@ import {
 	unauthorizedError,
 } from "@/lib/api/server";
 import {
-	deleteImageByPublicId,
-	extractPublicIdFromUrl,
+	deleteReplacedCloudinaryImage,
 	uploadProfileImage,
 } from "@/lib/cloudinary";
 import { getDataSource } from "@/lib/typeorm/data-source";
@@ -25,6 +24,8 @@ export async function POST(request: Request) {
 	try {
 		const formData = await request.formData();
 		const file = formData.get("file");
+		const previousImageUrl =
+			String(formData.get("previousImageUrl") ?? "").trim() || null;
 
 		if (!(file instanceof File)) {
 			return badRequestError("No se ha enviado ningun archivo", "FILE_REQUIRED");
@@ -56,15 +57,19 @@ export async function POST(request: Request) {
 			return notFoundError("Usuario no encontrado", "USER_NOT_FOUND");
 		}
 
-		const previousPublicId = extractPublicIdFromUrl(user.profile_image_url);
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
 		const base64File = `data:${file.type};base64,${buffer.toString("base64")}`;
 		const uploadResult = await uploadProfileImage(base64File);
 
-		if (previousPublicId && previousPublicId !== uploadResult.public_id) {
+		const imageToReplace = previousImageUrl || user.profile_image_url;
+
+		if (imageToReplace) {
 			try {
-				await deleteImageByPublicId(previousPublicId);
+				await deleteReplacedCloudinaryImage(
+					imageToReplace,
+					uploadResult.secure_url,
+				);
 			} catch (error) {
 				console.error("Error borrando imagen anterior:", error);
 			}

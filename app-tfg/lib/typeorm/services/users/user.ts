@@ -19,6 +19,7 @@ import {
 	assignClientToCommercialInternal,
 	AssignClientToCommercialInternalError,
 } from "@/lib/typeorm/services/commercial/client-commercial-assignment-internal";
+import { deleteReplacedCloudinaryImage } from "@/lib/cloudinary";
 import { createCommercialFromUser } from "@/lib/typeorm/services/commercial/commercial-internal";
 import {
 	REQUEST_SOURCE_TYPE_IDS,
@@ -596,7 +597,7 @@ export async function updateUser(input: UpdateUserInput) {
 
 	const ds = await getDataSource();
 
-	return ds.transaction(async (manager) => {
+	const result = await ds.transaction(async (manager) => {
 		const userRepo = manager.getRepository(User);
 		const roleRepo = manager.getRepository(Role);
 		const statusRepo = manager.getRepository(UserStatus);
@@ -706,6 +707,7 @@ export async function updateUser(input: UpdateUserInput) {
 
 		const previousRoleId = currentUser.role_id;
 		const previousStatusId = currentUser.status_id;
+		const previousProfileImageUrl = currentUser.profile_image_url;
 
 		currentUser.name = name;
 		currentUser.email = email;
@@ -811,6 +813,25 @@ export async function updateUser(input: UpdateUserInput) {
 		return {
 			message: "Usuario actualizado correctamente",
 			userId: currentUser.id,
+			previousProfileImageUrl,
+			nextProfileImageUrl: currentUser.profile_image_url,
 		};
 	});
+
+	try {
+		await deleteReplacedCloudinaryImage(
+			result.previousProfileImageUrl,
+			result.nextProfileImageUrl,
+		);
+	} catch (cleanupError) {
+		console.error(
+			"[users/updateUser] Error borrando la imagen anterior de Cloudinary:",
+			cleanupError,
+		);
+	}
+
+	return {
+		message: result.message,
+		userId: result.userId,
+	};
 }

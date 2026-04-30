@@ -166,6 +166,9 @@ export default function UserProfileCard({
 
 			const uploadFormData = new FormData();
 			uploadFormData.append("file", file);
+			if (formData.profile_image_url) {
+				uploadFormData.append("previousImageUrl", formData.profile_image_url);
+			}
 
 			const body = await requestJson<UploadProfileImageResponse>(
 				"/api/profile/upload-image",

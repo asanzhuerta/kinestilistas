@@ -51,7 +51,32 @@ export async function uploadCatalogImage(base64File: string) {
 export async function deleteImageByPublicId(publicId: string) {
 	return cloudinary.uploader.destroy(publicId, {
 		resource_type: "image",
+		invalidate: true,
 	});
+}
+
+export async function deleteImageByUrl(url: string | null | undefined) {
+	const publicId = extractPublicIdFromUrl(url);
+
+	if (!publicId) {
+		return null;
+	}
+
+	return deleteImageByPublicId(publicId);
+}
+
+export async function deleteReplacedCloudinaryImage(
+	previousUrl: string | null | undefined,
+	nextUrl: string | null | undefined,
+) {
+	const previousPublicId = extractPublicIdFromUrl(previousUrl);
+	const nextPublicId = extractPublicIdFromUrl(nextUrl);
+
+	if (!previousPublicId || previousPublicId === nextPublicId) {
+		return null;
+	}
+
+	return deleteImageByPublicId(previousPublicId);
 }
 
 // Extrae el public_id desde una URL de Cloudinary

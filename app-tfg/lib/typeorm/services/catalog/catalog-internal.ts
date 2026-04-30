@@ -8,6 +8,7 @@ import { SupportResourceType } from "@/lib/typeorm/entities/SupportResourceType"
 import { SupportResource } from "@/lib/typeorm/entities/SupportResource";
 import { ColorChart } from "@/lib/typeorm/entities/ColorChart";
 import { ColorReference } from "@/lib/typeorm/entities/ColorReference";
+import { deleteReplacedCloudinaryImage } from "@/lib/cloudinary";
 
 type QueryDriverError = {
 	code?: string;
@@ -329,4 +330,16 @@ export async function requireColorReference(manager: EntityManager, id: string) 
 	}
 
 	return colorReference;
+}
+
+export async function cleanupCatalogImageReplacement(
+	previousImageUrl: string | null | undefined,
+	nextImageUrl: string | null | undefined,
+	context: string,
+) {
+	try {
+		await deleteReplacedCloudinaryImage(previousImageUrl, nextImageUrl);
+	} catch (error) {
+		console.error(`[${context}] Error borrando imagen anterior de Cloudinary:`, error);
+	}
 }

@@ -3,6 +3,7 @@ import type { AdminUpsertProductBody } from "@/lib/contracts/product-catalog";
 import { Product } from "@/lib/typeorm/entities/Product";
 import { normalizeProductWriteInput } from "./catalog-validation";
 import {
+	cleanupCatalogImageReplacement,
 	requireProduct,
 	requireProductCategory,
 	requireProductLineForCategory,
@@ -144,6 +145,7 @@ export async function updateProduct(input: { productId: string } & AdminUpsertPr
 		const updatedProduct = await ds.transaction(async (manager) => {
 			const repo = manager.getRepository(Product);
 			const product = await requireProduct(manager, input.productId);
+			const previousImageUrl = product.image_url;
 
 			const nextProductCategoryId =
 				normalized.productCategoryId ?? product.product_category_id;
@@ -211,8 +213,20 @@ export async function updateProduct(input: { productId: string } & AdminUpsertPr
 				product.supplier = normalized.supplier;
 			}
 
-			return repo.save(product);
+			const savedProduct = await repo.save(product);
+
+			return {
+				id: savedProduct.id,
+				previousImageUrl,
+				nextImageUrl: savedProduct.image_url,
+			};
 		});
+
+		await cleanupCatalogImageReplacement(
+			updatedProduct.previousImageUrl,
+			updatedProduct.nextImageUrl,
+			"catalog/product",
+		);
 
 		return getProductById(updatedProduct.id);
 	} catch (error) {
