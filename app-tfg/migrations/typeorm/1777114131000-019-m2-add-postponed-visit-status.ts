@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class M2AddPostponedVisitStatus1777000000000
+export class M2AddPostponedVisitStatus1777114131000
 	implements MigrationInterface
 {
-	name = "M2AddPostponedVisitStatus1777000000000";
+	name = "M2AddPostponedVisitStatus1777114131000";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`

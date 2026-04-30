@@ -73,6 +73,7 @@ export type Product = {
 	name: string;
 	reference: string;
 	description: string | null;
+	subcategory: string | null;
 	product_category_id: string;
 	product_line_id: string;
 	image_url: string | null;
@@ -106,6 +107,7 @@ export type AdminUpsertProductBody = {
 	name?: string;
 	reference?: string;
 	description?: string | null;
+	subcategory?: string | null;
 	productCategoryId?: string;
 	productLineId?: string;
 	imageUrl?: string | null;
@@ -167,6 +169,7 @@ export function buildAdminUpsertProductInput(body: AdminUpsertProductBody) {
 		name: body.name,
 		reference: body.reference,
 		description: body.description,
+		subcategory: body.subcategory,
 		productCategoryId: body.productCategoryId,
 		productLineId: body.productLineId,
 		imageUrl: body.imageUrl,

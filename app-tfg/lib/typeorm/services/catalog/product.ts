@@ -59,6 +59,7 @@ export async function listProducts(input: ListProductsInput = {}) {
 				product.name ILIKE :search
 				OR product.reference ILIKE :search
 				OR COALESCE(product.description, '') ILIKE :search
+				OR COALESCE(product.subcategory, '') ILIKE :search
 				OR COALESCE(product.supplier, '') ILIKE :search
 			)`,
 			{ search: `%${search}%` },
@@ -108,6 +109,7 @@ export async function createProduct(input: AdminUpsertProductBody) {
 				name: normalized.name,
 				reference: normalized.reference,
 				description: normalized.description ?? null,
+				subcategory: normalized.subcategory ?? null,
 				product_category_id: String(normalized.productCategoryId),
 				product_line_id: String(normalized.productLineId),
 				image_url: normalized.imageUrl ?? null,
@@ -163,6 +165,10 @@ export async function updateProduct(input: { productId: string } & AdminUpsertPr
 
 			if (normalized.description !== undefined) {
 				product.description = normalized.description;
+			}
+
+			if (normalized.subcategory !== undefined) {
+				product.subcategory = normalized.subcategory;
 			}
 
 			if (normalized.productCategoryId !== undefined) {

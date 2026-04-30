@@ -38,6 +38,7 @@ export type NormalizedProductWriteInput = {
 	name?: string;
 	reference?: string;
 	description?: string | null;
+	subcategory?: string | null;
 	productCategoryId?: string;
 	productLineId?: string;
 	imageUrl?: string | null;
@@ -362,6 +363,7 @@ export function normalizeProductWriteInput(
 				  )
 				: undefined,
 		description: normalizeOptionalTextField(input.description),
+		subcategory: normalizeOptionalTextField(input.subcategory),
 		productCategoryId: normalizeUuidField(
 			input.productCategoryId,
 			"La categoria del producto",

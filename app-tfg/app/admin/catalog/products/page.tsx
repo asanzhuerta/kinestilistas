@@ -47,6 +47,7 @@ function mapProductToItem(
 		fields: [
 			{ label: "Categoria", value: product.productCategory?.name || "-" },
 			{ label: "Linea", value: product.productLine?.name || "-" },
+			{ label: "Subcategoria", value: product.subcategory || "-" },
 			{ label: "Proveedor", value: product.supplier || "-" },
 			{ label: "Precio base", value: `${product.base_price} EUR` },
 			{ label: "Alta", value: formatDateShort(product.created_at) },
@@ -62,6 +63,7 @@ function mapProductToItem(
 			product.name,
 			product.reference,
 			product.description,
+			product.subcategory,
 			product.supplier,
 			product.productCategory?.name,
 			product.productLine?.name,

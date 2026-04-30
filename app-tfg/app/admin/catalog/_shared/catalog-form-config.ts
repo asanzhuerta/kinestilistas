@@ -42,6 +42,7 @@ type ProductValues = {
 	name: string | null;
 	reference: string | null;
 	description: string | null;
+	subcategory: string | null;
 	product_category_id: string | null;
 	product_line_id: string | null;
 	image_url: string | null;
@@ -109,6 +110,7 @@ export function getProductInitialValues(
 		name: product?.name ?? "",
 		reference: product?.reference ?? "",
 		description: product?.description ?? "",
+		subcategory: product?.subcategory ?? "",
 		productCategoryId: product?.product_category_id ?? "",
 		productLineId: product?.product_line_id ?? "",
 		imageUrl: product?.image_url ?? "",
@@ -264,6 +266,12 @@ export function getProductFields(input: {
 					`${productLine.name} · ${productLine.productCategory?.name ?? "Sin categoria"}`,
 				),
 			),
+		},
+		{
+			name: "subcategory",
+			label: "Subcategoria",
+			type: "text",
+			placeholder: "Sublinea o agrupacion interna opcional",
 		},
 		{
 			name: "statusId",

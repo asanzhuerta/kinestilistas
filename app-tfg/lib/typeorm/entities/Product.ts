@@ -33,6 +33,9 @@ export class Product {
 	@Column({ type: "text", nullable: true })
 	description!: string | null;
 
+	@Column({ type: "text", nullable: true })
+	subcategory!: string | null;
+
 	@Column({ type: "uuid" })
 	product_category_id!: string;
 
