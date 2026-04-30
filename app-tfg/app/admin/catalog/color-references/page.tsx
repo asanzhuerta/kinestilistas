@@ -1,14 +1,7 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
-import {
-	getColorReferenceFields,
-	getColorReferenceInitialValues,
-} from "@/app/admin/catalog/_shared/catalog-form-config";
-import {
-	listColorCharts,
-	listColorReferences,
-} from "@/lib/typeorm/services/catalog/color-chart";
+import { listColorReferences } from "@/lib/typeorm/services/catalog/color-chart";
 
 function mapColorReferenceToItem(
 	colorReference: Awaited<ReturnType<typeof listColorReferences>>[number],
@@ -64,10 +57,7 @@ function mapColorReferenceToItem(
 }
 
 export default async function AdminColorReferencesPage() {
-	const [colorReferences, colorCharts] = await Promise.all([
-		listColorReferences(),
-		listColorCharts(),
-	]);
+	const colorReferences = await listColorReferences();
 
 	return (
 		<div className="space-y-6">
@@ -78,14 +68,8 @@ export default async function AdminColorReferencesPage() {
 
 			<CatalogAdminWorkspace
 				entityLabel="referencia"
-				entityLabelPlural="las referencias de color"
 				basePath="/admin/catalog/color-references"
-				apiBasePath="/api/admin/catalog/color-references"
 				items={colorReferences.map(mapColorReferenceToItem)}
-				initialValues={getColorReferenceInitialValues()}
-				fields={getColorReferenceFields(colorCharts)}
-				editPathPattern="/admin/catalog/color-references/[id]/edit"
-				createRedirectToEdit
 				metrics={[
 					{ label: "referencias", value: colorReferences.length },
 					{

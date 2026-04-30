@@ -1,11 +1,6 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
-import {
-	getProductLineFields,
-	getProductLineInitialValues,
-} from "@/app/admin/catalog/_shared/catalog-form-config";
-import { listProductCategories } from "@/lib/typeorm/services/catalog/product-category";
 import { listProductLines } from "@/lib/typeorm/services/catalog/product-line";
 
 function mapProductLineToItem(
@@ -53,10 +48,7 @@ function mapProductLineToItem(
 }
 
 export default async function AdminProductLinesPage() {
-	const [productLines, productCategories] = await Promise.all([
-		listProductLines(),
-		listProductCategories(),
-	]);
+	const productLines = await listProductLines();
 
 	return (
 		<div className="space-y-6">
@@ -67,14 +59,8 @@ export default async function AdminProductLinesPage() {
 
 			<CatalogAdminWorkspace
 				entityLabel="linea comercial"
-				entityLabelPlural="las lineas comerciales"
 				basePath="/admin/catalog/product-lines"
-				apiBasePath="/api/admin/catalog/product-lines"
 				items={productLines.map(mapProductLineToItem)}
-				initialValues={getProductLineInitialValues()}
-				fields={getProductLineFields(productCategories)}
-				editPathPattern="/admin/catalog/product-lines/[id]/edit"
-				createRedirectToEdit
 				metrics={[
 					{ label: "lineas", value: productLines.length },
 					{

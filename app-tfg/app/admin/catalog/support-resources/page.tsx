@@ -1,13 +1,6 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
-import {
-	getSupportResourceFields,
-	getSupportResourceInitialValues,
-} from "@/app/admin/catalog/_shared/catalog-form-config";
-import { listSupportResourceTypes } from "@/lib/typeorm/services/catalog/lookups";
-import { listProductLines } from "@/lib/typeorm/services/catalog/product-line";
-import { listProducts } from "@/lib/typeorm/services/catalog/product";
 import { listSupportResources } from "@/lib/typeorm/services/catalog/support-resource";
 import { formatDateShort } from "@/lib/utils/user-utils";
 
@@ -66,13 +59,7 @@ function mapSupportResourceToItem(
 }
 
 export default async function AdminSupportResourcesPage() {
-	const [supportResources, supportResourceTypes, products, productLines] =
-		await Promise.all([
-			listSupportResources(),
-			listSupportResourceTypes(),
-			listProducts(),
-			listProductLines(),
-		]);
+	const supportResources = await listSupportResources();
 
 	return (
 		<div className="space-y-6">
@@ -83,18 +70,8 @@ export default async function AdminSupportResourcesPage() {
 
 			<CatalogAdminWorkspace
 				entityLabel="recurso"
-				entityLabelPlural="los recursos de apoyo"
 				basePath="/admin/catalog/support-resources"
-				apiBasePath="/api/admin/catalog/support-resources"
 				items={supportResources.map(mapSupportResourceToItem)}
-				initialValues={getSupportResourceInitialValues()}
-				fields={getSupportResourceFields({
-					supportResourceTypes,
-					products,
-					productLines,
-				})}
-				editPathPattern="/admin/catalog/support-resources/[id]/edit"
-				createRedirectToEdit
 				metrics={[
 					{ label: "recursos", value: supportResources.length },
 					{

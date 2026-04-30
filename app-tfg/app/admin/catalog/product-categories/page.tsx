@@ -1,10 +1,6 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
-import {
-	getProductCategoryFields,
-	getProductCategoryInitialValues,
-} from "@/app/admin/catalog/_shared/catalog-form-config";
 import { listProductCategories } from "@/lib/typeorm/services/catalog/product-category";
 
 function mapProductCategoryToItem(
@@ -56,14 +52,8 @@ export default async function AdminProductCategoriesPage() {
 
 			<CatalogAdminWorkspace
 				entityLabel="categoria"
-				entityLabelPlural="las categorias del catalogo"
 				basePath="/admin/catalog/product-categories"
-				apiBasePath="/api/admin/catalog/product-categories"
 				items={categories.map(mapProductCategoryToItem)}
-				initialValues={getProductCategoryInitialValues()}
-				fields={getProductCategoryFields()}
-				editPathPattern="/admin/catalog/product-categories/[id]/edit"
-				createRedirectToEdit
 				metrics={[
 					{ label: "categorias", value: categories.length },
 					{

@@ -1,12 +1,7 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
-import {
-	getColorChartFields,
-	getColorChartInitialValues,
-} from "@/app/admin/catalog/_shared/catalog-form-config";
 import { listColorCharts } from "@/lib/typeorm/services/catalog/color-chart";
-import { listProductLines } from "@/lib/typeorm/services/catalog/product-line";
 import { formatDateShort } from "@/lib/utils/user-utils";
 
 function mapColorChartToItem(
@@ -58,10 +53,7 @@ function mapColorChartToItem(
 }
 
 export default async function AdminColorChartsPage() {
-	const [colorCharts, productLines] = await Promise.all([
-		listColorCharts(),
-		listProductLines(),
-	]);
+	const colorCharts = await listColorCharts();
 
 	return (
 		<div className="space-y-6">
@@ -72,14 +64,8 @@ export default async function AdminColorChartsPage() {
 
 			<CatalogAdminWorkspace
 				entityLabel="carta de color"
-				entityLabelPlural="las cartas de color"
 				basePath="/admin/catalog/color-charts"
-				apiBasePath="/api/admin/catalog/color-charts"
 				items={colorCharts.map(mapColorChartToItem)}
-				initialValues={getColorChartInitialValues()}
-				fields={getColorChartFields(productLines)}
-				editPathPattern="/admin/catalog/color-charts/[id]/edit"
-				createRedirectToEdit
 				metrics={[
 					{ label: "cartas", value: colorCharts.length },
 					{

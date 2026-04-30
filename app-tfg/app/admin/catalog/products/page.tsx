@@ -1,13 +1,6 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
-import {
-	getProductFields,
-	getProductInitialValues,
-} from "@/app/admin/catalog/_shared/catalog-form-config";
-import { listProductCategories } from "@/lib/typeorm/services/catalog/product-category";
-import { listProductLines } from "@/lib/typeorm/services/catalog/product-line";
-import { listProductStatuses } from "@/lib/typeorm/services/catalog/lookups";
 import { listProducts } from "@/lib/typeorm/services/catalog/product";
 import { formatDateShort } from "@/lib/utils/user-utils";
 
@@ -79,13 +72,7 @@ function mapProductToItem(
 }
 
 export default async function AdminProductsPage() {
-	const [products, productCategories, productLines, productStatuses] =
-		await Promise.all([
-			listProducts(),
-			listProductCategories(),
-			listProductLines(),
-			listProductStatuses(),
-		]);
+	const products = await listProducts();
 
 	return (
 		<div className="space-y-6">
@@ -96,18 +83,8 @@ export default async function AdminProductsPage() {
 
 			<CatalogAdminWorkspace
 				entityLabel="producto"
-				entityLabelPlural="los productos del catalogo"
 				basePath="/admin/catalog/products"
-				apiBasePath="/api/admin/catalog/products"
 				items={products.map(mapProductToItem)}
-				initialValues={getProductInitialValues()}
-				fields={getProductFields({
-					productCategories,
-					productLines,
-					productStatuses,
-				})}
-				editPathPattern="/admin/catalog/products/[id]/edit"
-				createRedirectToEdit
 				metrics={[
 					{ label: "productos", value: products.length },
 					{
