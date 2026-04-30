@@ -33,6 +33,10 @@ export default function EntityTable({ items, config }: Props) {
 					setHasImageFilter={table.setHasImageFilter}
 					hideInactiveItems={table.hideInactiveItems}
 					setHideInactiveItems={table.setHideInactiveItems}
+					extraFilterValues={table.extraFilterValues}
+					setExtraFilterValue={table.setExtraFilterValue}
+					extraFilters={config?.extraFilters ?? []}
+					extraFilterOptions={table.extraFilterOptions}
 					sortField={table.sortField}
 					setSortField={table.setSortField}
 					sortDirection={table.sortDirection}

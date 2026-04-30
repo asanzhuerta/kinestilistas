@@ -5,6 +5,7 @@ import type {
 	EntitySortDirection,
 	EntitySortField,
 	EntityTableConfig,
+	EntityTableExtraFilter,
 } from "./entity-table-types";
 
 type Props = {
@@ -18,6 +19,10 @@ type Props = {
 	setHasImageFilter: (value: string) => void;
 	hideInactiveItems: boolean;
 	setHideInactiveItems: (value: boolean) => void;
+	extraFilterValues: Record<string, string>;
+	setExtraFilterValue: (key: string, value: string) => void;
+	extraFilters: EntityTableExtraFilter[];
+	extraFilterOptions: Record<string, string[]>;
 	sortField: EntitySortField;
 	setSortField: (value: EntitySortField) => void;
 	sortDirection: EntitySortDirection;
@@ -42,6 +47,10 @@ export default function EntityTableFilters({
 	setHasImageFilter,
 	hideInactiveItems,
 	setHideInactiveItems,
+	extraFilterValues,
+	setExtraFilterValue,
+	extraFilters,
+	extraFilterOptions,
 	sortField,
 	setSortField,
 	sortDirection,
@@ -184,6 +193,32 @@ export default function EntityTableFilters({
 								</select>
 							</div>
 						) : null}
+
+						{extraFilters.map((filter) => (
+							<div key={filter.key}>
+								<label
+									htmlFor={`entity-table-extra-filter-${filter.key}`}
+									className="mb-1 block text-sm font-semibold text-slate-700"
+								>
+									{filter.label}
+								</label>
+								<select
+									id={`entity-table-extra-filter-${filter.key}`}
+									value={extraFilterValues[filter.key] ?? "todos"}
+									onChange={(e) =>
+										setExtraFilterValue(filter.key, e.target.value)
+									}
+									className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
+								>
+									<option value="todos">{filter.allLabel ?? "Todos"}</option>
+									{(extraFilterOptions[filter.key] ?? []).map((option) => (
+										<option key={option} value={option}>
+											{option}
+										</option>
+									))}
+								</select>
+							</div>
+						))}
 					</div>
 
 					<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

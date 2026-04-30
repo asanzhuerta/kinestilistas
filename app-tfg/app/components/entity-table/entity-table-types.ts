@@ -17,6 +17,12 @@ export type EntityTableField = {
 	value: string;
 };
 
+export type EntityTableExtraFilter = {
+	key: string;
+	label: string;
+	allLabel?: string;
+};
+
 export type EntityTableItem = {
 	id: string;
 	title: string;
@@ -30,6 +36,7 @@ export type EntityTableItem = {
 	fields: EntityTableField[];
 	actions?: EntityTableAction[];
 	searchText?: string;
+	filterValues?: Record<string, string | null | undefined>;
 };
 
 export type EntityTableConfig = {
@@ -40,6 +47,7 @@ export type EntityTableConfig = {
 	hideInactiveLabel?: string;
 	defaultHideInactive?: boolean;
 	emptyMessage?: string;
+	extraFilters?: EntityTableExtraFilter[];
 };
 
 export type EntitySortField =

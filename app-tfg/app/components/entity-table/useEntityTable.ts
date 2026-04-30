@@ -8,8 +8,6 @@ import type {
 	EntityTableItem,
 } from "./entity-table-types";
 
-// Normaliza un valor para facilitar búsquedas y comparaciones
-// sin diferenciar mayúsculas, minúsculas ni tildes.
 function normalizeValue(value: unknown) {
 	return String(value ?? "")
 		.normalize("NFD")
@@ -17,7 +15,6 @@ function normalizeValue(value: unknown) {
 		.toLowerCase();
 }
 
-// Compara dos valores de texto ya normalizados para ordenación.
 function compareValues(a: unknown, b: unknown) {
 	const aValue = normalizeValue(a);
 	const bValue = normalizeValue(b);
@@ -27,14 +24,16 @@ function compareValues(a: unknown, b: unknown) {
 	return 0;
 }
 
-// Hook reutilizable para gestionar búsqueda, filtros y ordenación
-// de cualquier listado basado en EntityTableItem.
+function buildExtraFilterInitialState(config?: EntityTableConfig) {
+	return Object.fromEntries(
+		(config?.extraFilters ?? []).map((filter) => [filter.key, "todos"]),
+	) as Record<string, string>;
+}
+
 export function useEntityTable(
 	items: EntityTableItem[],
 	config?: EntityTableConfig,
 ) {
-	// ESTADO LOCAL
-	// Controla la búsqueda, filtros activos y orden actual del listado.
 	const [search, setSearch] = useState("");
 	const [categoryFilter, setCategoryFilter] = useState("todos");
 	const [statusFilter, setStatusFilter] = useState("todos");
@@ -45,9 +44,10 @@ export function useEntityTable(
 	const [sortField, setSortField] = useState<EntitySortField>("primaryDate");
 	const [sortDirection, setSortDirection] =
 		useState<EntitySortDirection>("desc");
+	const [extraFilterValues, setExtraFilterValues] = useState<
+		Record<string, string>
+	>(() => buildExtraFilterInitialState(config));
 
-	// OPCIONES DE FILTRO
-	// Extrae dinámicamente las categorías presentes en los elementos.
 	const categories = useMemo(
 		() =>
 			[
@@ -58,7 +58,6 @@ export function useEntityTable(
 		[items],
 	);
 
-	// Extrae dinámicamente los estados presentes en los elementos.
 	const statuses = useMemo(
 		() =>
 			[
@@ -69,8 +68,22 @@ export function useEntityTable(
 		[items],
 	);
 
-	// DATOS FILTRADOS Y ORDENADOS
-	// Aplica búsqueda, filtros y ordenación sobre la colección recibida.
+	const extraFilterOptions = useMemo(() => {
+		return Object.fromEntries(
+			(config?.extraFilters ?? []).map((filter) => {
+				const options = [
+					...new Set(
+						items
+							.map((item) => item.filterValues?.[filter.key])
+							.filter(Boolean) as string[],
+					),
+				].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+
+				return [filter.key, options];
+			}),
+		) as Record<string, string[]>;
+	}, [items, config?.extraFilters]);
+
 	const filteredAndSortedItems = useMemo(() => {
 		const searchTerm = normalizeValue(search.trim());
 
@@ -107,12 +120,22 @@ export function useEntityTable(
 				!hideInactiveItems ||
 				item.status?.toLowerCase() !== "inactive";
 
+			const matchesExtraFilters = (config?.extraFilters ?? []).every(
+				(filter) => {
+					const selectedValue = extraFilterValues[filter.key] ?? "todos";
+					const itemValue = item.filterValues?.[filter.key] ?? null;
+
+					return selectedValue === "todos" || itemValue === selectedValue;
+				},
+			);
+
 			return (
 				matchesSearch &&
 				matchesCategory &&
 				matchesStatus &&
 				matchesImage &&
-				matchesHideInactive
+				matchesHideInactive &&
+				matchesExtraFilters
 			);
 		});
 
@@ -129,22 +152,30 @@ export function useEntityTable(
 		statusFilter,
 		hasImageFilter,
 		hideInactiveItems,
+		extraFilterValues,
 		sortField,
 		sortDirection,
+		config?.extraFilters,
 		config?.showImageFilter,
 		config?.showHideInactiveToggle,
 	]);
 
-	// RESETEO DE FILTROS
-	// Restablece todos los filtros al estado inicial configurado.
 	function resetFilters() {
 		setSearch("");
 		setCategoryFilter("todos");
 		setStatusFilter("todos");
 		setHasImageFilter("todos");
 		setHideInactiveItems(config?.defaultHideInactive ?? false);
+		setExtraFilterValues(buildExtraFilterInitialState(config));
 		setSortField("primaryDate");
 		setSortDirection("desc");
+	}
+
+	function setExtraFilterValue(key: string, value: string) {
+		setExtraFilterValues((current) => ({
+			...current,
+			[key]: value,
+		}));
 	}
 
 	return {
@@ -158,6 +189,9 @@ export function useEntityTable(
 		setHasImageFilter,
 		hideInactiveItems,
 		setHideInactiveItems,
+		extraFilterValues,
+		setExtraFilterValue,
+		extraFilterOptions,
 		sortField,
 		setSortField,
 		sortDirection,

@@ -59,6 +59,10 @@ function mapProductToItem(
 				variant: "secondary",
 			},
 		],
+		filterValues: {
+			productLine: product.productLine?.name ?? null,
+			subcategory: product.subcategory ?? null,
+		},
 		searchText: [
 			product.name,
 			product.reference,
@@ -120,6 +124,18 @@ export default async function AdminProductsPage() {
 					categoryLabel: "Categoria",
 					statusLabel: "Estado",
 					showImageFilter: true,
+					extraFilters: [
+						{
+							key: "productLine",
+							label: "Linea comercial",
+							allLabel: "Todas",
+						},
+						{
+							key: "subcategory",
+							label: "Subcategoria",
+							allLabel: "Todas",
+						},
+					],
 					emptyMessage: "No hay productos registrados todavia.",
 				}}
 			/>
