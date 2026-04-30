@@ -11,7 +11,18 @@ type NamedOptionSource = {
 
 type ProductLineOptionSource = NamedOptionSource & {
 	productCategory?: {
+		id?: string | null;
 		name: string | null;
+	} | null;
+};
+
+type ProductSubcategoryOptionSource = NamedOptionSource & {
+	product_line_id: string;
+	productLine?: {
+		name: string | null;
+		productCategory?: {
+			name: string | null;
+		} | null;
 	} | null;
 };
 
@@ -38,13 +49,21 @@ type ProductLineValues = {
 	display_order: number | null;
 };
 
+type ProductSubcategoryValues = {
+	name: string | null;
+	description: string | null;
+	product_line_id: string | null;
+	image_url: string | null;
+	display_order: number | null;
+};
+
 type ProductValues = {
 	name: string | null;
 	reference: string | null;
 	description: string | null;
-	subcategory: string | null;
 	product_category_id: string | null;
 	product_line_id: string | null;
+	product_subcategory_id: string | null;
 	image_url: string | null;
 	format: string | null;
 	packing: number | null;
@@ -105,6 +124,18 @@ export function getProductLineInitialValues(
 	};
 }
 
+export function getProductSubcategoryInitialValues(
+	productSubcategory?: ProductSubcategoryValues | null,
+): Record<string, FormValue> {
+	return {
+		name: productSubcategory?.name ?? "",
+		description: productSubcategory?.description ?? "",
+		productLineId: productSubcategory?.product_line_id ?? "",
+		imageUrl: productSubcategory?.image_url ?? "",
+		displayOrder: String(productSubcategory?.display_order ?? 0),
+	};
+}
+
 export function getProductInitialValues(
 	product?: ProductValues | null,
 ): Record<string, FormValue> {
@@ -112,9 +143,9 @@ export function getProductInitialValues(
 		name: product?.name ?? "",
 		reference: product?.reference ?? "",
 		description: product?.description ?? "",
-		subcategory: product?.subcategory ?? "",
 		productCategoryId: product?.product_category_id ?? "",
 		productLineId: product?.product_line_id ?? "",
+		productSubcategoryId: product?.product_subcategory_id ?? "",
 		imageUrl: product?.image_url ?? "",
 		format: product?.format ?? "",
 		packing:
@@ -233,9 +264,55 @@ export function getProductLineFields(
 	];
 }
 
+export function getProductSubcategoryFields(
+	productLines: ProductLineOptionSource[],
+): FieldDescriptor[] {
+	return [
+		{
+			name: "name",
+			label: "Nombre",
+			type: "text",
+			required: true,
+			placeholder: "Antiox, nourish, scalp...",
+		},
+		{
+			name: "productLineId",
+			label: "Linea comercial",
+			type: "select",
+			required: true,
+			options: productLines.map((productLine) =>
+				buildOption(
+					productLine.id,
+					`${productLine.name} · ${productLine.productCategory?.name ?? "Sin categoria"}`,
+				),
+			),
+		},
+		{
+			name: "imageUrl",
+			label: "Imagen",
+			type: "image",
+			helpText:
+				"Sube la imagen principal de la subcategoria. Se guardara en Cloudinary.",
+		},
+		{
+			name: "displayOrder",
+			label: "Orden de visualizacion",
+			type: "number",
+			min: 0,
+		},
+		{
+			name: "description",
+			label: "Descripcion",
+			type: "textarea",
+			placeholder: "Describe el grupo de tratamientos o variantes que representa.",
+		},
+	];
+}
+
 export function getProductFields(input: {
 	productCategories: NamedOptionSource[];
 	productLines: ProductLineOptionSource[];
+	productSubcategories: ProductSubcategoryOptionSource[];
 	productStatuses: LookupOptionSource[];
 }): FieldDescriptor[] {
 	return [
@@ -267,18 +344,25 @@ export function getProductFields(input: {
 			label: "Linea comercial",
 			type: "select",
 			required: true,
-			options: input.productLines.map((productLine) =>
-				buildOption(
-					productLine.id,
-					`${productLine.name} · ${productLine.productCategory?.name ?? "Sin categoria"}`,
-				),
-			),
+			options: input.productLines.map((productLine) => ({
+				value: productLine.id,
+				label: `${productLine.name} · ${productLine.productCategory?.name ?? "Sin categoria"}`,
+				groupKey: productLine.productCategory?.id ?? undefined,
+			})),
+			filterByFieldName: "productCategoryId",
 		},
 		{
-			name: "subcategory",
+			name: "productSubcategoryId",
 			label: "Subcategoria",
-			type: "text",
-			placeholder: "Sublinea o agrupacion interna opcional",
+			type: "select",
+			options: input.productSubcategories.map((productSubcategory) => ({
+				value: productSubcategory.id,
+				label: `${productSubcategory.name} · ${productSubcategory.productLine?.name ?? "Sin linea"}`,
+				groupKey: productSubcategory.product_line_id,
+			})),
+			filterByFieldName: "productLineId",
+			helpText:
+				"Opcional. Vincula el producto a una subcategoria concreta de la linea seleccionada.",
 		},
 		{
 			name: "statusId",

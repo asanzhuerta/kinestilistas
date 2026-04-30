@@ -19,6 +19,11 @@ const navItems = [
 		href: "/admin/catalog/product-lines",
 	},
 	{
+		title: "Subcategorias",
+		icon: <CatalogIcon className="h-6 w-6" />,
+		href: "/admin/catalog/product-subcategories",
+	},
+	{
 		title: "Productos",
 		icon: <ProductsIcon className="h-6 w-6" />,
 		href: "/admin/catalog/products",

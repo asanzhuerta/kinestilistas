@@ -40,7 +40,10 @@ function mapProductToItem(
 		fields: [
 			{ label: "Categoria", value: product.productCategory?.name || "-" },
 			{ label: "Linea", value: product.productLine?.name || "-" },
-			{ label: "Subcategoria", value: product.subcategory || "-" },
+			{
+				label: "Subcategoria",
+				value: product.productSubcategory?.name || "-",
+			},
 			{ label: "Formato", value: product.format || "-" },
 			{
 				label: "Packing",
@@ -62,13 +65,13 @@ function mapProductToItem(
 		],
 		filterValues: {
 			productLine: product.productLine?.name ?? null,
-			subcategory: product.subcategory ?? null,
+			subcategory: product.productSubcategory?.name ?? null,
 		},
 		searchText: [
 			product.name,
 			product.reference,
 			product.description,
-			product.subcategory,
+			product.productSubcategory?.name,
 			product.format,
 			product.packing !== null && product.packing !== undefined
 				? String(product.packing)
@@ -76,6 +79,7 @@ function mapProductToItem(
 			product.supplier,
 			product.productCategory?.name,
 			product.productLine?.name,
+			product.productSubcategory?.name,
 			product.status?.name,
 		]
 			.filter(Boolean)

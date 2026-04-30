@@ -7,13 +7,16 @@ import CatalogAdminForm from "@/app/components/catalog-admin/CatalogAdminForm";
 import { listProductStatuses } from "@/lib/typeorm/services/catalog/lookups";
 import { listProductCategories } from "@/lib/typeorm/services/catalog/product-category";
 import { listProductLines } from "@/lib/typeorm/services/catalog/product-line";
+import { listProductSubcategories } from "@/lib/typeorm/services/catalog/product-subcategory";
 
 export default async function NewProductPage() {
-	const [productCategories, productLines, productStatuses] = await Promise.all([
-		listProductCategories(),
-		listProductLines(),
-		listProductStatuses(),
-	]);
+	const [productCategories, productLines, productSubcategories, productStatuses] =
+		await Promise.all([
+			listProductCategories(),
+			listProductLines(),
+			listProductSubcategories(),
+			listProductStatuses(),
+		]);
 
 	return (
 		<CatalogAdminCreateShell
@@ -31,6 +34,7 @@ export default async function NewProductPage() {
 				fields={getProductFields({
 					productCategories,
 					productLines,
+					productSubcategories,
 					productStatuses,
 				})}
 				cancelHref="/admin/catalog/products"

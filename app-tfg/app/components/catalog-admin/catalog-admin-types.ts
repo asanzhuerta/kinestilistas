@@ -6,6 +6,7 @@ export type Metric = {
 export type FieldOption = {
 	value: string;
 	label: string;
+	groupKey?: string;
 };
 
 export type FieldType =
@@ -26,6 +27,7 @@ export type FieldDescriptor = {
 	placeholder?: string;
 	helpText?: string;
 	options?: FieldOption[];
+	filterByFieldName?: string;
 	step?: string;
 	min?: number;
 };

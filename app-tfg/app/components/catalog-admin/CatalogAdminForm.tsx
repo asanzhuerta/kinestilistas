@@ -36,6 +36,27 @@ function resolveEditPath(pattern: string, id: string) {
 	return pattern.replace("[id]", id);
 }
 
+function getFilteredOptions(
+	field: FieldDescriptor,
+	formValues: Record<string, FormValue>,
+) {
+	if (!field.options) {
+		return [];
+	}
+
+	const filterValue = field.filterByFieldName
+		? getFieldStringValue(formValues[field.filterByFieldName])
+		: "";
+
+	if (!filterValue) {
+		return field.options;
+	}
+
+	return field.options.filter(
+		(option) => !option.groupKey || option.groupKey === filterValue,
+	);
+}
+
 function getSubmitButtonLabel(
 	isSubmitting: boolean,
 	isEditing: boolean,
@@ -87,10 +108,23 @@ export default function CatalogAdminForm({
 	}, [editingId]);
 
 	function handleTextFieldChange(name: string, value: string) {
-		setFormValues((current) => ({
-			...current,
-			[name]: value,
-		}));
+		setFormValues((current) => {
+			const nextValues = {
+				...current,
+				[name]: value,
+			};
+
+			if (name === "productCategoryId") {
+				nextValues.productLineId = "";
+				nextValues.productSubcategoryId = "";
+			}
+
+			if (name === "productLineId") {
+				nextValues.productSubcategoryId = "";
+			}
+
+			return nextValues;
+		});
 	}
 
 	function handleCheckboxFieldChange(name: string, checked: boolean) {
@@ -332,7 +366,7 @@ export default function CatalogAdminForm({
 										className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
 									>
 										<option value="">Selecciona una opcion</option>
-										{field.options?.map((option) => (
+										{getFilteredOptions(field, formValues).map((option) => (
 											<option key={option.value} value={option.value}>
 												{option.label}
 											</option>

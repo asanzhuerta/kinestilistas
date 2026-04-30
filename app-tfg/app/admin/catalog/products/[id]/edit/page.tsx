@@ -9,6 +9,7 @@ import { listProductCategories } from "@/lib/typeorm/services/catalog/product-ca
 import { listProductLines } from "@/lib/typeorm/services/catalog/product-line";
 import { listProductStatuses } from "@/lib/typeorm/services/catalog/lookups";
 import { getProductById } from "@/lib/typeorm/services/catalog/product";
+import { listProductSubcategories } from "@/lib/typeorm/services/catalog/product-subcategory";
 
 type Props = {
 	params: Promise<{ id: string }>;
@@ -16,11 +17,12 @@ type Props = {
 
 export default async function EditProductPage({ params }: Props) {
 	const { id } = await params;
-	const [product, productCategories, productLines, productStatuses] =
+	const [product, productCategories, productLines, productSubcategories, productStatuses] =
 		await Promise.all([
 			getProductById(id),
 			listProductCategories(),
 			listProductLines(),
+			listProductSubcategories(),
 			listProductStatuses(),
 		]);
 
@@ -44,6 +46,7 @@ export default async function EditProductPage({ params }: Props) {
 				fields={getProductFields({
 					productCategories,
 					productLines,
+					productSubcategories,
 					productStatuses,
 				})}
 				editingId={product.id}
