@@ -60,6 +60,8 @@ export async function listProducts(input: ListProductsInput = {}) {
 				OR product.reference ILIKE :search
 				OR COALESCE(product.description, '') ILIKE :search
 				OR COALESCE(product.subcategory, '') ILIKE :search
+				OR COALESCE(product.format, '') ILIKE :search
+				OR COALESCE(product.packing::text, '') ILIKE :search
 				OR COALESCE(product.supplier, '') ILIKE :search
 			)`,
 			{ search: `%${search}%` },
@@ -113,6 +115,8 @@ export async function createProduct(input: AdminUpsertProductBody) {
 				product_category_id: String(normalized.productCategoryId),
 				product_line_id: String(normalized.productLineId),
 				image_url: normalized.imageUrl ?? null,
+				format: normalized.format ?? null,
+				packing: normalized.packing ?? null,
 				technical_info: normalized.technicalInfo ?? null,
 				status_id: Number(normalized.statusId),
 				base_price: String(normalized.basePrice),
@@ -181,6 +185,14 @@ export async function updateProduct(input: { productId: string } & AdminUpsertPr
 
 			if (normalized.imageUrl !== undefined) {
 				product.image_url = normalized.imageUrl;
+			}
+
+			if (normalized.format !== undefined) {
+				product.format = normalized.format;
+			}
+
+			if (normalized.packing !== undefined) {
+				product.packing = normalized.packing;
 			}
 
 			if (normalized.technicalInfo !== undefined) {

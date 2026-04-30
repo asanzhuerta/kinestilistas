@@ -41,6 +41,14 @@ function mapProductToItem(
 			{ label: "Categoria", value: product.productCategory?.name || "-" },
 			{ label: "Linea", value: product.productLine?.name || "-" },
 			{ label: "Subcategoria", value: product.subcategory || "-" },
+			{ label: "Formato", value: product.format || "-" },
+			{
+				label: "Packing",
+				value:
+					product.packing !== null && product.packing !== undefined
+						? String(product.packing)
+						: "-",
+			},
 			{ label: "Proveedor", value: product.supplier || "-" },
 			{ label: "Precio base", value: `${product.base_price} EUR` },
 			{ label: "Alta", value: formatDateShort(product.created_at) },
@@ -61,6 +69,10 @@ function mapProductToItem(
 			product.reference,
 			product.description,
 			product.subcategory,
+			product.format,
+			product.packing !== null && product.packing !== undefined
+				? String(product.packing)
+				: null,
 			product.supplier,
 			product.productCategory?.name,
 			product.productLine?.name,

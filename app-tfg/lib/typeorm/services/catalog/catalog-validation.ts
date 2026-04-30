@@ -42,6 +42,8 @@ export type NormalizedProductWriteInput = {
 	productCategoryId?: string;
 	productLineId?: string;
 	imageUrl?: string | null;
+	format?: string | null;
+	packing?: number | null;
 	technicalInfo?: string | null;
 	statusId?: number;
 	basePrice?: string;
@@ -251,6 +253,30 @@ function normalizeNonNegativeIntegerField(
 	return parsed;
 }
 
+function normalizeOptionalNonNegativeIntegerField(
+	value: number | string | null | undefined,
+	fieldName: string,
+	code: string,
+) {
+	if (value === undefined) {
+		return undefined;
+	}
+
+	const normalizedValue = String(value ?? "").trim();
+
+	if (!normalizedValue) {
+		return null;
+	}
+
+	const parsed = Number(normalizedValue);
+
+	if (!Number.isInteger(parsed) || parsed < 0) {
+		throw new CatalogValidationError(`${fieldName} no es valido`, 400, code);
+	}
+
+	return parsed;
+}
+
 function normalizePriceField(
 	value: number | string | null | undefined,
 	fieldName: string,
@@ -380,6 +406,12 @@ export function normalizeProductWriteInput(
 			input.imageUrl,
 			"La imagen del producto",
 			"INVALID_PRODUCT_IMAGE_URL",
+		),
+		format: normalizeOptionalTextField(input.format),
+		packing: normalizeOptionalNonNegativeIntegerField(
+			input.packing,
+			"El packing del producto",
+			"INVALID_PRODUCT_PACKING",
 		),
 		technicalInfo: normalizeOptionalTextField(input.technicalInfo),
 		statusId: normalizeLookupIdField(

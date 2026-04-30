@@ -46,6 +46,12 @@ export class Product {
 	image_url!: string | null;
 
 	@Column({ type: "text", nullable: true })
+	format!: string | null;
+
+	@Column({ type: "integer", nullable: true })
+	packing!: number | null;
+
+	@Column({ type: "text", nullable: true })
 	technical_info!: string | null;
 
 	@Column({ type: "smallint" })

@@ -77,6 +77,8 @@ export type Product = {
 	product_category_id: string;
 	product_line_id: string;
 	image_url: string | null;
+	format: string | null;
+	packing: number | null;
 	technical_info: string | null;
 	status_id: number;
 	base_price: string;
@@ -111,6 +113,8 @@ export type AdminUpsertProductBody = {
 	productCategoryId?: string;
 	productLineId?: string;
 	imageUrl?: string | null;
+	format?: string | null;
+	packing?: number | string | null;
 	technicalInfo?: string | null;
 	statusId?: number | string;
 	basePrice?: number | string;
@@ -173,6 +177,8 @@ export function buildAdminUpsertProductInput(body: AdminUpsertProductBody) {
 		productCategoryId: body.productCategoryId,
 		productLineId: body.productLineId,
 		imageUrl: body.imageUrl,
+		format: body.format,
+		packing: body.packing,
 		technicalInfo: body.technicalInfo,
 		statusId: body.statusId,
 		basePrice: body.basePrice,

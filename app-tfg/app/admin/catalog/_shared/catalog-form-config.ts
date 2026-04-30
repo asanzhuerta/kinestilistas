@@ -46,6 +46,8 @@ type ProductValues = {
 	product_category_id: string | null;
 	product_line_id: string | null;
 	image_url: string | null;
+	format: string | null;
+	packing: number | null;
 	technical_info: string | null;
 	status_id: number | null;
 	base_price: string | null;
@@ -114,6 +116,11 @@ export function getProductInitialValues(
 		productCategoryId: product?.product_category_id ?? "",
 		productLineId: product?.product_line_id ?? "",
 		imageUrl: product?.image_url ?? "",
+		format: product?.format ?? "",
+		packing:
+			product?.packing !== null && product?.packing !== undefined
+				? String(product.packing)
+				: "",
 		technicalInfo: product?.technical_info ?? "",
 		statusId: product?.status_id ? String(product.status_id) : "",
 		basePrice: product?.base_price ?? "",
@@ -304,6 +311,19 @@ export function getProductFields(input: {
 				"Sube la imagen principal del producto. Se guardara en Cloudinary.",
 		},
 		{
+			name: "format",
+			label: "Formato",
+			type: "text",
+			placeholder: "250 ml, 1.000 ml, 10 x 50 g...",
+		},
+		{
+			name: "packing",
+			label: "Packing",
+			type: "number",
+			min: 0,
+			placeholder: "6",
+		},
+		{
 			name: "description",
 			label: "Descripcion",
 			type: "textarea",
@@ -314,7 +334,7 @@ export function getProductFields(input: {
 			label: "Informacion tecnica",
 			type: "textarea",
 			placeholder:
-				"Modo de aplicacion, rendimiento, observaciones tecnicas...",
+				"Modo de aplicacion, rendimiento o notas tecnicas adicionales...",
 		},
 	];
 }
