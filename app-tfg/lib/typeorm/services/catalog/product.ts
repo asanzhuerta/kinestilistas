@@ -70,6 +70,9 @@ export async function listProducts(input: ListProductsInput = {}) {
 				product.name ILIKE :search
 				OR product.reference ILIKE :search
 				OR COALESCE(product.description, '') ILIKE :search
+				OR COALESCE(product.technical_info, '') ILIKE :search
+				OR COALESCE(productCategory.name, '') ILIKE :search
+				OR COALESCE(productLine.name, '') ILIKE :search
 				OR COALESCE(productSubcategory.name, '') ILIKE :search
 				OR COALESCE(product.format, '') ILIKE :search
 				OR COALESCE(product.packing::text, '') ILIKE :search

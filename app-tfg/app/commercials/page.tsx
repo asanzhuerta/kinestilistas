@@ -57,17 +57,17 @@ const sections: Array<{
 	},
 	{
 		title: "Catalogo y operativa comercial",
-		module: "M3 · M4",
+		module: "M3 / M4",
 		items: [
 			{
 				title: "Catalogo",
 				icon: <CatalogIcon className="h-6 w-6" />,
-				disabled: true,
+				href: "/commercials/catalog",
 			},
 			{
 				title: "Coloracion",
 				icon: <ColorIcon className="h-6 w-6" />,
-				disabled: true,
+				href: "/commercials/coloration",
 			},
 			{
 				title: "Productos",
@@ -88,7 +88,7 @@ const sections: Array<{
 	},
 	{
 		title: "Comunicacion y seguimiento",
-		module: "M6 · M7",
+		module: "M6 / M7",
 		items: [
 			{
 				title: "Promociones",

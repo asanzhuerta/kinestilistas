@@ -25,6 +25,15 @@ export type EntityTableExtraFilter = {
 
 export type EntityTableCardVariant = "default" | "headline" | "media";
 
+export type EntitySortField =
+	| "title"
+	| "subtitle"
+	| "category"
+	| "status"
+	| "primaryDate";
+
+export type EntitySortDirection = "asc" | "desc";
+
 export type EntityTableItem = {
 	id: string;
 	title: string;
@@ -48,17 +57,10 @@ export type EntityTableConfig = {
 	showHideInactiveToggle?: boolean;
 	hideInactiveLabel?: string;
 	defaultHideInactive?: boolean;
+	defaultSortField?: EntitySortField;
+	defaultSortDirection?: EntitySortDirection;
 	emptyMessage?: string;
 	extraFilters?: EntityTableExtraFilter[];
 	cardVariant?: EntityTableCardVariant;
 	gridClassName?: string;
 };
-
-export type EntitySortField =
-	| "title"
-	| "subtitle"
-	| "category"
-	| "status"
-	| "primaryDate";
-
-export type EntitySortDirection = "asc" | "desc";

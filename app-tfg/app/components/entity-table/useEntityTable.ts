@@ -30,6 +30,16 @@ function buildExtraFilterInitialState(config?: EntityTableConfig) {
 	) as Record<string, string>;
 }
 
+function getDefaultSortField(config?: EntityTableConfig): EntitySortField {
+	return config?.defaultSortField ?? "primaryDate";
+}
+
+function getDefaultSortDirection(
+	config?: EntityTableConfig,
+): EntitySortDirection {
+	return config?.defaultSortDirection ?? "desc";
+}
+
 export function useEntityTable(
 	items: EntityTableItem[],
 	config?: EntityTableConfig,
@@ -41,9 +51,12 @@ export function useEntityTable(
 	const [hideInactiveItems, setHideInactiveItems] = useState(
 		config?.defaultHideInactive ?? false,
 	);
-	const [sortField, setSortField] = useState<EntitySortField>("primaryDate");
-	const [sortDirection, setSortDirection] =
-		useState<EntitySortDirection>("desc");
+	const [sortField, setSortField] = useState<EntitySortField>(
+		getDefaultSortField(config),
+	);
+	const [sortDirection, setSortDirection] = useState<EntitySortDirection>(
+		getDefaultSortDirection(config),
+	);
 	const [extraFilterValues, setExtraFilterValues] = useState<
 		Record<string, string>
 	>(() => buildExtraFilterInitialState(config));
@@ -167,8 +180,8 @@ export function useEntityTable(
 		setHasImageFilter("todos");
 		setHideInactiveItems(config?.defaultHideInactive ?? false);
 		setExtraFilterValues(buildExtraFilterInitialState(config));
-		setSortField("primaryDate");
-		setSortDirection("desc");
+		setSortField(getDefaultSortField(config));
+		setSortDirection(getDefaultSortDirection(config));
 	}
 
 	function setExtraFilterValue(key: string, value: string) {

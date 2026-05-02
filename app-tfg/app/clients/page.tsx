@@ -16,8 +16,16 @@ import {
 } from "../components/IconsSVGs";
 
 const navItems = [
-	{ title: "Coloracion", icon: <ColorIcon className="h-6 w-6" />, disabled: true },
-	{ title: "Catalogos", icon: <CatalogIcon className="h-6 w-6" />, disabled: true },
+	{
+		title: "Coloracion",
+		icon: <ColorIcon className="h-6 w-6" />,
+		href: "/clients/coloration",
+	},
+	{
+		title: "Catalogos",
+		icon: <CatalogIcon className="h-6 w-6" />,
+		href: "/clients/catalog",
+	},
 	{ title: "Agenda", icon: <AgendaIcon className="h-6 w-6" />, disabled: true },
 	{ title: "Citas", icon: <AppointmentIcon className="h-6 w-6" />, disabled: true },
 	{ title: "Pedido abierto", icon: <OrderIcon className="h-6 w-6" />, disabled: true },
@@ -41,9 +49,10 @@ export default function ClientsHome() {
 			</div>
 
 			<div className="mb-4 rounded-2xl border border-slate-200 bg-white/75 px-4 py-3 text-sm text-slate-600 shadow-sm">
-				Los accesos mostrados a continuacion forman parte de modulos
-				previstos para siguientes iteraciones. En esta version ya tienes
-				operativa la prevision de reparto y la gestion de tu perfil.
+				En esta version ya tienes operativos la prevision de reparto, el
+				catalogo de productos, la consulta de coloracion y la gestion de tu
+				perfil. El resto de accesos se activaran en las siguientes
+				iteraciones.
 			</div>
 
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -52,6 +61,7 @@ export default function ClientsHome() {
 						key={item.title}
 						title={item.title}
 						icon={item.icon}
+						href={item.href}
 						disabled={item.disabled}
 					/>
 				))}

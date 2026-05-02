@@ -30,6 +30,7 @@ export async function listColorCharts(input: ListColorChartsInput = {}) {
 	const query = repo
 		.createQueryBuilder("colorChart")
 		.leftJoinAndSelect("colorChart.productLine", "productLine")
+		.leftJoinAndSelect("productLine.productCategory", "productCategory")
 		.orderBy("colorChart.created_at", "DESC");
 
 	const productLineId = String(input.productLineId ?? "").trim();
@@ -61,6 +62,7 @@ export async function getColorChartById(id: string) {
 	return repo
 		.createQueryBuilder("colorChart")
 		.leftJoinAndSelect("colorChart.productLine", "productLine")
+		.leftJoinAndSelect("productLine.productCategory", "productCategory")
 		.leftJoinAndSelect("colorChart.colorReferences", "colorReferences")
 		.where("colorChart.id = :id", { id })
 		.orderBy("colorReferences.display_order", "ASC")
