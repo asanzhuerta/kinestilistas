@@ -1,5 +1,6 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
+import { getSingleSearchParamValue } from "@/app/components/catalog-admin/catalog-navigation";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
 import { listColorReferences } from "@/lib/typeorm/services/catalog/color-chart";
 
@@ -8,13 +9,17 @@ function mapColorReferenceToItem(
 ): EntityTableItem {
 	return {
 		id: colorReference.id,
-		title: `${colorReference.code} · ${colorReference.name}`,
+		title: `${colorReference.code} - ${colorReference.name}`,
 		subtitle: colorReference.description || "Sin descripcion",
 		imageUrl: colorReference.image_url,
-		category: colorReference.colorChart?.name ?? "Sin carta",
+		category: colorReference.colorChart?.productLine?.name ?? "Sin linea",
 		status: `Orden ${colorReference.display_order}`,
 		primaryDate: String(9999 - colorReference.display_order).padStart(4, "0"),
 		badges: [
+			{
+				label: colorReference.colorChart?.productLine?.name ?? "Sin linea",
+				className: "bg-sky-100 text-sky-700 border border-sky-200",
+			},
 			{
 				label: colorReference.colorChart?.name ?? "Sin carta",
 				className: "bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200",
@@ -28,6 +33,10 @@ function mapColorReferenceToItem(
 			{
 				label: "Nombre",
 				value: colorReference.name,
+			},
+			{
+				label: "Linea",
+				value: colorReference.colorChart?.productLine?.name || "-",
 			},
 			{
 				label: "Carta",
@@ -45,18 +54,35 @@ function mapColorReferenceToItem(
 				variant: "secondary",
 			},
 		],
+		filterValues: {
+			colorChart: colorReference.colorChart?.name ?? null,
+		},
 		searchText: [
 			colorReference.code,
 			colorReference.name,
 			colorReference.description,
 			colorReference.colorChart?.name,
+			colorReference.colorChart?.productLine?.name,
 		]
 			.filter(Boolean)
 			.join(" "),
 	};
 }
 
-export default async function AdminColorReferencesPage() {
+type Props = {
+	searchParams?: Promise<{
+		category?: string | string[];
+		colorChart?: string | string[];
+	}>;
+};
+
+export default async function AdminColorReferencesPage({ searchParams }: Props) {
+	const resolvedSearchParams =
+		(await searchParams) ??
+		({
+			category: undefined,
+			colorChart: undefined,
+		} as const);
 	const colorReferences = await listColorReferences();
 
 	return (
@@ -86,9 +112,25 @@ export default async function AdminColorReferencesPage() {
 					},
 				]}
 				tableConfig={{
-					categoryLabel: "Carta",
+					categoryLabel: "Linea",
 					statusLabel: "Orden",
 					showImageFilter: true,
+					initialCategoryFilter: getSingleSearchParamValue(
+						resolvedSearchParams.category,
+					),
+					initialExtraFilterValues: {
+						colorChart: getSingleSearchParamValue(
+							resolvedSearchParams.colorChart,
+						) ?? "",
+					},
+					extraFilters: [
+						{
+							key: "colorChart",
+							label: "Carta de color",
+							allLabel: "Todas",
+							dependsOn: ["category"],
+						},
+					],
 					emptyMessage: "No hay referencias de color registradas todavia.",
 				}}
 			/>

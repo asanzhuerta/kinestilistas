@@ -208,6 +208,7 @@ export default function EntityTableFilters({
 									onChange={(e) =>
 										setExtraFilterValue(filter.key, e.target.value)
 									}
+									disabled={(extraFilterOptions[filter.key] ?? []).length === 0}
 									className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
 								>
 									<option value="todos">{filter.allLabel ?? "Todos"}</option>

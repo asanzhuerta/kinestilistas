@@ -10,17 +10,17 @@ export default function NewProductCategoryPage() {
 		<CatalogAdminCreateShell
 			title="Nueva categoria"
 			subtitle="Crea una familia principal para ordenar el catalogo profesional."
-			backHref="/admin/catalog/product-categories"
-			backLabel="categorias"
+			backHref="/admin/catalog/product-lines"
+			backLabel="categorias y lineas"
 		>
 			<CatalogAdminForm
 				entityLabel="categoria"
 				entityLabelPlural="las categorias del catalogo"
-				basePath="/admin/catalog/product-categories"
+				basePath="/admin/catalog/product-lines"
 				apiBasePath="/api/admin/catalog/product-categories"
 				initialValues={getProductCategoryInitialValues()}
 				fields={getProductCategoryFields()}
-				cancelHref="/admin/catalog/product-categories"
+				cancelHref="/admin/catalog/product-lines"
 				showHeader={false}
 				editPathPattern="/admin/catalog/product-categories/[id]/edit"
 				createRedirectToEdit

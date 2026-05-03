@@ -9,19 +9,9 @@ import {
 
 const navItems = [
 	{
-		title: "Categorias",
-		icon: <CatalogIcon className="h-6 w-6" />,
-		href: "/admin/catalog/product-categories",
-	},
-	{
-		title: "Lineas comerciales",
+		title: "Categorias y lineas",
 		icon: <CatalogIcon className="h-6 w-6" />,
 		href: "/admin/catalog/product-lines",
-	},
-	{
-		title: "Subcategorias",
-		icon: <CatalogIcon className="h-6 w-6" />,
-		href: "/admin/catalog/product-subcategories",
 	},
 	{
 		title: "Productos",

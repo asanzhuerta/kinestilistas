@@ -163,6 +163,8 @@ export async function listColorReferences(
 	const query = repo
 		.createQueryBuilder("colorReference")
 		.leftJoinAndSelect("colorReference.colorChart", "colorChart")
+		.leftJoinAndSelect("colorChart.productLine", "productLine")
+		.leftJoinAndSelect("productLine.productCategory", "productCategory")
 		.orderBy("colorReference.display_order", "ASC")
 		.addOrderBy("colorReference.name", "ASC");
 
@@ -181,6 +183,8 @@ export async function listColorReferences(
 				colorReference.code ILIKE :search
 				OR colorReference.name ILIKE :search
 				OR COALESCE(colorReference.description, '') ILIKE :search
+				OR COALESCE(colorChart.name, '') ILIKE :search
+				OR COALESCE(productLine.name, '') ILIKE :search
 			)`,
 			{ search: `%${search}%` },
 		);

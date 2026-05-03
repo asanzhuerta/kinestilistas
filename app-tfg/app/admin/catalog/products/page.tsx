@@ -1,5 +1,6 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
+import { getSingleSearchParamValue } from "@/app/components/catalog-admin/catalog-navigation";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
 import { listProducts } from "@/lib/typeorm/services/catalog/product";
 import { formatDateShort } from "@/lib/utils/user-utils";
@@ -87,7 +88,22 @@ function mapProductToItem(
 	};
 }
 
-export default async function AdminProductsPage() {
+type Props = {
+	searchParams?: Promise<{
+		category?: string | string[];
+		productLine?: string | string[];
+		subcategory?: string | string[];
+	}>;
+};
+
+export default async function AdminProductsPage({ searchParams }: Props) {
+	const resolvedSearchParams =
+		(await searchParams) ??
+		({
+			category: undefined,
+			productLine: undefined,
+			subcategory: undefined,
+		} as const);
 	const products = await listProducts();
 
 	return (
@@ -117,16 +133,29 @@ export default async function AdminProductsPage() {
 					categoryLabel: "Categoria",
 					statusLabel: "Estado",
 					showImageFilter: true,
+					initialCategoryFilter: getSingleSearchParamValue(
+						resolvedSearchParams.category,
+					),
+					initialExtraFilterValues: {
+						productLine: getSingleSearchParamValue(
+							resolvedSearchParams.productLine,
+						) ?? "",
+						subcategory: getSingleSearchParamValue(
+							resolvedSearchParams.subcategory,
+						) ?? "",
+					},
 					extraFilters: [
 						{
 							key: "productLine",
 							label: "Linea comercial",
 							allLabel: "Todas",
+							dependsOn: ["category"],
 						},
 						{
 							key: "subcategory",
 							label: "Subcategoria",
 							allLabel: "Todas",
+							dependsOn: ["category", "productLine"],
 						},
 					],
 					emptyMessage: "No hay productos registrados todavia.",

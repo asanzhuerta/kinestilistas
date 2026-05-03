@@ -24,10 +24,25 @@ function compareValues(a: unknown, b: unknown) {
 	return 0;
 }
 
-function buildExtraFilterInitialState(config?: EntityTableConfig) {
-	return Object.fromEntries(
+function buildExtraFilterInitialState(
+	config?: EntityTableConfig,
+	includeInitialValues = true,
+) {
+	const extraFilterInitialState = Object.fromEntries(
 		(config?.extraFilters ?? []).map((filter) => [filter.key, "todos"]),
 	) as Record<string, string>;
+
+	if (includeInitialValues) {
+		for (const [key, value] of Object.entries(
+			config?.initialExtraFilterValues ?? {},
+		)) {
+			if (typeof value === "string" && value.trim() !== "") {
+				extraFilterInitialState[key] = value;
+			}
+		}
+	}
+
+	return extraFilterInitialState;
 }
 
 function getDefaultSortField(config?: EntityTableConfig): EntitySortField {
@@ -40,14 +55,88 @@ function getDefaultSortDirection(
 	return config?.defaultSortDirection ?? "desc";
 }
 
+function resolveInitialFilterValue(value: string | undefined) {
+	return typeof value === "string" && value.trim() !== "" ? value : "todos";
+}
+
+function matchesSelectedValue(
+	item: EntityTableItem,
+	filterKey: string,
+	selectedValue: string,
+) {
+	if (selectedValue === "todos") {
+		return true;
+	}
+
+	if (filterKey === "category") {
+		return item.category === selectedValue;
+	}
+
+	if (filterKey === "status") {
+		return item.status === selectedValue;
+	}
+
+	if (filterKey === "hasImage") {
+		return (
+			(selectedValue === "con_imagen" && Boolean(item.imageUrl)) ||
+			(selectedValue === "sin_imagen" && !item.imageUrl)
+		);
+	}
+
+	return (item.filterValues?.[filterKey] ?? null) === selectedValue;
+}
+
+function getAvailableExtraFilterOptions(input: {
+	items: EntityTableItem[];
+	filterKey: string;
+	dependencyKeys: string[];
+	categoryFilter: string;
+	statusFilter: string;
+	hasImageFilter: string;
+	extraFilterValues: Record<string, string>;
+}) {
+	const scopedItems = input.items.filter((item) =>
+		input.dependencyKeys.every((dependencyKey) => {
+			if (dependencyKey === input.filterKey) {
+				return true;
+			}
+
+			const selectedValue =
+				dependencyKey === "category"
+					? input.categoryFilter
+					: dependencyKey === "status"
+						? input.statusFilter
+						: dependencyKey === "hasImage"
+							? input.hasImageFilter
+							: (input.extraFilterValues[dependencyKey] ?? "todos");
+
+			return matchesSelectedValue(item, dependencyKey, selectedValue);
+		}),
+	);
+
+	return [
+		...new Set(
+			scopedItems
+				.map((item) => item.filterValues?.[input.filterKey])
+				.filter(Boolean) as string[],
+		),
+	].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+}
+
 export function useEntityTable(
 	items: EntityTableItem[],
 	config?: EntityTableConfig,
 ) {
-	const [search, setSearch] = useState("");
-	const [categoryFilter, setCategoryFilter] = useState("todos");
-	const [statusFilter, setStatusFilter] = useState("todos");
-	const [hasImageFilter, setHasImageFilter] = useState("todos");
+	const [search, setSearch] = useState(config?.initialSearch ?? "");
+	const [categoryFilter, setCategoryFilter] = useState(
+		resolveInitialFilterValue(config?.initialCategoryFilter),
+	);
+	const [statusFilter, setStatusFilter] = useState(
+		resolveInitialFilterValue(config?.initialStatusFilter),
+	);
+	const [hasImageFilter, setHasImageFilter] = useState(
+		resolveInitialFilterValue(config?.initialHasImageFilter),
+	);
 	const [hideInactiveItems, setHideInactiveItems] = useState(
 		config?.defaultHideInactive ?? false,
 	);
@@ -59,7 +148,7 @@ export function useEntityTable(
 	);
 	const [extraFilterValues, setExtraFilterValues] = useState<
 		Record<string, string>
-	>(() => buildExtraFilterInitialState(config));
+	>(() => buildExtraFilterInitialState(config, true));
 
 	const categories = useMemo(
 		() =>
@@ -81,21 +170,51 @@ export function useEntityTable(
 		[items],
 	);
 
-	const extraFilterOptions = useMemo(() => {
-		return Object.fromEntries(
-			(config?.extraFilters ?? []).map((filter) => {
-				const options = [
-					...new Set(
-						items
-							.map((item) => item.filterValues?.[filter.key])
-							.filter(Boolean) as string[],
-					),
-				].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+	const resolvedCategoryFilter =
+		categoryFilter !== "todos" && !categories.includes(categoryFilter)
+			? "todos"
+			: categoryFilter;
+	const resolvedStatusFilter =
+		statusFilter !== "todos" && !statuses.includes(statusFilter)
+			? "todos"
+			: statusFilter;
 
-				return [filter.key, options];
-			}),
-		) as Record<string, string[]>;
-	}, [items, config?.extraFilters]);
+	const { resolvedExtraFilterValues, extraFilterOptions } = useMemo(() => {
+		const nextExtraFilterValues = { ...extraFilterValues };
+		const nextExtraFilterOptions: Record<string, string[]> = {};
+
+		for (const filter of config?.extraFilters ?? []) {
+			const options = getAvailableExtraFilterOptions({
+				items,
+				filterKey: filter.key,
+				dependencyKeys: filter.dependsOn ?? [],
+				categoryFilter: resolvedCategoryFilter,
+				statusFilter: resolvedStatusFilter,
+				hasImageFilter,
+				extraFilterValues: nextExtraFilterValues,
+			});
+
+			nextExtraFilterOptions[filter.key] = options;
+
+			const selectedValue = nextExtraFilterValues[filter.key] ?? "todos";
+
+			if (selectedValue !== "todos" && !options.includes(selectedValue)) {
+				nextExtraFilterValues[filter.key] = "todos";
+			}
+		}
+
+		return {
+			resolvedExtraFilterValues: nextExtraFilterValues,
+			extraFilterOptions: nextExtraFilterOptions,
+		};
+	}, [
+		items,
+		config?.extraFilters,
+		resolvedCategoryFilter,
+		resolvedStatusFilter,
+		hasImageFilter,
+		extraFilterValues,
+	]);
 
 	const filteredAndSortedItems = useMemo(() => {
 		const searchTerm = normalizeValue(search.trim());
@@ -117,10 +236,12 @@ export function useEntityTable(
 			const matchesSearch = searchTerm === "" || haystack.includes(searchTerm);
 
 			const matchesCategory =
-				categoryFilter === "todos" || item.category === categoryFilter;
+				resolvedCategoryFilter === "todos" ||
+				item.category === resolvedCategoryFilter;
 
 			const matchesStatus =
-				statusFilter === "todos" || item.status === statusFilter;
+				resolvedStatusFilter === "todos" ||
+				item.status === resolvedStatusFilter;
 
 			const matchesImage =
 				!config?.showImageFilter ||
@@ -135,7 +256,8 @@ export function useEntityTable(
 
 			const matchesExtraFilters = (config?.extraFilters ?? []).every(
 				(filter) => {
-					const selectedValue = extraFilterValues[filter.key] ?? "todos";
+					const selectedValue =
+						resolvedExtraFilterValues[filter.key] ?? "todos";
 					const itemValue = item.filterValues?.[filter.key] ?? null;
 
 					return selectedValue === "todos" || itemValue === selectedValue;
@@ -161,11 +283,11 @@ export function useEntityTable(
 	}, [
 		items,
 		search,
-		categoryFilter,
-		statusFilter,
+		resolvedCategoryFilter,
+		resolvedStatusFilter,
 		hasImageFilter,
 		hideInactiveItems,
-		extraFilterValues,
+		resolvedExtraFilterValues,
 		sortField,
 		sortDirection,
 		config?.extraFilters,
@@ -179,7 +301,7 @@ export function useEntityTable(
 		setStatusFilter("todos");
 		setHasImageFilter("todos");
 		setHideInactiveItems(config?.defaultHideInactive ?? false);
-		setExtraFilterValues(buildExtraFilterInitialState(config));
+		setExtraFilterValues(buildExtraFilterInitialState(config, false));
 		setSortField(getDefaultSortField(config));
 		setSortDirection(getDefaultSortDirection(config));
 	}
@@ -194,15 +316,15 @@ export function useEntityTable(
 	return {
 		search,
 		setSearch,
-		categoryFilter,
+		categoryFilter: resolvedCategoryFilter,
 		setCategoryFilter,
-		statusFilter,
+		statusFilter: resolvedStatusFilter,
 		setStatusFilter,
 		hasImageFilter,
 		setHasImageFilter,
 		hideInactiveItems,
 		setHideInactiveItems,
-		extraFilterValues,
+		extraFilterValues: resolvedExtraFilterValues,
 		setExtraFilterValue,
 		extraFilterOptions,
 		sortField,

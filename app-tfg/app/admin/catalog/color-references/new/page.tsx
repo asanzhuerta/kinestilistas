@@ -3,11 +3,23 @@ import {
 	getColorReferenceFields,
 	getColorReferenceInitialValues,
 } from "@/app/admin/catalog/_shared/catalog-form-config";
+import { getSingleSearchParamValue } from "@/app/components/catalog-admin/catalog-navigation";
 import CatalogAdminForm from "@/app/components/catalog-admin/CatalogAdminForm";
 import { listColorCharts } from "@/lib/typeorm/services/catalog/color-chart";
 
-export default async function NewColorReferencePage() {
+type Props = {
+	searchParams?: Promise<{
+		colorChartId?: string | string[];
+	}>;
+};
+
+export default async function NewColorReferencePage({ searchParams }: Props) {
 	const colorCharts = await listColorCharts();
+	const resolvedSearchParams = await searchParams;
+	const initialValues = getColorReferenceInitialValues();
+	const initialColorChartId = getSingleSearchParamValue(
+		resolvedSearchParams?.colorChartId,
+	);
 
 	return (
 		<CatalogAdminCreateShell
@@ -21,7 +33,10 @@ export default async function NewColorReferencePage() {
 				entityLabelPlural="las referencias de color"
 				basePath="/admin/catalog/color-references"
 				apiBasePath="/api/admin/catalog/color-references"
-				initialValues={getColorReferenceInitialValues()}
+				initialValues={{
+					...initialValues,
+					colorChartId: initialColorChartId ?? initialValues.colorChartId,
+				}}
 				fields={getColorReferenceFields(colorCharts)}
 				cancelHref="/admin/catalog/color-references"
 				showHeader={false}

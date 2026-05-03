@@ -21,6 +21,7 @@ export type EntityTableExtraFilter = {
 	key: string;
 	label: string;
 	allLabel?: string;
+	dependsOn?: string[];
 };
 
 export type EntityTableCardVariant = "default" | "headline" | "media";
@@ -63,4 +64,9 @@ export type EntityTableConfig = {
 	extraFilters?: EntityTableExtraFilter[];
 	cardVariant?: EntityTableCardVariant;
 	gridClassName?: string;
+	initialSearch?: string;
+	initialCategoryFilter?: string;
+	initialStatusFilter?: string;
+	initialHasImageFilter?: string;
+	initialExtraFilterValues?: Record<string, string>;
 };

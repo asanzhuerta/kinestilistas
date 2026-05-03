@@ -1,97 +1,95 @@
 import H1Title from "@/app/components/H1Title";
-import {
-	buildCategoryBadgeClassMap,
-	getCategoryBadgeClass,
-} from "@/app/components/catalog/category-badge-palette";
-import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
-import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
+import CatalogHierarchyWorkspace from "@/app/components/catalog-admin/CatalogHierarchyWorkspace";
+import { getSingleSearchParamValue } from "@/app/components/catalog-admin/catalog-navigation";
 import { listProductCategories } from "@/lib/typeorm/services/catalog/product-category";
 import { listProductLines } from "@/lib/typeorm/services/catalog/product-line";
+import { listProductSubcategories } from "@/lib/typeorm/services/catalog/product-subcategory";
 
-function mapProductLineToItem(
-	productLine: Awaited<ReturnType<typeof listProductLines>>[number],
-	categoryBadgeClassMap: Map<string, string>,
-): EntityTableItem {
+type Props = {
+	searchParams?: Promise<{
+		expandedCategoryId?: string | string[];
+		expandedLineId?: string | string[];
+	}>;
+};
+
+function serializeProductCategory(
+	productCategory: Awaited<ReturnType<typeof listProductCategories>>[number],
+) {
 	return {
-		id: productLine.id,
-		title: productLine.name,
-		subtitle: productLine.description || "Sin descripcion",
-		imageUrl: productLine.image_url,
-		category: productLine.productCategory?.name ?? "Sin categoria",
-		status: productLine.image_url ? "Con imagen" : "Sin imagen",
-		primaryDate: String(9999 - productLine.display_order).padStart(4, "0"),
-		badges: [
-			{
-				label: productLine.productCategory?.name ?? "Sin categoria",
-				className: getCategoryBadgeClass(
-					productLine.productCategory?.name,
-					categoryBadgeClassMap,
-				),
-			},
-		],
-		fields: [],
-		actions: [
-			{
-				label: "Editar",
-				href: `/admin/catalog/product-lines/${productLine.id}/edit`,
-				variant: "secondary",
-			},
-		],
-		searchText: [
-			productLine.name,
-			productLine.description,
-			productLine.productCategory?.name,
-		]
-			.filter(Boolean)
-			.join(" "),
+		id: productCategory.id,
+		name: productCategory.name,
+		description: productCategory.description,
+		display_order: productCategory.display_order,
 	};
 }
 
-export default async function AdminProductLinesPage() {
-	const [productLines, productCategories] = await Promise.all([
-		listProductLines(),
-		listProductCategories(),
-	]);
-	const categoryBadgeClassMap = buildCategoryBadgeClassMap(
-		productCategories.map((productCategory) => productCategory.name),
-	);
+function serializeProductLine(
+	productLine: Awaited<ReturnType<typeof listProductLines>>[number],
+) {
+	return {
+		id: productLine.id,
+		name: productLine.name,
+		description: productLine.description,
+		product_category_id: productLine.product_category_id,
+		image_url: productLine.image_url,
+		display_order: productLine.display_order,
+		productCategory: productLine.productCategory
+			? {
+					id: productLine.productCategory.id,
+					name: productLine.productCategory.name,
+					description: productLine.productCategory.description,
+					display_order: productLine.productCategory.display_order,
+			  }
+			: null,
+	};
+}
+
+function serializeProductSubcategory(
+	productSubcategory: Awaited<ReturnType<typeof listProductSubcategories>>[number],
+) {
+	return {
+		id: productSubcategory.id,
+		name: productSubcategory.name,
+		description: productSubcategory.description,
+		product_line_id: productSubcategory.product_line_id,
+		parent_subcategory_id: productSubcategory.parent_subcategory_id,
+		image_url: productSubcategory.image_url,
+		display_order: productSubcategory.display_order,
+	};
+}
+
+export default async function AdminProductLinesPage({ searchParams }: Props) {
+	const [resolvedSearchParams, productCategories, productLines, productSubcategories] =
+		await Promise.all([
+			searchParams ??
+				Promise.resolve<{
+					expandedCategoryId?: string | string[];
+					expandedLineId?: string | string[];
+				}>({}),
+			listProductCategories(),
+			listProductLines(),
+			listProductSubcategories(),
+		]);
 
 	return (
 		<div className="space-y-6">
 			<H1Title
-				title="Lineas comerciales"
-				subtitle="Gestiona las agrupaciones especificas de la oferta del distribuidor"
+				title="Categorias y lineas comerciales"
+				subtitle="Gestiona la jerarquia principal del catalogo y accede al detalle filtrado de sus productos"
 			/>
 
-			<CatalogAdminWorkspace
-				entityLabel="linea comercial"
-				basePath="/admin/catalog/product-lines"
-				items={productLines.map((productLine) =>
-					mapProductLineToItem(productLine, categoryBadgeClassMap),
+			<CatalogHierarchyWorkspace
+				productCategories={productCategories.map(serializeProductCategory)}
+				productLines={productLines.map(serializeProductLine)}
+				productSubcategories={productSubcategories.map(
+					serializeProductSubcategory,
 				)}
-				metrics={[
-					{ label: "lineas", value: productLines.length },
-					{
-						label: "con imagen",
-						value: productLines.filter((productLine) => Boolean(productLine.image_url))
-							.length,
-					},
-					{
-						label: "categorias usadas",
-						value: new Set(
-							productLines.map((productLine) => productLine.product_category_id),
-						).size,
-					},
-				]}
-				tableConfig={{
-					categoryLabel: "Categoria",
-					statusLabel: "Imagen",
-					showImageFilter: true,
-					cardVariant: "media",
-					gridClassName:
-						"grid grid-cols-1 gap-3 p-3 lg:grid-cols-2 2xl:grid-cols-3",
-					emptyMessage: "No hay lineas comerciales registradas todavia.",
-				}}
+				initialExpandedCategoryId={getSingleSearchParamValue(
+					resolvedSearchParams.expandedCategoryId,
+				)}
+				initialExpandedLineId={getSingleSearchParamValue(
+					resolvedSearchParams.expandedLineId,
+				)}
 			/>
 		</div>
 	);

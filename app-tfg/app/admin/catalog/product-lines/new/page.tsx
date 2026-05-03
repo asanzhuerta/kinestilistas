@@ -3,11 +3,23 @@ import {
 	getProductLineFields,
 	getProductLineInitialValues,
 } from "@/app/admin/catalog/_shared/catalog-form-config";
+import { getSingleSearchParamValue } from "@/app/components/catalog-admin/catalog-navigation";
 import CatalogAdminForm from "@/app/components/catalog-admin/CatalogAdminForm";
 import { listProductCategories } from "@/lib/typeorm/services/catalog/product-category";
 
-export default async function NewProductLinePage() {
+type Props = {
+	searchParams?: Promise<{
+		productCategoryId?: string | string[];
+	}>;
+};
+
+export default async function NewProductLinePage({ searchParams }: Props) {
 	const productCategories = await listProductCategories();
+	const resolvedSearchParams = await searchParams;
+	const initialValues = getProductLineInitialValues();
+	const initialProductCategoryId = getSingleSearchParamValue(
+		resolvedSearchParams?.productCategoryId,
+	);
 
 	return (
 		<CatalogAdminCreateShell
@@ -21,7 +33,10 @@ export default async function NewProductLinePage() {
 				entityLabelPlural="las lineas comerciales"
 				basePath="/admin/catalog/product-lines"
 				apiBasePath="/api/admin/catalog/product-lines"
-				initialValues={getProductLineInitialValues()}
+				initialValues={{
+					...initialValues,
+					productCategoryId: initialProductCategoryId ?? initialValues.productCategoryId,
+				}}
 				fields={getProductLineFields(productCategories)}
 				cancelHref="/admin/catalog/product-lines"
 				showHeader={false}

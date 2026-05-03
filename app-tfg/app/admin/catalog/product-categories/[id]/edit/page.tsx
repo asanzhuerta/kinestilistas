@@ -23,18 +23,18 @@ export default async function EditProductCategoryPage({ params }: Props) {
 		<CatalogAdminEditShell
 			title="Editar categoria"
 			subtitle={`Actualiza la estructura base del catalogo para ${category.name}.`}
-			backHref="/admin/catalog/product-categories"
-			backLabel="categorias"
+			backHref="/admin/catalog/product-lines"
+			backLabel="categorias y lineas"
 		>
 			<CatalogAdminForm
 				entityLabel="categoria"
 				entityLabelPlural="las categorias del catalogo"
-				basePath="/admin/catalog/product-categories"
+				basePath="/admin/catalog/product-lines"
 				apiBasePath="/api/admin/catalog/product-categories"
 				initialValues={getProductCategoryInitialValues(category)}
 				fields={getProductCategoryFields()}
 				editingId={category.id}
-				cancelHref="/admin/catalog/product-categories"
+				cancelHref="/admin/catalog/product-lines"
 				showHeader={false}
 			/>
 		</CatalogAdminEditShell>
