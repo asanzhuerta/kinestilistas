@@ -19,6 +19,7 @@ type Props = {
 	subtitle: string;
 	backHref: string;
 	colorationBasePath: string;
+	showPrice?: boolean;
 	product: NonNullable<Awaited<ReturnType<typeof getProductById>>>;
 	supportResources: DetailResource[];
 	relatedColorCharts: Awaited<ReturnType<typeof listColorCharts>>;
@@ -45,6 +46,7 @@ export default function CatalogProductDetail({
 	subtitle,
 	backHref,
 	colorationBasePath,
+	showPrice = true,
 	product,
 	supportResources,
 	relatedColorCharts,
@@ -143,14 +145,16 @@ export default function CatalogProductDetail({
 								</p>
 							</div>
 
-							<div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-									Precio base
-								</p>
-								<p className="mt-2 text-lg font-semibold text-slate-900">
-									{product.base_price} EUR
-								</p>
-							</div>
+							{showPrice ? (
+								<div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+									<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+										Precio base
+									</p>
+									<p className="mt-2 text-lg font-semibold text-slate-900">
+										{product.base_price} EUR
+									</p>
+								</div>
+							) : null}
 
 							<div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-2 xl:col-span-3">
 								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">

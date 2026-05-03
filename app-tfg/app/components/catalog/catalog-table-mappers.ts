@@ -1,8 +1,10 @@
 import type { EntityTableBadge, EntityTableItem } from "@/app/components/entity-table/entity-table-types";
-import { formatDateShort } from "@/lib/utils/user-utils";
 import type { listColorCharts } from "@/lib/typeorm/services/catalog/color-chart";
 import type { listProducts } from "@/lib/typeorm/services/catalog/product";
-import { getCategoryBadgeClass } from "./category-badge-palette";
+import {
+	buildCategoryBadgeClassMap,
+	getCategoryBadgeClass,
+} from "./category-badge-palette";
 
 function buildBadge(
 	label: string | null | undefined,
@@ -22,25 +24,29 @@ export function mapCatalogProductsToEntityTableItems(
 	products: Awaited<ReturnType<typeof listProducts>>,
 	detailBasePath: string,
 ): EntityTableItem[] {
+	const categoryBadgeClassMap = buildCategoryBadgeClassMap(
+		products.map((product) => product.productCategory?.name),
+	);
+
 	return products.map((product) => ({
 		id: product.id,
 		title: product.name,
-		subtitle: product.reference,
+		subtitle: product.description || "",
 		imageUrl: product.image_url,
+		secondaryImageUrl: product.productLine?.image_url ?? null,
+		secondaryImageLabel: product.productLine?.name ?? null,
 		category: product.productCategory?.name ?? "Sin categoria",
 		primaryDate: product.created_at.toISOString(),
 		badges: [
 			buildBadge(
-				product.productLine?.name,
-				"bg-sky-100 text-sky-700 border border-sky-200",
-			),
-			buildBadge(
-				product.productSubcategory?.name,
-				"bg-violet-100 text-violet-700 border border-violet-200",
+				product.productCategory?.name,
+				getCategoryBadgeClass(
+					product.productCategory?.name,
+					categoryBadgeClassMap,
+				),
 			),
 		].filter(Boolean) as EntityTableBadge[],
 		fields: [
-			{ label: "Categoria", value: product.productCategory?.name ?? "-" },
 			{ label: "Formato", value: product.format ?? "-" },
 			{
 				label: "Packing",
@@ -49,16 +55,10 @@ export function mapCatalogProductsToEntityTableItems(
 						? String(product.packing)
 						: "-",
 			},
-			{ label: "Precio", value: `${product.base_price} EUR` },
-			{ label: "Proveedor", value: product.supplier ?? "-" },
-			{
-				label: "Alta",
-				value: formatDateShort(product.created_at),
-			},
 		],
 		actions: [
 			{
-				label: "Ver detalle",
+				label: "Ver producto",
 				href: `${detailBasePath}/${product.id}`,
 				variant: "primary",
 			},

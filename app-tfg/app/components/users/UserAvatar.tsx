@@ -10,6 +10,8 @@ type UserAvatarProps = {
 	size?: "sm" | "md" | "lg" | "xl";
 	shape?: "circle" | "soft-square";
 	imageFit?: "cover" | "contain";
+	imagePaddingClass?: string;
+	imagePositionClass?: string;
 	imageBackgroundClass?: string;
 	className?: string;
 };
@@ -50,6 +52,8 @@ export default function UserAvatar({
 	size = "md",
 	shape = "circle",
 	imageFit = "cover",
+	imagePaddingClass = "p-2",
+	imagePositionClass = "object-center",
 	imageBackgroundClass = "bg-white",
 	className = "",
 }: UserAvatarProps) {
@@ -107,8 +111,8 @@ export default function UserAvatar({
 		: "bg-slate-200";
 	const imageClassName =
 		imageFit === "contain"
-			? "h-full w-full object-contain p-2"
-			: "h-full w-full object-cover";
+			? `h-full w-full object-contain ${imagePositionClass} ${imagePaddingClass}`
+			: `h-full w-full object-cover ${imagePositionClass}`;
 
 	return (
 		<div

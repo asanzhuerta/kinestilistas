@@ -46,6 +46,8 @@ function EntityCard({
 }) {
 	const isHeadlineVariant = cardVariant === "headline";
 	const isMediaVariant = cardVariant === "media";
+	const isCatalogProductVariant = cardVariant === "catalog-product";
+	const hasSubtitle = item.subtitle.trim().length > 0;
 	const motionProps = shouldReduceMotion
 		? {
 				initial: false,
@@ -67,116 +69,300 @@ function EntityCard({
 			className={`rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md ${
 				isHeadlineVariant
 					? "flex min-h-[136px] flex-col justify-between p-5"
+					: isCatalogProductVariant
+						? "p-5"
 					: isMediaVariant
 						? "flex min-h-[168px] flex-col justify-between p-4"
 						: "p-3.5"
 			}`}
 		>
-			<div
-				className={`flex items-start gap-3 ${
-					isHeadlineVariant
-						? "min-h-0"
-						: isMediaVariant
-							? "gap-4"
-							: ""
-				}`}
-			>
-				{!isHeadlineVariant ? (
-					<UserAvatar
-						name={item.title}
-						imageUrl={item.imageUrl}
-						size={isMediaVariant ? "xl" : "md"}
-						shape={isMediaVariant ? "soft-square" : "circle"}
-						imageFit={isMediaVariant ? "contain" : "cover"}
-						imageBackgroundClass="bg-white"
-						className="flex-shrink-0"
-					/>
-				) : null}
+			{isCatalogProductVariant ? (
+				<>
+					<div className="lg:hidden">
+						<div className="grid grid-cols-2 gap-4">
+							<div className="aspect-[4/5] w-full">
+								<UserAvatar
+									name={item.title}
+									imageUrl={item.imageUrl}
+									size="xl"
+									shape="soft-square"
+									imageFit="contain"
+									imagePositionClass="object-center"
+									imagePaddingClass="p-0"
+									imageBackgroundClass="bg-white"
+									className="h-full w-full rounded-2xl text-4xl"
+								/>
+							</div>
 
-				<div className="min-w-0 flex-1">
-					{isMediaVariant && item.badges?.length ? (
-						<div className="mb-2 flex flex-wrap gap-2">
-							{item.badges.map((badge) => (
-								<span
-									key={`${item.id}-${badge.label}`}
-									className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${badge.className ?? "bg-slate-100 text-slate-700"}`}
-								>
-									{badge.label}
-								</span>
+							<div className="flex min-w-0 flex-col gap-3">
+								{item.badges?.length ? (
+									<div className="flex flex-wrap justify-end gap-2">
+										{item.badges.map((badge) => (
+											<span
+												key={`${item.id}-${badge.label}`}
+												className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${badge.className ?? "bg-slate-100 text-slate-700"}`}
+											>
+												{badge.label}
+											</span>
+										))}
+									</div>
+								) : null}
+
+								{item.secondaryImageUrl || item.secondaryImageLabel ? (
+									<div className="aspect-square w-full">
+										<UserAvatar
+											name={item.secondaryImageLabel ?? item.title}
+											imageUrl={item.secondaryImageUrl}
+											size="xl"
+											shape="soft-square"
+											imageFit="contain"
+											imagePaddingClass="p-0"
+											imageBackgroundClass="bg-white"
+											className="h-full w-full rounded-2xl text-2xl"
+										/>
+									</div>
+								) : null}
+							</div>
+						</div>
+
+						<div className="mt-4">
+							<p className="text-2xl font-semibold leading-tight text-slate-900">
+								{item.title}
+							</p>
+							{hasSubtitle ? (
+								<p className="mt-2 text-sm leading-relaxed text-slate-600">
+									{item.subtitle}
+								</p>
+							) : null}
+
+							{item.fields.length ? (
+								<div className="mt-4 grid grid-cols-1 gap-y-2 text-sm text-slate-600">
+									{item.fields.map((field) => (
+										<div key={`${item.id}-${field.label}`}>
+											<span className="font-medium text-slate-700">
+												{field.label}:
+											</span>{" "}
+											{field.value || "-"}
+										</div>
+									))}
+								</div>
+							) : null}
+
+							{item.actions?.length ? (
+								<div className="mt-4 flex flex-wrap gap-2">
+									{item.actions.map((action) => (
+										<Link
+											key={`${item.id}-${action.label}`}
+											href={action.href}
+											className={`rounded-md px-2.5 py-1.5 text-[11px] font-medium transition ${getActionClasses(
+												action.variant,
+											)}`}
+										>
+											{action.label}
+										</Link>
+									))}
+								</div>
+							) : null}
+						</div>
+					</div>
+
+					<div className="hidden items-stretch gap-4 lg:grid lg:grid-cols-[7.25rem_minmax(0,1fr)_5rem] xl:grid-cols-[9rem_minmax(0,1fr)_6rem]">
+						<div className="h-full w-full self-stretch">
+							<UserAvatar
+								name={item.title}
+								imageUrl={item.imageUrl}
+								size="xl"
+								shape="soft-square"
+								imageFit="contain"
+								imagePositionClass="object-center"
+								imagePaddingClass="p-0"
+								imageBackgroundClass="bg-white"
+								className="h-full min-h-[14rem] w-full rounded-2xl text-4xl xl:min-h-[16rem]"
+							/>
+						</div>
+
+						<div className="min-w-0">
+							<p className="text-xl font-semibold leading-tight text-slate-900 xl:text-[1.7rem]">
+								{item.title}
+							</p>
+							{hasSubtitle ? (
+								<p className="mt-2 text-sm leading-relaxed text-slate-600">
+									{item.subtitle}
+								</p>
+							) : null}
+
+							{item.fields.length ? (
+								<div className="mt-4 grid grid-cols-1 gap-y-2 text-sm text-slate-600 xl:gap-x-5">
+									{item.fields.map((field) => (
+										<div key={`${item.id}-${field.label}`}>
+											<span className="font-medium text-slate-700">
+												{field.label}:
+											</span>{" "}
+											{field.value || "-"}
+										</div>
+									))}
+								</div>
+							) : null}
+
+							{item.actions?.length ? (
+								<div className="mt-4 flex flex-wrap gap-2">
+									{item.actions.map((action) => (
+										<Link
+											key={`${item.id}-${action.label}`}
+											href={action.href}
+											className={`rounded-md px-2.5 py-1.5 text-[11px] font-medium transition ${getActionClasses(
+												action.variant,
+											)}`}
+										>
+											{action.label}
+										</Link>
+									))}
+								</div>
+							) : null}
+						</div>
+
+						<div className="flex flex-col items-end gap-3 self-start">
+							{item.badges?.length ? (
+								<div className="flex flex-wrap justify-end gap-2">
+									{item.badges.map((badge) => (
+										<span
+											key={`${item.id}-${badge.label}`}
+											className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold sm:text-xs ${badge.className ?? "bg-slate-100 text-slate-700"}`}
+										>
+											{badge.label}
+										</span>
+									))}
+								</div>
+							) : null}
+
+							{item.secondaryImageUrl || item.secondaryImageLabel ? (
+								<div className="aspect-square w-full max-w-[5rem] xl:max-w-[6rem]">
+									<UserAvatar
+										name={item.secondaryImageLabel ?? item.title}
+										imageUrl={item.secondaryImageUrl}
+										size="xl"
+										shape="soft-square"
+										imageFit="contain"
+										imagePaddingClass="p-0"
+										imageBackgroundClass="bg-white"
+										className="h-full w-full rounded-xl text-2xl sm:rounded-2xl"
+									/>
+								</div>
+							) : null}
+						</div>
+					</div>
+				</>
+			) : (
+				<>
+					<div
+						className={`flex items-start gap-3 ${
+							isHeadlineVariant
+								? "min-h-0"
+								: isMediaVariant
+									? "gap-4"
+									: ""
+						}`}
+					>
+						{!isHeadlineVariant ? (
+							<UserAvatar
+								name={item.title}
+								imageUrl={item.imageUrl}
+								size={isMediaVariant ? "xl" : "md"}
+								shape={isMediaVariant ? "soft-square" : "circle"}
+								imageFit={isMediaVariant ? "contain" : "cover"}
+								imageBackgroundClass="bg-white"
+								className="flex-shrink-0"
+							/>
+						) : null}
+
+						<div className="min-w-0 flex-1">
+							{isMediaVariant && item.badges?.length ? (
+								<div className="mb-2 flex flex-wrap gap-2">
+									{item.badges.map((badge) => (
+										<span
+											key={`${item.id}-${badge.label}`}
+											className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${badge.className ?? "bg-slate-100 text-slate-700"}`}
+										>
+											{badge.label}
+										</span>
+									))}
+								</div>
+							) : null}
+
+							<p
+								className={
+									isHeadlineVariant
+										? "text-lg font-semibold leading-tight text-slate-800"
+										: isMediaVariant
+											? "text-lg font-semibold leading-tight text-slate-800"
+											: "truncate text-sm font-semibold text-slate-800"
+								}
+							>
+								{item.title}
+							</p>
+							<p
+								className={
+									isHeadlineVariant
+										? "mt-1 text-sm leading-snug text-slate-600"
+										: isMediaVariant
+											? "mt-1 text-sm leading-snug text-slate-600"
+											: "truncate text-xs text-slate-600"
+								}
+							>
+								{item.subtitle}
+							</p>
+						</div>
+
+						{!isMediaVariant && item.badges?.length ? (
+							<div className="ml-auto flex flex-col items-end gap-2">
+								{item.badges.map((badge) => (
+									<span
+										key={`${item.id}-${badge.label}`}
+										className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${badge.className ?? "bg-slate-100 text-slate-700"}`}
+									>
+										{badge.label}
+									</span>
+								))}
+							</div>
+						) : null}
+					</div>
+
+					{!isHeadlineVariant && !isMediaVariant ? (
+						<div className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-slate-600">
+							{item.fields.map((field) => (
+								<div key={`${item.id}-${field.label}`}>
+									<span className="font-medium text-slate-700">
+										{field.label}:
+									</span>{" "}
+									{field.value || "-"}
+								</div>
 							))}
 						</div>
 					) : null}
 
-					<p
-						className={
-							isHeadlineVariant
-								? "text-lg font-semibold leading-tight text-slate-800"
-								: isMediaVariant
-									? "text-lg font-semibold leading-tight text-slate-800"
-									: "truncate text-sm font-semibold text-slate-800"
-						}
-					>
-						{item.title}
-					</p>
-					<p
-						className={
-							isHeadlineVariant
-								? "mt-1 text-sm leading-snug text-slate-600"
-								: isMediaVariant
-									? "mt-1 text-sm leading-snug text-slate-600"
-									: "truncate text-xs text-slate-600"
-						}
-					>
-						{item.subtitle}
-					</p>
-				</div>
-
-				{!isMediaVariant && item.badges?.length ? (
-					<div className="ml-auto flex flex-col items-end gap-2">
-						{item.badges.map((badge) => (
-							<span
-								key={`${item.id}-${badge.label}`}
-								className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${badge.className ?? "bg-slate-100 text-slate-700"}`}
-							>
-								{badge.label}
-							</span>
-						))}
-					</div>
-				) : null}
-			</div>
-
-			{!isHeadlineVariant && !isMediaVariant ? (
-				<div className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-slate-600">
-					{item.fields.map((field) => (
-						<div key={`${item.id}-${field.label}`}>
-							<span className="font-medium text-slate-700">{field.label}:</span>{" "}
-							{field.value || "-"}
-						</div>
-					))}
-				</div>
-			) : null}
-
-			{item.actions?.length ? (
-				<div
-					className={
-						isHeadlineVariant || isMediaVariant
-							? "mt-5 flex flex-wrap gap-2"
-							: "mt-3 flex flex-wrap gap-2"
-					}
-				>
-					{item.actions.map((action) => (
-						<Link
-							key={`${item.id}-${action.label}`}
-							href={action.href}
-							className={`rounded-md px-2.5 py-1.5 text-[11px] font-medium transition ${getActionClasses(
-								action.variant,
-							)}`}
+					{item.actions?.length ? (
+						<div
+							className={
+								isHeadlineVariant || isMediaVariant
+									? "mt-5 flex flex-wrap gap-2"
+									: "mt-3 flex flex-wrap gap-2"
+							}
 						>
-							{action.label}
-						</Link>
-					))}
-				</div>
-			) : null}
+							{item.actions.map((action) => (
+								<Link
+									key={`${item.id}-${action.label}`}
+									href={action.href}
+									className={`rounded-md px-2.5 py-1.5 text-[11px] font-medium transition ${getActionClasses(
+										action.variant,
+									)}`}
+								>
+									{action.label}
+								</Link>
+							))}
+						</div>
+					) : null}
+				</>
+			)}
 		</m.div>
 	);
 }

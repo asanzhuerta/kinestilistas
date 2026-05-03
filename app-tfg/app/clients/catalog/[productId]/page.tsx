@@ -20,6 +20,7 @@ export default async function ClientCatalogProductPage({
 			subtitle="Detalle tecnico y comercial de la referencia"
 			backHref="/clients/catalog"
 			colorationBasePath="/clients/coloration"
+			showPrice={false}
 			product={detail.product}
 			supportResources={detail.supportResources}
 			relatedColorCharts={detail.relatedColorCharts}

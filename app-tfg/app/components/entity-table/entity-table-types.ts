@@ -24,7 +24,11 @@ export type EntityTableExtraFilter = {
 	dependsOn?: string[];
 };
 
-export type EntityTableCardVariant = "default" | "headline" | "media";
+export type EntityTableCardVariant =
+	| "default"
+	| "headline"
+	| "media"
+	| "catalog-product";
 
 export type EntitySortField =
 	| "title"
@@ -40,6 +44,8 @@ export type EntityTableItem = {
 	title: string;
 	subtitle: string;
 	imageUrl?: string | null;
+	secondaryImageUrl?: string | null;
+	secondaryImageLabel?: string | null;
 	category?: string | null;
 	status?: string | null;
 	primaryDate?: string | null;

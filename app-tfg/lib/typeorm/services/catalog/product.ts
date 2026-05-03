@@ -3,8 +3,8 @@ import type { AdminUpsertProductBody } from "@/lib/contracts/product-catalog";
 import { Product } from "@/lib/typeorm/entities/Product";
 import { normalizeProductWriteInput } from "./catalog-validation";
 import {
+	CatalogServiceError,
 	cleanupCatalogImageReplacement,
-	requireProduct,
 	requireProductCategory,
 	requireProductLineForCategory,
 	requireProductSubcategoryForLine,
@@ -167,89 +167,81 @@ export async function updateProduct(input: { productId: string } & AdminUpsertPr
 	try {
 		const updatedProduct = await ds.transaction(async (manager) => {
 			const repo = manager.getRepository(Product);
-			const product = await requireProduct(manager, input.productId);
-			const previousImageUrl = product.image_url;
+			const product = await repo.findOne({
+				where: { id: input.productId },
+			});
 
-			const nextProductCategoryId =
-				normalized.productCategoryId ?? product.product_category_id;
-			const nextProductLineId =
-				normalized.productLineId ?? product.product_line_id;
-			const nextProductSubcategoryId =
-				normalized.productSubcategoryId !== undefined
-					? normalized.productSubcategoryId
-					: product.product_subcategory_id;
-			const nextStatusId = normalized.statusId ?? product.status_id;
-
-			await requireProductCategory(manager, nextProductCategoryId);
-			await requireProductLineForCategory(
-				manager,
-				nextProductLineId,
-				nextProductCategoryId,
-			);
-
-			if (nextProductSubcategoryId) {
-				await requireProductSubcategoryForLine(
-					manager,
-					nextProductSubcategoryId,
-					nextProductLineId,
+			if (!product) {
+				throw new CatalogServiceError(
+					"Producto no encontrado",
+					404,
+					"PRODUCT_NOT_FOUND",
 				);
 			}
 
-			await requireProductStatus(manager, nextStatusId);
+			const previousImageUrl = product.image_url;
+			const nextValues = {
+				name: normalized.name ?? product.name,
+				reference: normalized.reference ?? product.reference,
+				description:
+					normalized.description !== undefined
+						? normalized.description
+						: product.description,
+				product_category_id:
+					normalized.productCategoryId ?? product.product_category_id,
+				product_line_id:
+					normalized.productLineId ?? product.product_line_id,
+				product_subcategory_id:
+					normalized.productSubcategoryId !== undefined
+						? normalized.productSubcategoryId
+						: product.product_subcategory_id,
+				image_url:
+					normalized.imageUrl !== undefined
+						? normalized.imageUrl
+						: product.image_url,
+				format:
+					normalized.format !== undefined
+						? normalized.format
+						: product.format,
+				packing:
+					normalized.packing !== undefined
+						? normalized.packing
+						: product.packing,
+				technical_info:
+					normalized.technicalInfo !== undefined
+						? normalized.technicalInfo
+						: product.technical_info,
+				status_id: normalized.statusId ?? product.status_id,
+				base_price: normalized.basePrice ?? product.base_price,
+				supplier:
+					normalized.supplier !== undefined
+						? normalized.supplier
+						: product.supplier,
+			};
 
-			if (normalized.name !== undefined) {
-				product.name = normalized.name;
+			await requireProductCategory(manager, nextValues.product_category_id);
+			await requireProductLineForCategory(
+				manager,
+				nextValues.product_line_id,
+				nextValues.product_category_id,
+			);
+
+			if (nextValues.product_subcategory_id) {
+				await requireProductSubcategoryForLine(
+					manager,
+					nextValues.product_subcategory_id,
+					nextValues.product_line_id,
+				);
 			}
 
-			if (normalized.reference !== undefined) {
-				product.reference = normalized.reference;
-			}
+			await requireProductStatus(manager, nextValues.status_id);
 
-			if (normalized.description !== undefined) {
-				product.description = normalized.description;
-			}
-
-			if (normalized.productCategoryId !== undefined) {
-				product.product_category_id = normalized.productCategoryId;
-			}
-
-			if (normalized.productLineId !== undefined) {
-				product.product_line_id = normalized.productLineId;
-			}
-
-			if (normalized.productSubcategoryId !== undefined) {
-				product.product_subcategory_id = normalized.productSubcategoryId;
-			}
-
-			if (normalized.imageUrl !== undefined) {
-				product.image_url = normalized.imageUrl;
-			}
-
-			if (normalized.format !== undefined) {
-				product.format = normalized.format;
-			}
-
-			if (normalized.packing !== undefined) {
-				product.packing = normalized.packing;
-			}
-
-			if (normalized.technicalInfo !== undefined) {
-				product.technical_info = normalized.technicalInfo;
-			}
-
-			if (normalized.statusId !== undefined) {
-				product.status_id = normalized.statusId;
-			}
-
-			if (normalized.basePrice !== undefined) {
-				product.base_price = normalized.basePrice;
-			}
-
-			if (normalized.supplier !== undefined) {
-				product.supplier = normalized.supplier;
-			}
-
-			const savedProduct = await repo.save(product);
+			const savedProduct = await repo.save(
+				repo.create({
+					id: product.id,
+					...nextValues,
+				}),
+			);
 
 			return {
 				id: savedProduct.id,

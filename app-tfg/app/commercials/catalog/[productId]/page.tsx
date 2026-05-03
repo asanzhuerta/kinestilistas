@@ -20,6 +20,7 @@ export default async function CommercialCatalogProductPage({
 			subtitle="Consulta comercial completa de la referencia seleccionada"
 			backHref="/commercials/catalog"
 			colorationBasePath="/commercials/coloration"
+			showPrice={false}
 			product={detail.product}
 			supportResources={detail.supportResources}
 			relatedColorCharts={detail.relatedColorCharts}

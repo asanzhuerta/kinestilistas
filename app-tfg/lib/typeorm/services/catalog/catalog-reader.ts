@@ -3,6 +3,33 @@ import { listColorCharts, getColorChartById, listColorReferences } from "./color
 import { getProductById, listProducts } from "./product";
 import { listSupportResources } from "./support-resource";
 
+const PENDING_REFERENCE_PREFIX = "PENDING-CODE-";
+
+function normalizeCategoryName(value: string | null | undefined) {
+	return String(value ?? "")
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.trim()
+		.toUpperCase();
+}
+
+function shouldIncludeRelatedColorCharts(product: NonNullable<Awaited<ReturnType<typeof getProductById>>>) {
+	const normalizedCategoryName = normalizeCategoryName(
+		product.productCategory?.name,
+	);
+	const normalizedReference = String(product.reference ?? "")
+		.trim()
+		.toUpperCase();
+
+	// In M3, tint products without a real ERP reference are persisted
+	// with a synthetic placeholder and are the only ones that should
+	// expose associated color charts in their product detail.
+	return (
+		normalizedCategoryName === "COLORACION" &&
+		normalizedReference.startsWith(PENDING_REFERENCE_PREFIX)
+	);
+}
+
 export async function listActiveCatalogProducts() {
 	return listProducts({
 		statusId: PRODUCT_STATUS_IDS.ACTIVE,
@@ -16,10 +43,14 @@ export async function getActiveCatalogProductDetail(productId: string) {
 		return null;
 	}
 
+	const includeRelatedColorCharts = shouldIncludeRelatedColorCharts(product);
+
 	const [productResources, lineResources, relatedColorCharts] = await Promise.all([
 		listSupportResources({ productId }),
 		listSupportResources({ productLineId: product.product_line_id }),
-		listColorCharts({ productLineId: product.product_line_id }),
+		includeRelatedColorCharts
+			? listColorCharts({ productLineId: product.product_line_id })
+			: Promise.resolve([] as Awaited<ReturnType<typeof listColorCharts>>),
 	]);
 
 	const supportResources = [

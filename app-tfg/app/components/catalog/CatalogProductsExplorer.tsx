@@ -95,6 +95,9 @@ export default function CatalogProductsExplorer({
 					showImageFilter: true,
 					defaultSortField: "title",
 					defaultSortDirection: "asc",
+					cardVariant: "catalog-product",
+					gridClassName:
+						"grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
 					extraFilters: [
 						{
 							key: "productLine",

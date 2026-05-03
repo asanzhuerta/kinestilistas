@@ -1,50 +1,37 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
 import { getSingleSearchParamValue } from "@/app/components/catalog-admin/catalog-navigation";
+import {
+	buildCategoryBadgeClassMap,
+	getCategoryBadgeClass,
+} from "@/app/components/catalog/category-badge-palette";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
 import { listProducts } from "@/lib/typeorm/services/catalog/product";
-import { formatDateShort } from "@/lib/utils/user-utils";
-
-function getProductStatusClass(statusCode: string | undefined) {
-	if (statusCode === "active") {
-		return "bg-emerald-100 text-emerald-700 border border-emerald-200";
-	}
-
-	if (statusCode === "inactive") {
-		return "bg-amber-100 text-amber-700 border border-amber-200";
-	}
-
-	return "bg-slate-100 text-slate-700 border border-slate-200";
-}
 
 function mapProductToItem(
 	product: Awaited<ReturnType<typeof listProducts>>[number],
+	categoryBadgeClassMap: Map<string, string>,
 ): EntityTableItem {
 	return {
 		id: product.id,
 		title: product.name,
-		subtitle: product.reference,
+		subtitle: product.description || "",
 		imageUrl: product.image_url,
+		secondaryImageUrl: product.productLine?.image_url ?? null,
+		secondaryImageLabel: product.productLine?.name ?? null,
 		category: product.productCategory?.name ?? "Sin categoria",
 		status: product.status?.name ?? "Sin estado",
 		primaryDate: product.created_at.toISOString(),
 		badges: [
 			{
-				label: product.status?.name ?? "Sin estado",
-				className: getProductStatusClass(product.status?.code),
-			},
-			{
-				label: product.productLine?.name ?? "Sin linea",
-				className: "bg-sky-100 text-sky-700 border border-sky-200",
+				label: product.productCategory?.name ?? "Sin categoria",
+				className: getCategoryBadgeClass(
+					product.productCategory?.name,
+					categoryBadgeClassMap,
+				),
 			},
 		],
 		fields: [
-			{ label: "Categoria", value: product.productCategory?.name || "-" },
-			{ label: "Linea", value: product.productLine?.name || "-" },
-			{
-				label: "Subcategoria",
-				value: product.productSubcategory?.name || "-",
-			},
 			{ label: "Formato", value: product.format || "-" },
 			{
 				label: "Packing",
@@ -53,9 +40,7 @@ function mapProductToItem(
 						? String(product.packing)
 						: "-",
 			},
-			{ label: "Proveedor", value: product.supplier || "-" },
 			{ label: "Precio base", value: `${product.base_price} EUR` },
-			{ label: "Alta", value: formatDateShort(product.created_at) },
 		],
 		actions: [
 			{
@@ -105,6 +90,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 			subcategory: undefined,
 		} as const);
 	const products = await listProducts();
+	const categoryBadgeClassMap = buildCategoryBadgeClassMap(
+		products.map((product) => product.productCategory?.name),
+	);
 
 	return (
 		<div className="space-y-6">
@@ -116,7 +104,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 			<CatalogAdminWorkspace
 				entityLabel="producto"
 				basePath="/admin/catalog/products"
-				items={products.map(mapProductToItem)}
+				items={products.map((product) =>
+					mapProductToItem(product, categoryBadgeClassMap),
+				)}
 				metrics={[
 					{ label: "productos", value: products.length },
 					{
@@ -159,6 +149,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 						},
 					],
 					emptyMessage: "No hay productos registrados todavia.",
+					cardVariant: "catalog-product",
+					gridClassName:
+						"grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
 				}}
 			/>
 		</div>
