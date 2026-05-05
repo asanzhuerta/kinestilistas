@@ -1,24 +1,27 @@
 import ColorChartsExplorer from "@/app/components/catalog/ColorChartsExplorer";
-import { buildCategoryBadgeClassMap } from "@/app/components/catalog/category-badge-palette";
+import {
+	serializeColorChartListItem,
+	serializeColorReferenceListItem,
+	toClientPlain,
+} from "@/app/components/catalog/coloration-serializers";
 import { listCatalogColorChartsWithReferences } from "@/lib/typeorm/services/catalog/catalog-reader";
-import { listProductCategories } from "@/lib/typeorm/services/catalog/product-category";
 
 export default async function CommercialColorationPage() {
-	const [{ colorCharts, colorReferences }, productCategories] = await Promise.all([
-		listCatalogColorChartsWithReferences(),
-		listProductCategories(),
-	]);
-	const categoryBadgeClassMap = buildCategoryBadgeClassMap(
-		productCategories.map((productCategory) => productCategory.name),
+	const { colorCharts, colorReferences } =
+		await listCatalogColorChartsWithReferences();
+	const serializedColorCharts = toClientPlain(
+		colorCharts.map(serializeColorChartListItem),
+	);
+	const serializedColorReferences = toClientPlain(
+		colorReferences.map(serializeColorReferenceListItem),
 	);
 
 	return (
 		<ColorChartsExplorer
 			title="Coloracion"
 			subtitle="Explora cartas de color y referencias para asesoramiento tecnico"
-			colorCharts={colorCharts}
-			colorReferences={colorReferences}
-			categoryBadgeClassMap={categoryBadgeClassMap}
+			colorCharts={serializedColorCharts}
+			colorReferences={serializedColorReferences}
 			detailBasePath="/commercials/coloration"
 		/>
 	);

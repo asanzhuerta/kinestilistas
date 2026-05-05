@@ -224,6 +224,7 @@ export async function createColorReference(
 				name: normalized.name,
 				description: normalized.description ?? null,
 				image_url: normalized.imageUrl ?? null,
+				thumb_image_url: normalized.imageUrlThumb ?? null,
 				display_order: normalized.displayOrder ?? 0,
 			});
 
@@ -254,6 +255,7 @@ export async function updateColorReference(
 				input.colorReferenceId,
 			);
 			const previousImageUrl = colorReference.image_url;
+			const previousThumbImageUrl = colorReference.thumb_image_url;
 			const nextColorChartId =
 				normalized.colorChartId ?? colorReference.color_chart_id;
 
@@ -279,6 +281,10 @@ export async function updateColorReference(
 				colorReference.image_url = normalized.imageUrl;
 			}
 
+			if (normalized.imageUrlThumb !== undefined) {
+				colorReference.thumb_image_url = normalized.imageUrlThumb;
+			}
+
 			if (normalized.displayOrder !== undefined) {
 				colorReference.display_order = normalized.displayOrder;
 			}
@@ -288,7 +294,9 @@ export async function updateColorReference(
 			return {
 				id: savedColorReference.id,
 				previousImageUrl,
+				previousThumbImageUrl,
 				nextImageUrl: savedColorReference.image_url,
+				nextThumbImageUrl: savedColorReference.thumb_image_url,
 			};
 		});
 
@@ -296,6 +304,11 @@ export async function updateColorReference(
 			updatedColorReference.previousImageUrl,
 			updatedColorReference.nextImageUrl,
 			"catalog/color-reference",
+		);
+		await cleanupCatalogImageReplacement(
+			updatedColorReference.previousThumbImageUrl,
+			updatedColorReference.nextThumbImageUrl,
+			"catalog/color-reference-thumb",
 		);
 
 		return getColorReferenceById(updatedColorReference.id);

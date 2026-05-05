@@ -101,6 +101,7 @@ type ColorReferenceValues = {
 	name: string | null;
 	description: string | null;
 	image_url: string | null;
+	thumb_image_url: string | null;
 	display_order: number | null;
 };
 
@@ -228,6 +229,7 @@ export function getColorReferenceInitialValues(
 		name: colorReference?.name ?? "",
 		description: colorReference?.description ?? "",
 		imageUrl: colorReference?.image_url ?? "",
+		imageUrlThumb: colorReference?.thumb_image_url ?? "",
 		displayOrder: String(colorReference?.display_order ?? 0),
 	};
 }
@@ -568,7 +570,7 @@ export function getColorChartFields(
 			label: "Imagen",
 			type: "image",
 			helpText:
-				"Sube la imagen de portada de la carta. Se guardara en Cloudinary.",
+				"Puedes usar una imagen publica de la API de coloracion o subir una nueva a Cloudinary.",
 		},
 		{
 			name: "description",
@@ -612,6 +614,13 @@ export function getColorReferenceFields(
 			type: "image",
 			helpText:
 				"Sube una referencia visual del tono. Se guardara en Cloudinary.",
+		},
+		{
+			name: "imageUrlThumb",
+			label: "Miniatura",
+			type: "image",
+			helpText:
+				"Opcional. Puedes definir una miniatura especifica para usos futuros del catalogo.",
 		},
 		{
 			name: "displayOrder",

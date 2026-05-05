@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
 import ColorChartDetail from "@/app/components/catalog/ColorChartDetail";
+import {
+	serializeColorChartDetail,
+	toClientPlain,
+} from "@/app/components/catalog/coloration-serializers";
 import { getCatalogColorChartDetail } from "@/lib/typeorm/services/catalog/catalog-reader";
 
 export default async function ClientColorChartDetailPage({
@@ -19,7 +23,7 @@ export default async function ClientColorChartDetailPage({
 			title="Carta de color"
 			subtitle="Localiza tonos y referencias en tu catalogo profesional"
 			backHref="/clients/coloration"
-			colorChart={colorChart}
+			colorChart={toClientPlain(serializeColorChartDetail(colorChart))}
 		/>
 	);
 }

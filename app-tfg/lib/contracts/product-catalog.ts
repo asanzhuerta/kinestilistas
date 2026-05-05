@@ -67,6 +67,7 @@ export type ColorReference = {
 	name: string;
 	description: string | null;
 	image_url: string | null;
+	thumb_image_url: string | null;
 	display_order: number;
 };
 
@@ -167,6 +168,7 @@ export type AdminUpsertColorReferenceBody = {
 	name?: string;
 	description?: string | null;
 	imageUrl?: string | null;
+	imageUrlThumb?: string | null;
 	displayOrder?: number | string | null;
 };
 
@@ -256,6 +258,7 @@ export function buildAdminUpsertColorReferenceInput(
 		name: body.name,
 		description: body.description,
 		imageUrl: body.imageUrl,
+		imageUrlThumb: body.imageUrlThumb,
 		displayOrder: body.displayOrder,
 	};
 }

@@ -7,7 +7,11 @@ import type {
 	AdminUpsertProductSubcategoryBody,
 	AdminUpsertSupportResourceBody,
 } from "@/lib/contracts/product-catalog";
-import { isValidCloudinaryImageUrl } from "@/lib/cloudinary";
+import {
+	isValidCloudinaryImageUrl,
+	isValidColorChartImageUrl,
+	isValidColorReferenceImageUrl,
+} from "@/lib/cloudinary";
 import { normalizeText } from "@/lib/utils/text";
 
 const UUID_PATTERN =
@@ -82,6 +86,7 @@ export type NormalizedColorReferenceWriteInput = {
 	name?: string;
 	description?: string | null;
 	imageUrl?: string | null;
+	imageUrlThumb?: string | null;
 	displayOrder?: number;
 };
 
@@ -131,6 +136,7 @@ function normalizeOptionalCloudinaryImageField(
 	value: string | null | undefined,
 	fieldName: string,
 	code: string,
+	validator: (value: string | null) => boolean = isValidCloudinaryImageUrl,
 ) {
 	const normalized = normalizeOptionalTextField(value);
 
@@ -138,7 +144,7 @@ function normalizeOptionalCloudinaryImageField(
 		return normalized;
 	}
 
-	if (!isValidCloudinaryImageUrl(normalized)) {
+	if (!validator(normalized)) {
 		throw new CatalogValidationError(`${fieldName} no es valida`, 400, code);
 	}
 
@@ -561,6 +567,7 @@ export function normalizeColorChartWriteInput(
 			input.imageUrl,
 			"La imagen de la carta de color",
 			"INVALID_COLOR_CHART_IMAGE_URL",
+			isValidColorChartImageUrl,
 		),
 	};
 }
@@ -597,6 +604,13 @@ export function normalizeColorReferenceWriteInput(
 			input.imageUrl,
 			"La imagen de la referencia de color",
 			"INVALID_COLOR_REFERENCE_IMAGE_URL",
+			isValidColorReferenceImageUrl,
+		),
+		imageUrlThumb: normalizeOptionalCloudinaryImageField(
+			input.imageUrlThumb,
+			"La miniatura de la referencia de color",
+			"INVALID_COLOR_REFERENCE_THUMB_IMAGE_URL",
+			isValidColorReferenceImageUrl,
 		),
 		displayOrder: normalizeNonNegativeIntegerField(
 			input.displayOrder,

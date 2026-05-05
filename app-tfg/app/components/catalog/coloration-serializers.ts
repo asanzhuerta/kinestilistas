@@ -1,0 +1,218 @@
+import type {
+	getColorChartById,
+	listColorCharts,
+	listColorReferences,
+} from "@/lib/typeorm/services/catalog/color-chart";
+
+export type SerializedColorChartListItem = {
+	id: string;
+	name: string;
+	description: string | null;
+	image_url: string | null;
+	product_line_id: string;
+	productLine: {
+		id: string;
+		name: string;
+		description: string | null;
+		product_category_id: string;
+		image_url: string | null;
+		display_order: number;
+		productCategory: {
+			id: string;
+			name: string;
+			description: string | null;
+			display_order: number;
+		} | null;
+	} | null;
+};
+
+export type SerializedColorReferenceListItem = {
+	id: string;
+	color_chart_id: string;
+	code: string;
+	name: string;
+	description: string | null;
+	image_url: string | null;
+	thumb_image_url: string | null;
+	display_order: number;
+	colorChart: {
+		id: string;
+		name: string;
+		description: string | null;
+		image_url: string | null;
+		product_line_id: string;
+		productLine: {
+			id: string;
+			name: string;
+			description: string | null;
+			product_category_id: string;
+			image_url: string | null;
+			display_order: number;
+			productCategory: {
+				id: string;
+				name: string;
+				description: string | null;
+				display_order: number;
+			} | null;
+		} | null;
+	} | null;
+};
+
+export type SerializedColorChartDetail = {
+	id: string;
+	name: string;
+	description: string | null;
+	image_url: string | null;
+	created_at: string;
+	updated_at: string;
+	productLine: {
+		id: string;
+		name: string;
+		description: string | null;
+		product_category_id: string;
+		image_url: string | null;
+		display_order: number;
+		productCategory: {
+			id: string;
+			name: string;
+			description: string | null;
+			display_order: number;
+		} | null;
+	} | null;
+	colorReferences: Array<{
+		id: string;
+		color_chart_id: string;
+		code: string;
+		name: string;
+		description: string | null;
+		image_url: string | null;
+		thumb_image_url: string | null;
+		display_order: number;
+	}>;
+};
+
+export function toClientPlain<T>(value: T): T {
+	return JSON.parse(JSON.stringify(value)) as T;
+}
+
+export function serializeColorChartListItem(
+	colorChart: Awaited<ReturnType<typeof listColorCharts>>[number],
+): SerializedColorChartListItem {
+	return {
+		id: colorChart.id,
+		name: colorChart.name,
+		description: colorChart.description,
+		image_url: colorChart.image_url,
+		product_line_id: colorChart.product_line_id,
+		productLine: colorChart.productLine
+			? {
+					id: colorChart.productLine.id,
+					name: colorChart.productLine.name,
+					description: colorChart.productLine.description,
+					product_category_id: colorChart.productLine.product_category_id,
+					image_url: colorChart.productLine.image_url,
+					display_order: colorChart.productLine.display_order,
+					productCategory: colorChart.productLine.productCategory
+						? {
+								id: colorChart.productLine.productCategory.id,
+								name: colorChart.productLine.productCategory.name,
+								description: colorChart.productLine.productCategory.description,
+								display_order:
+									colorChart.productLine.productCategory.display_order,
+						  }
+						: null,
+			  }
+			: null,
+	};
+}
+
+export function serializeColorReferenceListItem(
+	colorReference: Awaited<ReturnType<typeof listColorReferences>>[number],
+): SerializedColorReferenceListItem {
+	return {
+		id: colorReference.id,
+		color_chart_id: colorReference.color_chart_id,
+		code: colorReference.code,
+		name: colorReference.name,
+		description: colorReference.description,
+		image_url: colorReference.image_url,
+		thumb_image_url: colorReference.thumb_image_url,
+		display_order: colorReference.display_order,
+		colorChart: colorReference.colorChart
+			? {
+					id: colorReference.colorChart.id,
+					name: colorReference.colorChart.name,
+					description: colorReference.colorChart.description,
+					image_url: colorReference.colorChart.image_url,
+					product_line_id: colorReference.colorChart.product_line_id,
+					productLine: colorReference.colorChart.productLine
+						? {
+								id: colorReference.colorChart.productLine.id,
+								name: colorReference.colorChart.productLine.name,
+								description: colorReference.colorChart.productLine.description,
+								product_category_id:
+									colorReference.colorChart.productLine.product_category_id,
+								image_url: colorReference.colorChart.productLine.image_url,
+								display_order:
+									colorReference.colorChart.productLine.display_order,
+								productCategory:
+									colorReference.colorChart.productLine.productCategory
+										? {
+												id: colorReference.colorChart.productLine.productCategory.id,
+												name: colorReference.colorChart.productLine.productCategory.name,
+												description:
+													colorReference.colorChart.productLine.productCategory
+														.description,
+												display_order:
+													colorReference.colorChart.productLine.productCategory
+														.display_order,
+										  }
+										: null,
+						  }
+						: null,
+			  }
+			: null,
+	};
+}
+
+export function serializeColorChartDetail(
+	colorChart: NonNullable<Awaited<ReturnType<typeof getColorChartById>>>,
+): SerializedColorChartDetail {
+	return {
+		id: colorChart.id,
+		name: colorChart.name,
+		description: colorChart.description,
+		image_url: colorChart.image_url,
+		created_at: colorChart.created_at.toISOString(),
+		updated_at: colorChart.updated_at.toISOString(),
+		productLine: colorChart.productLine
+			? {
+					id: colorChart.productLine.id,
+					name: colorChart.productLine.name,
+					description: colorChart.productLine.description,
+					product_category_id: colorChart.productLine.product_category_id,
+					image_url: colorChart.productLine.image_url,
+					display_order: colorChart.productLine.display_order,
+					productCategory: colorChart.productLine.productCategory
+						? {
+								id: colorChart.productLine.productCategory.id,
+								name: colorChart.productLine.productCategory.name,
+								description: colorChart.productLine.productCategory.description,
+								display_order:
+									colorChart.productLine.productCategory.display_order,
+						  }
+						: null,
+			  }
+			: null,
+		colorReferences: (colorChart.colorReferences ?? []).map((reference) => ({
+			id: reference.id,
+			color_chart_id: reference.color_chart_id,
+			code: reference.code,
+			name: reference.name,
+			description: reference.description,
+			image_url: reference.image_url,
+			thumb_image_url: reference.thumb_image_url,
+			display_order: reference.display_order,
+		})),
+	};
+}

@@ -126,3 +126,56 @@ export function isValidCloudinaryImageUrl(value: string | null) {
 		return false;
 	}
 }
+
+export function isValidPublicColorReferenceImageUrl(value: string | null) {
+	if (!value) {
+		return true;
+	}
+
+	try {
+		const url = new URL(value);
+
+		return (
+			url.protocol === "https:" &&
+			url.hostname === "kinmobileapp.com" &&
+			url.pathname.startsWith("/kincolor/img/")
+		);
+	} catch {
+		return false;
+	}
+}
+
+export function isValidColorReferenceImageUrl(value: string | null) {
+	return (
+		isValidCloudinaryImageUrl(value) ||
+		isValidPublicColorReferenceImageUrl(value)
+	);
+}
+
+export function isValidPublicColorChartImageUrl(value: string | null) {
+	if (!value) {
+		return true;
+	}
+
+	try {
+		const url = new URL(value);
+
+		return (
+			(url.protocol === "https:" &&
+				url.hostname === "kinmobileapp.com" &&
+				url.pathname.startsWith("/kincolor/img/")) ||
+			(url.protocol === "https:" &&
+				url.hostname === "www.kincosmetics.com" &&
+				url.pathname.startsWith("/tmp/images/"))
+		);
+	} catch {
+		return false;
+	}
+}
+
+export function isValidColorChartImageUrl(value: string | null) {
+	return (
+		isValidCloudinaryImageUrl(value) ||
+		isValidPublicColorChartImageUrl(value)
+	);
+}

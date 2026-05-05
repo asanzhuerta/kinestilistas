@@ -40,6 +40,9 @@ export class ColorReference {
 	@Column({ type: "text", nullable: true })
 	image_url!: string | null;
 
+	@Column({ type: "text", nullable: true })
+	thumb_image_url!: string | null;
+
 	@Column({ type: "integer", default: 0 })
 	display_order!: number;
 
