@@ -251,7 +251,9 @@ export default function EntityTableFilters({
 									}
 									className="rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
 								>
-									<option value="primaryDate">Fecha</option>
+									<option value="primaryDate">
+										{config?.primaryDateLabel ?? "Fecha"}
+									</option>
 									<option value="title">Titulo</option>
 									<option value="subtitle">Subtitulo</option>
 									<option value="category">Categoria</option>

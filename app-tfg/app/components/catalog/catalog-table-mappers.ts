@@ -1,10 +1,40 @@
 import type { EntityTableBadge, EntityTableItem } from "@/app/components/entity-table/entity-table-types";
-import type { listColorCharts } from "@/lib/typeorm/services/catalog/color-chart";
+import type {
+	listColorCharts,
+	listColorReferences,
+} from "@/lib/typeorm/services/catalog/color-chart";
 import type { listProducts } from "@/lib/typeorm/services/catalog/product";
+import type { SerializedColorReferenceListItem } from "./coloration-serializers";
 import {
 	buildCategoryBadgeClassMap,
 	getCategoryBadgeClass,
 } from "./category-badge-palette";
+
+function normalizeSortSegment(value: string) {
+	return value
+		.normalize("NFD")
+		.replace(/\p{Diacritic}/gu, "")
+		.toLowerCase()
+		.trim();
+}
+
+export function buildColorReferenceSortKey(
+	code: string | null | undefined,
+	name: string | null | undefined,
+) {
+	const normalizedCode = String(code ?? "").trim();
+
+	if (/^\d+(?:\.\d+)*$/.test(normalizedCode)) {
+		const segments = normalizedCode
+			.split(".")
+			.map((segment) => segment.padStart(4, "0"))
+			.join(".");
+		return `0|${segments}|${normalizeSortSegment(name ?? "")}`;
+	}
+
+	const alphaSeed = normalizedCode || String(name ?? "");
+	return `1|${normalizeSortSegment(alphaSeed)}|${normalizeSortSegment(name ?? "")}`;
+}
 
 function buildBadge(
 	label: string | null | undefined,
@@ -132,6 +162,64 @@ export function mapColorChartsToEntityTableItems(
 			colorChart.description,
 			colorChart.productLine?.name,
 			colorChart.productLine?.productCategory?.name,
+		]
+			.filter(Boolean)
+			.join(" "),
+	}));
+}
+
+export function mapColorReferencesToEntityTableItems(
+	colorReferences:
+		| Awaited<ReturnType<typeof listColorReferences>>
+		| SerializedColorReferenceListItem[],
+	lineBadgeClassMap: Map<string, string>,
+	colorChartBadgeClassMap: Map<string, string>,
+	options?: {
+		hrefBasePath?: string;
+	},
+): EntityTableItem[] {
+	return colorReferences.map((colorReference) => ({
+		id: colorReference.id,
+		title: `${colorReference.code} - ${colorReference.name}`,
+		subtitle: "",
+		href: options?.hrefBasePath
+			? `${options.hrefBasePath}/${colorReference.id}/edit`
+			: null,
+		imageUrl:
+			colorReference.image_url ??
+			colorReference.thumb_image_url ??
+			null,
+		category: colorReference.colorChart?.productLine?.name ?? "Sin linea",
+		primaryDate: buildColorReferenceSortKey(
+			colorReference.code,
+			colorReference.name,
+		),
+		badges: [
+			buildBadge(
+				colorReference.colorChart?.productLine?.name,
+				getCategoryBadgeClass(
+					colorReference.colorChart?.productLine?.name,
+					lineBadgeClassMap,
+				),
+			),
+			buildBadge(
+				colorReference.colorChart?.name,
+				getCategoryBadgeClass(
+					colorReference.colorChart?.name,
+					colorChartBadgeClassMap,
+				),
+			),
+		].filter(Boolean) as EntityTableBadge[],
+		fields: [],
+		filterValues: {
+			colorChart: colorReference.colorChart?.name ?? null,
+		},
+		searchText: [
+			colorReference.code,
+			colorReference.name,
+			colorReference.description,
+			colorReference.colorChart?.name,
+			colorReference.colorChart?.productLine?.name,
 		]
 			.filter(Boolean)
 			.join(" "),

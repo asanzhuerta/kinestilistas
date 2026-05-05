@@ -5,13 +5,13 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import H1Title from "@/app/components/H1Title";
 import { formatDateTime } from "@/lib/utils/user-utils";
-import type { getColorChartById } from "@/lib/typeorm/services/catalog/color-chart";
+import type { SerializedColorChartDetail } from "./coloration-serializers";
 
 type Props = {
 	title: string;
 	subtitle: string;
 	backHref: string;
-	colorChart: NonNullable<Awaited<ReturnType<typeof getColorChartById>>>;
+	colorChart: SerializedColorChartDetail;
 };
 
 function normalizeText(value: string | null | undefined) {
@@ -77,7 +77,7 @@ export default function ColorChartDetail({
 									src={colorChart.image_url}
 									alt={colorChart.name}
 									fill
-									className="object-cover"
+									className="object-contain bg-white"
 									sizes="(max-width: 1024px) 100vw, 320px"
 								/>
 							) : (
@@ -169,7 +169,7 @@ export default function ColorChartDetail({
 											src={reference.image_url}
 											alt={`${reference.code} ${reference.name}`}
 											fill
-											className="object-cover"
+											className="object-contain bg-white"
 											sizes="(max-width: 1280px) 50vw, 320px"
 										/>
 									) : (

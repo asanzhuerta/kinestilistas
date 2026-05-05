@@ -28,7 +28,8 @@ export type EntityTableCardVariant =
 	| "default"
 	| "headline"
 	| "media"
-	| "catalog-product";
+	| "catalog-product"
+	| "color-reference";
 
 export type EntitySortField =
 	| "title"
@@ -43,6 +44,7 @@ export type EntityTableItem = {
 	id: string;
 	title: string;
 	subtitle: string;
+	href?: string | null;
 	imageUrl?: string | null;
 	secondaryImageUrl?: string | null;
 	secondaryImageLabel?: string | null;
@@ -60,6 +62,7 @@ export type EntityTableItem = {
 export type EntityTableConfig = {
 	categoryLabel?: string;
 	statusLabel?: string;
+	primaryDateLabel?: string;
 	showImageFilter?: boolean;
 	showHideInactiveToggle?: boolean;
 	hideInactiveLabel?: string;

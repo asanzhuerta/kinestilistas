@@ -1,73 +1,11 @@
 import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
+import { mapColorReferencesToEntityTableItems } from "@/app/components/catalog/catalog-table-mappers";
 import { getSingleSearchParamValue } from "@/app/components/catalog-admin/catalog-navigation";
-import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
+import {
+	buildCategoryBadgeClassMap,
+} from "@/app/components/catalog/category-badge-palette";
 import { listColorReferences } from "@/lib/typeorm/services/catalog/color-chart";
-
-function mapColorReferenceToItem(
-	colorReference: Awaited<ReturnType<typeof listColorReferences>>[number],
-): EntityTableItem {
-	return {
-		id: colorReference.id,
-		title: `${colorReference.code} - ${colorReference.name}`,
-		subtitle: colorReference.description || "Sin descripcion",
-		imageUrl: colorReference.image_url,
-		category: colorReference.colorChart?.productLine?.name ?? "Sin linea",
-		status: `Orden ${colorReference.display_order}`,
-		primaryDate: String(9999 - colorReference.display_order).padStart(4, "0"),
-		badges: [
-			{
-				label: colorReference.colorChart?.productLine?.name ?? "Sin linea",
-				className: "bg-sky-100 text-sky-700 border border-sky-200",
-			},
-			{
-				label: colorReference.colorChart?.name ?? "Sin carta",
-				className: "bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200",
-			},
-		],
-		fields: [
-			{
-				label: "Codigo",
-				value: colorReference.code,
-			},
-			{
-				label: "Nombre",
-				value: colorReference.name,
-			},
-			{
-				label: "Linea",
-				value: colorReference.colorChart?.productLine?.name || "-",
-			},
-			{
-				label: "Carta",
-				value: colorReference.colorChart?.name || "-",
-			},
-			{
-				label: "Orden",
-				value: String(colorReference.display_order),
-			},
-		],
-		actions: [
-			{
-				label: "Editar",
-				href: `/admin/catalog/color-references/${colorReference.id}/edit`,
-				variant: "secondary",
-			},
-		],
-		filterValues: {
-			colorChart: colorReference.colorChart?.name ?? null,
-		},
-		searchText: [
-			colorReference.code,
-			colorReference.name,
-			colorReference.description,
-			colorReference.colorChart?.name,
-			colorReference.colorChart?.productLine?.name,
-		]
-			.filter(Boolean)
-			.join(" "),
-	};
-}
 
 type Props = {
 	searchParams?: Promise<{
@@ -84,6 +22,12 @@ export default async function AdminColorReferencesPage({ searchParams }: Props) 
 			colorChart: undefined,
 		} as const);
 	const colorReferences = await listColorReferences();
+	const lineBadgeClassMap = buildCategoryBadgeClassMap(
+		colorReferences.map((colorReference) => colorReference.colorChart?.productLine?.name),
+	);
+	const colorChartBadgeClassMap = buildCategoryBadgeClassMap(
+		colorReferences.map((colorReference) => colorReference.colorChart?.name),
+	);
 
 	return (
 		<div className="space-y-6">
@@ -95,7 +39,12 @@ export default async function AdminColorReferencesPage({ searchParams }: Props) 
 			<CatalogAdminWorkspace
 				entityLabel="referencia"
 				basePath="/admin/catalog/color-references"
-				items={colorReferences.map(mapColorReferenceToItem)}
+				items={mapColorReferencesToEntityTableItems(
+					colorReferences,
+					lineBadgeClassMap,
+					colorChartBadgeClassMap,
+					{ hrefBasePath: "/admin/catalog/color-references" },
+				)}
 				metrics={[
 					{ label: "referencias", value: colorReferences.length },
 					{
@@ -113,8 +62,11 @@ export default async function AdminColorReferencesPage({ searchParams }: Props) 
 				]}
 				tableConfig={{
 					categoryLabel: "Linea",
-					statusLabel: "Orden",
 					showImageFilter: true,
+					cardVariant: "color-reference",
+					defaultSortField: "primaryDate",
+					defaultSortDirection: "asc",
+					primaryDateLabel: "Codigo",
 					initialCategoryFilter: getSingleSearchParamValue(
 						resolvedSearchParams.category,
 					),
@@ -131,6 +83,8 @@ export default async function AdminColorReferencesPage({ searchParams }: Props) 
 							dependsOn: ["category"],
 						},
 					],
+					gridClassName:
+						"grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4",
 					emptyMessage: "No hay referencias de color registradas todavia.",
 				}}
 			/>
