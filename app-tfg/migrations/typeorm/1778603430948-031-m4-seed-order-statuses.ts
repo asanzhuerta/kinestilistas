@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class M4SeedOrderStatuses1778200002000 implements MigrationInterface {
-	name = "M4SeedOrderStatuses1778200002000";
+export class M4SeedOrderStatuses1778603430948 implements MigrationInterface {
+	name = "M4SeedOrderStatuses1778603430948";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class M4CreateOrderTables1778200001000 implements MigrationInterface {
-	name = "M4CreateOrderTables1778200001000";
+export class M4CreateOrderTables1778603418624 implements MigrationInterface {
+	name = "M4CreateOrderTables1778603418624";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`

@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class M4CreateLookupTables1778200000000
+export class M4CreateLookupTables1778603405101
 	implements MigrationInterface
 {
-	name = "M4CreateLookupTables1778200000000";
+	name = "M4CreateLookupTables1778603405101";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`
