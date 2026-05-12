@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
 import EntityTable from "@/app/components/entity-table/EntityTable";
@@ -12,7 +10,7 @@ import { requireAdminSession } from "@/lib/auth/require-session";
 export default async function UsuariosPage() {
 	// CONTROL DE ACCESO
 	// Se asegura de que el usuario esté autenticado y tenga rol de administrador.
-	const session = await requireAdminSession();
+	await requireAdminSession();
 
 	// CARGA DE DATOS
 	// Recupera el listado completo de usuarios y lo adapta al formato visual común.

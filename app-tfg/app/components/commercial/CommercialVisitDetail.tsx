@@ -10,7 +10,6 @@ import SubmitButton from "@/app/components/forms/SubmitButton";
 import { useCommercialVisit } from "@/app/hooks/api/useCommercialVisit";
 import { formatTimeLabel } from "@/lib/utils/time";
 import {
-	type CommercialVisit,
 	COMMERCIAL_VISIT_STATUS_OPTIONS,
 	COMMERCIAL_VISIT_TYPE_OPTIONS,
 	formatVisitDate,

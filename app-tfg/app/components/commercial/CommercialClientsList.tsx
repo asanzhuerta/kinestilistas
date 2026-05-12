@@ -12,11 +12,11 @@ export default function CommercialClientsList() {
 		loading,
 		error,
 	} = useCommercialClients();
-	const clients = clientsData ?? [];
+	const clientsCount = clientsData?.length ?? 0;
 
 	const tableItems = useMemo(
-		() => mapCommercialClientsToEntityTableItems(clients),
-		[clients],
+		() => mapCommercialClientsToEntityTableItems(clientsData ?? []),
+		[clientsData],
 	);
 
 	return (
@@ -43,7 +43,7 @@ export default function CommercialClientsList() {
 						<div className="flex flex-wrap gap-3 text-sm text-slate-600">
 							<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
 								<span className="font-semibold text-slate-900">
-									{clients.length}
+									{clientsCount}
 								</span>{" "}
 								clientes asignados
 							</div>

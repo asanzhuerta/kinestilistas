@@ -381,6 +381,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 		},
 
 		debug(code) {
+			void code;
 			// Silenciado para no ensuciar la consola con ruido innecesario.
 			// Si quieres ver trazas de debug, puedes descomentar la línea siguiente.
 			// console.debug(`[auth] ${code}`);

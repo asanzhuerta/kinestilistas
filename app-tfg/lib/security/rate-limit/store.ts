@@ -23,10 +23,8 @@ type MemoryRateLimitEntry = {
 type MemoryRateLimitStore = Map<string, MemoryRateLimitEntry>;
 
 declare global {
-	// eslint-disable-next-line no-var
 	var __kinestilistasRateLimitStore: MemoryRateLimitStore | undefined;
 
-	// eslint-disable-next-line no-var
 	var __kinestilistasRateLimitCounter: number | undefined;
 }
 

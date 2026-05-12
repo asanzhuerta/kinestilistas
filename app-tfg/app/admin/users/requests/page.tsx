@@ -11,7 +11,7 @@ import { requireAdminSession } from "@/lib/auth/require-session";
 export default async function RequestsPage() {
 	// CONTROL DE ACCESO
 	// Se asegura de que el usuario esté autenticado y tenga rol de administrador.
-	const session = await requireAdminSession();
+	await requireAdminSession();
 
 	// CARGA DE DATOS
 	// Recupera todas las solicitudes y conserva solo las que siguen pendientes.

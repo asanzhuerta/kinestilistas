@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import HeaderTitle from "@/app/components/basics/HeaderTitle";
-import PageTransition from "@/app/components/animations/PageTransition";
 
 export const metadata: Metadata = {
 	title: "Navegador no compatible | KinEstilistas",

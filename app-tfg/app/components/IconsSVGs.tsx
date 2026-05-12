@@ -238,7 +238,7 @@ export function TrainingIcon({
 export function ChatIcon({ className = "w-6 h-6" }: { className?: string }) {
 	return (
 		<svg
-			className="h-6 w-6 text-black"
+			className={`${className} text-black`}
 			fill="none"
 			stroke="currentColor"
 			viewBox="0 0 24 24"
@@ -256,13 +256,13 @@ export function ChatIcon({ className = "w-6 h-6" }: { className?: string }) {
 
 // Icono de flecha derecha
 export function RightArrowIcon({
-	className = "w-6 h-6",
+	className = "w-5 h-5",
 }: {
 	className?: string;
 }) {
 	return (
 		<svg
-			className="h-5 w-5 text-black/40 transition-transform group-hover:translate-x-1"
+			className={`${className} text-black/40 transition-transform group-hover:translate-x-1`}
 			fill="none"
 			stroke="currentColor"
 			viewBox="0 0 24 24"
@@ -280,13 +280,13 @@ export function RightArrowIcon({
 
 // Icono de flecha izquierda
 export function LeftArrowIcon({
-	className = "w-6 h-6",
+	className = "w-5 h-5",
 }: {
 	className?: string;
 }) {
 	return (
 		<svg
-			className="h-5 w-5 text-black/40 transition-transform group-hover:-translate-x-1"
+			className={`${className} text-black/40 transition-transform group-hover:-translate-x-1`}
 			fill="none"
 			stroke="currentColor"
 			viewBox="0 0 24 24"
