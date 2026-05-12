@@ -1,8 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import H1Title from "@/app/components/H1Title";
+import ProductOrderBox from "@/app/components/catalog/ProductOrderBox";
+import { getVisibleProductReference } from "@/lib/catalog/product-reference";
 import { formatDateTime } from "@/lib/utils/user-utils";
 import type { listColorCharts } from "@/lib/typeorm/services/catalog/color-chart";
+import type { listColorReferences } from "@/lib/typeorm/services/catalog/color-chart";
 import type { getProductById } from "@/lib/typeorm/services/catalog/product";
 
 type DetailResource = {
@@ -23,6 +26,16 @@ type Props = {
 	product: NonNullable<Awaited<ReturnType<typeof getProductById>>>;
 	supportResources: DetailResource[];
 	relatedColorCharts: Awaited<ReturnType<typeof listColorCharts>>;
+	orderableColorReferences: Awaited<ReturnType<typeof listColorReferences>>;
+	orderContext?: {
+		mode: "client" | "commercial";
+		draftApiBasePath: string;
+		clientOptions?: Array<{
+			id: string;
+			name: string;
+			contactName: string | null;
+		}>;
+	};
 };
 
 function InfoChip({
@@ -50,7 +63,11 @@ export default function CatalogProductDetail({
 	product,
 	supportResources,
 	relatedColorCharts,
+	orderableColorReferences,
+	orderContext,
 }: Props) {
+	const visibleReference = getVisibleProductReference(product.reference);
+
 	return (
 		<div className="space-y-6">
 			<H1Title title={title} subtitle={subtitle} />
@@ -94,7 +111,7 @@ export default function CatalogProductDetail({
 					<div className="space-y-5">
 						<div>
 							<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-								{product.reference}
+								{visibleReference || "Referencia compuesta por tonos"}
 							</p>
 
 							<h2 className="mt-2 text-3xl font-bold text-slate-900">
@@ -169,6 +186,25 @@ export default function CatalogProductDetail({
 				</div>
 			</section>
 
+			{orderContext ? (
+				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
+					<ProductOrderBox
+						mode={orderContext.mode}
+						draftApiBasePath={orderContext.draftApiBasePath}
+						productId={product.id}
+						productName={product.name}
+						productLineName={product.productLine?.name ?? null}
+						orderableColorReferences={orderableColorReferences.map((reference) => ({
+							id: reference.id,
+							code: reference.code,
+							name: reference.name,
+							erpReference: reference.erp_reference ?? null,
+						}))}
+						clientOptions={orderContext.clientOptions ?? []}
+					/>
+				</section>
+			) : null}
+
 			<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
 				<div className="flex flex-col gap-2">
 					<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
@@ -229,6 +265,54 @@ export default function CatalogProductDetail({
 					</div>
 				)}
 			</section>
+
+			{orderableColorReferences.length > 0 ? (
+				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
+					<div className="flex flex-col gap-2">
+						<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+							Coloración relacionada
+						</p>
+						<h3 className="text-2xl font-semibold text-slate-900">
+							Referencias exactas disponibles
+						</h3>
+						<p className="text-sm leading-7 text-slate-600">
+							Estas son las referencias concretas que se pueden pedir para este
+							tinte. El pedido se registra por código exacto, no por el producto
+							genérico.
+						</p>
+					</div>
+
+					<div className="mt-5 grid gap-4 lg:grid-cols-2">
+						{orderableColorReferences.map((reference) => (
+							<article
+								key={reference.id}
+								className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+							>
+								<div className="flex flex-wrap gap-2">
+									<span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+										{reference.erp_reference ?? reference.code}
+									</span>
+									{reference.erp_reference &&
+									reference.erp_reference !== reference.code ? (
+										<span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">
+											Tono {reference.code}
+										</span>
+									) : null}
+								</div>
+
+								<h4 className="mt-4 text-lg font-semibold text-slate-900">
+									{reference.name}
+								</h4>
+
+								<p className="mt-2 text-sm leading-6 text-slate-600">
+									{reference.description ||
+										"Referencia disponible para pedido y consulta comercial."}
+								</p>
+							</article>
+						))}
+					</div>
+				</section>
+			) : null}
 
 			{relatedColorCharts.length > 0 ? (
 				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">

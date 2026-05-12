@@ -1,9 +1,8 @@
 import { PRODUCT_STATUS_IDS } from "@/lib/typeorm/constants/catalog-ids";
+import { isSyntheticProductReference } from "@/lib/catalog/product-reference";
 import { listColorCharts, getColorChartById, listColorReferences } from "./color-chart";
 import { getProductById, listProducts } from "./product";
 import { listSupportResources } from "./support-resource";
-
-const PENDING_REFERENCE_PREFIX = "PENDING-CODE-";
 
 function normalizeCategoryName(value: string | null | undefined) {
 	return String(value ?? "")
@@ -17,16 +16,13 @@ function shouldIncludeRelatedColorCharts(product: NonNullable<Awaited<ReturnType
 	const normalizedCategoryName = normalizeCategoryName(
 		product.productCategory?.name,
 	);
-	const normalizedReference = String(product.reference ?? "")
-		.trim()
-		.toUpperCase();
 
 	// In M3, tint products without a real ERP reference are persisted
 	// with a synthetic placeholder and are the only ones that should
 	// expose associated color charts in their product detail.
 	return (
 		normalizedCategoryName === "COLORACION" &&
-		normalizedReference.startsWith(PENDING_REFERENCE_PREFIX)
+		isSyntheticProductReference(product.reference)
 	);
 }
 
@@ -45,12 +41,21 @@ export async function getActiveCatalogProductDetail(productId: string) {
 
 	const includeRelatedColorCharts = shouldIncludeRelatedColorCharts(product);
 
-	const [productResources, lineResources, relatedColorCharts] = await Promise.all([
+	const [
+		productResources,
+		lineResources,
+		relatedColorCharts,
+		orderableColorReferences,
+	] = await Promise.all([
 		listSupportResources({ productId }),
 		listSupportResources({ productLineId: product.product_line_id }),
 		includeRelatedColorCharts
 			? listColorCharts({ productLineId: product.product_line_id })
 			: Promise.resolve([] as Awaited<ReturnType<typeof listColorCharts>>),
+		listColorReferences({
+			productId: product.id,
+			orderableOnly: true,
+		}),
 	]);
 
 	const supportResources = [
@@ -74,6 +79,7 @@ export async function getActiveCatalogProductDetail(productId: string) {
 		product,
 		supportResources,
 		relatedColorCharts,
+		orderableColorReferences,
 	};
 }
 

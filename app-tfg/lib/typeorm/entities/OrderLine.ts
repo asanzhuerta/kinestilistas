@@ -9,13 +9,12 @@ import {
 import type { Relation } from "typeorm";
 import { Order } from "./Order";
 import { Product } from "./Product";
+import { ColorReference } from "./ColorReference";
 
 @Entity("order_lines")
 @Index("order_lines_order_id_index", ["order_id"])
 @Index("order_lines_product_id_index", ["product_id"])
-@Index("order_lines_order_id_product_id_unique", ["order_id", "product_id"], {
-	unique: true,
-})
+@Index("order_lines_color_reference_id_index", ["color_reference_id"])
 export class OrderLine {
 	@PrimaryGeneratedColumn("uuid")
 	id!: string;
@@ -25,6 +24,9 @@ export class OrderLine {
 
 	@Column({ type: "uuid" })
 	product_id!: string;
+
+	@Column({ type: "uuid", nullable: true })
+	color_reference_id!: string | null;
 
 	@Column({ type: "integer" })
 	quantity!: number;
@@ -37,6 +39,15 @@ export class OrderLine {
 
 	@Column({ type: "numeric", precision: 12, scale: 2 })
 	line_total!: string;
+
+	@Column({ type: "text" })
+	order_reference_snapshot!: string;
+
+	@Column({ type: "text", nullable: true })
+	variant_code_snapshot!: string | null;
+
+	@Column({ type: "text", nullable: true })
+	variant_name_snapshot!: string | null;
 
 	@ManyToOne(() => Order, {
 		onDelete: "CASCADE",
@@ -51,4 +62,12 @@ export class OrderLine {
 	})
 	@JoinColumn({ name: "product_id" })
 	product!: Relation<Product>;
+
+	@ManyToOne(() => ColorReference, {
+		onDelete: "SET NULL",
+		onUpdate: "CASCADE",
+		nullable: true,
+	})
+	@JoinColumn({ name: "color_reference_id" })
+	colorReference!: Relation<ColorReference | null>;
 }

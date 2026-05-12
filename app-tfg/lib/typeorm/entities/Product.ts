@@ -15,6 +15,7 @@ import { ProductLine } from "./ProductLine";
 import { ProductSubcategory } from "./ProductSubcategory";
 import { ProductStatus } from "./ProductStatus";
 import { SupportResource } from "./SupportResource";
+import { ColorReference } from "./ColorReference";
 
 @Entity("products")
 @Index("products_name_index", ["name"])
@@ -114,6 +115,12 @@ export class Product {
 		(supportResource) => supportResource.product,
 	)
 	supportResources!: Relation<SupportResource[]>;
+
+	@OneToMany(
+		() => ColorReference,
+		(colorReference) => colorReference.product,
+	)
+	colorReferences!: Relation<ColorReference[]>;
 
 	@CreateDateColumn({ type: "timestamptz" })
 	created_at!: Date;

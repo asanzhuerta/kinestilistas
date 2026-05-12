@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import CatalogProductDetail from "@/app/components/catalog/CatalogProductDetail";
+import { requireClientSession } from "@/lib/auth/require-session";
 import { getActiveCatalogProductDetail } from "@/lib/typeorm/services/catalog/catalog-reader";
 
 export default async function ClientCatalogProductPage({
@@ -7,6 +8,7 @@ export default async function ClientCatalogProductPage({
 }: {
 	params: Promise<{ productId: string }>;
 }) {
+	await requireClientSession();
 	const { productId } = await params;
 	const detail = await getActiveCatalogProductDetail(productId);
 
@@ -24,6 +26,11 @@ export default async function ClientCatalogProductPage({
 			product={detail.product}
 			supportResources={detail.supportResources}
 			relatedColorCharts={detail.relatedColorCharts}
+			orderableColorReferences={detail.orderableColorReferences}
+			orderContext={{
+				mode: "client",
+				draftApiBasePath: "/api/clients/orders",
+			}}
 		/>
 	);
 }

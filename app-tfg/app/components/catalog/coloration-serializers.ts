@@ -29,11 +29,14 @@ export type SerializedColorChartListItem = {
 export type SerializedColorReferenceListItem = {
 	id: string;
 	color_chart_id: string;
+	product_id: string | null;
 	code: string;
 	name: string;
 	description: string | null;
 	image_url: string | null;
 	thumb_image_url: string | null;
+	erp_reference: string | null;
+	is_orderable: boolean;
 	display_order: number;
 	colorChart: {
 		id: string;
@@ -82,11 +85,14 @@ export type SerializedColorChartDetail = {
 	colorReferences: Array<{
 		id: string;
 		color_chart_id: string;
+		product_id: string | null;
 		code: string;
 		name: string;
 		description: string | null;
 		image_url: string | null;
 		thumb_image_url: string | null;
+		erp_reference: string | null;
+		is_orderable: boolean;
 		display_order: number;
 	}>;
 };
@@ -132,11 +138,14 @@ export function serializeColorReferenceListItem(
 	return {
 		id: colorReference.id,
 		color_chart_id: colorReference.color_chart_id,
+		product_id: colorReference.product_id ?? null,
 		code: colorReference.code,
 		name: colorReference.name,
 		description: colorReference.description,
 		image_url: colorReference.image_url,
 		thumb_image_url: colorReference.thumb_image_url,
+		erp_reference: colorReference.erp_reference ?? null,
+		is_orderable: Boolean(colorReference.is_orderable),
 		display_order: colorReference.display_order,
 		colorChart: colorReference.colorChart
 			? {
@@ -207,11 +216,14 @@ export function serializeColorChartDetail(
 		colorReferences: (colorChart.colorReferences ?? []).map((reference) => ({
 			id: reference.id,
 			color_chart_id: reference.color_chart_id,
+			product_id: reference.product_id ?? null,
 			code: reference.code,
 			name: reference.name,
 			description: reference.description,
 			image_url: reference.image_url,
 			thumb_image_url: reference.thumb_image_url,
+			erp_reference: reference.erp_reference ?? null,
+			is_orderable: Boolean(reference.is_orderable),
 			display_order: reference.display_order,
 		})),
 	};

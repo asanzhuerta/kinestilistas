@@ -3,6 +3,7 @@ import OrderWorkspace from "@/app/components/orders/OrderWorkspace";
 import { listClientsByCommercialId } from "@/lib/typeorm/services/commercial/client";
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
 import {
+	getDraftOrderForCommercialUser,
 	listOrderProductOptions,
 	listOrdersForCommercialUser,
 } from "@/lib/typeorm/services/orders/order";
@@ -10,11 +11,14 @@ import {
 export default async function CommercialOrdersPage() {
 	const session = await requireCommercialSession();
 	const commercial = await requireCommercialByUserId(session.user.id);
-
-	const [productOptions, orders, clients] = await Promise.all([
+	const clients = await listClientsByCommercialId(commercial.id);
+	const initialSelectedClientId = clients[0]?.id ?? null;
+	const [productOptions, orders, initialDraftOrder] = await Promise.all([
 		listOrderProductOptions(),
 		listOrdersForCommercialUser(session.user.id),
-		listClientsByCommercialId(commercial.id),
+		getDraftOrderForCommercialUser(session.user.id, {
+			clientId: initialSelectedClientId,
+		}),
 	]);
 
 	return (
@@ -26,6 +30,8 @@ export default async function CommercialOrdersPage() {
 			apiPath="/api/commercial/orders"
 			productOptions={productOptions}
 			initialOrders={orders}
+			initialDraftOrder={initialDraftOrder}
+			initialSelectedClientId={initialSelectedClientId}
 			clientOptions={clients.map((client) => ({
 				id: client.id,
 				name: client.name,

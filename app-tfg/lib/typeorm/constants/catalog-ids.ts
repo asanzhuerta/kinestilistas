@@ -102,4 +102,5 @@ export const ORDER_STATUS_IDS = {
 	CONFIRMED: 2,
 	DELIVERED: 3,
 	CANCELLED: 4,
+	DRAFT: 5,
 } as const;

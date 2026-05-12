@@ -63,11 +63,14 @@ export type SupportResource = {
 export type ColorReference = {
 	id: string;
 	color_chart_id: string;
+	product_id: string | null;
 	code: string;
 	name: string;
 	description: string | null;
 	image_url: string | null;
 	thumb_image_url: string | null;
+	erp_reference: string | null;
+	is_orderable: boolean;
 	display_order: number;
 };
 

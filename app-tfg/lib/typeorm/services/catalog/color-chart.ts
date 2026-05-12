@@ -3,8 +3,10 @@ import type {
 	AdminUpsertColorChartBody,
 	AdminUpsertColorReferenceBody,
 } from "@/lib/contracts/product-catalog";
+import { PENDING_REFERENCE_PREFIX } from "@/lib/catalog/product-reference";
 import { ColorChart } from "@/lib/typeorm/entities/ColorChart";
 import { ColorReference } from "@/lib/typeorm/entities/ColorReference";
+import { Product } from "@/lib/typeorm/entities/Product";
 import { normalizeColorChartWriteInput, normalizeColorReferenceWriteInput } from "./catalog-validation";
 import {
 	cleanupCatalogImageReplacement,
@@ -21,8 +23,36 @@ type ListColorChartsInput = {
 
 type ListColorReferencesInput = {
 	colorChartId?: string | null;
+	productId?: string | null;
+	orderableOnly?: boolean | null;
 	search?: string | null;
 };
+
+async function resolveLinkedProductIdForColorChart(
+	colorChartId: string,
+	manager: Awaited<ReturnType<typeof getDataSource>>["manager"],
+) {
+	const row = await manager
+		.getRepository(ColorChart)
+		.createQueryBuilder("colorChart")
+		.innerJoin(
+			Product,
+			"product",
+			[
+				"product.product_line_id = colorChart.product_line_id",
+				"product.reference LIKE :referencePrefix",
+			].join(" AND "),
+			{
+				referencePrefix: `${PENDING_REFERENCE_PREFIX}%`,
+			},
+		)
+		.select("product.id", "productId")
+		.where("colorChart.id = :colorChartId", { colorChartId })
+		.orderBy("product.created_at", "ASC")
+		.getRawOne<{ productId: string } | null>();
+
+	return row?.productId ?? null;
+}
 
 export async function listColorCharts(input: ListColorChartsInput = {}) {
 	const ds = await getDataSource();
@@ -163,12 +193,15 @@ export async function listColorReferences(
 	const query = repo
 		.createQueryBuilder("colorReference")
 		.leftJoinAndSelect("colorReference.colorChart", "colorChart")
+		.leftJoinAndSelect("colorReference.product", "product")
 		.leftJoinAndSelect("colorChart.productLine", "productLine")
 		.leftJoinAndSelect("productLine.productCategory", "productCategory")
 		.orderBy("colorReference.display_order", "ASC")
 		.addOrderBy("colorReference.name", "ASC");
 
 	const colorChartId = String(input.colorChartId ?? "").trim();
+	const productId = String(input.productId ?? "").trim();
+	const orderableOnly = input.orderableOnly === true;
 	const search = String(input.search ?? "").trim();
 
 	if (colorChartId) {
@@ -177,10 +210,21 @@ export async function listColorReferences(
 		});
 	}
 
+	if (productId) {
+		query.andWhere("colorReference.product_id = :productId", {
+			productId,
+		});
+	}
+
+	if (orderableOnly) {
+		query.andWhere("colorReference.is_orderable = true");
+	}
+
 	if (search) {
 		query.andWhere(
 			`(
-				colorReference.code ILIKE :search
+				COALESCE(colorReference.erp_reference, '') ILIKE :search
+				OR colorReference.code ILIKE :search
 				OR colorReference.name ILIKE :search
 				OR COALESCE(colorReference.description, '') ILIKE :search
 				OR COALESCE(colorChart.name, '') ILIKE :search
@@ -201,6 +245,7 @@ export async function getColorReferenceById(id: string) {
 		where: { id },
 		relations: {
 			colorChart: true,
+			product: true,
 		},
 	});
 }
@@ -215,11 +260,17 @@ export async function createColorReference(
 
 	try {
 		const createdColorReference = await ds.transaction(async (manager) => {
-			await requireColorChart(manager, String(normalized.colorChartId));
+			const colorChartId = String(normalized.colorChartId);
+			await requireColorChart(manager, colorChartId);
+			const linkedProductId = await resolveLinkedProductIdForColorChart(
+				colorChartId,
+				manager,
+			);
 
 			const repo = manager.getRepository(ColorReference);
 			const colorReference = repo.create({
-				color_chart_id: String(normalized.colorChartId),
+				color_chart_id: colorChartId,
+				product_id: linkedProductId,
 				code: normalized.code,
 				name: normalized.name,
 				description: normalized.description ?? null,
@@ -260,6 +311,10 @@ export async function updateColorReference(
 				normalized.colorChartId ?? colorReference.color_chart_id;
 
 			await requireColorChart(manager, nextColorChartId);
+			colorReference.product_id = await resolveLinkedProductIdForColorChart(
+				nextColorChartId,
+				manager,
+			);
 
 			if (normalized.colorChartId !== undefined) {
 				colorReference.color_chart_id = normalized.colorChartId;

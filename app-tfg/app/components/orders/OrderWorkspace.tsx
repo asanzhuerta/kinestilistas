@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageTransition from "@/app/components/animations/PageTransition";
 import H1Title from "@/app/components/H1Title";
 import type {
@@ -19,6 +19,7 @@ type OrderClientOption = {
 type EditableLine = {
 	localId: string;
 	productId: string;
+	colorReferenceId: string | null;
 	quantity: number;
 };
 
@@ -30,7 +31,9 @@ type WorkspaceProps = {
 	apiPath: string;
 	productOptions: OrderProductOption[];
 	initialOrders: OrderSummary[];
+	initialDraftOrder?: OrderSummary | null;
 	clientOptions?: OrderClientOption[];
+	initialSelectedClientId?: string | null;
 };
 
 function formatCurrency(amount: string) {
@@ -48,6 +51,8 @@ function formatCurrency(amount: string) {
 
 function getOrderStatusClasses(statusCode: string) {
 	switch (statusCode) {
+		case "draft":
+			return "bg-slate-100 text-slate-700";
 		case "created":
 			return "bg-amber-100 text-amber-700";
 		case "confirmed":
@@ -63,13 +68,44 @@ function getOrderStatusClasses(statusCode: string) {
 
 function buildProductLabel(product: OrderProductOption) {
 	const contextParts = [
-		product.productCategoryName,
 		product.productLineName,
+		product.colorReferenceCode && product.colorReferenceCode !== product.orderReference
+			? `tono ${product.colorReferenceCode}`
+			: null,
+		product.colorReferenceName,
 	].filter(Boolean);
 
-	return `${product.reference} · ${product.name}${
+	return `${product.orderReference} · ${product.name}${
 		contextParts.length > 0 ? ` · ${contextParts.join(" / ")}` : ""
 	}`;
+}
+
+function createEmptyLine(localId = `line-${Date.now()}`): EditableLine {
+	return {
+		localId,
+		productId: "",
+		colorReferenceId: null,
+		quantity: 1,
+	};
+}
+
+function buildSelectionValue(
+	productId: string,
+	colorReferenceId: string | null | undefined,
+) {
+	return `${productId}::${String(colorReferenceId ?? "").trim()}`;
+}
+
+function mapOrderToEditableLines(order: OrderSummary | null | undefined) {
+	const mappedLines =
+		order?.lines.map((line, index) => ({
+			localId: `line-${index + 1}-${line.id}`,
+			productId: line.product_id,
+			colorReferenceId: line.color_reference_id ?? null,
+			quantity: line.quantity,
+		})) ?? [];
+
+	return mappedLines.length > 0 ? mappedLines : [createEmptyLine("line-1")];
 }
 
 export default function OrderWorkspace({
@@ -80,21 +116,27 @@ export default function OrderWorkspace({
 	apiPath,
 	productOptions,
 	initialOrders,
+	initialDraftOrder = null,
 	clientOptions = [],
+	initialSelectedClientId,
 }: WorkspaceProps) {
+	const initialCommercialClientId =
+		initialSelectedClientId ?? clientOptions[0]?.id ?? "";
 	const [orders, setOrders] = useState(initialOrders);
-	const [lines, setLines] = useState<EditableLine[]>([
-		{
-			localId: "line-1",
-			productId: "",
-			quantity: 1,
-		},
-	]);
-	const [selectedClientId, setSelectedClientId] = useState(
-		clientOptions[0]?.id ?? "",
+	const [draftOrder, setDraftOrder] = useState<OrderSummary | null>(
+		initialDraftOrder,
 	);
-	const [notes, setNotes] = useState("");
+	const [lines, setLines] = useState<EditableLine[]>(
+		mapOrderToEditableLines(initialDraftOrder),
+	);
+	const [selectedClientId, setSelectedClientId] = useState(
+		initialCommercialClientId,
+	);
+	const [notes, setNotes] = useState(initialDraftOrder?.notes ?? "");
 	const [submitting, setSubmitting] = useState(false);
+	const [savingDraft, setSavingDraft] = useState(false);
+	const [clearingDraft, setClearingDraft] = useState(false);
+	const [loadingDraft, setLoadingDraft] = useState(false);
 	const [productSearch, setProductSearch] = useState("");
 	const [feedback, setFeedback] = useState<{
 		type: "success" | "error";
@@ -106,11 +148,88 @@ export default function OrderWorkspace({
 			? orders.filter((order) => order.client_id === selectedClientId)
 			: orders;
 
-	const filteredProductOptions = productOptions.filter((product) =>
-		buildProductLabel(product)
-			.toLowerCase()
-			.includes(productSearch.trim().toLowerCase()),
+	const filteredProductOptions = useMemo(
+		() =>
+			productOptions.filter((product) =>
+				buildProductLabel(product)
+					.toLowerCase()
+					.includes(productSearch.trim().toLowerCase()),
+			),
+		[productOptions, productSearch],
 	);
+
+	function syncDraftState(nextDraftOrder: OrderSummary | null) {
+		setDraftOrder(nextDraftOrder);
+		setNotes(nextDraftOrder?.notes ?? "");
+		setLines(mapOrderToEditableLines(nextDraftOrder));
+	}
+
+	useEffect(() => {
+		if (mode !== "commercial") {
+			return;
+		}
+
+		if (!selectedClientId) {
+			syncDraftState(null);
+			return;
+		}
+
+		let isCancelled = false;
+
+		async function loadDraft() {
+			setLoadingDraft(true);
+
+			try {
+				const response = await fetch(
+					`${apiPath}/draft?clientId=${encodeURIComponent(selectedClientId)}`,
+					{
+						method: "GET",
+						cache: "no-store",
+					},
+				);
+				const data = (await response.json().catch(() => null)) as
+					| OrderSummary
+					| { error?: string }
+					| null;
+
+				if (isCancelled) {
+					return;
+				}
+
+				if (!response.ok) {
+					setFeedback({
+						type: "error",
+						message:
+							(data && "error" in data && data.error) ||
+							"No se ha podido cargar el pedido en curso de este cliente.",
+					});
+					return;
+				}
+
+				syncDraftState(data && "id" in data ? data : null);
+			} catch (error) {
+				console.error("[orders][draft][load] error:", error);
+
+				if (!isCancelled) {
+					setFeedback({
+						type: "error",
+						message:
+							"Ha ocurrido un error inesperado al cargar el pedido en curso.",
+					});
+				}
+			} finally {
+				if (!isCancelled) {
+					setLoadingDraft(false);
+				}
+			}
+		}
+
+		loadDraft();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [apiPath, mode, selectedClientId]);
 
 	function updateLine(localId: string, updates: Partial<EditableLine>) {
 		setLines((currentLines) =>
@@ -120,14 +239,19 @@ export default function OrderWorkspace({
 		);
 	}
 
+	function updateSelectedOption(localId: string, optionId: string) {
+		const selectedOption = productOptions.find((option) => option.id === optionId);
+
+		updateLine(localId, {
+			productId: selectedOption?.productId ?? "",
+			colorReferenceId: selectedOption?.colorReferenceId ?? null,
+		});
+	}
+
 	function addLine() {
 		setLines((currentLines) => [
 			...currentLines,
-			{
-				localId: `line-${Date.now()}-${currentLines.length + 1}`,
-				productId: "",
-				quantity: 1,
-			},
+			createEmptyLine(`line-${Date.now()}-${currentLines.length + 1}`),
 		]);
 	}
 
@@ -137,6 +261,124 @@ export default function OrderWorkspace({
 				? currentLines
 				: currentLines.filter((line) => line.localId !== localId),
 		);
+	}
+
+	function buildPayloadLines() {
+		return lines.map((line) => ({
+			productId: line.productId,
+			colorReferenceId: line.colorReferenceId,
+			quantity: line.quantity,
+		}));
+	}
+
+	async function handleSaveDraft() {
+		setFeedback(null);
+
+		if (mode === "commercial" && !selectedClientId) {
+			setFeedback({
+				type: "error",
+				message: "Selecciona primero un cliente asignado para guardar el pedido.",
+			});
+			return;
+		}
+
+		setSavingDraft(true);
+
+		try {
+			const response = await fetch(`${apiPath}/draft`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					clientId: mode === "commercial" ? selectedClientId : undefined,
+					notes,
+					lines: buildPayloadLines(),
+				}),
+			});
+			const data = (await response.json().catch(() => null)) as
+				| OrderSummary
+				| { error?: string }
+				| null;
+
+			if (!response.ok) {
+				setFeedback({
+					type: "error",
+					message:
+						(data && "error" in data && data.error) ||
+						"No se ha podido guardar el pedido en curso.",
+				});
+				return;
+			}
+
+			syncDraftState(data && "id" in data ? data : null);
+			setFeedback({
+				type: "success",
+				message:
+					data && "id" in data
+						? "Pedido en curso guardado correctamente."
+						: "El pedido en curso se ha vaciado correctamente.",
+			});
+		} catch (error) {
+			console.error("[orders][draft][save] error:", error);
+			setFeedback({
+				type: "error",
+				message: "Ha ocurrido un error inesperado al guardar el pedido en curso.",
+			});
+		} finally {
+			setSavingDraft(false);
+		}
+	}
+
+	async function handleClearDraft() {
+		setFeedback(null);
+
+		if (mode === "commercial" && !selectedClientId) {
+			setFeedback({
+				type: "error",
+				message: "Selecciona primero un cliente asignado para vaciar el pedido.",
+			});
+			return;
+		}
+
+		setClearingDraft(true);
+
+		try {
+			const draftPath =
+				mode === "commercial"
+					? `${apiPath}/draft?clientId=${encodeURIComponent(selectedClientId)}`
+					: `${apiPath}/draft`;
+			const response = await fetch(draftPath, {
+				method: "DELETE",
+			});
+			const data = (await response.json().catch(() => null)) as
+				| { ok?: boolean; error?: string }
+				| null;
+
+			if (!response.ok) {
+				setFeedback({
+					type: "error",
+					message:
+						(data && "error" in data && data.error) ||
+						"No se ha podido vaciar el pedido en curso.",
+				});
+				return;
+			}
+
+			syncDraftState(null);
+			setFeedback({
+				type: "success",
+				message: "El pedido en curso se ha vaciado correctamente.",
+			});
+		} catch (error) {
+			console.error("[orders][draft][clear] error:", error);
+			setFeedback({
+				type: "error",
+				message: "Ha ocurrido un error inesperado al vaciar el pedido en curso.",
+			});
+		} finally {
+			setClearingDraft(false);
+		}
 	}
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -151,11 +393,6 @@ export default function OrderWorkspace({
 			return;
 		}
 
-		const payloadLines = lines.map((line) => ({
-			productId: line.productId,
-			quantity: line.quantity,
-		}));
-
 		setSubmitting(true);
 
 		try {
@@ -167,7 +404,7 @@ export default function OrderWorkspace({
 				body: JSON.stringify({
 					clientId: mode === "commercial" ? selectedClientId : undefined,
 					notes,
-					lines: payloadLines,
+					lines: buildPayloadLines(),
 				}),
 			});
 
@@ -187,14 +424,7 @@ export default function OrderWorkspace({
 			}
 
 			setOrders((currentOrders) => [data, ...currentOrders]);
-			setNotes("");
-			setLines([
-				{
-					localId: "line-1",
-					productId: "",
-					quantity: 1,
-				},
-			]);
+			syncDraftState(null);
 			setFeedback({
 				type: "success",
 				message: `Pedido registrado correctamente por un total de ${formatCurrency(
@@ -227,8 +457,8 @@ export default function OrderWorkspace({
 
 					<p className="max-w-2xl text-sm text-slate-600">
 						{mode === "client"
-							? "Selecciona productos y cantidades. El sistema calculara el total del pedido sin exponer precios unitarios."
-							: "Puedes registrar pedidos para clientes actualmente asignados. El historial queda visible por cliente con estado e importe total."}
+							? "Prepara un pedido en curso, guárdalo como borrador si lo necesitas y confirma el pedido cuando esté listo. En coloración podrás trabajar con la referencia exacta."
+							: "Trabaja con pedidos en curso por cliente asignado, guarda borradores y registra el pedido final cuando cierres la selección de referencias y cantidades."}
 					</p>
 				</div>
 
@@ -247,17 +477,17 @@ export default function OrderWorkspace({
 				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
 					<div className="flex flex-col gap-2">
 						<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-							Nuevo pedido
+							Pedido en curso
 						</p>
 						<h2 className="text-2xl font-semibold text-slate-900">
-							Registrar composicion del pedido
+							{draftOrder ? "Editar borrador actual" : "Preparar nuevo pedido"}
 						</h2>
 					</div>
 
 					{mode === "commercial" && clientOptions.length === 0 ? (
 						<div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-5 py-6 text-sm text-slate-600">
-							No tienes clientes asignados ahora mismo, asi que todavia no
-							puedes registrar pedidos desde el area comercial.
+							No tienes clientes asignados ahora mismo, así que todavía no
+							puedes registrar pedidos desde el área comercial.
 						</div>
 					) : (
 						<form onSubmit={handleSubmit} className="mt-5 space-y-5">
@@ -285,19 +515,48 @@ export default function OrderWorkspace({
 								</div>
 							) : null}
 
+							{draftOrder ? (
+								<div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-600">
+									<div className="flex flex-wrap items-center gap-2">
+										<span
+											className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusClasses(
+												draftOrder.status_code,
+											)}`}
+										>
+											{draftOrder.status_name}
+										</span>
+										<span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+											{draftOrder.line_count} líneas guardadas
+										</span>
+									</div>
+									<p className="mt-2">
+										Última actualización:{" "}
+										<span className="font-medium text-slate-900">
+											{formatDateTime(draftOrder.updated_at)}
+										</span>
+									</p>
+								</div>
+							) : null}
+
+							{loadingDraft ? (
+								<div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-600">
+									Cargando pedido en curso...
+								</div>
+							) : null}
+
 							<div>
 								<label
 									htmlFor="order-product-search"
 									className="mb-2 block text-sm font-medium text-slate-700"
 								>
-									Buscar productos
+									Buscar referencias
 								</label>
 								<input
 									id="order-product-search"
 									type="text"
 									value={productSearch}
 									onChange={(event) => setProductSearch(event.target.value)}
-									placeholder="Referencia, nombre, categoria o linea"
+									placeholder="Referencia exacta, tono, nombre, categoría o línea"
 									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 								/>
 							</div>
@@ -313,19 +572,20 @@ export default function OrderWorkspace({
 												htmlFor={`order-product-${line.localId}`}
 												className="mb-2 block text-sm font-medium text-slate-700"
 											>
-												Producto {index + 1}
+												Referencia {index + 1}
 											</label>
 											<select
 												id={`order-product-${line.localId}`}
-												value={line.productId}
+												value={buildSelectionValue(
+													line.productId,
+													line.colorReferenceId,
+												)}
 												onChange={(event) =>
-													updateLine(line.localId, {
-														productId: event.target.value,
-													})
+													updateSelectedOption(line.localId, event.target.value)
 												}
 												className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 											>
-												<option value="">Selecciona una referencia</option>
+												<option value="::">Selecciona una referencia</option>
 												{filteredProductOptions.map((product) => (
 													<option key={product.id} value={product.id}>
 														{buildProductLabel(product)}
@@ -376,7 +636,7 @@ export default function OrderWorkspace({
 									onClick={addLine}
 									className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
 								>
-									Añadir linea
+									Añadir línea
 								</button>
 							</div>
 
@@ -392,18 +652,36 @@ export default function OrderWorkspace({
 									value={notes}
 									onChange={(event) => setNotes(event.target.value)}
 									rows={4}
-									placeholder="Indicaciones de preparacion, reparto o contexto comercial"
+									placeholder="Indicaciones de preparación, reparto o contexto comercial"
 									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 								/>
 							</div>
 
-							<button
-								type="submit"
-								disabled={submitting}
-								className="inline-flex rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-							>
-								{submitting ? "Registrando pedido..." : "Registrar pedido"}
-							</button>
+							<div className="flex flex-wrap gap-3">
+								<button
+									type="button"
+									onClick={handleSaveDraft}
+									disabled={savingDraft || submitting || clearingDraft}
+									className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+								>
+									{savingDraft ? "Guardando..." : "Guardar borrador"}
+								</button>
+								<button
+									type="button"
+									onClick={handleClearDraft}
+									disabled={clearingDraft || savingDraft || submitting}
+									className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
+								>
+									{clearingDraft ? "Vaciando..." : "Vaciar borrador"}
+								</button>
+								<button
+									type="submit"
+									disabled={submitting || savingDraft || clearingDraft}
+									className="inline-flex rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+								>
+									{submitting ? "Registrando pedido..." : "Registrar pedido"}
+								</button>
+							</div>
 						</form>
 					)}
 				</section>
@@ -420,7 +698,7 @@ export default function OrderWorkspace({
 
 					{visibleOrders.length === 0 ? (
 						<div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-5 py-6 text-sm text-slate-600">
-							Aun no hay pedidos registrados en este contexto.
+							Aún no hay pedidos registrados en este contexto.
 						</div>
 					) : (
 						<div className="mt-5 space-y-4">
@@ -478,7 +756,7 @@ export default function OrderWorkspace({
 											</div>
 											<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
 												<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-													Lineas
+													Líneas
 												</p>
 												<p className="mt-2 text-lg font-semibold text-slate-900">
 													{order.line_count}
@@ -493,12 +771,24 @@ export default function OrderWorkspace({
 												key={line.id}
 												className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
 											>
-												<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-													{line.product_reference}
-												</p>
-												<p className="mt-1 text-sm font-semibold text-slate-900">
+												<div className="flex flex-wrap items-center gap-2">
+													<span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+														{line.order_reference}
+													</span>
+													{line.color_reference_code ? (
+														<span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">
+															Tono {line.color_reference_code}
+														</span>
+													) : null}
+												</div>
+												<p className="mt-2 text-sm font-semibold text-slate-900">
 													{line.product_name}
 												</p>
+												{line.color_reference_name ? (
+													<p className="mt-1 text-sm text-slate-600">
+														{line.color_reference_name}
+													</p>
+												) : null}
 												<p className="mt-1 text-sm text-slate-600">
 													Cantidad: {line.quantity}
 													{line.product_line_name

@@ -1,4 +1,5 @@
 export type OrderStatusCode =
+	| "draft"
 	| "created"
 	| "confirmed"
 	| "delivered"
@@ -6,8 +7,14 @@ export type OrderStatusCode =
 
 export type OrderProductOption = {
 	id: string;
+	productId: string;
+	colorReferenceId: string | null;
 	name: string;
-	reference: string;
+	reference: string | null;
+	orderReference: string;
+	colorReferenceCode: string | null;
+	colorReferenceName: string | null;
+	isColorReference: boolean;
 	productCategoryName: string | null;
 	productLineName: string | null;
 	format: string | null;
@@ -17,8 +24,12 @@ export type OrderProductOption = {
 export type OrderSummaryLine = {
 	id: string;
 	product_id: string;
+	color_reference_id: string | null;
 	product_name: string;
-	product_reference: string;
+	product_reference: string | null;
+	order_reference: string;
+	color_reference_code: string | null;
+	color_reference_name: string | null;
 	product_line_name: string | null;
 	quantity: number;
 };
@@ -43,6 +54,7 @@ export type OrderSummary = {
 
 export type CreateOrderLineBody = {
 	productId?: string;
+	colorReferenceId?: string | null;
 	quantity?: number | string | null;
 };
 
@@ -57,6 +69,30 @@ export type CreateCommercialOrderBody = {
 	lines?: CreateOrderLineBody[];
 };
 
+export type SaveClientOrderDraftBody = {
+	notes?: string | null;
+	lines?: CreateOrderLineBody[];
+};
+
+export type SaveCommercialOrderDraftBody = {
+	clientId?: string;
+	notes?: string | null;
+	lines?: CreateOrderLineBody[];
+};
+
+export type AddClientDraftOrderLineBody = {
+	productId?: string;
+	colorReferenceId?: string | null;
+	quantity?: number | string | null;
+};
+
+export type AddCommercialDraftOrderLineBody = {
+	clientId?: string;
+	productId?: string;
+	colorReferenceId?: string | null;
+	quantity?: number | string | null;
+};
+
 export function buildCreateClientOrderInput(body: CreateClientOrderBody) {
 	return {
 		notes: body.notes,
@@ -69,5 +105,43 @@ export function buildCreateCommercialOrderInput(body: CreateCommercialOrderBody)
 		clientId: body.clientId,
 		notes: body.notes,
 		lines: body.lines,
+	};
+}
+
+export function buildSaveClientOrderDraftInput(body: SaveClientOrderDraftBody) {
+	return {
+		notes: body.notes,
+		lines: body.lines,
+	};
+}
+
+export function buildSaveCommercialOrderDraftInput(
+	body: SaveCommercialOrderDraftBody,
+) {
+	return {
+		clientId: body.clientId,
+		notes: body.notes,
+		lines: body.lines,
+	};
+}
+
+export function buildAddClientDraftOrderLineInput(
+	body: AddClientDraftOrderLineBody,
+) {
+	return {
+		productId: body.productId,
+		colorReferenceId: body.colorReferenceId,
+		quantity: body.quantity,
+	};
+}
+
+export function buildAddCommercialDraftOrderLineInput(
+	body: AddCommercialDraftOrderLineBody,
+) {
+	return {
+		clientId: body.clientId,
+		productId: body.productId,
+		colorReferenceId: body.colorReferenceId,
+		quantity: body.quantity,
 	};
 }

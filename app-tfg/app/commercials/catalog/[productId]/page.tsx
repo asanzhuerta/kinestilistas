@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
 import CatalogProductDetail from "@/app/components/catalog/CatalogProductDetail";
+import { requireCommercialSession } from "@/lib/auth/require-session";
+import { listClientsByCommercialId } from "@/lib/typeorm/services/commercial/client";
+import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
 import { getActiveCatalogProductDetail } from "@/lib/typeorm/services/catalog/catalog-reader";
 
 export default async function CommercialCatalogProductPage({
@@ -7,8 +10,13 @@ export default async function CommercialCatalogProductPage({
 }: {
 	params: Promise<{ productId: string }>;
 }) {
+	const session = await requireCommercialSession();
+	const commercial = await requireCommercialByUserId(session.user.id);
 	const { productId } = await params;
-	const detail = await getActiveCatalogProductDetail(productId);
+	const [detail, clients] = await Promise.all([
+		getActiveCatalogProductDetail(productId),
+		listClientsByCommercialId(commercial.id),
+	]);
 
 	if (!detail) {
 		notFound();
@@ -24,6 +32,16 @@ export default async function CommercialCatalogProductPage({
 			product={detail.product}
 			supportResources={detail.supportResources}
 			relatedColorCharts={detail.relatedColorCharts}
+			orderableColorReferences={detail.orderableColorReferences}
+			orderContext={{
+				mode: "commercial",
+				draftApiBasePath: "/api/commercial/orders",
+				clientOptions: clients.map((client) => ({
+					id: client.id,
+					name: client.name,
+					contactName: client.contact_name ?? null,
+				})),
+			}}
 		/>
 	);
 }
