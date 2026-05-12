@@ -77,7 +77,7 @@ const sections: Array<{
 			{
 				title: "Pedidos",
 				icon: <OrderIcon className="h-6 w-6" />,
-				disabled: true,
+				href: "/commercials/orders",
 			},
 			{
 				title: "Cobros",
