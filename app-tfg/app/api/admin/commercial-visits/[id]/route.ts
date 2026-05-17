@@ -10,13 +10,14 @@ import {
 } from "@/lib/api/server";
 import {
 	getCommercialVisitById,
+	getCommercialVisitDetailById,
 	updateCommercialVisit,
 } from "@/lib/typeorm/services/commercial/commercial-visit";
 
 // GET /api/admin/commercial-visits/[id]
 // Obtiene el detalle de una visita comercial concreta desde el panel de administracion.
 export async function GET(_: Request, context: RouteContext) {
-	const user = await requireRoleUser("admin");
+		const user = await requireRoleUser("admin");
 
 	if (!user) {
 		return unauthorizedError();
@@ -24,7 +25,7 @@ export async function GET(_: Request, context: RouteContext) {
 
 	try {
 		const { id } = await context.params;
-		const visit = await getCommercialVisitById(id);
+		const visit = await getCommercialVisitDetailById(id);
 
 		if (!visit) {
 			return notFoundError("Visita no encontrada");
@@ -67,6 +68,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 			statusId: body.statusId !== undefined ? Number(body.statusId) : undefined,
 			notes: body.notes,
 			result: body.result,
+			orderIds: body.orderIds,
 		});
 
 		return NextResponse.json(updatedVisit, { status: 200 });

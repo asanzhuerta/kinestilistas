@@ -48,6 +48,10 @@ export type OrderSummary = {
 	notes: string | null;
 	created_at: string;
 	updated_at: string;
+	delivery_visit_id: string | null;
+	delivery_visit_scheduled_for_date: string | null;
+	delivery_visit_status_id: number | null;
+	delivery_visit_status_name: string | null;
 	line_count: number;
 	lines: OrderSummaryLine[];
 };

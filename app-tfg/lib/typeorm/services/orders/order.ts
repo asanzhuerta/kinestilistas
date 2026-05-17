@@ -72,7 +72,7 @@ type PreparedOrderLineRecord = {
 
 const ORDER_STATUS_TRANSITION_IDS_BY_CODE: Record<string, number[]> = {
 	created: [ORDER_STATUS_IDS.CONFIRMED, ORDER_STATUS_IDS.CANCELLED],
-	confirmed: [ORDER_STATUS_IDS.DELIVERED, ORDER_STATUS_IDS.CANCELLED],
+	confirmed: [ORDER_STATUS_IDS.CANCELLED],
 	delivered: [],
 	cancelled: [],
 	draft: [],
@@ -215,6 +215,11 @@ function mapOrderToSummary(order: Order): OrderSummary {
 		notes: order.notes ?? null,
 		created_at: toIsoString(order.created_at),
 		updated_at: toIsoString(order.updated_at),
+		delivery_visit_id: order.delivery_visit_id ?? null,
+		delivery_visit_scheduled_for_date:
+			order.deliveryVisit?.scheduled_for_date ?? null,
+		delivery_visit_status_id: order.deliveryVisit?.status_id ?? null,
+		delivery_visit_status_name: order.deliveryVisit?.status?.name ?? null,
 		line_count: sortedLines.length,
 		lines: sortedLines.map(buildOrderSummaryLine),
 	};
@@ -308,6 +313,8 @@ function createOrdersBaseQuery(repo: Repository<Order>) {
 		.leftJoinAndSelect("order.client", "client")
 		.leftJoinAndSelect("order.createdByUser", "createdByUser")
 		.leftJoinAndSelect("order.status", "status")
+		.leftJoinAndSelect("order.deliveryVisit", "deliveryVisit")
+		.leftJoinAndSelect("deliveryVisit.status", "deliveryVisitStatus")
 		.leftJoinAndSelect("order.lines", "lines")
 		.leftJoinAndSelect("lines.product", "product")
 		.leftJoinAndSelect("lines.colorReference", "colorReference")
@@ -356,6 +363,10 @@ async function updateOrderStatusRecord(
 			orderRepo.create({
 				id: order.id,
 				status_id: nextStatusId,
+				delivery_visit_id:
+					nextStatusId === ORDER_STATUS_IDS.CANCELLED
+						? null
+						: order.delivery_visit_id ?? null,
 			}),
 		);
 	}
@@ -600,6 +611,7 @@ async function persistOrderRecord(
 			client_id: input.clientId,
 			created_by_user_id: input.createdByUserId,
 			status_id: input.statusId,
+			delivery_visit_id: currentOrder?.delivery_visit_id ?? null,
 			total_amount: formatCents(totalAmountCents),
 			notes: normalizeText(input.notes) || null,
 		}),

@@ -66,6 +66,22 @@ export type CommercialVisit = {
 	status: CommercialVisitStatus | null;
 };
 
+export type CommercialVisitDeliveryOrder = {
+	id: string;
+	status_id: number;
+	status_name: string;
+	total_amount: string;
+	notes: string | null;
+	created_at: string;
+	updated_at: string;
+	line_count: number;
+};
+
+export type CommercialVisitDetail = CommercialVisit & {
+	linkedOrders: CommercialVisitDeliveryOrder[];
+	availableOrdersForDelivery: CommercialVisitDeliveryOrder[];
+};
+
 export type CreateCommercialVisitBody = {
 	clientId?: string;
 	commercialId?: string;
@@ -80,4 +96,5 @@ export type UpdateCommercialVisitBody = {
 	statusId?: number;
 	notes?: string | null;
 	result?: string | null;
+	orderIds?: string[];
 };

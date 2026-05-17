@@ -9,7 +9,7 @@ import {
 	unauthorizedError,
 } from "@/lib/api/server";
 import {
-	getCommercialVisitByIdForCommercial,
+	getCommercialVisitDetailByIdForCommercial,
 	updateCommercialVisit,
 } from "@/lib/typeorm/services/commercial/commercial-visit";
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
@@ -26,7 +26,7 @@ export async function GET(_: Request, context: RouteContext) {
 	try {
 		const commercial = await requireCommercialByUserId(user.id);
 		const { id } = await context.params;
-		const visit = await getCommercialVisitByIdForCommercial(id, commercial.id);
+		const visit = await getCommercialVisitDetailByIdForCommercial(id, commercial.id);
 
 		if (!visit) {
 			return notFoundError("Visita no encontrada");
@@ -61,6 +61,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 			statusId: body.statusId,
 			notes: body.notes,
 			result: body.result,
+			orderIds: body.orderIds,
 		});
 
 		return NextResponse.json(visit, { status: 200 });

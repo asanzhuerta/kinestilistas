@@ -3,6 +3,7 @@ import {
 	PrimaryGeneratedColumn,
 	Column,
 	ManyToOne,
+	OneToMany,
 	JoinColumn,
 	Index,
 } from "typeorm";
@@ -11,6 +12,7 @@ import { Client } from "./Client";
 import { Commercial } from "./Commercial";
 import { CommercialVisitStatus } from "./CommercialVisitStatus";
 import { CommercialVisitType } from "./CommercialVisitType";
+import { Order } from "./Order";
 
 @Entity("commercial_visits")
 @Index("commercial_visits_client_id_index", ["client_id"])
@@ -64,4 +66,7 @@ export class CommercialVisit {
 
 	@Column({ type: "text", nullable: true })
 	result!: string | null;
+
+	@OneToMany(() => Order, (order) => order.deliveryVisit)
+	deliveryOrders!: Relation<Order[]>;
 }
