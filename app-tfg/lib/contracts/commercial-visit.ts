@@ -88,6 +88,7 @@ export type CreateCommercialVisitBody = {
 	scheduledForDate?: string;
 	visitTypeId?: number;
 	notes?: string | null;
+	orderIds?: string[];
 };
 
 export type UpdateCommercialVisitBody = {

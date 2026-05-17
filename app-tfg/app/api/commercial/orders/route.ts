@@ -25,6 +25,9 @@ export async function GET(request: Request) {
 		const searchParams = getRequestSearchParams(request);
 		const orders = await listOrdersForCommercialUser(user.id, {
 			clientId: searchParams.get("clientId"),
+			pendingDeliveryOnly:
+				searchParams.get("pendingDeliveryOnly") === "1" ||
+				searchParams.get("pendingDeliveryOnly") === "true",
 		});
 
 		return NextResponse.json(orders, { status: 200 });

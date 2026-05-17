@@ -52,6 +52,11 @@ type SaveDraftInput = {
 	lines?: CreateOrderLineBody[];
 };
 
+type ListOrdersForCommercialUserInput = {
+	clientId?: string | null;
+	pendingDeliveryOnly?: boolean;
+};
+
 type NormalizedOrderLineInput = {
 	productId: string;
 	colorReferenceId: string | null;
@@ -319,6 +324,26 @@ function createOrdersBaseQuery(repo: Repository<Order>) {
 		.leftJoinAndSelect("lines.product", "product")
 		.leftJoinAndSelect("lines.colorReference", "colorReference")
 		.leftJoinAndSelect("product.productLine", "productLine");
+}
+
+function createCommercialOrdersBaseQuery(
+	repo: Repository<Order>,
+	commercialId: string,
+) {
+	return createOrdersBaseQuery(repo)
+		.innerJoin(
+			ClientCommercialAssignment,
+			"assignment",
+			[
+				"assignment.client_id = order.client_id",
+				"assignment.commercial_id = :commercialId",
+				"assignment.unassigned_at IS NULL",
+			].join(" AND "),
+			{ commercialId },
+		)
+		.andWhere("order.status_id != :draftStatusId", {
+			draftStatusId: ORDER_STATUS_IDS.DRAFT,
+		});
 }
 
 async function getOrderById(orderId: string) {
@@ -979,27 +1004,12 @@ export async function listOrdersForClientUser(userId: string) {
 
 export async function listOrdersForCommercialUser(
 	userId: string,
-	input: {
-		clientId?: string | null;
-	} = {},
+	input: ListOrdersForCommercialUserInput = {},
 ) {
 	const commercial = await requireCommercialByUserId(userId);
 	const ds = await getDataSource();
 	const repo = ds.getRepository(Order);
-	const query = createOrdersBaseQuery(repo)
-		.innerJoin(
-			ClientCommercialAssignment,
-			"assignment",
-			[
-				"assignment.client_id = order.client_id",
-				"assignment.commercial_id = :commercialId",
-				"assignment.unassigned_at IS NULL",
-			].join(" AND "),
-			{ commercialId: commercial.id },
-		)
-		.andWhere("order.status_id != :draftStatusId", {
-			draftStatusId: ORDER_STATUS_IDS.DRAFT,
-		})
+	const query = createCommercialOrdersBaseQuery(repo, commercial.id)
 		.orderBy("order.created_at", "DESC")
 		.addOrderBy("lines.order_reference_snapshot", "ASC")
 		.addOrderBy("product.name", "ASC");
@@ -1008,6 +1018,14 @@ export async function listOrdersForCommercialUser(
 
 	if (clientId) {
 		query.andWhere("order.client_id = :clientId", { clientId });
+	}
+
+	if (input.pendingDeliveryOnly) {
+		query
+			.andWhere("order.status_id = :confirmedStatusId", {
+				confirmedStatusId: ORDER_STATUS_IDS.CONFIRMED,
+			})
+			.andWhere("order.delivery_visit_id IS NULL");
 	}
 
 	const orders = await query.getMany();

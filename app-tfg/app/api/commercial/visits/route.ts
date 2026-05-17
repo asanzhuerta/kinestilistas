@@ -72,6 +72,7 @@ export async function POST(request: Request) {
 			scheduledForDate: String(body.scheduledForDate),
 			visitTypeId: Number(body.visitTypeId),
 			notes: body.notes ?? null,
+			orderIds: Array.isArray(body.orderIds) ? body.orderIds : [],
 		});
 
 		return NextResponse.json(visit, { status: 201 });
