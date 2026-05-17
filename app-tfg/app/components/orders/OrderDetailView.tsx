@@ -192,6 +192,53 @@ export default function OrderDetailView({
 					</div>
 				</section>
 
+				{order.status_code === "confirmed" || order.delivery_visit_id ? (
+					<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+						<div className="flex flex-col gap-2">
+							<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+								Entrega
+							</p>
+							<h2 className="text-2xl font-semibold text-slate-900">
+								Estado de reparto
+							</h2>
+						</div>
+
+						{order.delivery_visit_id ? (
+							<div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+									<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+										Visita
+									</p>
+									<p className="mt-2 text-sm font-semibold text-slate-900">
+										{order.delivery_visit_id.slice(0, 8)}
+									</p>
+								</div>
+								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+									<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+										Fecha prevista
+									</p>
+									<p className="mt-2 text-sm font-semibold text-slate-900">
+										{order.delivery_visit_scheduled_for_date || "-"}
+									</p>
+								</div>
+								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:col-span-2">
+									<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+										Estado de la visita
+									</p>
+									<p className="mt-2 text-sm font-semibold text-slate-900">
+										{order.delivery_visit_status_name || "Sin estado"}
+									</p>
+								</div>
+							</div>
+						) : (
+							<div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-600">
+								Este pedido ya esta confirmado, pero todavia no se ha vinculado
+								a una visita de reparto.
+							</div>
+						)}
+					</section>
+				) : null}
+
 				{canUpdateStatus ? (
 					<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 						<div className="flex flex-col gap-2">

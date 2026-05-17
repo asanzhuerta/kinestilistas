@@ -1,4 +1,6 @@
 import type {
+	CommercialVisitDetail,
+	CommercialVisitDeliveryOrder,
 	CommercialVisit,
 	CommercialVisitClient,
 	CommercialVisitClientUser,
@@ -11,6 +13,8 @@ import type {
 } from "@/lib/contracts/commercial-visit";
 
 export type {
+	CommercialVisitDetail,
+	CommercialVisitDeliveryOrder,
 	CommercialVisit,
 	CommercialVisitClient,
 	CommercialVisitClientUser,

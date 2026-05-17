@@ -45,6 +45,14 @@ export default async function CommercialOrderDetailPage({
 					label: "Ver ficha del cliente",
 					href: `/commercials/clients/${detail.order.client_id}`,
 				},
+				...(detail.order.delivery_visit_id
+					? [
+							{
+								label: "Ver visita de reparto",
+								href: `/commercials/visits/${detail.order.delivery_visit_id}`,
+							},
+						]
+					: []),
 				{
 					label: "Ver agenda comercial",
 					href: "/commercials/visits",

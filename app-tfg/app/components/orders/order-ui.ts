@@ -30,6 +30,23 @@ export function getOrderStatusClasses(statusCode: string) {
 	}
 }
 
+export function getOrderStatusClassesById(statusId: number) {
+	switch (statusId) {
+		case 1:
+			return getOrderStatusClasses("created");
+		case 2:
+			return getOrderStatusClasses("confirmed");
+		case 3:
+			return getOrderStatusClasses("delivered");
+		case 4:
+			return getOrderStatusClasses("cancelled");
+		case 5:
+			return getOrderStatusClasses("draft");
+		default:
+			return getOrderStatusClasses("");
+	}
+}
+
 export function buildOrderProductLabel(product: OrderProductOption) {
 	const contextParts = [
 		product.productLineName,

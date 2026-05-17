@@ -3,13 +3,13 @@
 import { useCallback, useEffect } from "react";
 import { requestJson } from "@/lib/api/client";
 import type {
-	CommercialVisit,
+	CommercialVisitDetail,
 	UpdateCommercialVisitBody,
 } from "@/lib/contracts/commercial-visit";
 import { useApiRequest } from "./useApiRequest";
 
 export function useCommercialVisit(visitId: string) {
-	const { run, ...request } = useApiRequest<CommercialVisit>();
+	const { run, ...request } = useApiRequest<CommercialVisitDetail>();
 
 	const load = useCallback(() => {
 		if (!visitId) {
@@ -17,7 +17,7 @@ export function useCommercialVisit(visitId: string) {
 		}
 
 		return run(() =>
-			requestJson<CommercialVisit>(`/api/commercial/visits/${visitId}`, {
+			requestJson<CommercialVisitDetail>(`/api/commercial/visits/${visitId}`, {
 				method: "GET",
 				cache: "no-store",
 				fallbackMessage: "No se pudo obtener la visita",
@@ -33,7 +33,7 @@ export function useCommercialVisit(visitId: string) {
 
 			return run(
 				() =>
-					requestJson<CommercialVisit>(`/api/commercial/visits/${visitId}`, {
+					requestJson<CommercialVisitDetail>(`/api/commercial/visits/${visitId}`, {
 						method: "PATCH",
 						headers: {
 							"Content-Type": "application/json",

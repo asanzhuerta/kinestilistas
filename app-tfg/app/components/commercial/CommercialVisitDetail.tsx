@@ -9,6 +9,11 @@ import SafeForm from "@/app/components/forms/SafeForm";
 import SubmitButton from "@/app/components/forms/SubmitButton";
 import { useCommercialVisit } from "@/app/hooks/api/useCommercialVisit";
 import { formatTimeLabel } from "@/lib/utils/time";
+import { formatDateTime } from "@/lib/utils/user-utils";
+import {
+	formatOrderCurrency,
+	getOrderStatusClassesById,
+} from "@/app/components/orders/order-ui";
 import {
 	COMMERCIAL_VISIT_STATUS_OPTIONS,
 	COMMERCIAL_VISIT_TYPE_OPTIONS,
@@ -74,6 +79,7 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 	} = useCommercialVisit(visitId);
 	const [saving, setSaving] = useState(false);
 	const [success, setSuccess] = useState("");
+	const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
 	const [formState, setFormState] = useState<VisitFormState>(
 		DEFAULT_VISIT_FORM_STATE,
 	);
@@ -90,12 +96,29 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			notes: visit.notes ?? "",
 			result: visit.result ?? "",
 		});
+		setSelectedOrderIds(visit.linkedOrders.map((order) => order.id));
 	}, [visit]);
 
 	const canEditPlanning = useMemo(
 		() => visit?.status_id === 1 || visit?.status_id === 4,
 		[visit],
 	);
+	const isDeliveryVisit = formState.visitTypeId === "1";
+	const deliveryOrdersLocked = !canEditPlanning;
+	const deliveryOrdersForDisplay = useMemo(() => {
+		const availableDeliveryOrders = visit?.availableOrdersForDelivery ?? [];
+		const ordersById = new Map<string, (typeof availableDeliveryOrders)[number]>();
+
+		for (const order of visit?.linkedOrders ?? []) {
+			ordersById.set(order.id, order);
+		}
+
+		for (const order of availableDeliveryOrders) {
+			ordersById.set(order.id, order);
+		}
+
+		return Array.from(ordersById.values());
+	}, [visit]);
 
 	const visitRows = useMemo(() => {
 		if (!visit) {
@@ -201,6 +224,14 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 		];
 	}, [visit]);
 
+	function toggleOrderSelection(orderId: string) {
+		setSelectedOrderIds((currentOrderIds) =>
+			currentOrderIds.includes(orderId)
+				? currentOrderIds.filter((currentOrderId) => currentOrderId !== orderId)
+				: [...currentOrderIds, orderId],
+		);
+	}
+
 	async function handleSubmit(event: React.FormEvent) {
 		event.preventDefault();
 
@@ -214,6 +245,7 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 				statusId: Number(formState.statusId),
 				notes: formState.notes,
 				result: formState.result,
+				orderIds: isDeliveryVisit ? selectedOrderIds : [],
 			});
 
 			if (visitData) {
@@ -312,6 +344,108 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 							/>
 						</section>
 
+						{isDeliveryVisit ? (
+							<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
+								<div className="flex flex-col gap-2">
+									<h2 className="text-lg font-semibold text-slate-900">
+										Pedidos vinculados al reparto
+									</h2>
+									<p className="text-sm text-slate-600">
+										Selecciona los pedidos confirmados que se entregaran en esta
+										visita. Al completar el reparto, esos pedidos pasaran
+										automaticamente a estado entregado.
+									</p>
+								</div>
+
+								{deliveryOrdersForDisplay.length === 0 ? (
+									<div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-600">
+										No hay pedidos confirmados disponibles para este cliente en
+										este momento.
+									</div>
+								) : (
+									<div className="mt-5 space-y-3">
+										{deliveryOrdersForDisplay.map((order) => {
+											const isSelected = selectedOrderIds.includes(order.id);
+
+											return (
+												<label
+													key={order.id}
+													className={`flex cursor-pointer flex-col gap-3 rounded-2xl border px-4 py-4 transition ${
+														isSelected
+															? "border-sky-300 bg-sky-50"
+															: "border-slate-200 bg-white"
+													} ${
+														deliveryOrdersLocked
+															? "cursor-not-allowed opacity-80"
+															: "hover:border-slate-300"
+													}`}
+												>
+													<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+														<div className="flex items-start gap-3">
+															<input
+																type="checkbox"
+																checked={isSelected}
+																onChange={() => toggleOrderSelection(order.id)}
+																disabled={deliveryOrdersLocked}
+																className="mt-1 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
+															/>
+
+															<div>
+																<div className="flex flex-wrap items-center gap-2">
+																	<span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+																		Pedido {order.id.slice(0, 8)}
+																	</span>
+																	<span
+																		className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusClassesById(
+																			order.status_id,
+																		)}`}
+																	>
+																		{order.status_name}
+																	</span>
+																</div>
+
+																<p className="mt-2 text-sm text-slate-600">
+																	Registrado el{" "}
+																	<span className="font-medium text-slate-900">
+																		{formatDateTime(order.created_at)}
+																	</span>
+																</p>
+
+																{order.notes ? (
+																	<p className="mt-2 text-sm leading-6 text-slate-600">
+																		{order.notes}
+																	</p>
+																) : null}
+															</div>
+														</div>
+
+														<div className="grid gap-2 sm:min-w-[180px]">
+															<div className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
+																<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+																	Importe
+																</p>
+																<p className="mt-1 text-sm font-semibold text-slate-900">
+																	{formatOrderCurrency(order.total_amount)}
+																</p>
+															</div>
+															<div className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
+																<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+																	Lineas
+																</p>
+																<p className="mt-1 text-sm font-semibold text-slate-900">
+																	{order.line_count}
+																</p>
+															</div>
+														</div>
+													</div>
+												</label>
+											);
+										})}
+									</div>
+								)}
+							</section>
+						) : null}
+
 						<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
 							<h2 className="text-lg font-semibold text-slate-900">
 								Actualizar visita
@@ -358,12 +492,17 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 									<select
 										id="visit-type-id"
 										value={formState.visitTypeId}
-										onChange={(event) =>
+										onChange={(event) => {
+											const nextVisitTypeId = event.target.value;
 											setFormState((currentState) => ({
 												...currentState,
-												visitTypeId: event.target.value,
-											}))
-										}
+												visitTypeId: nextVisitTypeId,
+											}));
+
+											if (nextVisitTypeId !== "1") {
+												setSelectedOrderIds([]);
+											}
+										}}
 										disabled={!canEditPlanning}
 										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
 									>
