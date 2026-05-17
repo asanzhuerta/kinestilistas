@@ -21,6 +21,7 @@ export default async function ClientOrdersPage() {
 			subtitle="Crea pedidos y consulta su historial"
 			backHref="/clients"
 			apiPath="/api/clients/orders"
+			detailBasePath="/clients/orders"
 			productOptions={productOptions}
 			initialOrders={orders}
 			initialDraftOrder={draftOrder}

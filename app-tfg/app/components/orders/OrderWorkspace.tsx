@@ -29,6 +29,7 @@ type WorkspaceProps = {
 	subtitle: string;
 	backHref: string;
 	apiPath: string;
+	detailBasePath: string;
 	productOptions: OrderProductOption[];
 	initialOrders: OrderSummary[];
 	initialDraftOrder?: OrderSummary | null;
@@ -114,6 +115,7 @@ export default function OrderWorkspace({
 	subtitle,
 	backHref,
 	apiPath,
+	detailBasePath,
 	productOptions,
 	initialOrders,
 	initialDraftOrder = null,
@@ -762,6 +764,12 @@ export default function OrderWorkspace({
 													{order.line_count}
 												</p>
 											</div>
+											<Link
+												href={`${detailBasePath}/${order.id}`}
+												className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 sm:col-span-2"
+											>
+												Ver detalle del pedido
+											</Link>
 										</div>
 									</div>
 

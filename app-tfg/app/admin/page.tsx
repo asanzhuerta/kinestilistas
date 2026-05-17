@@ -1,6 +1,11 @@
 import NavCard from "../components/NavCard";
 import PageTransition from "../components/animations/PageTransition";
-import { CatalogIcon, ClientsIcon, ReportsIcon } from "../components/IconsSVGs";
+import {
+	CatalogIcon,
+	ClientsIcon,
+	OrderIcon,
+	ReportsIcon,
+} from "../components/IconsSVGs";
 
 const navItems = [
 	{
@@ -17,6 +22,11 @@ const navItems = [
 		title: "Catalogo",
 		icon: <CatalogIcon className="h-6 w-6" />,
 		href: "/admin/catalog",
+	},
+	{
+		title: "Pedidos",
+		icon: <OrderIcon className="h-6 w-6" />,
+		href: "/admin/orders",
 	},
 	{
 		title: "Auditoria",

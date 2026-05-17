@@ -28,6 +28,7 @@ export default async function CommercialOrdersPage() {
 			subtitle="Registra pedidos para clientes asignados"
 			backHref="/commercials"
 			apiPath="/api/commercial/orders"
+			detailBasePath="/commercials/orders"
 			productOptions={productOptions}
 			initialOrders={orders}
 			initialDraftOrder={initialDraftOrder}
