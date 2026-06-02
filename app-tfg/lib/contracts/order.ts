@@ -5,6 +5,14 @@ export type OrderStatusCode =
 	| "delivered"
 	| "cancelled";
 
+export type OrderPaymentStatusCode = "pending" | "paid";
+
+export type OrderPaymentMethodCode =
+	| "cash"
+	| "card"
+	| "transfer"
+	| "other";
+
 export type OrderProductOption = {
 	id: string;
 	productId: string;
@@ -41,11 +49,20 @@ export type OrderSummary = {
 	client_contact_name: string | null;
 	created_by_user_id: string;
 	created_by_user_name: string;
+	created_by_user_role_id: number | null;
 	status_id: number;
 	status_code: OrderStatusCode | string;
 	status_name: string;
 	total_amount: string;
 	notes: string | null;
+	payment_status_id: number;
+	payment_status_code: OrderPaymentStatusCode | string;
+	payment_status_name: string;
+	payment_method: OrderPaymentMethodCode | string | null;
+	payment_notes: string | null;
+	paid_at: string | null;
+	paid_by_user_id: string | null;
+	paid_by_user_name: string | null;
 	created_at: string;
 	updated_at: string;
 	delivery_visit_id: string | null;
@@ -62,9 +79,16 @@ export type OrderStatusOption = {
 	name: string;
 };
 
+export type OrderPaymentStatusOption = {
+	id: number;
+	code: OrderPaymentStatusCode | string;
+	name: string;
+};
+
 export type OrderDetail = {
 	order: OrderSummary;
 	availableStatusTransitions: OrderStatusOption[];
+	availablePaymentTransitions: OrderPaymentStatusOption[];
 };
 
 export type CreateOrderLineBody = {
@@ -110,6 +134,9 @@ export type AddCommercialDraftOrderLineBody = {
 
 export type UpdateOrderStatusBody = {
 	statusId?: number | string | null;
+	paymentStatusId?: number | string | null;
+	paymentMethod?: string | null;
+	paymentNotes?: string | null;
 };
 
 export function buildCreateClientOrderInput(body: CreateClientOrderBody) {
@@ -168,5 +195,8 @@ export function buildAddCommercialDraftOrderLineInput(
 export function buildUpdateOrderStatusInput(body: UpdateOrderStatusBody) {
 	return {
 		statusId: body.statusId,
+		paymentStatusId: body.paymentStatusId,
+		paymentMethod: body.paymentMethod,
+		paymentNotes: body.paymentNotes,
 	};
 }

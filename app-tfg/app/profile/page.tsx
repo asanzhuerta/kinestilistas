@@ -30,7 +30,7 @@ export default async function ProfilePage() {
 	}
 
 	return (
-		<main className="app-bg min-h-[100svh] w-full px-4 py-4 pb-28 text-slate-800">
+		<main className="app-bg min-h-[100svh] w-full px-4 py-4 pb-28 md:pb-32 text-slate-800">
 			<div className="mx-auto flex min-h-[100svh] w-full max-w-6xl flex-col">
 				<HeaderTitle
 					title="KinEstilistas"

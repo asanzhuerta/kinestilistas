@@ -31,8 +31,10 @@ import { SupportResource } from "./entities/SupportResource";
 import { ColorChart } from "./entities/ColorChart";
 import { ColorReference } from "./entities/ColorReference";
 import { OrderStatus } from "./entities/OrderStatus";
+import { OrderPaymentStatus } from "./entities/OrderPaymentStatus";
 import { Order } from "./entities/Order";
 import { OrderLine } from "./entities/OrderLine";
+import { AppRateLimitPolicy } from "./entities/AppRateLimitPolicy";
 
 export const entities = [
 	Role,
@@ -65,8 +67,10 @@ export const entities = [
 	ColorChart,
 	ColorReference,
 	OrderStatus,
+	OrderPaymentStatus,
 	Order,
 	OrderLine,
+	AppRateLimitPolicy,
 ];
 
 function createDataSource() {
@@ -79,30 +83,70 @@ function createDataSource() {
 	});
 }
 
-export const AppDataSource = createDataSource();
+const globalForTypeorm = globalThis as typeof globalThis & {
+	__appDataSource?: DataSource;
+	__appDataSourceInitPromise?: Promise<DataSource> | null;
+};
 
-let productionInitPromise: Promise<DataSource> | null = null;
+function getOrCreateDataSource() {
+	if (!globalForTypeorm.__appDataSource) {
+		globalForTypeorm.__appDataSource = createDataSource();
+	}
+
+	return globalForTypeorm.__appDataSource;
+}
+
+function hasCurrentEntityMetadata(dataSource: DataSource) {
+	return entities.every((entity) => {
+		try {
+			dataSource.getMetadata(entity);
+			return true;
+		} catch {
+			return false;
+		}
+	});
+}
+
+function resetCachedDataSource() {
+	globalForTypeorm.__appDataSource = undefined;
+	globalForTypeorm.__appDataSourceInitPromise = null;
+}
 
 export async function getDataSource(): Promise<DataSource> {
-	if (process.env.NODE_ENV !== "production") {
-		const ds = createDataSource();
+	let dataSource = getOrCreateDataSource();
 
-		if (!ds.isInitialized) {
-			await ds.initialize();
-		}
-
-		return ds;
+	// En desarrollo, el hot reload puede volver a cargar las clases Entity
+	// mientras dejamos vivo el DataSource global. Cuando eso pasa, TypeORM
+	// conserva metadata ligada a las clases antiguas y luego falla con
+	// "EntityMetadataNotFoundError" al pedir repositorios con las nuevas.
+	//
+	// Importante: aqui no destruimos el DataSource anterior porque puede seguir
+	// siendo usado por otras requests en vuelo. Si lo cerramos en caliente,
+	// consultas concurrentes pueden caer con "Connection terminated".
+	if (
+		dataSource.isInitialized &&
+		!hasCurrentEntityMetadata(dataSource)
+	) {
+		resetCachedDataSource();
+		dataSource = getOrCreateDataSource();
 	}
 
-	if (AppDataSource.isInitialized) {
-		return AppDataSource;
+	if (dataSource.isInitialized) {
+		return dataSource;
 	}
 
-	if (!productionInitPromise) {
-		productionInitPromise = AppDataSource.initialize();
+	if (!globalForTypeorm.__appDataSourceInitPromise) {
+		globalForTypeorm.__appDataSourceInitPromise = dataSource
+			.initialize()
+			.then((dataSource) => {
+				globalForTypeorm.__appDataSource = dataSource;
+				return dataSource;
+			})
+			.catch((error) => {
+				globalForTypeorm.__appDataSourceInitPromise = null;
+				throw error;
+			});
 	}
 
-	await productionInitPromise;
-
-	return AppDataSource;
+	return globalForTypeorm.__appDataSourceInitPromise;
 }

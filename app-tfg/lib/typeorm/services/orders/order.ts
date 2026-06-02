@@ -1,6 +1,8 @@
 import type {
 	CreateOrderLineBody,
 	OrderDetail,
+	OrderPaymentMethodCode,
+	OrderPaymentStatusOption,
 	OrderProductOption,
 	OrderStatusOption,
 	OrderSummary,
@@ -10,6 +12,9 @@ import { getVisibleProductReference, isSyntheticProductReference } from "@/lib/c
 import { normalizeText } from "@/lib/utils/text";
 import { getDataSource } from "@/lib/typeorm/data-source";
 import {
+	COMMERCIAL_VISIT_STATUS_IDS,
+	COMMERCIAL_VISIT_TYPE_IDS,
+	ORDER_PAYMENT_STATUS_IDS,
 	ORDER_STATUS_IDS,
 	PRODUCT_STATUS_IDS,
 } from "@/lib/typeorm/constants/catalog-ids";
@@ -18,7 +23,9 @@ import { Client } from "@/lib/typeorm/entities/Client";
 import { User } from "@/lib/typeorm/entities/User";
 import { Order } from "@/lib/typeorm/entities/Order";
 import { OrderLine } from "@/lib/typeorm/entities/OrderLine";
+import { OrderPaymentStatus } from "@/lib/typeorm/entities/OrderPaymentStatus";
 import { OrderStatus } from "@/lib/typeorm/entities/OrderStatus";
+import { CommercialVisit } from "@/lib/typeorm/entities/CommercialVisit";
 import { ColorReference } from "@/lib/typeorm/entities/ColorReference";
 import { ClientCommercialAssignment } from "@/lib/typeorm/entities/ClientCommercialAssignment";
 import { getClientByUserId } from "@/lib/typeorm/services/commercial/client";
@@ -54,7 +61,24 @@ type SaveDraftInput = {
 
 type ListOrdersForCommercialUserInput = {
 	clientId?: string | null;
+	paymentStatusId?: number | string | null;
 	pendingDeliveryOnly?: boolean;
+	statusId?: number | string | null;
+};
+
+type ListOrdersForAdminInput = {
+	clientId?: string | null;
+	paymentStatusId?: number | string | null;
+	statusId?: number | string | null;
+};
+
+type UpdateOrderManagementInput = {
+	actedByUserId?: string | null;
+	orderId: string;
+	paymentMethod?: string | null;
+	paymentNotes?: string | null;
+	paymentStatusId?: number | string | null;
+	statusId?: number | string | null;
 };
 
 type NormalizedOrderLineInput = {
@@ -82,6 +106,20 @@ const ORDER_STATUS_TRANSITION_IDS_BY_CODE: Record<string, number[]> = {
 	cancelled: [],
 	draft: [],
 };
+
+const ORDER_PAYMENT_TRANSITION_IDS_BY_CODE: Record<string, number[]> = {
+	pending: [ORDER_PAYMENT_STATUS_IDS.PAID],
+	paid: [ORDER_PAYMENT_STATUS_IDS.PENDING],
+};
+
+const ORDER_PAYMENT_METHOD_CODES = new Set<OrderPaymentMethodCode>([
+	"cash",
+	"card",
+	"transfer",
+	"other",
+]);
+
+const MAX_OPEN_UNPAID_ORDERS_PER_CLIENT = 2;
 
 function toIsoString(value: Date | string | null | undefined) {
 	if (!value) {
@@ -213,11 +251,20 @@ function mapOrderToSummary(order: Order): OrderSummary {
 		client_contact_name: order.client?.contact_name ?? null,
 		created_by_user_id: order.created_by_user_id,
 		created_by_user_name: order.createdByUser?.name ?? "Usuario",
+		created_by_user_role_id: order.createdByUser?.role_id ?? null,
 		status_id: order.status_id,
 		status_code: order.status?.code ?? "",
 		status_name: order.status?.name ?? "Sin estado",
 		total_amount: String(order.total_amount ?? "0.00"),
 		notes: order.notes ?? null,
+		payment_status_id: order.payment_status_id,
+		payment_status_code: order.paymentStatus?.code ?? "",
+		payment_status_name: order.paymentStatus?.name ?? "Sin estado de cobro",
+		payment_method: order.payment_method ?? null,
+		payment_notes: order.payment_notes ?? null,
+		paid_at: toIsoString(order.paid_at) || null,
+		paid_by_user_id: order.paid_by_user_id ?? null,
+		paid_by_user_name: order.paidByUser?.name ?? null,
 		created_at: toIsoString(order.created_at),
 		updated_at: toIsoString(order.updated_at),
 		delivery_visit_id: order.delivery_visit_id ?? null,
@@ -238,8 +285,30 @@ function mapOrderStatusToOption(status: OrderStatus): OrderStatusOption {
 	};
 }
 
+function mapOrderPaymentStatusToOption(
+	status: OrderPaymentStatus,
+): OrderPaymentStatusOption {
+	return {
+		id: status.id,
+		code: status.code,
+		name: status.name,
+	};
+}
+
 function getAllowedOrderTransitionIds(statusCode: string | null | undefined) {
 	return ORDER_STATUS_TRANSITION_IDS_BY_CODE[String(statusCode ?? "").trim()] ?? [];
+}
+
+function getAllowedOrderPaymentTransitionIds(order: Order) {
+	if (order.status?.code !== "delivered") {
+		return [] as number[];
+	}
+
+	return (
+		ORDER_PAYMENT_TRANSITION_IDS_BY_CODE[
+			String(order.paymentStatus?.code ?? "").trim()
+		] ?? []
+	);
 }
 
 function normalizeOrderStatusId(statusId: number | string | null | undefined) {
@@ -254,6 +323,71 @@ function normalizeOrderStatusId(statusId: number | string | null | undefined) {
 	}
 
 	return parsed;
+}
+
+function normalizeOrderPaymentStatusId(
+	statusId: number | string | null | undefined,
+) {
+	const parsed = Number(statusId);
+
+	if (!Number.isInteger(parsed) || parsed <= 0) {
+		throw new OrderServiceError(
+			"Debes indicar un estado de cobro valido",
+			400,
+			"ORDER_PAYMENT_STATUS_ID_INVALID",
+		);
+	}
+
+	return parsed;
+}
+
+function normalizeOptionalFilterId(value: number | string | null | undefined) {
+	if (value === null || value === undefined || String(value).trim() === "") {
+		return null;
+	}
+
+	const parsed = Number(value);
+
+	if (!Number.isInteger(parsed) || parsed <= 0) {
+		throw new OrderServiceError(
+			"El filtro indicado no es valido",
+			400,
+			"ORDER_FILTER_ID_INVALID",
+		);
+	}
+
+	return parsed;
+}
+
+function normalizePaymentMethod(
+	paymentMethod: string | null | undefined,
+	options: {
+		required?: boolean;
+	} = {},
+) {
+	const normalized = normalizeText(paymentMethod)?.toLowerCase() ?? "";
+
+	if (!normalized) {
+		if (options.required) {
+			throw new OrderServiceError(
+				"Debes indicar el metodo de cobro del pedido",
+				400,
+				"ORDER_PAYMENT_METHOD_REQUIRED",
+			);
+		}
+
+		return null;
+	}
+
+	if (!ORDER_PAYMENT_METHOD_CODES.has(normalized as OrderPaymentMethodCode)) {
+		throw new OrderServiceError(
+			"El metodo de cobro indicado no es valido",
+			400,
+			"ORDER_PAYMENT_METHOD_INVALID",
+		);
+	}
+
+	return normalized as OrderPaymentMethodCode;
 }
 
 function ensureManageableOrder(order: Order) {
@@ -282,6 +416,33 @@ function ensureOrderTransitionAllowed(order: Order, nextStatusId: number) {
 	}
 }
 
+function ensureOrderPaymentTransitionAllowed(
+	order: Order,
+	nextPaymentStatusId: number,
+) {
+	if (order.status?.code !== "delivered") {
+		throw new OrderServiceError(
+			"Solo se puede registrar el cobro cuando el pedido ya consta como entregado",
+			400,
+			"ORDER_PAYMENT_REQUIRES_DELIVERED",
+		);
+	}
+
+	if (order.payment_status_id === nextPaymentStatusId) {
+		return;
+	}
+
+	const allowedPaymentStatusIds = getAllowedOrderPaymentTransitionIds(order);
+
+	if (!allowedPaymentStatusIds.includes(nextPaymentStatusId)) {
+		throw new OrderServiceError(
+			`No se puede cambiar el cobro de un pedido en estado ${order.paymentStatus?.name ?? "actual"} al estado solicitado`,
+			400,
+			"ORDER_PAYMENT_STATUS_TRANSITION_NOT_ALLOWED",
+		);
+	}
+}
+
 async function listOrderStatusOptionsByIds(statusIds: number[]) {
 	if (statusIds.length === 0) {
 		return [] as OrderStatusOption[];
@@ -301,14 +462,37 @@ async function listOrderStatusOptionsByIds(statusIds: number[]) {
 		.map(mapOrderStatusToOption);
 }
 
+async function listOrderPaymentStatusOptionsByIds(statusIds: number[]) {
+	if (statusIds.length === 0) {
+		return [] as OrderPaymentStatusOption[];
+	}
+
+	const ds = await getDataSource();
+	const statuses = await ds
+		.getRepository(OrderPaymentStatus)
+		.createQueryBuilder("status")
+		.where("status.id IN (:...statusIds)", { statusIds })
+		.getMany();
+	const statusMap = new Map(statuses.map((status) => [status.id, status]));
+
+	return statusIds
+		.map((statusId) => statusMap.get(statusId))
+		.filter((status): status is OrderPaymentStatus => Boolean(status))
+		.map(mapOrderPaymentStatusToOption);
+}
+
 async function buildOrderDetail(order: Order): Promise<OrderDetail> {
 	const availableStatusTransitions = await listOrderStatusOptionsByIds(
 		getAllowedOrderTransitionIds(order.status?.code),
+	);
+	const availablePaymentTransitions = await listOrderPaymentStatusOptionsByIds(
+		getAllowedOrderPaymentTransitionIds(order),
 	);
 
 	return {
 		order: mapOrderToSummary(order),
 		availableStatusTransitions,
+		availablePaymentTransitions,
 	};
 }
 
@@ -318,6 +502,8 @@ function createOrdersBaseQuery(repo: Repository<Order>) {
 		.leftJoinAndSelect("order.client", "client")
 		.leftJoinAndSelect("order.createdByUser", "createdByUser")
 		.leftJoinAndSelect("order.status", "status")
+		.leftJoinAndSelect("order.paymentStatus", "paymentStatus")
+		.leftJoinAndSelect("order.paidByUser", "paidByUser")
 		.leftJoinAndSelect("order.deliveryVisit", "deliveryVisit")
 		.leftJoinAndSelect("deliveryVisit.status", "deliveryVisitStatus")
 		.leftJoinAndSelect("order.lines", "lines")
@@ -372,28 +558,148 @@ async function getRequiredOrderById(orderId: string) {
 	return order;
 }
 
-async function updateOrderStatusRecord(
+async function updateOrderManagementRecord(
 	order: Order,
-	statusId: number | string | null | undefined,
+	input: Omit<UpdateOrderManagementInput, "orderId">,
 ) {
 	ensureManageableOrder(order);
-	const nextStatusId = normalizeOrderStatusId(statusId);
-	ensureOrderTransitionAllowed(order, nextStatusId);
+	const hasStatusUpdate = input.statusId !== undefined;
+	const hasPaymentUpdate = input.paymentStatusId !== undefined;
 
-	if (order.status_id !== nextStatusId) {
-		const ds = await getDataSource();
-		const orderRepo = ds.getRepository(Order);
-
-		await orderRepo.save(
-			orderRepo.create({
-				id: order.id,
-				status_id: nextStatusId,
-				delivery_visit_id:
-					nextStatusId === ORDER_STATUS_IDS.CANCELLED
-						? null
-						: order.delivery_visit_id ?? null,
-			}),
+	if (
+		!hasStatusUpdate &&
+		!hasPaymentUpdate &&
+		input.paymentMethod === undefined &&
+		input.paymentNotes === undefined
+	) {
+		throw new OrderServiceError(
+			"Debes indicar al menos un cambio valido para el pedido",
+			400,
+			"ORDER_UPDATE_EMPTY",
 		);
+	}
+
+	if (
+		input.paymentStatusId === undefined &&
+		(input.paymentMethod !== undefined || input.paymentNotes !== undefined)
+	) {
+		throw new OrderServiceError(
+			"Para registrar un cobro debes indicar tambien el estado de cobro",
+			400,
+			"ORDER_PAYMENT_STATUS_REQUIRED",
+		);
+	}
+
+	const nextStatusId = hasStatusUpdate
+		? normalizeOrderStatusId(input.statusId)
+		: order.status_id;
+
+	if (hasStatusUpdate) {
+		ensureOrderTransitionAllowed(order, nextStatusId);
+	}
+
+	let nextPaymentStatusId = order.payment_status_id;
+	let nextPaymentMethod = order.payment_method ?? null;
+	let nextPaymentNotes = order.payment_notes ?? null;
+	let nextPaidAt = order.paid_at ?? null;
+	let nextPaidByUserId = order.paid_by_user_id ?? null;
+
+	if (hasPaymentUpdate) {
+		nextPaymentStatusId = normalizeOrderPaymentStatusId(input.paymentStatusId);
+		ensureOrderPaymentTransitionAllowed(order, nextPaymentStatusId);
+		nextPaymentNotes =
+			input.paymentNotes === undefined
+				? order.payment_notes ?? null
+				: normalizeText(input.paymentNotes) || null;
+
+		if (nextPaymentStatusId === ORDER_PAYMENT_STATUS_IDS.PAID) {
+			nextPaymentMethod = normalizePaymentMethod(input.paymentMethod, {
+				required: true,
+			});
+			nextPaidAt = new Date();
+			nextPaidByUserId = String(input.actedByUserId ?? "").trim() || null;
+
+			if (!nextPaidByUserId) {
+				throw new OrderServiceError(
+					"No se ha podido identificar el usuario que registra el cobro",
+					500,
+					"ORDER_PAYMENT_ACTOR_REQUIRED",
+				);
+			}
+		} else {
+			nextPaymentMethod = null;
+			nextPaidAt = null;
+			nextPaidByUserId = null;
+		}
+	}
+
+	const shouldUpdate =
+		order.status_id !== nextStatusId ||
+		order.delivery_visit_id !==
+			(nextStatusId === ORDER_STATUS_IDS.CANCELLED
+				? null
+				: order.delivery_visit_id ?? null) ||
+		order.payment_status_id !== nextPaymentStatusId ||
+		(order.payment_method ?? null) !== nextPaymentMethod ||
+		(order.payment_notes ?? null) !== nextPaymentNotes ||
+		String(order.paid_at?.toISOString?.() ?? order.paid_at ?? "") !==
+			String(nextPaidAt?.toISOString?.() ?? nextPaidAt ?? "") ||
+		(order.paid_by_user_id ?? null) !== nextPaidByUserId;
+
+	if (shouldUpdate) {
+		const ds = await getDataSource();
+		const nextDeliveryVisitId =
+			nextStatusId === ORDER_STATUS_IDS.CANCELLED
+				? null
+				: order.delivery_visit_id ?? null;
+
+		await ds.transaction(async (manager) => {
+			const orderRepo = manager.getRepository(Order);
+
+			await orderRepo.save(
+				orderRepo.create({
+					id: order.id,
+					status_id: nextStatusId,
+					delivery_visit_id: nextDeliveryVisitId,
+					payment_status_id: nextPaymentStatusId,
+					payment_method: nextPaymentMethod,
+					payment_notes: nextPaymentNotes,
+					paid_at: nextPaidAt,
+					paid_by_user_id: nextPaidByUserId,
+				}),
+			);
+
+			if (
+				nextStatusId === ORDER_STATUS_IDS.CANCELLED &&
+				order.delivery_visit_id
+			) {
+				const visitRepo = manager.getRepository(CommercialVisit);
+				const linkedVisit = await visitRepo.findOne({
+					where: { id: order.delivery_visit_id },
+				});
+
+				if (
+					linkedVisit &&
+					linkedVisit.visit_type_id === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
+					(linkedVisit.status_id === COMMERCIAL_VISIT_STATUS_IDS.PLANNED ||
+						linkedVisit.status_id === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED)
+				) {
+					const remainingConfirmedOrders = await orderRepo.count({
+						where: {
+							delivery_visit_id: order.delivery_visit_id,
+							status_id: ORDER_STATUS_IDS.CONFIRMED,
+						},
+					});
+
+					if (remainingConfirmedOrders === 0) {
+						await visitRepo.update(
+							{ id: order.delivery_visit_id },
+							{ status_id: COMMERCIAL_VISIT_STATUS_IDS.CANCELLED },
+						);
+					}
+				}
+			}
+		});
 	}
 
 	const updatedOrder = await getRequiredOrderById(order.id);
@@ -429,14 +735,12 @@ async function ensureOrderActors(
 	const clientRepo = manager.getRepository(Client);
 	const userRepo = manager.getRepository(User);
 
-	const [client, createdByUser] = await Promise.all([
-		clientRepo.findOne({
-			where: { id: input.clientId },
-		}),
-		userRepo.findOne({
-			where: { id: input.createdByUserId },
-		}),
-	]);
+	const client = await clientRepo.findOne({
+		where: { id: input.clientId },
+	});
+	const createdByUser = await userRepo.findOne({
+		where: { id: input.createdByUserId },
+	});
 
 	if (!client) {
 		throw new OrderServiceError(
@@ -477,33 +781,32 @@ async function prepareOrderLineRecords(
 		),
 	);
 
-	const [products, colorReferences, productVariantCounts] = await Promise.all([
-		productRepo
-			.createQueryBuilder("product")
-			.leftJoinAndSelect("product.productLine", "productLine")
-			.where("product.id IN (:...productIds)", { productIds })
-			.andWhere("product.status_id = :statusId", {
-				statusId: PRODUCT_STATUS_IDS.ACTIVE,
-			})
-			.getMany(),
+	const products = await productRepo
+		.createQueryBuilder("product")
+		.leftJoinAndSelect("product.productLine", "productLine")
+		.where("product.id IN (:...productIds)", { productIds })
+		.andWhere("product.status_id = :statusId", {
+			statusId: PRODUCT_STATUS_IDS.ACTIVE,
+		})
+		.getMany();
+	const colorReferences =
 		colorReferenceIds.length > 0
-			? colorReferenceRepo
+			? await colorReferenceRepo
 					.createQueryBuilder("colorReference")
 					.where("colorReference.id IN (:...colorReferenceIds)", {
 						colorReferenceIds,
 					})
 					.andWhere("colorReference.is_orderable = true")
 					.getMany()
-			: Promise.resolve([] as ColorReference[]),
-		colorReferenceRepo
-			.createQueryBuilder("colorReference")
-			.select("colorReference.product_id", "productId")
-			.addSelect("COUNT(*)", "count")
-			.where("colorReference.product_id IN (:...productIds)", { productIds })
-			.andWhere("colorReference.is_orderable = true")
-			.groupBy("colorReference.product_id")
-			.getRawMany<{ productId: string; count: string }>(),
-	]);
+			: ([] as ColorReference[]);
+	const productVariantCounts = await colorReferenceRepo
+		.createQueryBuilder("colorReference")
+		.select("colorReference.product_id", "productId")
+		.addSelect("COUNT(*)", "count")
+		.where("colorReference.product_id IN (:...productIds)", { productIds })
+		.andWhere("colorReference.is_orderable = true")
+		.groupBy("colorReference.product_id")
+		.getRawMany<{ productId: string; count: string }>();
 
 	if (products.length !== productIds.length) {
 		throw new OrderServiceError(
@@ -668,6 +971,41 @@ async function persistOrderRecord(
 	return savedOrder.id;
 }
 
+async function countOpenUnpaidOrdersForClient(
+	manager: Awaited<ReturnType<typeof getDataSource>>["manager"],
+	clientId: string,
+) {
+	return manager
+		.getRepository(Order)
+		.createQueryBuilder("order")
+		.where("order.client_id = :clientId", { clientId })
+		.andWhere("order.status_id NOT IN (:...excludedStatusIds)", {
+			excludedStatusIds: [ORDER_STATUS_IDS.DRAFT, ORDER_STATUS_IDS.CANCELLED],
+		})
+		.andWhere("order.payment_status_id != :paidStatusId", {
+			paidStatusId: ORDER_PAYMENT_STATUS_IDS.PAID,
+		})
+		.getCount();
+}
+
+async function ensureClientCanRegisterOrder(
+	manager: Awaited<ReturnType<typeof getDataSource>>["manager"],
+	clientId: string,
+) {
+	const openUnpaidOrdersCount = await countOpenUnpaidOrdersForClient(
+		manager,
+		clientId,
+	);
+
+	if (openUnpaidOrdersCount >= MAX_OPEN_UNPAID_ORDERS_PER_CLIENT) {
+		throw new OrderServiceError(
+			`Este cliente ya tiene ${MAX_OPEN_UNPAID_ORDERS_PER_CLIENT} pedidos registrados pendientes de cobro. No se pueden registrar mas pedidos hasta cerrar al menos uno.`,
+			409,
+			"ORDER_OPEN_LIMIT_REACHED",
+		);
+	}
+}
+
 async function loadDraftOrderSummary(
 	clientId: string,
 	createdByUserId: string,
@@ -760,6 +1098,8 @@ async function submitOrderRecord(input: CreateOrderInput) {
 	const normalizedLines = normalizeRequestedOrderLines(input.lines);
 
 	const createdOrderId = await ds.transaction(async (manager) => {
+		await ensureClientCanRegisterOrder(manager, input.clientId);
+
 		const existingDraftId = await findDraftOrderId(
 			manager,
 			input.clientId,
@@ -1020,6 +1360,20 @@ export async function listOrdersForCommercialUser(
 		query.andWhere("order.client_id = :clientId", { clientId });
 	}
 
+	const statusId = normalizeOptionalFilterId(input.statusId);
+
+	if (statusId !== null) {
+		query.andWhere("order.status_id = :statusId", { statusId });
+	}
+
+	const paymentStatusId = normalizeOptionalFilterId(input.paymentStatusId);
+
+	if (paymentStatusId !== null) {
+		query.andWhere("order.payment_status_id = :paymentStatusId", {
+			paymentStatusId,
+		});
+	}
+
 	if (input.pendingDeliveryOnly) {
 		query
 			.andWhere("order.status_id = :confirmedStatusId", {
@@ -1033,9 +1387,7 @@ export async function listOrdersForCommercialUser(
 }
 
 export async function listOrdersForAdmin(
-	input: {
-		clientId?: string | null;
-	} = {},
+	input: ListOrdersForAdminInput = {},
 ) {
 	const ds = await getDataSource();
 	const repo = ds.getRepository(Order);
@@ -1050,6 +1402,20 @@ export async function listOrdersForAdmin(
 
 	if (clientId) {
 		query.andWhere("order.client_id = :clientId", { clientId });
+	}
+
+	const statusId = normalizeOptionalFilterId(input.statusId);
+
+	if (statusId !== null) {
+		query.andWhere("order.status_id = :statusId", { statusId });
+	}
+
+	const paymentStatusId = normalizeOptionalFilterId(input.paymentStatusId);
+
+	if (paymentStatusId !== null) {
+		query.andWhere("order.payment_status_id = :paymentStatusId", {
+			paymentStatusId,
+		});
 	}
 
 	const orders = await query.getMany();
@@ -1112,10 +1478,7 @@ export async function getOrderDetailForAdmin(orderId: string) {
 
 export async function updateOrderStatusForCommercialUser(
 	userId: string,
-	input: {
-		orderId: string;
-		statusId: number | string | null | undefined;
-	},
+	input: UpdateOrderManagementInput,
 ) {
 	const commercial = await requireCommercialByUserId(userId);
 	const order = await getRequiredOrderById(input.orderId);
@@ -1133,16 +1496,25 @@ export async function updateOrderStatusForCommercialUser(
 		);
 	}
 
-	return updateOrderStatusRecord(order, input.statusId);
+	return updateOrderManagementRecord(order, {
+		actedByUserId: userId,
+		paymentMethod: input.paymentMethod,
+		paymentNotes: input.paymentNotes,
+		paymentStatusId: input.paymentStatusId,
+		statusId: input.statusId,
+	});
 }
 
-export async function updateOrderStatusForAdmin(input: {
-	orderId: string;
-	statusId: number | string | null | undefined;
-}) {
+export async function updateOrderStatusForAdmin(input: UpdateOrderManagementInput) {
 	const order = await getRequiredOrderById(input.orderId);
 	ensureManageableOrder(order);
-	return updateOrderStatusRecord(order, input.statusId);
+	return updateOrderManagementRecord(order, {
+		actedByUserId: input.actedByUserId,
+		paymentMethod: input.paymentMethod,
+		paymentNotes: input.paymentNotes,
+		paymentStatusId: input.paymentStatusId,
+		statusId: input.statusId,
+	});
 }
 
 export async function saveDraftForClientUser(

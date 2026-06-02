@@ -8,7 +8,9 @@ import type {
 	OrderProductOption,
 	OrderSummary,
 } from "@/lib/contracts/order";
+import { ROLE_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { formatDateTime } from "@/lib/utils/user-utils";
+import { getOrderPaymentStatusClasses } from "./order-ui";
 
 type OrderClientOption = {
 	id: string;
@@ -94,7 +96,16 @@ function buildSelectionValue(
 	productId: string,
 	colorReferenceId: string | null | undefined,
 ) {
-	return `${productId}::${String(colorReferenceId ?? "").trim()}`;
+	const normalizedProductId = String(productId ?? "").trim();
+	const normalizedColorReferenceId = String(colorReferenceId ?? "").trim();
+
+	if (!normalizedProductId) {
+		return "";
+	}
+
+	return normalizedColorReferenceId
+		? `${normalizedProductId}::${normalizedColorReferenceId}`
+		: normalizedProductId;
 }
 
 function mapOrderToEditableLines(order: OrderSummary | null | undefined) {
@@ -107,6 +118,33 @@ function mapOrderToEditableLines(order: OrderSummary | null | undefined) {
 		})) ?? [];
 
 	return mappedLines.length > 0 ? mappedLines : [createEmptyLine("line-1")];
+}
+
+function isOrderOpenWithoutPayment(order: OrderSummary) {
+	return (
+		order.status_code !== "draft" &&
+		order.status_code !== "cancelled" &&
+		order.payment_status_code !== "paid"
+	);
+}
+
+function matchesOrderSearch(order: OrderSummary, searchTerm: string) {
+	const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+	if (!normalizedSearchTerm) {
+		return true;
+	}
+
+	return [
+		order.id,
+		order.client_name,
+		order.created_by_user_name,
+		order.notes ?? "",
+		...order.lines.map((line) => `${line.order_reference} ${line.product_name}`),
+	]
+		.join(" ")
+		.toLowerCase()
+		.includes(normalizedSearchTerm);
 }
 
 export default function OrderWorkspace({
@@ -140,15 +178,100 @@ export default function OrderWorkspace({
 	const [clearingDraft, setClearingDraft] = useState(false);
 	const [loadingDraft, setLoadingDraft] = useState(false);
 	const [productSearch, setProductSearch] = useState("");
+	const [historyClientFilter, setHistoryClientFilter] = useState("all");
+	const [historyPaymentFilter, setHistoryPaymentFilter] = useState("all");
+	const [historySearch, setHistorySearch] = useState("");
+	const [historyStatusFilter, setHistoryStatusFilter] = useState("all");
+	const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(
+		mode !== "commercial",
+	);
 	const [feedback, setFeedback] = useState<{
 		type: "success" | "error";
 		message: string;
 	} | null>(null);
 
-	const visibleOrders =
-		mode === "commercial" && selectedClientId
-			? orders.filter((order) => order.client_id === selectedClientId)
-			: orders;
+	const selectedClientOrders = useMemo(
+		() =>
+			selectedClientId
+				? orders.filter((order) => order.client_id === selectedClientId)
+				: [],
+		[orders, selectedClientId],
+	);
+	const selectedClientOpenOrdersCount = useMemo(
+		() =>
+			selectedClientOrders.filter((order) => isOrderOpenWithoutPayment(order))
+				.length,
+		[selectedClientOrders],
+	);
+	const orderLimitReached =
+		mode === "commercial"
+			? Boolean(selectedClientId) &&
+				selectedClientOpenOrdersCount >= 2
+			: orders.filter((order) => isOrderOpenWithoutPayment(order)).length >= 2;
+	const visibleOrders = useMemo(() => {
+		return orders.filter((order) => {
+			if (
+				mode === "commercial" &&
+				historyClientFilter !== "all" &&
+				order.client_id !== historyClientFilter
+			) {
+				return false;
+			}
+
+			if (
+				historyStatusFilter !== "all" &&
+				order.status_code !== historyStatusFilter
+			) {
+				return false;
+			}
+
+			if (
+				historyPaymentFilter !== "all" &&
+				order.payment_status_code !== historyPaymentFilter
+			) {
+				return false;
+			}
+
+			return matchesOrderSearch(order, historySearch);
+		});
+	}, [
+		historyClientFilter,
+		historyPaymentFilter,
+		historySearch,
+		historyStatusFilter,
+		mode,
+		orders,
+	]);
+	const summaryCounts = useMemo(() => {
+		const blockedClients = new Set(
+			clientOptions
+				.filter((client) => {
+					const clientOpenOrdersCount = orders.filter(
+						(order) =>
+							order.client_id === client.id && isOrderOpenWithoutPayment(order),
+					).length;
+
+					return clientOpenOrdersCount >= 2;
+				})
+				.map((client) => client.id),
+		);
+
+		return {
+			blockedClients: blockedClients.size,
+			deliveredPendingPayment: orders.filter(
+				(order) =>
+					order.status_code === "delivered" &&
+					order.payment_status_code !== "paid",
+			).length,
+			openOrders: orders.filter(
+				(order) =>
+					order.status_code === "created" || order.status_code === "confirmed",
+			).length,
+			paidOrders: orders.filter(
+				(order) => order.payment_status_code === "paid",
+			).length,
+		};
+	}, [clientOptions, orders]);
 
 	const filteredProductOptions = useMemo(
 		() =>
@@ -395,6 +518,17 @@ export default function OrderWorkspace({
 			return;
 		}
 
+		if (orderLimitReached) {
+			setFeedback({
+				type: "error",
+				message:
+					mode === "commercial"
+						? "Este cliente ya tiene 2 pedidos registrados pendientes de cobro. Debes cerrar al menos uno antes de crear otro."
+						: "Ya tienes 2 pedidos registrados pendientes de cobro. Debes cerrar al menos uno antes de crear otro.",
+			});
+			return;
+		}
+
 		setSubmitting(true);
 
 		try {
@@ -427,6 +561,9 @@ export default function OrderWorkspace({
 
 			setOrders((currentOrders) => [data, ...currentOrders]);
 			syncDraftState(null);
+			if (mode === "commercial") {
+				setIsCreatePanelOpen(false);
+			}
 			setFeedback({
 				type: "success",
 				message: `Pedido registrado correctamente por un total de ${formatCurrency(
@@ -476,20 +613,92 @@ export default function OrderWorkspace({
 					</div>
 				) : null}
 
+				{mode === "commercial" ? (
+					<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
+						<div className="flex flex-col gap-2">
+							<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+								Resumen global
+							</p>
+							<h2 className="text-2xl font-semibold text-slate-900">
+								Todos los pedidos del comercial
+							</h2>
+							<p className="text-sm text-slate-600">
+								Aqui puedes revisar primero todo lo pendiente, filtrar por
+								cliente o estado y abrir la creacion de nuevos pedidos solo
+								cuando lo necesites.
+							</p>
+						</div>
+
+						<div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+							<div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+									Pedidos abiertos
+								</p>
+								<p className="mt-2 text-2xl font-semibold text-sky-900">
+									{summaryCounts.openOrders}
+								</p>
+							</div>
+							<div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">
+									Pendientes de cobro
+								</p>
+								<p className="mt-2 text-2xl font-semibold text-amber-900">
+									{summaryCounts.deliveredPendingPayment}
+								</p>
+							</div>
+							<div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+									Cobrados
+								</p>
+								<p className="mt-2 text-2xl font-semibold text-emerald-900">
+									{summaryCounts.paidOrders}
+								</p>
+							</div>
+							<div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-700">
+									Clientes bloqueados
+								</p>
+								<p className="mt-2 text-2xl font-semibold text-rose-900">
+									{summaryCounts.blockedClients}
+								</p>
+							</div>
+						</div>
+					</section>
+				) : null}
+
 				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-					<div className="flex flex-col gap-2">
-						<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-							Pedido en curso
-						</p>
-						<h2 className="text-2xl font-semibold text-slate-900">
-							{draftOrder ? "Editar borrador actual" : "Preparar nuevo pedido"}
-						</h2>
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex flex-col gap-2">
+							<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+								Pedido en curso
+							</p>
+							<h2 className="text-2xl font-semibold text-slate-900">
+								{draftOrder
+									? "Editar borrador actual"
+									: "Preparar nuevo pedido"}
+							</h2>
+						</div>
+
+						{mode === "commercial" ? (
+							<button
+								type="button"
+								onClick={() => setIsCreatePanelOpen((currentValue) => !currentValue)}
+								className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+							>
+								{isCreatePanelOpen ? "Ocultar formulario" : "Nuevo pedido"}
+							</button>
+						) : null}
 					</div>
 
 					{mode === "commercial" && clientOptions.length === 0 ? (
 						<div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-5 py-6 text-sm text-slate-600">
 							No tienes clientes asignados ahora mismo, así que todavía no
 							puedes registrar pedidos desde el área comercial.
+						</div>
+					) : mode === "commercial" && !isCreatePanelOpen ? (
+						<div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-5 py-6 text-sm text-slate-600">
+							Abre el formulario solo cuando necesites registrar un nuevo
+							pedido o retomar un borrador.
 						</div>
 					) : (
 						<form onSubmit={handleSubmit} className="mt-5 space-y-5">
@@ -514,6 +723,14 @@ export default function OrderWorkspace({
 											</option>
 										))}
 									</select>
+								</div>
+							) : null}
+
+							{orderLimitReached ? (
+								<div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700">
+									{mode === "commercial"
+										? `Este cliente ya tiene ${selectedClientOpenOrdersCount} pedidos registrados pendientes de cobro. No puedes registrar otro hasta cerrar al menos uno.`
+										: "Ya tienes 2 pedidos registrados pendientes de cobro. No puedes registrar otro hasta cerrar al menos uno."}
 								</div>
 							) : null}
 
@@ -587,7 +804,7 @@ export default function OrderWorkspace({
 												}
 												className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 											>
-												<option value="::">Selecciona una referencia</option>
+												<option value="">Selecciona una referencia</option>
 												{filteredProductOptions.map((product) => (
 													<option key={product.id} value={product.id}>
 														{buildProductLabel(product)}
@@ -678,7 +895,12 @@ export default function OrderWorkspace({
 								</button>
 								<button
 									type="submit"
-									disabled={submitting || savingDraft || clearingDraft}
+									disabled={
+										submitting ||
+										savingDraft ||
+										clearingDraft ||
+										orderLimitReached
+									}
 									className="inline-flex rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
 								>
 									{submitting ? "Registrando pedido..." : "Registrar pedido"}
@@ -696,6 +918,100 @@ export default function OrderWorkspace({
 						<h2 className="text-2xl font-semibold text-slate-900">
 							Pedidos registrados
 						</h2>
+						<p className="text-sm text-slate-600">
+							{mode === "commercial"
+								? "El listado arranca mostrando el conjunto completo de pedidos del comercial. Usa los filtros para revisar clientes concretos o estados operativos."
+								: "Consulta aqui todos tus pedidos ya registrados."}
+						</p>
+					</div>
+
+					<div
+						className={`mt-5 grid gap-3 ${
+							mode === "commercial"
+								? "lg:grid-cols-[minmax(0,1.2fr)_220px_220px_220px]"
+								: "lg:grid-cols-[minmax(0,1fr)]"
+						}`}
+					>
+						<div>
+							<label
+								htmlFor="orders-history-search"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
+								Buscar
+							</label>
+							<input
+								id="orders-history-search"
+								type="text"
+								value={historySearch}
+								onChange={(event) => setHistorySearch(event.target.value)}
+								placeholder="Pedido, cliente, creador o referencia"
+								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+							/>
+						</div>
+
+						{mode === "commercial" ? (
+							<div>
+								<label
+									htmlFor="orders-history-client-filter"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
+									Cliente
+								</label>
+								<select
+									id="orders-history-client-filter"
+									value={historyClientFilter}
+									onChange={(event) => setHistoryClientFilter(event.target.value)}
+									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+								>
+									<option value="all">Todos los clientes</option>
+									{clientOptions.map((client) => (
+										<option key={client.id} value={client.id}>
+											{client.name}
+										</option>
+									))}
+								</select>
+							</div>
+						) : null}
+
+						<div>
+							<label
+								htmlFor="orders-history-status-filter"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
+								Estado
+							</label>
+							<select
+								id="orders-history-status-filter"
+								value={historyStatusFilter}
+								onChange={(event) => setHistoryStatusFilter(event.target.value)}
+								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+							>
+								<option value="all">Todos</option>
+								<option value="created">Creado</option>
+								<option value="confirmed">Confirmado</option>
+								<option value="delivered">Entregado</option>
+								<option value="cancelled">Cancelado</option>
+							</select>
+						</div>
+
+						<div>
+							<label
+								htmlFor="orders-history-payment-filter"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
+								Cobro
+							</label>
+							<select
+								id="orders-history-payment-filter"
+								value={historyPaymentFilter}
+								onChange={(event) => setHistoryPaymentFilter(event.target.value)}
+								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+							>
+								<option value="all">Todos</option>
+								<option value="pending">Pendiente</option>
+								<option value="paid">Cobrado</option>
+							</select>
+						</div>
 					</div>
 
 					{visibleOrders.length === 0 ? (
@@ -722,6 +1038,21 @@ export default function OrderWorkspace({
 												>
 													{order.status_name}
 												</span>
+												{order.status_code === "delivered" ? (
+													<span
+														className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderPaymentStatusClasses(
+															order.payment_status_code,
+														)}`}
+													>
+														{order.payment_status_name}
+													</span>
+												) : null}
+												{mode === "client" &&
+												order.created_by_user_role_id === ROLE_IDS.COMMERCIAL ? (
+													<span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+														Gestionado por {order.created_by_user_name}
+													</span>
+												) : null}
 												{mode === "commercial" ? (
 													<span className="rounded-full bg-fuchsia-100 px-3 py-1 text-xs font-semibold text-fuchsia-700">
 														{order.client_name}

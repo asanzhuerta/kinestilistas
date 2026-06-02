@@ -15,12 +15,15 @@ import { User } from "./User";
 import { OrderStatus } from "./OrderStatus";
 import { OrderLine } from "./OrderLine";
 import { CommercialVisit } from "./CommercialVisit";
+import { OrderPaymentStatus } from "./OrderPaymentStatus";
 
 @Entity("orders")
 @Index("orders_client_id_index", ["client_id"])
 @Index("orders_created_by_user_id_index", ["created_by_user_id"])
 @Index("orders_status_id_index", ["status_id"])
+@Index("orders_payment_status_id_index", ["payment_status_id"])
 @Index("orders_delivery_visit_id_index", ["delivery_visit_id"])
+@Index("orders_paid_by_user_id_index", ["paid_by_user_id"])
 @Index("orders_created_at_index", ["created_at"])
 export class Order {
 	@PrimaryGeneratedColumn("uuid")
@@ -37,6 +40,21 @@ export class Order {
 
 	@Column({ type: "uuid", nullable: true })
 	delivery_visit_id!: string | null;
+
+	@Column({ type: "smallint", default: 1 })
+	payment_status_id!: number;
+
+	@Column({ type: "text", nullable: true })
+	payment_method!: string | null;
+
+	@Column({ type: "text", nullable: true })
+	payment_notes!: string | null;
+
+	@Column({ type: "timestamptz", nullable: true })
+	paid_at!: Date | null;
+
+	@Column({ type: "uuid", nullable: true })
+	paid_by_user_id!: string | null;
 
 	@Column({ type: "numeric", precision: 12, scale: 2 })
 	total_amount!: string;
@@ -72,6 +90,21 @@ export class Order {
 	})
 	@JoinColumn({ name: "delivery_visit_id" })
 	deliveryVisit!: Relation<CommercialVisit | null>;
+
+	@ManyToOne(() => OrderPaymentStatus, {
+		onDelete: "RESTRICT",
+		onUpdate: "CASCADE",
+	})
+	@JoinColumn({ name: "payment_status_id" })
+	paymentStatus!: Relation<OrderPaymentStatus>;
+
+	@ManyToOne(() => User, {
+		onDelete: "SET NULL",
+		onUpdate: "CASCADE",
+		nullable: true,
+	})
+	@JoinColumn({ name: "paid_by_user_id" })
+	paidByUser!: Relation<User | null>;
 
 	@OneToMany(() => OrderLine, (orderLine) => orderLine.order)
 	lines!: Relation<OrderLine[]>;

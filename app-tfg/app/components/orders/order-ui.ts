@@ -30,6 +30,17 @@ export function getOrderStatusClasses(statusCode: string) {
 	}
 }
 
+export function getOrderPaymentStatusClasses(statusCode: string) {
+	switch (statusCode) {
+		case "paid":
+			return "bg-emerald-100 text-emerald-700";
+		case "pending":
+			return "bg-amber-100 text-amber-700";
+		default:
+			return "bg-slate-100 text-slate-700";
+	}
+}
+
 export function getOrderStatusClassesById(statusId: number) {
 	switch (statusId) {
 		case 1:
@@ -44,6 +55,21 @@ export function getOrderStatusClassesById(statusId: number) {
 			return getOrderStatusClasses("draft");
 		default:
 			return getOrderStatusClasses("");
+	}
+}
+
+export function getOrderPaymentMethodLabel(paymentMethod: string | null) {
+	switch (paymentMethod) {
+		case "cash":
+			return "Efectivo";
+		case "card":
+			return "Tarjeta";
+		case "transfer":
+			return "Transferencia";
+		case "other":
+			return "Otro";
+		default:
+			return "Sin definir";
 	}
 }
 

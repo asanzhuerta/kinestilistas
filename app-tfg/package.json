@@ -11,6 +11,8 @@
     "start:clean": "rimraf .next && next build --webpack && next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "m4:closeout": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/m4-closeout-smoke.ts",
+    "m4:ui-check": "node ./scripts/m4-ui-headless-check.mjs",
     "typeorm:cli": "node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "typeorm:ds": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./lib/typeorm/data-source-cli.ts",
     "migration:create": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json npm run typeorm:cli -- migration:create",

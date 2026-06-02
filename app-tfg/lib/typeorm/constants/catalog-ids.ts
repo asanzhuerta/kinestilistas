@@ -104,3 +104,8 @@ export const ORDER_STATUS_IDS = {
 	CANCELLED: 4,
 	DRAFT: 5,
 } as const;
+
+export const ORDER_PAYMENT_STATUS_IDS = {
+	PENDING: 1,
+	PAID: 2,
+} as const;

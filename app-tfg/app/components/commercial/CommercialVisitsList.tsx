@@ -416,6 +416,16 @@ export default function CommercialVisitsList() {
 			setFormError("");
 			setFormSuccess("");
 
+			if (
+				visitTypeId === DELIVERY_VISIT_TYPE_ID &&
+				selectedOrderIds.length === 0
+			) {
+				setFormError(
+					"Selecciona al menos un pedido confirmado antes de crear un reparto.",
+				);
+				return;
+			}
+
 			await requestJson<CommercialVisit>("/api/commercial/visits", {
 				method: "POST",
 				headers: {

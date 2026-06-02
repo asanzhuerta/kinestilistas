@@ -82,7 +82,7 @@ const sections: Array<{
 			{
 				title: "Cobros",
 				icon: <PaymentsIcon className="h-6 w-6" />,
-				disabled: true,
+				href: "/commercials/cobros",
 			},
 		],
 	},

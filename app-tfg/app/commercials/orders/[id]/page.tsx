@@ -39,6 +39,7 @@ export default async function CommercialOrderDetailPage({
 			backHref="/commercials/orders"
 			backLabel="Volver a pedidos"
 			initialDetail={detail}
+			mode="commercial"
 			updateApiPath={`/api/commercial/orders/${id}`}
 			relatedLinks={[
 				{

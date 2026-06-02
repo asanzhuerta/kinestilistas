@@ -59,6 +59,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 		const updatedVisit = await updateCommercialVisit({
 			visitId: id,
 			commercialId: existingVisit.commercial_id,
+			deliveredOrderQrs: body.deliveredOrderQrs,
 			scheduledForDate:
 				body.scheduledForDate !== undefined
 					? String(body.scheduledForDate)

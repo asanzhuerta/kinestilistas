@@ -34,6 +34,7 @@ export default async function ClientOrderDetailPage({ params }: PageProps) {
 			backHref="/clients/orders"
 			backLabel="Volver a pedidos"
 			initialDetail={detail}
+			mode="client"
 		/>
 	);
 }

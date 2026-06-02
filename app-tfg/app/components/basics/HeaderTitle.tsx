@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { usePageHeaderRegistration } from "@/app/components/layout/PageHeaderContext";
 
 type HeaderTitleProps = {
 	title: string;
@@ -11,6 +14,12 @@ export default function HeaderTitle({
 	subtitle = "Alta Peluqueria & Estetica",
 	noGlass = false,
 }: HeaderTitleProps) {
+	const isRegisteredInShellHeader = usePageHeaderRegistration({ title, subtitle });
+
+	if (isRegisteredInShellHeader) {
+		return null;
+	}
+
 	return (
 		<header
 			className={`relative mb-4 rounded-2xl px-6 py-4 text-center ${

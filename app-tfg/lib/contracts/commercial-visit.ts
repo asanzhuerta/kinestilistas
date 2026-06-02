@@ -97,5 +97,6 @@ export type UpdateCommercialVisitBody = {
 	statusId?: number;
 	notes?: string | null;
 	result?: string | null;
+	deliveredOrderQrs?: string[];
 	orderIds?: string[];
 };

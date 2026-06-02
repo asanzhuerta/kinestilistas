@@ -1,7 +1,12 @@
 import Link from "next/link";
 import type { OrderSummary } from "@/lib/contracts/order";
+import { ROLE_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { formatDateTime } from "@/lib/utils/user-utils";
-import { formatOrderCurrency, getOrderStatusClasses } from "./order-ui";
+import {
+	formatOrderCurrency,
+	getOrderPaymentStatusClasses,
+	getOrderStatusClasses,
+} from "./order-ui";
 
 type Props = {
 	orders: OrderSummary[];
@@ -44,6 +49,21 @@ export default function OrderHistoryList({
 								>
 									{order.status_name}
 								</span>
+								{order.status_code === "delivered" ? (
+									<span
+										className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderPaymentStatusClasses(
+											order.payment_status_code,
+										)}`}
+									>
+										{order.payment_status_name}
+									</span>
+								) : null}
+								{mode === "client" &&
+								order.created_by_user_role_id === ROLE_IDS.COMMERCIAL ? (
+									<span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+										Gestionado por {order.created_by_user_name}
+									</span>
+								) : null}
 								{mode !== "client" ? (
 									<span className="rounded-full bg-fuchsia-100 px-3 py-1 text-xs font-semibold text-fuchsia-700">
 										{order.client_name}

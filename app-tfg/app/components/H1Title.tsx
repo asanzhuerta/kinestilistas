@@ -1,3 +1,7 @@
+"use client";
+
+import { usePageHeaderRegistration } from "@/app/components/layout/PageHeaderContext";
+
 type H1TitleProps = {
 	title: string;
 	subtitle: string;
@@ -9,6 +13,12 @@ export default function H1Title({
 	subtitle,
 	noGlass = false,
 }: H1TitleProps) {
+	const isRegisteredInShellHeader = usePageHeaderRegistration({ title, subtitle });
+
+	if (isRegisteredInShellHeader) {
+		return null;
+	}
+
 	return (
 		<header
 			className={`mb-4 rounded-2xl px-6 py-4 text-center ${

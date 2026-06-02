@@ -7,9 +7,14 @@ import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
 import SafeForm from "@/app/components/forms/SafeForm";
 import SubmitButton from "@/app/components/forms/SubmitButton";
+import QrCameraScanner from "@/app/components/qr/QrCameraScanner";
 import { useCommercialVisit } from "@/app/hooks/api/useCommercialVisit";
-import { formatTimeLabel } from "@/lib/utils/time";
 import { formatDateTime } from "@/lib/utils/user-utils";
+import { formatTimeLabel } from "@/lib/utils/time";
+import {
+	extractOrderIdFromQrValue,
+	normalizeOrderQrValues,
+} from "@/lib/orders/qr";
 import {
 	formatOrderCurrency,
 	getOrderStatusClassesById,
@@ -70,6 +75,48 @@ const DEFAULT_VISIT_FORM_STATE: VisitFormState = {
 	result: "",
 };
 
+function CollapsibleSection({
+	title,
+	description,
+	defaultOpen = false,
+	children,
+}: {
+	title: string;
+	description?: string;
+	defaultOpen?: boolean;
+	children: ReactNode;
+}) {
+	const [isOpen, setIsOpen] = useState(defaultOpen);
+
+	return (
+		<section className="glass-card rounded-3xl border border-white/30 bg-white/75 shadow-xl backdrop-blur">
+			<button
+				type="button"
+				onClick={() => setIsOpen((currentValue) => !currentValue)}
+				aria-expanded={isOpen}
+				className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6"
+			>
+				<div>
+					<h2 className="text-base font-semibold text-slate-900 sm:text-lg">
+						{title}
+					</h2>
+					{description ? (
+						<p className="mt-1 text-sm text-slate-600">{description}</p>
+					) : null}
+				</div>
+
+				<span className="text-2xl leading-none text-slate-400">
+					{isOpen ? "−" : "+"}
+				</span>
+			</button>
+
+			{isOpen ? (
+				<div className="border-t border-slate-200/70 p-5 sm:p-6">{children}</div>
+			) : null}
+		</section>
+	);
+}
+
 export default function CommercialVisitDetail({ visitId }: Props) {
 	const {
 		data: visit,
@@ -79,6 +126,10 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 	} = useCommercialVisit(visitId);
 	const [saving, setSaving] = useState(false);
 	const [success, setSuccess] = useState("");
+	const [submissionError, setSubmissionError] = useState("");
+	const [deliveredOrderQrInput, setDeliveredOrderQrInput] = useState("");
+	const [qrScanFeedback, setQrScanFeedback] = useState("");
+	const [scannerOpen, setScannerOpen] = useState(false);
 	const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
 	const [formState, setFormState] = useState<VisitFormState>(
 		DEFAULT_VISIT_FORM_STATE,
@@ -97,14 +148,20 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			result: visit.result ?? "",
 		});
 		setSelectedOrderIds(visit.linkedOrders.map((order) => order.id));
+		setDeliveredOrderQrInput("");
+		setQrScanFeedback("");
 	}, [visit]);
 
 	const canEditPlanning = useMemo(
 		() => visit?.status_id === 1 || visit?.status_id === 4,
 		[visit],
 	);
+
 	const isDeliveryVisit = formState.visitTypeId === "1";
 	const deliveryOrdersLocked = !canEditPlanning;
+	const isActiveDeliveryVisit =
+		isDeliveryVisit && visit?.status_id !== 2 && visit?.status_id !== 3;
+
 	const deliveryOrdersForDisplay = useMemo(() => {
 		const availableDeliveryOrders = visit?.availableOrdersForDelivery ?? [];
 		const ordersById = new Map<string, (typeof availableDeliveryOrders)[number]>();
@@ -119,6 +176,23 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 
 		return Array.from(ordersById.values());
 	}, [visit]);
+
+	const scannedDeliveredOrderIds = useMemo(
+		() =>
+			normalizeOrderQrValues(
+				deliveredOrderQrInput
+					.split(/\r?\n/)
+					.map((value) => value.trim())
+					.filter(Boolean),
+			).filter((orderId) => selectedOrderIds.includes(orderId)),
+		[deliveredOrderQrInput, selectedOrderIds],
+	);
+
+	const canConfirmDelivery =
+		isActiveDeliveryVisit &&
+		selectedOrderIds.length > 0 &&
+		scannedDeliveredOrderIds.length === selectedOrderIds.length &&
+		Boolean(formState.result.trim());
 
 	const visitRows = useMemo(() => {
 		if (!visit) {
@@ -138,7 +212,7 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			},
 			{
 				id: "scheduledForDate",
-				label: "Día planificado",
+				label: "Dia planificado",
 				value: formatVisitDate(visit.scheduled_for_date),
 			},
 			{
@@ -177,7 +251,7 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			},
 			{
 				id: "location",
-				label: "Ubicación",
+				label: "Ubicacion",
 				value:
 					[visit.client?.city, visit.client?.province]
 						.filter(Boolean)
@@ -213,7 +287,7 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			},
 			{
 				id: "employeeCode",
-				label: "Código interno",
+				label: "Codigo interno",
 				value: visit.commercial?.employee_code ?? "-",
 			},
 			{
@@ -232,14 +306,156 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 		);
 	}
 
-	async function handleSubmit(event: React.FormEvent) {
-		event.preventDefault();
+	function buildDeliveredOrderQrs() {
+		return deliveredOrderQrInput
+			.split(/\r?\n/)
+			.map((value) => value.trim())
+			.filter(Boolean);
+	}
+
+	function handleDetectedQr(rawValue: string) {
+		const normalizedRawValue = String(rawValue ?? "").trim();
+		const orderId = extractOrderIdFromQrValue(normalizedRawValue);
+
+		if (!orderId) {
+			return {
+				accepted: false,
+				message:
+					"El QR escaneado no tiene un formato reconocido para pedidos.",
+			};
+		}
+
+		if (selectedOrderIds.length > 0 && !selectedOrderIds.includes(orderId)) {
+			return {
+				accepted: false,
+				message:
+					"El QR escaneado no pertenece a ninguno de los pedidos vinculados a este reparto.",
+			};
+		}
+
+		const currentValues = buildDeliveredOrderQrs();
+		const currentOrderIds = normalizeOrderQrValues(currentValues);
+
+		if (currentOrderIds.includes(orderId)) {
+			return {
+				accepted: false,
+				message: "Ese paquete ya estaba escaneado.",
+			};
+		}
+
+		const nextValues = [...currentValues, normalizedRawValue];
+		const nextRecognizedCount = normalizeOrderQrValues(nextValues).filter((value) =>
+			selectedOrderIds.includes(value),
+		).length;
+		const expectedCount = selectedOrderIds.length;
+
+		setDeliveredOrderQrInput(nextValues.join("\n"));
+		setQrScanFeedback(
+			expectedCount > 0 && nextRecognizedCount >= expectedCount
+				? "Todos los paquetes vinculados al reparto ya han sido escaneados."
+				: `QR anadido correctamente (${nextRecognizedCount}/${expectedCount}).`,
+		);
+
+		return {
+			accepted: true,
+			message:
+				expectedCount > 0 && nextRecognizedCount >= expectedCount
+					? "Todos los paquetes vinculados al reparto ya han sido escaneados."
+					: `QR anadido correctamente (${nextRecognizedCount}/${expectedCount}).`,
+			stop: expectedCount > 0 && nextRecognizedCount >= expectedCount,
+		};
+	}
+
+	async function handleConfirmDelivery() {
+		if (!isActiveDeliveryVisit) {
+			return;
+		}
+
+		if (selectedOrderIds.length === 0) {
+			setSubmissionError(
+				"Un reparto activo debe tener al menos un pedido confirmado vinculado antes de poder confirmarse.",
+			);
+			return;
+		}
+
+		if (!formState.result.trim()) {
+			setSubmissionError(
+				"Antes de confirmar la entrega debes indicar un resultado de la visita.",
+			);
+			return;
+		}
+
+		if (scannedDeliveredOrderIds.length !== selectedOrderIds.length) {
+			setSubmissionError(
+				"Debes escanear el QR de todos los pedidos vinculados antes de confirmar la entrega.",
+			);
+			return;
+		}
 
 		try {
 			setSaving(true);
 			setSuccess("");
+			setSubmissionError("");
 
 			const visitData = await save({
+				deliveredOrderQrs: buildDeliveredOrderQrs(),
+				scheduledForDate: formState.scheduledForDate,
+				visitTypeId: Number(formState.visitTypeId),
+				statusId: 2,
+				notes: formState.notes,
+				result: formState.result,
+				orderIds: selectedOrderIds,
+			});
+
+			if (visitData) {
+				setSuccess("Entrega confirmada correctamente.");
+				setScannerOpen(false);
+			}
+		} catch (err) {
+			console.error("[CommercialVisitDetail][confirm-delivery] error:", err);
+			setSubmissionError(
+				err instanceof Error
+					? err.message
+					: "No se pudo confirmar la entrega.",
+			);
+		} finally {
+			setSaving(false);
+		}
+	}
+
+	async function handleSubmit(event: React.FormEvent) {
+		event.preventDefault();
+
+		if (
+			isDeliveryVisit &&
+			formState.statusId !== "3" &&
+			selectedOrderIds.length === 0
+		) {
+			setSubmissionError(
+				"Un reparto activo debe tener al menos un pedido confirmado vinculado. Selecciona un pedido o cancela la visita.",
+			);
+			return;
+		}
+
+		if (
+			isDeliveryVisit &&
+			visit?.status_id !== 2 &&
+			formState.statusId === "2" &&
+			buildDeliveredOrderQrs().length === 0
+		) {
+			setSubmissionError(
+				"Antes de completar el reparto debes escanear o pegar el QR de todos los paquetes entregados.",
+			);
+			return;
+		}
+
+		try {
+			setSaving(true);
+			setSuccess("");
+			setSubmissionError("");
+
+			const visitData = await save({
+				deliveredOrderQrs: isDeliveryVisit ? buildDeliveredOrderQrs() : [],
 				scheduledForDate: formState.scheduledForDate,
 				visitTypeId: Number(formState.visitTypeId),
 				statusId: Number(formState.statusId),
@@ -253,6 +469,11 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			}
 		} catch (err) {
 			console.error("[CommercialVisitDetail][PATCH] error:", err);
+			setSubmissionError(
+				err instanceof Error
+					? err.message
+					: "No se pudo actualizar la visita.",
+			);
 		} finally {
 			setSaving(false);
 		}
@@ -260,20 +481,50 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 
 	return (
 		<PageTransition>
-			<div className="space-y-6">
-				<div className="flex items-center justify-between gap-4">
-					<H1Title
-						title="Detalle de visita"
-						subtitle="Consulta los datos de la visita y actualiza su estado."
-					/>
+			<div className="space-y-4">
+				<div className="glass-card rounded-3xl border border-white/30 bg-white/75 p-5 shadow-xl backdrop-blur sm:p-6">
+					<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+						<div className="min-w-0">
+							<H1Title
+								title="Detalle de visita"
+								subtitle="Consulta la visita y abre solo los bloques que necesites."
+							/>
+							{visit ? (
+								<div className="mt-4 flex flex-wrap items-center gap-3">
+									<span
+										className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${getVisitStatusClasses(
+											visit.status_id,
+										)}`}
+									>
+										{getVisitStatusLabel(visit.status_id)}
+									</span>
+									<span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+										{getVisitTypeLabel(visit.visit_type_id)}
+									</span>
+								</div>
+							) : null}
+						</div>
 
-					<Link
-						href="/commercials/visits"
-						className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-					>
-						← Volver a visitas
-					</Link>
+						<Link
+							href="/commercials/visits"
+							className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+						>
+							← Volver a visitas
+						</Link>
+					</div>
 				</div>
+
+				{success ? (
+					<section className="glass-card rounded-3xl border border-emerald-200 bg-emerald-50/90 p-4 text-sm font-medium text-emerald-700 shadow-sm">
+						{success}
+					</section>
+				) : null}
+
+				{submissionError ? (
+					<section className="glass-card rounded-3xl border border-red-200 bg-red-50/90 p-4 text-sm font-medium text-red-700 shadow-sm">
+						{submissionError}
+					</section>
+				) : null}
 
 				{loading ? (
 					<section className="glass-card rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
@@ -284,7 +535,9 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 				{!loading && error ? (
 					<section className="glass-card rounded-3xl border border-red-200 bg-red-50/80 p-6 shadow-xl backdrop-blur">
 						<h2 className="text-lg font-semibold text-red-700">
-							No se pudo cargar la visita
+							{visit
+								? "No se pudieron guardar los cambios"
+								: "No se pudo cargar la visita"}
 						</h2>
 						<p className="mt-2 text-sm text-red-600">{error}</p>
 					</section>
@@ -292,57 +545,18 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 
 				{!loading && !error && visit ? (
 					<>
-						<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-							<div className="flex flex-wrap items-center gap-3">
-								<span
-									className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${getVisitStatusClasses(
-										visit.status_id,
-									)}`}
-								>
-									{getVisitStatusLabel(visit.status_id)}
-								</span>
-
-								<span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-									{getVisitTypeLabel(visit.visit_type_id)}
-								</span>
-							</div>
-						</section>
-
-						<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-							<h2 className="mb-4 text-lg font-semibold text-slate-900">
-								Información de la visita
-							</h2>
+						<CollapsibleSection
+							title="Informacion de la visita"
+							description="Fecha, tipo, estado, notas y resultado."
+						>
 							<DataTable<InfoRow>
 								data={visitRows}
 								columns={infoColumns}
 								getRowKey={(item: InfoRow) => item.id}
 								emptyMessage="No hay datos de la visita."
 							/>
-						</section>
+						</CollapsibleSection>
 
-						<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-							<h2 className="mb-4 text-lg font-semibold text-slate-900">
-								Datos del cliente
-							</h2>
-							<DataTable<InfoRow>
-								data={clientRows}
-								columns={infoColumns}
-								getRowKey={(item: InfoRow) => item.id}
-								emptyMessage="No hay datos del cliente."
-							/>
-						</section>
-
-						<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-							<h2 className="mb-4 text-lg font-semibold text-slate-900">
-								Datos del comercial
-							</h2>
-							<DataTable<InfoRow>
-								data={commercialRows}
-								columns={infoColumns}
-								getRowKey={(item: InfoRow) => item.id}
-								emptyMessage="No hay datos del comercial."
-							/>
-						</section>
 
 						{isDeliveryVisit ? (
 							<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
@@ -446,26 +660,17 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 							</section>
 						) : null}
 
-						<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-							<h2 className="text-lg font-semibold text-slate-900">
-								Actualizar visita
-							</h2>
-
-							<p className="mt-1 text-sm text-slate-600">
-								Mientras la visita siga planificada puedes cambiar el día y el
-								tipo. El resultado es obligatorio al completarla.
-							</p>
-
-							<SafeForm
-								onSubmit={handleSubmit}
-								className="mt-5 grid gap-4 md:grid-cols-2"
-							>
+						<CollapsibleSection
+							title="Acciones de la visita"
+							description="Reprograma, actualiza, escanea QR o confirma la entrega cuando lo necesites."
+						>
+							<SafeForm onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
 								<div>
 									<label
 										htmlFor="visit-scheduled-for-date"
 										className="mb-2 block text-sm font-medium text-slate-700"
 									>
-										Día de la visita
+										Dia de la visita
 									</label>
 									<input
 										id="visit-scheduled-for-date"
@@ -579,9 +784,68 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 										}
 										rows={4}
 										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-										placeholder="Conclusiones de la visita, acuerdos alcanzados, próximos pasos..."
+										placeholder="Conclusiones de la visita, acuerdos alcanzados, proximos pasos..."
 									/>
 								</div>
+
+								{isActiveDeliveryVisit ? (
+									<div className="md:col-span-2">
+										<label
+											htmlFor="visit-delivered-order-qrs"
+											className="mb-2 block text-sm font-medium text-slate-700"
+										>
+											QR de paquetes entregados
+										</label>
+										<textarea
+											id="visit-delivered-order-qrs"
+											value={deliveredOrderQrInput}
+											onChange={(event) => {
+												setDeliveredOrderQrInput(event.target.value);
+												setQrScanFeedback("");
+											}}
+											rows={4}
+											className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+											placeholder="Escanea o pega un QR por linea antes de completar el reparto"
+										/>
+										<p className="mt-2 text-sm text-slate-600">
+											Debes aportar un QR por cada pedido vinculado al reparto.
+											Tambien puedes pegar el valor completo del codigo si el
+											lector lo envia como texto.
+										</p>
+										<p className="mt-2 text-sm font-medium text-slate-700">
+											QR reconocidos: {scannedDeliveredOrderIds.length}/
+											{selectedOrderIds.length}
+										</p>
+										<div className="mt-4 flex flex-wrap gap-3">
+											<button
+												type="button"
+												onClick={() => setScannerOpen(true)}
+												disabled={selectedOrderIds.length === 0}
+												className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+											>
+												Escanear QR
+											</button>
+											<button
+												type="button"
+												onClick={() => void handleConfirmDelivery()}
+												disabled={!canConfirmDelivery || saving}
+												className="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+											>
+												{saving ? "Confirmando entrega..." : "Confirmar entrega"}
+											</button>
+										</div>
+										<p className="mt-2 text-sm text-slate-600">
+											El boton grande de confirmar entrega valida los QR
+											escaneados y completa el reparto sin depender del selector
+											de estado.
+										</p>
+										{qrScanFeedback ? (
+											<p className="mt-2 text-sm text-emerald-700">
+												{qrScanFeedback}
+											</p>
+										) : null}
+									</div>
+								) : null}
 
 								<div className="md:col-span-2 flex flex-wrap items-center gap-3">
 									<SubmitButton
@@ -599,10 +863,41 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 									) : null}
 								</div>
 							</SafeForm>
-						</section>
+						</CollapsibleSection>
+
+						<CollapsibleSection
+							title="Datos del cliente"
+							description="Contacto, ubicacion y franja de visita."
+						>
+							<DataTable<InfoRow>
+								data={clientRows}
+								columns={infoColumns}
+								getRowKey={(item: InfoRow) => item.id}
+								emptyMessage="No hay datos del cliente."
+							/>
+						</CollapsibleSection>
+
+						<CollapsibleSection
+							title="Datos del comercial"
+							description="Usuario, codigo interno y territorio."
+						>
+							<DataTable<InfoRow>
+								data={commercialRows}
+								columns={infoColumns}
+								getRowKey={(item: InfoRow) => item.id}
+								emptyMessage="No hay datos del comercial."
+							/>
+						</CollapsibleSection>
+
 					</>
 				) : null}
 			</div>
+
+			<QrCameraScanner
+				isOpen={scannerOpen}
+				onClose={() => setScannerOpen(false)}
+				onDetected={handleDetectedQr}
+			/>
 		</PageTransition>
 	);
 }

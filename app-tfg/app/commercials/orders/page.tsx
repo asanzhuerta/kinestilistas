@@ -25,7 +25,7 @@ export default async function CommercialOrdersPage() {
 		<OrderWorkspace
 			mode="commercial"
 			title="Pedidos"
-			subtitle="Registra pedidos para clientes asignados"
+			subtitle="Supervisa todos los pedidos de tus clientes y registra nuevos solo cuando lo necesites"
 			backHref="/commercials"
 			apiPath="/api/commercial/orders"
 			detailBasePath="/commercials/orders"

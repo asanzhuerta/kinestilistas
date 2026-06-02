@@ -13,6 +13,7 @@ import {
 	COMMERCIAL_VISIT_TYPE_IDS,
 	ORDER_STATUS_IDS,
 } from "@/lib/typeorm/constants/catalog-ids";
+import { normalizeOrderQrValues } from "@/lib/orders/qr";
 import { getActiveAssignmentByCommercialAndClient } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
 import { normalizeText } from "@/lib/utils/text";
 import { parseTimeToMinutes } from "@/lib/utils/time";
@@ -122,6 +123,40 @@ function normalizeOrderIds(orderIds: string[] | null | undefined) {
 				.filter(Boolean),
 		),
 	);
+}
+
+function validateDeliveredOrderQrs(
+	finalAssignedOrderIds: string[],
+	deliveredOrderQrs: string[] | null | undefined,
+) {
+	const scannedOrderIds = normalizeOrderQrValues(deliveredOrderQrs);
+
+	if (finalAssignedOrderIds.length === 0) {
+		return [] as string[];
+	}
+
+	if (scannedOrderIds.length === 0) {
+		throw new UpdateCommercialVisitError(
+			"Debes escanear o pegar los QR de todos los paquetes antes de completar el reparto",
+			409,
+			"DELIVERY_VISIT_QR_REQUIRED",
+		);
+	}
+
+	if (
+		scannedOrderIds.length !== finalAssignedOrderIds.length ||
+		finalAssignedOrderIds.some(
+			(orderId) => !scannedOrderIds.includes(orderId),
+		)
+	) {
+		throw new UpdateCommercialVisitError(
+			"Los QR escaneados no coinciden con todos los pedidos vinculados al reparto",
+			409,
+			"DELIVERY_VISIT_QR_MISMATCH",
+		);
+	}
+
+	return scannedOrderIds;
 }
 
 async function validateDeliveryOrderIdsForVisit(
@@ -253,6 +288,7 @@ type CreateCommercialVisitInput = {
 type UpdateCommercialVisitInput = {
 	visitId: string;
 	commercialId: string;
+	deliveredOrderQrs?: string[] | null;
 	scheduledForDate?: string;
 	visitTypeId?: number;
 	statusId?: number;
@@ -402,18 +438,16 @@ export async function createCommercialVisit(input: CreateCommercialVisitInput) {
 			);
 		}
 
-		const [client, commercial, activeAssignment] = await Promise.all([
-			clientRepo.findOne({
-				where: { id: input.clientId },
-			}),
-			commercialRepo.findOne({
-				where: { id: input.commercialId },
-			}),
-			getActiveAssignmentByCommercialAndClient(
-				input.commercialId,
-				input.clientId,
-			),
-		]);
+		const client = await clientRepo.findOne({
+			where: { id: input.clientId },
+		});
+		const commercial = await commercialRepo.findOne({
+			where: { id: input.commercialId },
+		});
+		const activeAssignment = await getActiveAssignmentByCommercialAndClient(
+			input.commercialId,
+			input.clientId,
+		);
 
 		if (!client) {
 			throw new CreateCommercialVisitError(
@@ -461,6 +495,17 @@ export async function createCommercialVisit(input: CreateCommercialVisitInput) {
 							new CreateCommercialVisitError(message, status, code),
 					})
 				: [];
+
+		if (
+			Number(input.visitTypeId) === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
+			validatedOrderIds.length === 0
+		) {
+			throw new CreateCommercialVisitError(
+				"Debes seleccionar al menos un pedido confirmado para crear un reparto",
+				409,
+				"DELIVERY_VISIT_REQUIRES_ORDERS",
+			);
+		}
 
 		const visit = visitRepo.create({
 			client_id: input.clientId,
@@ -798,6 +843,18 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 			);
 		}
 
+		if (
+			nextVisitTypeId === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
+			nextStatusId !== COMMERCIAL_VISIT_STATUS_IDS.CANCELLED &&
+			finalAssignedOrderIds.length === 0
+		) {
+			throw new UpdateCommercialVisitError(
+				"Un reparto debe mantener al menos un pedido confirmado vinculado mientras siga activo",
+				409,
+				"DELIVERY_VISIT_REQUIRES_ORDERS",
+			);
+		}
+
 		if (nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.COMPLETED && !nextResult) {
 			throw new UpdateCommercialVisitError(
 				"Para completar una visita debes indicar un resultado",
@@ -815,6 +872,17 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 				"Debes vincular al menos un pedido confirmado antes de completar un reparto",
 				409,
 				"DELIVERY_VISIT_REQUIRES_ORDERS",
+			);
+		}
+
+		if (
+			visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.COMPLETED &&
+			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.COMPLETED &&
+			nextVisitTypeId === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY
+		) {
+			validateDeliveredOrderQrs(
+				finalAssignedOrderIds,
+				input.deliveredOrderQrs,
 			);
 		}
 

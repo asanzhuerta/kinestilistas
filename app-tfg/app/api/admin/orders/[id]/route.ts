@@ -40,9 +40,14 @@ export async function PATCH(request: Request, context: RouteContext) {
 	try {
 		const { id } = await context.params;
 		const body = await readJsonBody<UpdateOrderStatusBody>(request);
+		const input = buildUpdateOrderStatusInput(body);
 		const detail = await updateOrderStatusForAdmin({
 			orderId: id,
-			statusId: buildUpdateOrderStatusInput(body).statusId,
+			actedByUserId: user.id,
+			statusId: input.statusId,
+			paymentStatusId: input.paymentStatusId,
+			paymentMethod: input.paymentMethod,
+			paymentNotes: input.paymentNotes,
 		});
 
 		return NextResponse.json(detail, { status: 200 });

@@ -35,6 +35,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
 			backHref="/admin/orders"
 			backLabel="Volver a pedidos"
 			initialDetail={detail}
+			mode="admin"
 			updateApiPath={`/api/admin/orders/${id}`}
 			relatedLinks={[
 				{
