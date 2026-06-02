@@ -1,47 +1,46 @@
-// Esta página es la encargada de mostrar el formulario de login, se encarga de manejar el envío del formulario y de mostrar los errores en caso de que los haya
-"use client"; // necesario para poder usar el hook useState y la función signIn de next-auth, ya que esta página se renderiza en el cliente y no en el servidor
+"use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-import HeaderTitle from "../components/basics/HeaderTitle";
-import { useRouter } from "next/navigation";
 import PageTransition from "../components/animations/PageTransition";
-import Link from "next/link";
+import HeaderTitle from "../components/basics/HeaderTitle";
 import SafeForm from "../components/forms/SafeForm";
 import SubmitButton from "../components/forms/SubmitButton";
 
-// esta función se encarga de manejar el envío del formulario, se encarga de recoger los datos del formulario, enviarlos a la API de autenticación y manejar la respuesta de la API
 export default function LoginPage() {
 	const [leaving, setLeaving] = useState(false);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
 
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
+	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
 		setError("");
 		setLoading(true);
 
 		try {
-			const formData = new FormData(e.currentTarget);
+			const formData = new FormData(event.currentTarget);
 			const identifier = String(formData.get("identifier") ?? "").trim();
 			const password = String(formData.get("password") ?? "");
 
-			// Validación básica de campos
 			const result = await signIn("credentials", {
 				identifier,
 				password,
 				redirect: false,
 			});
 
-			// Si hay un error en la autenticación, se muestra un mensaje de error al usuario
 			if (result?.error) {
-				setError("Correo, teléfono, usuario o contraseña incorrectos");
+				setError(
+					result.code === "rate_limited"
+						? "Demasiados intentos, inténtelo más tarde"
+						: "Correo, teléfono, usuario o contraseña incorrectos",
+				);
 				setLoading(false);
 				return;
 			}
 
-			// Si la autenticación es correcta, se redirige al usuario a la página correspondiente según su rol
 			const userResult = await fetch("/api/auth/session");
 			const userData = await userResult.json();
 
@@ -49,11 +48,15 @@ export default function LoginPage() {
 
 			if (userData?.user?.role === "admin") {
 				router.push("/admin");
-			} else if (userData?.user?.role === "commercial") {
-				router.push("/commercials");
-			} else {
-				router.push("/clients");
+				return;
 			}
+
+			if (userData?.user?.role === "commercial") {
+				router.push("/commercials");
+				return;
+			}
+
+			router.push("/clients");
 		} catch {
 			setError("Error al iniciar sesión");
 			setLoading(false);
@@ -64,7 +67,7 @@ export default function LoginPage() {
 		<main className="app-bg min-h-[100svh] w-full px-4 py-4 text-slate-800">
 			<HeaderTitle
 				title="KinEstilistas "
-				subtitle="Alta Peluquería &amp; Estética"
+				subtitle="Alta Peluqueria &amp; Estetica"
 			/>
 
 			<PageTransition
@@ -77,13 +80,13 @@ export default function LoginPage() {
 						className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-md"
 					>
 						<h2 className="mb-2 text-center text-xl font-semibold">
-							Iniciar sesión
+							Iniciar sesion
 						</h2>
 
 						<input
 							name="identifier"
 							type="text"
-							placeholder="Correo, teléfono o usuario"
+							placeholder="Correo, telefono o usuario"
 							autoComplete="username"
 							required
 							className="w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-black"
@@ -92,7 +95,7 @@ export default function LoginPage() {
 						<input
 							name="password"
 							type="password"
-							placeholder="Contraseña"
+							placeholder="Contrasena"
 							autoComplete="current-password"
 							required
 							className="w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-black"
@@ -106,20 +109,20 @@ export default function LoginPage() {
 							Entrar
 						</SubmitButton>
 
-						{error && (
+						{error ? (
 							<p className="text-center text-sm text-red-600">{error}</p>
-						)}
+						) : null}
 					</SafeForm>
 				</div>
 
 				<div className="mx-auto mt-6 w-full max-w-sm text-center">
 					<p className="text-sm text-slate-600">
-						¿Nuevo cliente?{" "}
+						Nuevo cliente?{" "}
 						<Link
 							href="/register"
 							className="font-semibold text-black hover:underline"
 						>
-							Solicita aquí tu acceso.
+							Solicita aqui tu acceso.
 						</Link>
 					</p>
 				</div>

@@ -181,14 +181,16 @@ export default auth((req) => {
 		}
 
 		const policy = resolveApiRateLimitPolicy(pathname, method);
-		const ipAddress = getClientIpFromHeaders(req.headers);
+		if (!policy) {
+			return NextResponse.next();
+		}
 
+		const ipAddress = getClientIpFromHeaders(req.headers);
 		const identifier = resolveRateLimitIdentifier(policy, {
 			ipAddress,
 			userId: session?.user?.id ?? null,
 			email: session?.user?.email ?? null,
 		});
-
 		const rateLimitResult = applyRateLimit(policy, identifier);
 
 		if (!rateLimitResult.success) {

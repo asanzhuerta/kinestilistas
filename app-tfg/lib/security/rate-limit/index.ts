@@ -1,5 +1,13 @@
 export { applyRateLimit } from "./limiter";
-export { resolveApiRateLimitPolicy, RATE_LIMIT_POLICIES } from "./policies";
+export {
+	getRateLimitPolicy,
+	getRateLimitPolicyOverrides,
+	listConfiguredRateLimitPolicies,
+	resolveApiRateLimitPolicy,
+	RATE_LIMIT_POLICIES,
+	RATE_LIMIT_POLICY_DESCRIPTORS,
+	setRateLimitPolicyOverrides,
+} from "./policies";
 export {
 	buildRateLimitHeaders,
 	createRateLimitExceededResponse,
@@ -12,7 +20,9 @@ export {
 export type {
 	RateLimitIdentityContext,
 	RateLimitPolicy,
+	RateLimitPolicyDescriptor,
 	RateLimitPolicyName,
+	RateLimitPolicyOverride,
 	RateLimitResult,
 	RateLimitScope,
 } from "./types";

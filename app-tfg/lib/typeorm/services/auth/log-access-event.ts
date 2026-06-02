@@ -56,7 +56,10 @@ export async function logAccessEvent(input: LogAccessEventInput) {
 
 			await accessLogRepo.save(log);
 		});
+
+		return true;
 	} catch (error) {
 		console.error("[login] error al registrar evento de acceso:", error);
+		return false;
 	}
 }

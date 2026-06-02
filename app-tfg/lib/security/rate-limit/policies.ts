@@ -1,4 +1,19 @@
-import { type RateLimitPolicy } from "./types";
+import type {
+	RateLimitPolicy,
+	RateLimitPolicyDescriptor,
+	RateLimitPolicyName,
+	RateLimitPolicyOverride,
+} from "./types";
+
+type RateLimitPolicyOverrideMap = Partial<
+	Record<RateLimitPolicyName, RateLimitPolicyOverride>
+>;
+
+declare global {
+	var __kinestilistasRateLimitPolicyOverrides:
+		| RateLimitPolicyOverrideMap
+		| undefined;
+}
 
 // -----------------------------------------------------------------------------
 // POLÍTICAS CENTRALIZADAS DE RATE LIMIT
@@ -113,6 +128,132 @@ export const RATE_LIMIT_POLICIES = {
 	},
 } as const satisfies Record<string, RateLimitPolicy>;
 
+export const RATE_LIMIT_POLICY_DESCRIPTORS: Record<
+	RateLimitPolicyName,
+	RateLimitPolicyDescriptor
+> = {
+	DEFAULT_API: {
+		title: "API general",
+		description:
+			"Limite base para rutas API comunes que no tienen una politica mas especifica.",
+	},
+	AUTH_API: {
+		title: "Autenticacion API",
+		description:
+			"Protege rutas auxiliares de autenticacion como proveedores, callbacks y cierre de sesion.",
+	},
+	REGISTER_REQUEST: {
+		title: "Solicitud de registro",
+		description:
+			"Reduce el abuso del formulario de alta de clientes desde la pantalla publica.",
+	},
+	ADMIN_GENERIC_READ: {
+		title: "Admin lectura",
+		description:
+			"Controla las consultas GET de administracion fuera del modulo de usuarios.",
+	},
+	ADMIN_GENERIC_WRITE: {
+		title: "Admin escritura",
+		description:
+			"Controla altas, cambios y acciones mutables del panel de administracion.",
+	},
+	ADMIN_USERS_READ: {
+		title: "Admin usuarios lectura",
+		description:
+			"Limita el acceso frecuente al listado y detalle de usuarios desde administracion.",
+	},
+	ADMIN_USERS_WRITE: {
+		title: "Admin usuarios escritura",
+		description:
+			"Limita cambios de usuarios, estados, roles y operaciones sensibles relacionadas.",
+	},
+	PROFILE_IMAGE_UPLOAD: {
+		title: "Subida de imagen de perfil",
+		description:
+			"Evita abusos al subir imagenes de perfil repetidamente en un corto intervalo.",
+	},
+	LOGIN_IP: {
+		title: "Login por IP",
+		description:
+			"Bloquea ataques de fuerza bruta repetidos desde una misma IP.",
+	},
+	LOGIN_IDENTIFIER: {
+		title: "Login por cuenta",
+		description:
+			"Bloquea intentos repetidos contra un mismo correo, usuario o telefono.",
+	},
+};
+
+function sanitizeRateLimitPolicyOverride(
+	override: RateLimitPolicyOverride | null | undefined,
+) {
+	if (!override) {
+		return null;
+	}
+
+	const sanitizedOverride: RateLimitPolicyOverride = {};
+
+	if (typeof override.enabled === "boolean") {
+		sanitizedOverride.enabled = override.enabled;
+	}
+
+	if (
+		typeof override.maxRequests === "number" &&
+		Number.isInteger(override.maxRequests) &&
+		override.maxRequests > 0
+	) {
+		sanitizedOverride.maxRequests = override.maxRequests;
+	}
+
+	if (
+		typeof override.windowMs === "number" &&
+		Number.isInteger(override.windowMs) &&
+		override.windowMs > 0
+	) {
+		sanitizedOverride.windowMs = override.windowMs;
+	}
+
+	return Object.keys(sanitizedOverride).length > 0 ? sanitizedOverride : null;
+}
+
+export function setRateLimitPolicyOverrides(
+	overrides: RateLimitPolicyOverrideMap,
+) {
+	const nextOverrides: RateLimitPolicyOverrideMap = {};
+
+	for (const name of Object.keys(RATE_LIMIT_POLICIES) as RateLimitPolicyName[]) {
+		const sanitizedOverride = sanitizeRateLimitPolicyOverride(overrides[name]);
+
+		if (sanitizedOverride) {
+			nextOverrides[name] = sanitizedOverride;
+		}
+	}
+
+	globalThis.__kinestilistasRateLimitPolicyOverrides = nextOverrides;
+}
+
+export function getRateLimitPolicyOverrides() {
+	return globalThis.__kinestilistasRateLimitPolicyOverrides ?? {};
+}
+
+export function getRateLimitPolicy(name: RateLimitPolicyName): RateLimitPolicy {
+	const basePolicy = RATE_LIMIT_POLICIES[name];
+	const override = getRateLimitPolicyOverrides()[name];
+
+	return {
+		...basePolicy,
+		enabled: override?.enabled ?? true,
+		maxRequests: override?.maxRequests ?? basePolicy.maxRequests,
+		windowMs: override?.windowMs ?? basePolicy.windowMs,
+	};
+}
+
+export function listConfiguredRateLimitPolicies() {
+	return (Object.keys(RATE_LIMIT_POLICIES) as RateLimitPolicyName[]).map(
+		(name) => getRateLimitPolicy(name),
+	);
+}
+
 // -----------------------------------------------------------------------------
 // RESOLUCIÓN DE POLÍTICAS SEGÚN RUTA Y MÉTODO
 // -----------------------------------------------------------------------------
@@ -125,29 +266,36 @@ export const RATE_LIMIT_POLICIES = {
 export function resolveApiRateLimitPolicy(pathname: string, method: string) {
 	const normalizedMethod = method.toUpperCase();
 
+	if (
+		pathname.startsWith("/api/auth/callback/credentials") ||
+		pathname.startsWith("/api/auth/session")
+	) {
+		return null;
+	}
+
 	if (pathname.startsWith("/api/profile/upload-image")) {
-		return RATE_LIMIT_POLICIES.PROFILE_IMAGE_UPLOAD;
+		return getRateLimitPolicy("PROFILE_IMAGE_UPLOAD");
 	}
 
 	if (pathname.startsWith("/api/auth/register-request")) {
-		return RATE_LIMIT_POLICIES.REGISTER_REQUEST;
+		return getRateLimitPolicy("REGISTER_REQUEST");
 	}
 
 	if (pathname.startsWith("/api/auth/")) {
-		return RATE_LIMIT_POLICIES.AUTH_API;
+		return getRateLimitPolicy("AUTH_API");
 	}
 
 	if (pathname.startsWith("/api/admin/users")) {
 		return normalizedMethod === "GET"
-			? RATE_LIMIT_POLICIES.ADMIN_USERS_READ
-			: RATE_LIMIT_POLICIES.ADMIN_USERS_WRITE;
+			? getRateLimitPolicy("ADMIN_USERS_READ")
+			: getRateLimitPolicy("ADMIN_USERS_WRITE");
 	}
 
 	if (pathname.startsWith("/api/admin/")) {
 		return normalizedMethod === "GET"
-			? RATE_LIMIT_POLICIES.ADMIN_GENERIC_READ
-			: RATE_LIMIT_POLICIES.ADMIN_GENERIC_WRITE;
+			? getRateLimitPolicy("ADMIN_GENERIC_READ")
+			: getRateLimitPolicy("ADMIN_GENERIC_WRITE");
 	}
 
-	return RATE_LIMIT_POLICIES.DEFAULT_API;
+	return getRateLimitPolicy("DEFAULT_API");
 }

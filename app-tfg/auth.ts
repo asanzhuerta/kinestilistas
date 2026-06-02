@@ -2,17 +2,22 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
-import { isPersistedAccessSessionActive } from "@/lib/typeorm/services/auth/access-session";
+import { CredentialsSignin } from "@auth/core/errors";
+import {
+	cachePersistedAccessSessionState,
+	isPersistedAccessSessionActive,
+} from "@/lib/typeorm/services/auth/access-session";
 import { findUserForLogin } from "@/lib/typeorm/services/auth/find-user-for-login";
 import { logAccessEvent } from "@/lib/typeorm/services/auth/log-access-event";
 import { registerSuccessfulLogin } from "@/lib/typeorm/services/auth/register-successful-login";
 import {
 	applyRateLimit,
 	getClientIpFromHeaders,
+	getRateLimitPolicy,
 	normalizeRateLimitEmail,
-	RATE_LIMIT_POLICIES,
 	resolveRateLimitIdentifier,
 } from "@/lib/security/rate-limit";
+import { hydrateRateLimitPolicyOverrides } from "@/lib/typeorm/services/security/rate-limit-policy";
 
 // -----------------------------------------------------------------------------
 // EXTENSIÓN DE TIPOS DE SESIÓN
@@ -92,6 +97,18 @@ function getCompactErrorMessage(error: unknown): string {
 	return "";
 }
 
+function getAuthErrorCode(error: unknown): string | null {
+	if (isRecord(error) && typeof error.code === "string") {
+		return error.code;
+	}
+
+	return null;
+}
+
+class LoginRateLimitExceededError extends CredentialsSignin {
+	code = "rate_limited";
+}
+
 // -----------------------------------------------------------------------------
 // HELPERS PARA RATE LIMIT DEL LOGIN
 // -----------------------------------------------------------------------------
@@ -107,7 +124,7 @@ function getCompactErrorMessage(error: unknown): string {
 function isLoginRateLimited(headers: Headers, identifier: string) {
 	const ipAddress = getClientIpFromHeaders(headers);
 
-	const ipPolicy = RATE_LIMIT_POLICIES.LOGIN_IP;
+	const ipPolicy = getRateLimitPolicy("LOGIN_IP");
 	const ipRateLimitIdentifier = resolveRateLimitIdentifier(ipPolicy, {
 		ipAddress,
 		userId: null,
@@ -122,7 +139,7 @@ function isLoginRateLimited(headers: Headers, identifier: string) {
 	}
 
 	if (identifier) {
-		const identifierPolicy = RATE_LIMIT_POLICIES.LOGIN_IDENTIFIER;
+		const identifierPolicy = getRateLimitPolicy("LOGIN_IDENTIFIER");
 		const identifierRateLimitIdentifier = resolveRateLimitIdentifier(
 			identifierPolicy,
 			{
@@ -175,6 +192,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
 			async authorize(credentials, request) {
 				try {
+					await hydrateRateLimitPolicyOverrides();
+
 					// Normalizamos el identificador para que el login no dependa
 					// de mayúsculas, minúsculas o espacios accidentales.
 					const identifier = normalizeRateLimitEmail(
@@ -194,7 +213,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 					// Antes de tocar la BD, aplicamos rate limiting específico
 					// para el flujo de autenticación.
 					if (isLoginRateLimited(request.headers, identifier)) {
-						return null;
+						throw new LoginRateLimitExceededError();
 					}
 
 					// Si faltan credenciales, registramos el intento fallido y
@@ -291,7 +310,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 					await registerSuccessfulLogin(user.id);
 
 					// Registramos el login exitoso en la tabla de auditoría.
-					await logAccessEvent({
+					const persistedAccessSession = await logAccessEvent({
 						userId: user.id,
 						emailAttempted: user.email,
 						eventCode: "login_success",
@@ -304,6 +323,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 						expiresAt,
 					});
 
+					if (persistedAccessSession) {
+						cachePersistedAccessSessionState(accessSessionId, user.id, true);
+					}
+
 					// Devolvemos el usuario autenticado con los campos que
 					// necesitamos propagar al JWT y a la sesión.
 					return {
@@ -313,9 +336,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 						role: user.role.code,
 						name: user.name,
 						image: user.profile_image_url,
-						accessSessionId,
+						accessSessionId: persistedAccessSession
+							? accessSessionId
+							: undefined,
 					};
 				} catch (error) {
+					if (error instanceof CredentialsSignin) {
+						throw error;
+					}
+
 					// Error inesperado dentro del authorize.
 					// Lo registramos como error técnico y devolvemos null para no romper
 					// el flujo de autenticación del usuario.
@@ -339,11 +368,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 	logger: {
 		error(error) {
 			const errorType = getAuthErrorType(error);
+			const errorCode = getAuthErrorCode(error);
 			const details = getCompactErrorMessage(error);
 
 			// Error esperable cuando el usuario introduce mal las credenciales.
 			// No hace falta imprimir una traza enorme.
 			if (errorType === "CredentialsSignin") {
+				if (errorCode === "rate_limited") {
+					console.warn("[auth] Login rejected: rate limit exceeded.");
+					return;
+				}
+
 				console.warn("[auth] Login rejected: incorrect credentials.");
 				return;
 			}
@@ -403,8 +438,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 				if ("phone" in user) token.phone = user.phone as string | null;
 				if ("name" in user) token.name = user.name as string | null;
 				if ("image" in user) token.image = user.image as string | null;
-				if ("accessSessionId" in user) {
-					token.accessSessionId = user.accessSessionId as string;
+				if (
+					"accessSessionId" in user &&
+					typeof user.accessSessionId === "string"
+				) {
+					token.accessSessionId = user.accessSessionId;
+				} else {
+					delete token.accessSessionId;
 				}
 			}
 
@@ -418,10 +458,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 				return token;
 			}
 
-			const isActiveSession = await isPersistedAccessSessionActive({
-				sessionToken: accessSessionId,
-				userId,
-			});
+			let isActiveSession = true;
+
+			try {
+				isActiveSession = await isPersistedAccessSessionActive({
+					sessionToken: accessSessionId,
+					userId,
+				});
+			} catch (error) {
+				console.error("[auth] error validating persisted session:", error);
+			}
 
 			if (!isActiveSession) {
 				return {} as typeof token;
@@ -440,7 +486,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 					: null;
 			const role = typeof token.role === "string" ? token.role : "";
 
-			if (!session.user || !token.sub || !role || !accessSessionId) {
+			if (!session.user || !token.sub || !role) {
 				return {} as typeof session;
 			}
 
@@ -451,7 +497,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 			session.user.name = typeof token.name === "string" ? token.name : null;
 			session.user.image =
 				typeof token.image === "string" ? token.image : null;
-			session.accessSessionId = accessSessionId;
+
+			if (accessSessionId) {
+				session.accessSessionId = accessSessionId;
+			}
 
 			return session;
 		},

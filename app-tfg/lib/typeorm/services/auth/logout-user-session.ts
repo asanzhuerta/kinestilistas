@@ -2,6 +2,7 @@ import { getDataSource } from "@/lib/typeorm/data-source";
 import { AccessEventType } from "@/lib/typeorm/entities/AccessEventType";
 import { AccessResultType } from "@/lib/typeorm/entities/AccessResultType";
 import { UserAccessLog } from "@/lib/typeorm/entities/UserAccessLog";
+import { cachePersistedAccessSessionState } from "./access-session";
 
 type LogoutUserSessionInput = {
 	sessionToken: string;
@@ -62,6 +63,12 @@ export async function logoutUserSession(input: LogoutUserSessionInput) {
 				expires_at: null,
 			})
 			.execute();
+
+		cachePersistedAccessSessionState(
+			input.sessionToken,
+			input.userId ?? null,
+			false,
+		);
 
 		return { ok: true };
 	});

@@ -11,6 +11,15 @@ import { type RateLimitPolicy } from "./types";
 //
 // y consume una unidad de esa cuota.
 export function applyRateLimit(policy: RateLimitPolicy, identifier: string) {
+	if (policy.enabled === false) {
+		return {
+			success: true,
+			limit: policy.maxRequests,
+			remaining: policy.maxRequests,
+			resetAt: Date.now() + policy.windowMs,
+		};
+	}
+
 	const key = `${policy.keyPrefix}:${identifier}`;
 
 	return consumeRateLimit(key, policy.maxRequests, policy.windowMs);

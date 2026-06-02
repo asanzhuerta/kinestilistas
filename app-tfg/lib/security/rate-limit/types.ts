@@ -22,6 +22,18 @@ export type RateLimitPolicy = {
 	windowMs: number;
 	scope: RateLimitScope;
 	message: string;
+	enabled?: boolean;
+};
+
+export type RateLimitPolicyOverride = {
+	enabled?: boolean;
+	maxRequests?: number;
+	windowMs?: number;
+};
+
+export type RateLimitPolicyDescriptor = {
+	title: string;
+	description: string;
 };
 
 export type RateLimitIdentityContext = {
