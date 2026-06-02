@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated local artifacts used during headless checks.
+    ".codex-artifacts/**",
   ]),
 ]);
 

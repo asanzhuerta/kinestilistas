@@ -49,3 +49,7 @@ public/workbox-*.js
 
 # plantilla de ejemplo
 docs-example/
+
+# artefactos locales de Codex
+.codex-remote-attachments/
+codex-*.log
