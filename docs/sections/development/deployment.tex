@@ -1,54 +1,154 @@
-Este capítulo recoge la arquitectura física planteada para el sistema, las instrucciones para su despliegue y las instrucciones para la operación y mantenimiento del nivel de servicio.
+Este capítulo describe el estado actual del despliegue y de la operación técnica del sistema en función de lo que ya existe en el repositorio. No se documenta una arquitectura distribuida compleja ni infraestructura corporativa ajena al alcance del \textit{TFG}, sino una aplicación web full-stack desplegable sobre un único servicio de aplicación con una base de datos relacional y varias integraciones externas de apoyo.
 
 \section{Arquitectura Física}
-En este apartado, describimos los principales elementos hardware que forman la arquitectura física de nuestro sistema. Se debe incluir un modelo de despliegue en el cual se describe cómo los elementos software son instalados y ejecutados en los elementos hardware (físicos o virtuales). También se incluyen las especificaciones y los requisitos del hardware (servidores, etc.), así como de los elementos software (sistemas operativos, servicios, aplicaciones, etc.) necesarios.
 
-Además de los componentes locales, el sistema integra servicios externos que forman parte de la arquitectura lógica del sistema. En particular, se utiliza el servicio Cloudinary para el almacenamiento y gestión de imágenes de perfil de usuario.
+La arquitectura física realmente necesaria para ejecutar la aplicación puede resumirse en cuatro piezas:
 
-Cloudinary actúa como un sistema externo de almacenamiento multimedia accesible a través de API, permitiendo desacoplar la gestión de archivos del servidor principal de la aplicación.
+\begin{itemize}
+    \item un nodo de aplicación que ejecute \texttt{Next.js} en entorno \texttt{Node.js};
+    \item una base de datos \texttt{PostgreSQL} accesible desde la aplicación \citep{postgresdocs2026};
+    \item un servicio externo de almacenamiento multimedia para imágenes en \texttt{Cloudinary} \citep{cloudinaryupload2026};
+    \item servicios HTTP externos de soporte para geocodificación, rutas y representación de QR, concretamente \texttt{Nominatim}, \texttt{OSRM} y \texttt{QuickChart} \citep{nominatimapi2026,osrmdocs2026,quickchartqr2026}.
+\end{itemize}
+
+Desde el punto de vista del despliegue, la aplicación no separa frontend y backend en productos distintos. La misma instancia de \texttt{Next.js} sirve la interfaz web, resuelve los \textit{Route Handlers}, aplica autenticación, rate limiting y control de acceso, y coordina la lectura y escritura sobre la base de datos.
+
+En desarrollo local, \texttt{PostgreSQL} se levanta habitualmente con \texttt{Docker Desktop} a partir del \texttt{docker-compose.yml} del repositorio \citep{dockerdocs2026}. En producción, la base de datos puede residir en un servicio gestionado equivalente siempre que proporcione compatibilidad con \texttt{PostgreSQL} y conectividad estable con la aplicación.
 
 \section{Instrucciones de despliegue}
-A continuación, se describen las instrucciones de instalación del sistema sobre la infraestructura física descrita anteriormente.
 
 \subsection{Requisitos previos}
-Requisitos hardware y software para la correcta instalación del sistema.
 
-\subsubsection{Servicios externos}
-
-Para el correcto funcionamiento del sistema es necesario disponer de una cuenta en el servicio Cloudinary, utilizado para la gestión de imágenes de perfil.
-
-Se deben configurar las siguientes variables de entorno:
+\subsubsection*{Infraestructura mínima}
 
 \begin{itemize}
-    \item \texttt{CLOUDINARY\_CLOUD\_NAME}
-    \item \texttt{CLOUDINARY\_API\_KEY}
-    \item \texttt{CLOUDINARY\_API\_SECRET}
+    \item Un entorno capaz de ejecutar \texttt{Node.js 20} o superior.
+    \item Una instancia accesible de \texttt{PostgreSQL}.
+    \item Acceso a las variables de entorno de la aplicación.
+    \item Conexión saliente HTTPS hacia los servicios externos utilizados.
 \end{itemize}
 
-Estas credenciales permiten la autenticación con el servicio y son necesarias para la subida y gestión de imágenes desde la aplicación.
+\subsubsection*{Servicios externos}
+
+En el estado actual del proyecto, los servicios externos relevantes son:
+
+\begin{itemize}
+    \item \texttt{Cloudinary}, para imágenes de perfil y de catálogo.
+    \item \texttt{Nominatim}, para geocodificación de direcciones.
+    \item \texttt{OSRM}, para cálculo de geometrías de ruta y trayectos.
+    \item \texttt{QuickChart}, para generar la imagen QR asociada a los pedidos.
+\end{itemize}
+
+De ellos, solo \texttt{Cloudinary} requiere credenciales obligatorias para los flujos de subida. Las demas integraciones pueden mantenerse con sus endpoints publicos por defecto o sustituirse mediante configuración.
 
 \subsection{Inventario de componentes}
-Lista de los componentes hardware y software que se incluyen en la versión del producto.
 
-\subsection{Procedimientos de instalación}
-Procedimientos de instalación y configuración de cada componente hardware y software (base y desarrollado) para asegurar la correcta instalación y explotación del sistema, así como aquellos procedimientos necesarios de migración/carga de datos.
-
-Como parte de la configuración del sistema, se deben definir las variables de entorno correspondientes a los servicios externos utilizados, incluyendo Cloudinary.
-
-Una vez configuradas dichas variables, el sistema podrá gestionar correctamente la subida y recuperación de imágenes de perfil.
-
-\subsection{Pruebas de implantación}
-Descripción de las pruebas a realizar después de la instalación del sistema.
-
-\section{Instrucciones para la operación del sistema y mantenimiento del nivel de servicio}
-Procedimientos necesarios para asegurar el correcto funcionamiento, rendimiento, disponibilidad y seguridad del sistema: back-ups, chequeo de logs, etc. También, es preciso indicar claramente aquellas actuaciones precisas necesarias para el mantenimiento preventivo del sistema y así prevenir posibles fallos en el mismo.
-
-En relación con la gestión de imágenes de perfil, se recomienda realizar tareas periódicas de mantenimiento sobre el servicio Cloudinary, tales como:
+La versión actual del producto incorpora, como mínimo, los siguientes componentes software:
 
 \begin{itemize}
-    \item Eliminación de imágenes obsoletas o no referenciadas.
-    \item Monitorización del espacio de almacenamiento disponible.
-    \item Revisión de errores de carga de imágenes.
+    \item aplicación web \texttt{Next.js} con \texttt{App Router};
+    \item componentes de interfaz \texttt{React};
+    \item \textit{Route Handlers} internos para la API de la propia aplicación;
+    \item persistencia con \texttt{TypeORM} sobre \texttt{PostgreSQL};
+    \item autenticación y sesión con \texttt{Auth.js};
+    \item \textit{service worker} y \texttt{manifest} para la capa PWA básica;
+    \item scripts de validación técnica y migraciones versionadas.
 \end{itemize}
 
-Adicionalmente, el sistema implementa mecanismos de tolerancia a fallos en la carga de imágenes, mostrando una representación alternativa (inicial del usuario) en caso de error.
+\subsection{Procedimiento de instalación}
+
+La secuencia mínima para desplegar una instancia funcional es la siguiente:
+
+\begin{enumerate}
+    \item disponer del código fuente del repositorio;
+    \item instalar dependencias en \texttt{app-tfg/};
+    \item configurar las variables de entorno;
+    \item ejecutar las migraciones pendientes;
+    \item construir la aplicación;
+    \item arrancar el servidor con \texttt{next start}.
+\end{enumerate}
+
+La configuración mínima requerida incluye:
+
+\begin{lstlisting}[language=bash]
+DATABASE_URL=postgres://usuario:clave@host:5432/basedatos
+AUTH_SECRET=valor-seguro
+\end{lstlisting}
+
+Si se desea habilitar subida de imágenes:
+
+\begin{lstlisting}[language=bash]
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+\end{lstlisting}
+
+Si se desea personalizar geocodificación o rutas:
+
+\begin{lstlisting}[language=bash]
+GEOCODING_PROVIDER=nominatim
+GEOCODING_BASE_URL=https://nominatim.openstreetmap.org
+GEOCODING_COUNTRY_CODE=es
+GEOCODING_COUNTRY_NAME=Espana
+GEOCODING_EMAIL=
+GEOCODING_USER_AGENT=KinestilistasTFG/1.0
+NEXT_PUBLIC_OSRM_BASE_URL=https://router.project-osrm.org
+\end{lstlisting}
+
+La puesta en marcha local de referencia queda:
+
+\begin{lstlisting}[language=bash]
+docker compose up -d
+cd app-tfg
+npm install
+npm run migration:run
+npm run build
+npm run start
+\end{lstlisting}
+
+\subsection{Pruebas de implantacion}
+
+Tras el despliegue conviene validar, al menos, los siguientes puntos:
+
+\begin{itemize}
+    \item acceso a la página de login;
+    \item construcción correcta de sesión y navegacion por rol;
+    \item conexión efectiva con la base de datos;
+    \item lectura de clientes, visitas, catálogo y pedidos;
+    \item carga del \texttt{manifest} y del \textit{service worker};
+    \item subida de imágenes a \texttt{Cloudinary}, si la integracion esta habilitada;
+    \item geocodificación y ruta, si el entorno dispone de conectividad hacia \texttt{Nominatim} y \texttt{OSRM}.
+\end{itemize}
+
+Además de la comprobacion manual, el repositorio ya incluye una bateria técnica reproducible basada en:
+
+\begin{lstlisting}[language=bash]
+npm run lint
+npm run typecheck
+npm run build
+npm run m4:closeout
+npm run m4:ui-check
+\end{lstlisting}
+
+\section{Instrucciones para la operación del sistema y mantenimiento del nivel de servicio}
+
+En el alcance actual del proyecto, el mantenimiento preventivo se concentra en cinco frentes:
+
+\begin{itemize}
+    \item monitorizar la disponibilidad de \texttt{PostgreSQL} y la ejecucion correcta de migraciones;
+    \item revisar los errores de autenticación, sesión y rate limiting en los logs de aplicación;
+    \item vigilar las credenciales y cuotas de \texttt{Cloudinary};
+    \item comprobar el comportamiento de \texttt{Nominatim}, \texttt{OSRM} y \texttt{QuickChart} cuando haya incidencia de red o cambios de proveedor;
+    \item depurar periodicamente imágenes obsoletas o reemplazadas en \texttt{Cloudinary}.
+\end{itemize}
+
+También conviene tener en cuenta varias degradaciones controladas ya presentes en el código:
+
+\begin{itemize}
+    \item si una imagen remota falla, la interfaz recurre a \textit{fallbacks} visuales;
+    \item si no puede calcularse una ETA de reparto coherente, el cliente no recibe una hora inventada;
+    \item si el dispositivo no puede leer el QR desde la captura, el flujo de entrega permite seguir introduciendo el valor manualmente;
+    \item si un servicio geográfico externo falla, la aplicación mantiene el resto de la operativa siempre que la acción no dependa estrictamente de esa integracion.
+\end{itemize}
+
+Esta combinación de dependencias externas acotadas, persistencia relacional centralizada y validación técnica repetible resulta suficiente para el estado actual del sistema y para el alcance realmente implementado hasta la fecha.

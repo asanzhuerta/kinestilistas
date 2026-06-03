@@ -1,15 +1,15 @@
 \section{Preparación del entorno de trabajo}
 
-En esta sección se describen los requisitos reales necesarios para desarrollar y ejecutar el proyecto en local.
+En esta sección se describen los requisitos reales necesarios para desarrollar, validar y ejecutar el proyecto en local.
 
 \subsection{Requisitos hardware}
 
-No se requieren características especiales más allá de un equipo capaz de ejecutar herramientas modernas de desarrollo web y contenedores Docker. La configuración utilizada durante el desarrollo se ha movido cómodamente en el siguiente rango:
+No se requieren características especiales más allá de un equipo capaz de ejecutar herramientas modernas de desarrollo web, un navegador actual y contenedores Docker. La configuración utilizada durante el desarrollo se ha movido comodamente en el siguiente rango:
 
 \begin{itemize}
-    \item sistema operativo Windows 11 de 64 bits,
-    \item 16 GB de memoria RAM,
-    \item al menos 10 GB de espacio libre,
+    \item sistema operativo Windows 11 de 64 bits;
+    \item 16 GB de memoria RAM;
+    \item al menos 10 GB de espacio libre;
     \item procesador de gama media actual.
 \end{itemize}
 
@@ -18,10 +18,10 @@ No se requieren características especiales más allá de un equipo capaz de eje
 \subsubsection*{Base del entorno}
 
 \begin{itemize}
-    \item \texttt{Node.js 20} o superior
-    \item \texttt{npm}
-    \item \texttt{Docker Desktop} o equivalente
-    \item \texttt{Git}
+    \item \texttt{Node.js 20} o superior;
+    \item \texttt{npm};
+    \item \texttt{Docker Desktop} o equivalente;
+    \item \texttt{Git}.
 \end{itemize}
 
 \subsubsection*{Dependencias principales del proyecto}
@@ -29,36 +29,39 @@ No se requieren características especiales más allá de un equipo capaz de eje
 La aplicación utiliza actualmente:
 
 \begin{itemize}
-    \item \texttt{Next.js 16.1.6}
-    \item \texttt{React 19.2.3}
-    \item \texttt{TypeScript 5}
-    \item \texttt{Tailwind CSS 4}
-    \item \texttt{Framer Motion}
-    \item \texttt{Auth.js / NextAuth 5 beta}
-    \item \texttt{TypeORM 0.3.28}
-    \item \texttt{PostgreSQL 16}
-    \item \texttt{Cloudinary}
-    \item \texttt{Leaflet} y \texttt{react-leaflet}
+    \item \texttt{Next.js 16};
+    \item \texttt{React 19};
+    \item \texttt{TypeScript 5};
+    \item \texttt{Tailwind CSS 4};
+    \item \texttt{Motion for React};
+    \item \texttt{Auth.js / NextAuth 5 beta};
+    \item \texttt{TypeORM 0.3};
+    \item \texttt{PostgreSQL};
+    \item \texttt{Cloudinary};
+    \item \texttt{Leaflet} y \texttt{react-leaflet}.
 \end{itemize}
 
 \subsubsection*{Herramientas auxiliares}
 
 \begin{itemize}
-    \item \texttt{Visual Studio Code} para edición y depuración
-    \item \texttt{MiKTeX} y \texttt{latexmk} para compilar la memoria
+    \item \texttt{Visual Studio Code} para edicion y depuracion;
+    \item \texttt{MiKTeX} y \texttt{latexmk} para compilar la memoria;
+    \item \texttt{Port Forwarding} de \texttt{Visual Studio Code}, basado en \texttt{Microsoft Dev Tunnels}, para pruebas desde dispositivos físicos sobre una URL publica reutilizable.
 \end{itemize}
+
+En fases anteriores se utilizo también \texttt{Cloudflare Tunnel} para este mismo propósito, pero en la iteración actual resulta más comodo trabajar con la solución integrada en \texttt{Visual Studio Code}, ya que no exige una herramienta adicional, se integra sin coste extra en el flujo habitual de desarrollo y facilita conservar una URL estable de pruebas para la PWA instalada en móvil.
 
 \subsection{Configuración local}
 
 \subsubsection*{Base de datos}
 
-El servicio PostgreSQL se define en \texttt{docker-compose.yml} en la raiz del repositorio. Para arrancarlo:
+El servicio \texttt{PostgreSQL} se define en \texttt{docker-compose.yml} en la raiz del repositorio. Para arrancarlo:
 
 \begin{lstlisting}[language=bash]
 docker compose up -d
 \end{lstlisting}
 
-Por defecto queda expuesto en el puerto \texttt{5432}. El repositorio mantiene también una carpeta \texttt{db/init/} con scripts auxiliares de inicialización.
+Por defecto queda expuesto en el puerto \texttt{5432}. El repositorio mantiene también la carpeta \texttt{db/init/} con scripts auxiliares de inicializacion.
 
 \subsubsection*{Aplicación web}
 
@@ -78,11 +81,11 @@ DATABASE_URL=postgres://kin:kin@localhost:5432/kin
 AUTH_SECRET=valor-seguro
 \end{lstlisting}
 
-Variables opcionales según integración:
+Variables opcionales según integracion:
 
 \begin{itemize}
-    \item \texttt{CLOUDINARY\_*} para la subida de imágenes de perfil.
-    \item \texttt{GEOCODING\_*} para personalizar el comportamiento de geocodificación.
+    \item \texttt{CLOUDINARY\_*} para la subida de imágenes de perfil y de catálogo.
+    \item \texttt{GEOCODING\_*} para personalizar el comportamiento de geocodificación con \texttt{Nominatim}.
     \item \texttt{NEXT\_PUBLIC\_OSRM\_BASE\_URL} para sustituir el proveedor de rutas.
 \end{itemize}
 
@@ -97,7 +100,7 @@ npm run dev
 
 La aplicación queda disponible en \texttt{http://localhost:3000}.
 
-\subsection{Compilación y comprobaciones}
+\subsection{Compilacion y comprobaciones}
 
 Los comandos recomendados durante el desarrollo son:
 
@@ -107,14 +110,21 @@ npm run typecheck
 npm run build
 \end{lstlisting}
 
-El proyecto no dispone todavía de una batería completa de tests funcionales automatizados, de modo que estas comprobaciones deben acompañarse de validación manual de los flujos por rol.
+Si el cambio afecta especialmente a pedidos, reparto o cobro, conviene ejecutar también:
+
+\begin{lstlisting}[language=bash]
+npm run m4:closeout
+npm run m4:ui-check
+\end{lstlisting}
+
+El proyecto no dispone todavía de una bateria completa de tests funcionales automatizados, de modo que estas comprobaciones deben acompasarse con validación manual de los flujos por rol.
 
 \subsection{Documentación técnica}
 
-La memoria del TFG se mantiene en \texttt{docs/}. Su compilación puede realizarse mediante:
+La memoria del TFG se mantiene en \texttt{docs/}. Su compilacion puede realizarse mediante:
 
 \begin{lstlisting}[language=bash]
 latexmk -pdf -shell-escape main.tex
 \end{lstlisting}
 
-La carpeta de documentación debe evolucionar en paralelo al código cuando se incorporen nuevas funcionalidades o se reorganicen módulos ya existentes.
+La carpeta de documentación debe evolucionar en paralelo al código cuando se incorporen nuevas funcionalidades, nuevas integraciones o se reorganicen módulos ya existentes.

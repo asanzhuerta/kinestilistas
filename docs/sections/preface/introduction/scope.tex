@@ -1,17 +1,29 @@
-Con el fin de alcanzar los objetivos descritos anteriormente, es necesario definir el alcance del sistema y los elementos organizativos que se verán afectados por su implantación.
+Con el fin de alcanzar los objetivos descritos anteriormente, resulta necesario delimitar con precision el alcance funcional y organizativo del sistema, así como identificar que partes de ese alcance forman ya parte de la implementación actual del proyecto.
 
-El sistema desarrollado en este proyecto está orientado principalmente a apoyar la actividad comercial de un distribuidor de productos capilares profesionales y a mejorar la interacción con sus clientes, que en este caso son peluquerías profesionales.
+El sistema desarrollado en este Trabajo Fin de Grado esta orientado a apoyar la actividad comercial de un distribuidor de productos capilares profesionales y a mejorar su relación operativa con los salones clientes. La aplicación centraliza en una única plataforma los procesos de acceso seguro, gestión de clientes profesionales, planificación de visitas y rutas, consulta de catálogo técnico-comercial, gestión del flujo de pedido, reparto y cobro mínimo, y un bloque operativo de seguimiento técnico interno del salón con plantillas reutilizables, tonalidades de color y preparación asistida de correo técnico.
 
-La aplicación se plantea como una plataforma web accesible desde distintos dispositivos, diseñada con un enfoque responsive y compatible con su uso en dispositivos móviles mediante tecnología PWA (Progressive Web Application). De esta forma, tanto el distribuidor como las peluquerías podrán acceder al sistema desde ordenadores, tablets o teléfonos móviles.
+La solución se ha construido como una aplicación web accesible desde distintos dispositivos, con interfaz responsive y soporte de instalación basico mediante manifiesto web y registro de un \textit{service worker}. Esto permite utilizar la aplicación desde ordenadores, tabletas y telefonos móviles, manteniendo un único punto de entrada para los distintos perfiles del sistema.
 
+\subsection{Alcance funcional y organizativo}
 Desde el punto de vista organizativo, el sistema afecta principalmente a tres tipos de usuarios:
 
 \begin{itemize}
-    \item El distribuidor, responsable de la gestión de pedidos, la organización de rutas de reparto, el seguimiento de entregas y la gestión administrativa asociada a su actividad comercial.
-    \item Los comerciales que operan bajo la responsabilidad del distribuidor, quienes podrán utilizar el sistema para gestionar su actividad diaria, registrar visitas a clientes, realizar pedidos en nombre de las peluquerías y consultar información relevante para el desarrollo de su actividad comercial.
-    \item Las peluquerías clientes, que podrán consultar el catálogo de productos, realizar pedidos y acceder a distintas herramientas digitales relacionadas con la gestión de su actividad profesional.
+    \item El distribuidor administrador, responsable de la gestión de usuarios, clientes, catálogo, pedidos globales, auditoría y configuración transversal de la aplicación.
+    \item Los comerciales, que utilizan el sistema para gestionar sus clientes asignados, registrar visitas, consultar el catálogo, preparar pedidos, organizar repartos y registrar cobros mínimos.
+    \item Los clientes profesionales, que acceden al catálogo, consultan su información de reparto, mantienen su perfil y gestionan su propio historial de pedidos.
 \end{itemize}
 
-El alcance del sistema se limita al ámbito de la relación comercial entre el distribuidor y las peluquerías profesionales. Por tanto, el sistema no contempla en esta fase inicial funcionalidades orientadas a clientes finales o consumidores particulares, aunque se deja abierta la posibilidad de ampliar el sistema en el futuro para incorporar este tipo de servicios.
+\subsection{Alcance de la implementación}
+El alcance de la implementación actual cubre de forma operativa los módulos \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4}, junto con un primer incremento ya funcional de \texttt{M5} y un bloque transversal de administración ya materializado que incluye auditoría de accesos y acciones administrativas, políticas globales de rate limiting e integraciones externas de soporte. En concreto:
 
-En el marco del presente Trabajo Fin de Grado, el desarrollo se ha iniciado con la implementación de la base funcional del sistema, incluyendo la gestión de acceso, autenticación de usuarios, control de roles, administración de usuarios y mecanismos de trazabilidad y seguridad. Estas funcionalidades constituyen el núcleo sobre el que se apoyará la evolución del sistema y la incorporación progresiva del resto de módulos definidos.
+\begin{itemize}
+    \item \texttt{M1} cubre autenticación, sesiones, solicitudes de registro, gestión de usuarios, perfiles, trazabilidad y protecciones básicas de acceso.
+    \item \texttt{M2} cubre clientes profesionales, asignaciones comercial-cliente, geocodificación, visitas, configuración operativa del comercial, rutas y estimaciones de reparto.
+    \item \texttt{M3} cubre la administración y consulta del catálogo, incluyendo categorías, líneas, subcategorías, productos, recursos de apoyo, cartas de color y referencias cromáticas.
+    \item \texttt{M4} cubre borradores de pedido, confirmación, reparto integrado en visitas comerciales, validación QR, estado mínimo de cobro y trazabilidad por rol.
+    \item \texttt{M5} cubre fichas de clientes del salón, registro y mantenimiento de servicios, ficha técnica asociada, selección persistida de tonalidades cuando el producto enlaza referencias de color, galería visual de resultado final, plantillas reutilizables de servicio, uso de productos, filtrado de historial, sugerencias derivadas del historial técnico ya registrado y generación de borradores técnicos editables por servicio.
+\end{itemize}
+
+Por el contrario, el envío real de correo técnico mediante proveedor externo dentro de \texttt{M5}, el módulo \texttt{M6} y la mayor parte de \texttt{M8} permanecen como líneas de evolución futura. Asimismo, dentro de \texttt{M7} no se ha implementado todavía un subsistema amplio de integraciones empresariales, sincronización externa o pedidos a proveedor; la versión actual se limita a las capacidades transversales de administración y soporte realmente presentes en el código.
+
+En consecuencia, la memoria debe interpretarse distinguiendo entre dos niveles: por un lado, el alcance funcional completo identificado para la aplicación; por otro, el subconjunto efectivamente implementado y verificado en el estado actual del repositorio. El análisis, el diseño y la documentación técnica de los módulos ya construidos se ajustan en este documento al comportamiento real de la aplicación existente.

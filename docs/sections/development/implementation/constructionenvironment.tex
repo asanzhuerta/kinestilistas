@@ -1,39 +1,54 @@
-En esta sección se describe el entorno tecnológico realmente utilizado para construir la aplicación y ponerla en marcha en local.
+En esta sección se describe el entorno tecnologico realmente utilizado para construir la aplicación y ponerla en marcha en local.
 
-\subsection{Marco tecnológico}
+\subsection{Marco tecnologico}
 
 La versión actual del sistema se apoya en el siguiente conjunto de tecnologías:
 
 \begin{itemize}
-    \item \texttt{Next.js 16.1.6} como framework full-stack principal.
-    \item \texttt{React 19.2.3} para la construcción de la interfaz.
-    \item \texttt{TypeScript 5} como lenguaje de implementación.
-    \item \texttt{Tailwind CSS 4} para el estilo visual.
-    \item \texttt{Framer Motion} para transiciones y microinteracciones.
-    \item \texttt{Auth.js / NextAuth 5 beta} para autenticación y sesión.
-    \item \texttt{TypeORM 0.3.28} como capa ORM y de migraciones.
-    \item \texttt{PostgreSQL 16} como motor de base de datos.
-    \item \texttt{Leaflet} y \texttt{react-leaflet} para visualización y selección de posiciones en mapa.
-    \item \texttt{Cloudinary} para el almacenamiento externo de imágenes de perfil.
-    \item \texttt{bcryptjs} para la verificación de contraseñas.
+    \item \texttt{Next.js 16} como framework full-stack principal \citep{nextjsdocs2026,nextjsroutehandlers2026}.
+    \item \texttt{React 19} para la construcción de la interfaz \citep{reactdocs2026}.
+    \item \texttt{TypeScript 5} como lenguaje de implementación \citep{typescriptdocs2026}.
+    \item \texttt{Tailwind CSS 4} para el estilo visual \citep{tailwinddocs2026}.
+    \item \texttt{Motion for React} para transiciones y microinteracciones \citep{motionreactdocs2026}.
+    \item \texttt{Auth.js} para autenticación y sesión \citep{authjsdocs2026}.
+    \item \texttt{TypeORM 0.3} como capa ORM y de migraciones \citep{typeormentities2026,typeormmigrations2026}.
+    \item \texttt{PostgreSQL} como motor de base de datos relacional \citep{postgresdocs2026}.
+    \item \texttt{Leaflet} y \texttt{react-leaflet} para visualización y selección de posiciones en mapa \citep{leafletdocs2026}.
+    \item \texttt{Cloudinary} para el almacenamiento externo de imágenes \citep{cloudinaryupload2026}.
+    \item \texttt{Nominatim} para geocodificación \citep{nominatimapi2026}.
+    \item \texttt{OSRM} para el cálculo de rutas y geometrías \citep{osrmdocs2026}.
+    \item \texttt{QuickChart} para representar el QR operativo de los pedidos \citep{quickchartqr2026}.
 \end{itemize}
 
-Además, la aplicación expone un \texttt{manifest} web propio mediante \path{app/manifest.ts}. Esto permite definir metadatos e iconos de instalación, aunque en el estado actual del proyecto no se ha incorporado una capa completa de caché offline ni un servicio \textit{PWA} dedicado.
+\subsection{Capa PWA y soporte móvil}
+
+La aplicación expone un \texttt{manifest} web propio mediante \path{app/manifest.ts} y registra un \textit{service worker} desde \path{app/components/ServiceWorkerRegister.tsx}. En la implementación actual esto permite:
+
+\begin{itemize}
+    \item definir nombre, descripción, iconos y colores de la aplicación instalable;
+    \item registrar un \textit{app shell} mínimo en \path{public/sw.js};
+    \item intentar recuperar desde cache peticiones GET cuando la red falla.
+\end{itemize}
+
+No se ha construido todavía una experiencia \textit{offline-first} completa, pero la base PWA ya forma parte del código real del proyecto. De cara a la validación móvil, esta capa se beneficia de poder reutilizar una URL externa estable durante distintas sesiones de prueba.
 
 \subsection{Herramientas de trabajo}
 
 Durante el desarrollo del proyecto se han utilizado principalmente:
 
 \begin{itemize}
-    \item \texttt{Visual Studio Code} como entorno de edición.
+    \item \texttt{Visual Studio Code} como entorno de edicion.
     \item \texttt{Git} y \texttt{GitHub} para control de versiones.
-    \item \texttt{Docker Desktop} para levantar PostgreSQL en local.
+    \item \texttt{Docker Desktop} para levantar PostgreSQL en local \citep{dockerdocs2026}.
+    \item \texttt{Port Forwarding} de \texttt{Visual Studio Code}, apoyado en \texttt{Microsoft Dev Tunnels}, para pruebas desde dispositivos externos \citep{vscodeportforwarding2026,microsoftdevtunnelsfaq2026}.
     \item \texttt{MiKTeX} y \texttt{latexmk} para compilar la memoria técnica.
 \end{itemize}
 
+En fases anteriores del desarrollo también se utilizo \texttt{Cloudflare Tunnel} para exponer la aplicación local \citep{cloudflaretunnel2026}. La preferencia actual por la solución integrada en \texttt{Visual Studio Code} se debe a que reduce friccion operativa, no requiere una herramienta adicional, no introduce un coste extra dentro del flujo normal de desarrollo y permite conservar URLs estables al reutilizar el mismo túnel, algo especialmente comodo para las pruebas repetidas de instalación y uso de la PWA en móvil.
+
 \subsection{Arranque del entorno local}
 
-La puesta en marcha del proyecto en una máquina de desarrollo sigue la secuencia mostrada a continuación:
+La puesta en marcha del proyecto en una maquina de desarrollo sigue la secuencia mostrada a continuación:
 
 \begin{enumerate}
     \item Clonar el repositorio.
@@ -66,9 +81,9 @@ AUTH_SECRET=valor-seguro
 Existen además variables opcionales asociadas a integraciones concretas:
 
 \begin{itemize}
-    \item \texttt{CLOUDINARY\_*}: necesarias para la subida de imágenes de perfil.
-    \item \texttt{GEOCODING\_*}: permiten personalizar el proveedor y el comportamiento de geocodificación, aunque la configuración por defecto ya usa \texttt{Nominatim}.
-    \item \texttt{NEXT\_PUBLIC\_OSRM\_BASE\_URL}: permite sustituir la URL pública por defecto del motor de rutas.
+    \item \texttt{CLOUDINARY\_*}: necesarias para la subida de imágenes de perfil y de catálogo.
+    \item \texttt{GEOCODING\_*}: permiten personalizar el proveedor y el comportamiento de geocodificación.
+    \item \texttt{NEXT\_PUBLIC\_OSRM\_BASE\_URL}: permite sustituir la URL publica por defecto del motor de rutas.
 \end{itemize}
 
 \subsection{Validación técnica disponible}
@@ -78,6 +93,9 @@ La validación automatizada actualmente consolidada en el proyecto se apoya en:
 \begin{lstlisting}[language=bash]
 npm run lint
 npm run typecheck
+npm run build
+npm run m4:closeout
+npm run m4:ui-check
 \end{lstlisting}
 
-Junto a estas comprobaciones se realiza verificación manual por rol, especialmente sobre login, perfil, clientes, visitas y estimaciones de ruta, ya que todavía no existe una batería de tests funcionales automatizados.
+Junto a estas comprobaciones se realiza verificación manual por rol, especialmente sobre login, perfil, clientes, visitas, catálogo, pedidos, reparto y cobro. La existencia de scripts específicos para el cierre de \texttt{M4} no limita su utilidad a ese módulo: complementan la comprobacion estatica general de toda la aplicación y proporcionan evidencia repetible sobre algunos de sus flujos más sensibles.

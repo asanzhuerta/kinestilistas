@@ -1,17 +1,54 @@
-En el diseño del sistema se ha optado por externalizar el almacenamiento de imágenes de perfil de los usuarios mediante el uso de un servicio especializado en gestión de activos multimedia, en lugar de almacenar directamente dichos archivos en la base de datos o en el propio servidor de la aplicación.
+En el estado actual del proyecto, el almacenamiento del sistema se divide en tres categorías complementarias: datos estructurados persistentes, activos multimedia externos y datos operativos derivados bajo demanda.
 
-Para ello, se ha integrado el servicio Cloudinary, el cual permite gestionar de forma eficiente la subida, almacenamiento y entrega de imágenes a través de una red de distribución de contenidos (CDN).
+\subsubsection*{Datos estructurados persistentes}
 
-Esta decisión se fundamenta en los siguientes aspectos:
+La información principal del dominio se almacena en \texttt{PostgreSQL} mediante entidades gestionadas con \texttt{TypeORM} \citep{postgresdocs2026,typeormentities2026}. Esto incluye:
 
 \begin{itemize}
-    \item \textbf{Escalabilidad}: El almacenamiento de imágenes en un servicio externo evita el crecimiento descontrolado del tamaño de la base de datos y permite gestionar grandes volúmenes de contenido multimedia sin afectar al rendimiento del sistema.
-
-    \item \textbf{Rendimiento}: Cloudinary optimiza automáticamente la entrega de imágenes, reduciendo tiempos de carga mediante técnicas como compresión y distribución geográfica.
-
-    \item \textbf{Separación de responsabilidades}: Se delega la gestión de archivos multimedia a un servicio especializado, permitiendo que la aplicación se centre en la lógica de negocio.
-
-    \item \textbf{Simplicidad del modelo de datos}: En la base de datos únicamente se almacena la URL de la imagen (\texttt{profile\_image\_url}), evitando la necesidad de gestionar binarios.
+    \item usuarios, solicitudes de alta, accesos y trazabilidad administrativa;
+    \item clientes, comerciales y asignaciones entre ambos;
+    \item visitas, rutas comerciales y ordenacion de paradas;
+    \item estructura de catálogo, productos, cartas de color y referencias cromáticas;
+    \item pedidos, líneas de pedido, estados de negocio y estado mínimo de cobro;
+    \item catálogos controlados de roles, estados y tipos operativos utilizados por los módulos ya implementados;
+    \item configuración global persistida para políticas de rate limiting.
 \end{itemize}
 
-De este modo, la arquitectura del sistema distingue claramente entre el almacenamiento de datos estructurados (base de datos relacional) y el almacenamiento de contenido multimedia (servicio externo).
+Este modelo relacional actúa como fuente de verdad del sistema. Las operaciones criticas de autenticación, gestión comercial, catálogo y pedidos se apoyan en esta capa.
+
+\subsubsection*{Activos multimedia externos}
+
+Las imágenes no se almacenan como binarios en la base de datos. En su lugar, la aplicación delega su gestión en \texttt{Cloudinary} \citep{cloudinaryupload2026}. Esta decisión afecta actualmente a dos familias de activos:
+
+\begin{itemize}
+    \item imágenes de perfil de usuarios;
+    \item imágenes de catálogo, incluyendo líneas, subcategorías, productos, cartas de color y referencias cromáticas.
+\end{itemize}
+
+En la base de datos solo se persisten las URLs finales y, cuando procede, metadatos auxiliares como la miniatura asociada a una referencia cromatica. Esto simplifica el modelo, reduce el peso de la base de datos y permite reutilizar un almacenamiento optimizado para contenido multimedia.
+
+\subsubsection*{Datos derivados o reconstruibles}
+
+Existen además varios artefactos que la aplicación no persiste como entidad independiente:
+
+\begin{itemize}
+    \item el QR del pedido, que se reconstruye a partir del identificador del pedido y se representa mediante \texttt{QuickChart} \citep{quickchartqr2026};
+    \item la geometría de ruta comercial, que se consulta a \texttt{OSRM} en tiempo de ejecucion \citep{osrmdocs2026};
+    \item la geocodificación de una dirección, que se obtiene desde \texttt{Nominatim} cuando hace falta confirmar o recalcular coordenadas \citep{nominatimapi2026};
+    \item la ETA visible para cliente, que se calcula a partir de visitas reales, reglas horarias y posición en ruta, y no como un dato fijo aislado.
+\end{itemize}
+
+Esta separación evita almacenar resultados efimeros o facilmente regenerables cuando su valor depende de datos del negocio ya presentes en el sistema.
+
+\subsubsection*{Criterios de diseño adoptados}
+
+La estrategia de almacenamiento aplicada en el proyecto responde a cuatro criterios:
+
+\begin{itemize}
+    \item mantener el dato estructurado y transaccional dentro de la base de datos relacional;
+    \item externalizar los binarios y recursos multimedia a un servicio especializado;
+    \item recalcular bajo demanda la información derivada cuando sea más robusto que persistirla;
+    \item limitar el número de entidades persistentes a las que realmente aportan valor al modelo de negocio implementado.
+\end{itemize}
+
+Por ello, aunque el sistema ya muestra QR, ETA, mapas, capturas de cámara o recursos externos, no todo ello debe interpretarse como nuevas entidades almacenadas. La memoria debe distinguir entre datos persistidos, activos referenciados e información operativa calculada en el momento.

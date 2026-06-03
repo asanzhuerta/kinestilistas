@@ -1,6 +1,6 @@
-Los requisitos no funcionales describen las propiedades de calidad y restricciones que debe cumplir el sistema, más allá de las funcionalidades que proporciona. Estos requisitos incluyen aspectos como el rendimiento, la seguridad, la usabilidad o la mantenibilidad del sistema.
+Los requisitos no funcionales describen las propiedades de calidad y restricciones que debe cumplir el sistema, más allá de las funcionalidades que proporciona. Estos requisitos incluyen aspectos como rendimiento, seguridad, usabilidad, mantenibilidad o compatibilidad.
 
-Para la clasificación de los requisitos no funcionales se ha tomado como referencia el modelo de calidad definido en el estándar ISO/IEC 25010, que establece un conjunto de características para evaluar la calidad de los sistemas software \cite{iso25010}.
+Para la clasificación de los requisitos no funcionales se ha tomado como referencia el modelo de calidad definido en el estandar ISO/IEC 25010 \cite{iso25010}.
 
 % ------------------------------------------------------------------------------
 \subsection{RNF1. Usabilidad}
@@ -16,7 +16,7 @@ El sistema debe proporcionar una interfaz intuitiva que permita a los usuarios r
 \subsubsection{RNF-U-02 Adaptabilidad de la interfaz}
 \vspace{-1em}
 
-La interfaz del sistema debe adaptarse correctamente a distintos tamaños de pantalla, incluyendo dispositivos móviles, tabletas y ordenadores, manteniendo una experiencia de usuario consistente.
+La interfaz del sistema debe adaptarse correctamente a distintos tamanos de pantalla, incluyendo dispositivos móviles, tabletas y ordenadores, manteniendo una experiencia de usuario consistente.
 
 \vspace{-0.75em}
 \subsubsection{RNF-U-03 Claridad de la información}
@@ -32,10 +32,10 @@ El sistema debe presentar la información de forma clara y estructurada, facilit
 \subsubsection{RNF-P-01 Tiempo de respuesta}
 \vspace{-1em}
 
-El sistema debe responder a las solicitudes de los usuarios en un tiempo nferior a 2 segundos en condiciones normales de uso.
+El sistema debe responder a las solicitudes de los usuarios en un tiempo razonable bajo condiciones normales de uso, priorizando especialmente login, consulta de catálogo, lectura de clientes y operaciones sobre pedidos.
 
 \vspace{-0.75em}
-\subsubsection{RNF-P-02 Optimización de recursos}
+\subsubsection{RNF-P-02 Optimizacion de recursos}
 \vspace{-1em}
 
 El sistema debe optimizar la carga de recursos para garantizar un funcionamiento fluido incluso en dispositivos móviles con capacidad limitada.
@@ -48,19 +48,19 @@ El sistema debe optimizar la carga de recursos para garantizar un funcionamiento
 \subsubsection{RNF-C-01 Compatibilidad con navegadores}
 \vspace{-1em}
 
-El sistema debe ser compatible con los navegadores web modernos más utilizados.
+El sistema debe ser compatible con navegadores web modernos y, cuando no se cumpla el soporte mínimo definido, debe informar de ello mediante una ruta específica de navegador no soportado.
 
 \vspace{-0.75em}
 \subsubsection{RNF-C-02 Compatibilidad con sistemas operativos móviles}
 \vspace{-1em}
 
-El sistema debe ser compatible con los sistemas operativos móviles más utilizados (android e iOS).
+El sistema debe ser utilizable desde los sistemas operativos móviles más habituales, manteniendo una experiencia razonable en Android e iOS a traves del navegador.
 
 \vspace{-0.75em}
-\subsubsection{RNF-C-03 Integración con servicios externos}
+\subsubsection{RNF-C-03 Integracion con servicios externos}
 \vspace{-1em}
 
-El sistema debe permitir la integración con servicios externos necesarios para el funcionamiento del sistema, tales como servicios de mapas o herramientas de gestión empresarial, así como automatizar la integración con dichos servicios para garantizar su correcto funcionamiento y actualización.
+El sistema debe permitir integrarse con servicios externos de soporte necesarios para su funcionamiento, tales como almacenamiento de imágenes, geocodificación, cálculo de rutas y representación de QR.
 
 % ------------------------------------------------------------------------------
 \subsection{RNF4. Fiabilidad}
@@ -76,7 +76,7 @@ El sistema debe estar disponible para los usuarios la mayor parte del tiempo, mi
 \subsubsection{RNF-F-02 Integridad de los datos}
 \vspace{-1em}
 
-El sistema debe garantizar la correcta conservación de los datos almacenados, evitando pérdidas o inconsistencias en la información.
+El sistema debe garantizar la correcta conservacion de los datos almacenados, evitando perdidas o inconsistencias en la información.
 
 % ------------------------------------------------------------------------------
 \subsection{RNF5. Seguridad}
@@ -92,7 +92,13 @@ El sistema debe garantizar que únicamente los usuarios autorizados puedan acced
 \subsubsection{RNF-S-02 Protección de datos}
 \vspace{-1em}
 
-El sistema debe garantizar la protección de los datos almacenados mediante mecanismos adecuados de autenticación y control de acceso.
+El sistema debe proteger los datos almacenados mediante autenticación, autorización, trazabilidad de accesos y validación de operaciones sensibles.
+
+\vspace{-0.75em}
+\subsubsection{RNF-S-03 Limitacion de abuso}
+\vspace{-1em}
+
+El sistema debe incorporar mecanismos de rate limiting y validación de sesión para reducir el impacto de accesos abusivos o repetitivos sobre login y API.
 
 % ------------------------------------------------------------------------------
 \subsection{RNF6. Mantenibilidad}
@@ -102,13 +108,13 @@ El sistema debe garantizar la protección de los datos almacenados mediante meca
 \subsubsection{RNF-M-01 Modularidad del sistema}
 \vspace{-1em}
 
-El sistema debe estar organizado en módulos independientes que faciliten su mantenimiento, evolución y ampliación.
+El sistema debe estar organizado en módulos y capas técnicas que faciliten su mantenimiento, evolución y ampliacion.
 
 \vspace{-0.75em}
 \subsubsection{RNF-M-02 Facilidad de actualización}
 \vspace{-1em}
 
-El sistema debe permitir actualizar o modificar funcionalidades sin afectar al funcionamiento global de la aplicación.
+El sistema debe permitir actualizar o modificar funcionalidades sin afectar innecesariamente al funcionamiento global de la aplicación.
 
 % ------------------------------------------------------------------------------
 \subsection{RNF7. Portabilidad}
@@ -118,11 +124,16 @@ El sistema debe permitir actualizar o modificar funcionalidades sin afectar al f
 \subsubsection{RNF-PO-01 Acceso multiplataforma}
 \vspace{-1em}
 
-El sistema debe poder ejecutarse en distintos dispositivos mediante un navegador web sin necesidad de instalaciones específicas.
+El sistema debe poder ejecutarse en distintos dispositivos mediante un navegador web sin necesidad de instalaciones nativas específicas.
 
 \vspace{-0.75em}
 \subsubsection{RNF-PO-02 Instalación como aplicación web}
 \vspace{-1em}
 
-El sistema debe permitir su instalación como aplicación web progresiva (PWA) en dispositivos compatibles, facilitando su uso como aplicación móvil.
+El sistema debe permitir su instalación como aplicación web en dispositivos compatibles mediante manifiesto web e iconos de instalación.
 
+\vspace{-0.75em}
+\subsubsection{RNF-PO-03 Soporte basico fuera de red}
+\vspace{-1em}
+
+El sistema debe ofrecer una capa mínima de soporte cuando la conectividad falle puntualmente, apoyandose en el \textit{service worker} y en la cache del \textit{app shell} disponible.

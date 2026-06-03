@@ -1,17 +1,45 @@
 
-En este capítulo se presentan los objetivos y el catálogo de requisitos del nuevo sistema informático. Opcionalmente, se incluye el análisis de la brecha entre los requisitos planteados y la solución base seleccionada. 
+En este capítulo se presentan los objetivos y el catálogo de requisitos del nuevo sistema informatico. Opcionalmente, se incluye el análisis de la brecha entre los requisitos planteados y la solución base seleccionada.
 
 \section{Objetivos de Negocio}
-\textcolor{red}{TODO}Esta sección debe contener los objetivos de negocio que se esperan alcanzar cuando el sistema software a desarrollar esté en producción. Adicionalmente, se pueden incluir los modelos de procesos, que normalmente son los modelos de procesos de negocio actuales con ciertas mejoras.
+La implantacion del sistema persigue una serie de objetivos de negocio vinculados a la mejora de la actividad diaria del distribuidor y a la relación operativa con las peluquerías clientes. A diferencia de los objetivos del sistema, centrados en las capacidades de la aplicación, estos objetivos expresan el impacto esperado sobre la forma de trabajar del negocio una vez la solución se encuentre en uso.
+
+Los principales objetivos de negocio identificados son los siguientes:
+
+\begin{itemize}
+    \item Reducir la dependencia de procesos manuales y de herramientas dispersas en la gestión comercial, logistica y administrativa del distribuidor.
+    \item Centralizar la información relevante del negocio para disminuir duplicidades, inconsistencias y perdida de contexto entre visitas, pedidos, repartos y cobros.
+    \item Mejorar la eficiencia operativa del distribuidor, acortando el tiempo dedicado a tareas de coordinación, consulta y seguimiento.
+    \item Facilitar el control de la actividad comercial diaria mediante una vision más estructurada de clientes, visitas, rutas y resultados.
+    \item Aumentar la trazabilidad de las operaciones criticas del negocio, especialmente en acceso al sistema, gestión de usuarios, seguimiento de pedidos y registro de cobros.
+    \item Mejorar la calidad del servicio ofrecido a las peluquerías clientes, permitiendoles consultar catálogo, pedidos e información de reparto desde un canal digital unificado.
+    \item Favorecer la fidelizacion de los clientes profesionales mediante una relación más continua, más transparente y apoyada en herramientas digitales de valor operativo.
+    \item Sentar una base organizativa y técnica que permita escalar la actividad comercial e incorporar nuevos usuarios, nuevos comerciales y nuevas funcionalidades sin depender de procedimientos informales.
+\end{itemize}
+
+En consecuencia, el valor de negocio esperado no se limita a digitalizar tareas ya existentes, sino a reordenar el flujo completo de información del distribuidor para hacerlo más controlable, más trazable y más preparado para futuras ampliaciones funcionales.
 
 \section{Objetivos del Sistema}
-\textcolor{red}{TODO} Esta sección debe contener la especificación de los objetivos o requisitos generales del sistema.
+El sistema desarrollado persigue la construcción de una plataforma web unificada que permita al distribuidor, a su red comercial y a los clientes profesionales operar sobre una misma base de información, evitando la fragmentación entre herramientas aisladas de catálogo, seguimiento comercial y gestión de pedidos.
 
-\section{Metodología de captura de requisitos}
+De forma más concreta, los objetivos generales del sistema son los siguientes:
+
+\begin{itemize}
+    \item Centralizar en una única aplicación la gestión de usuarios, clientes, catálogo, visitas, rutas, pedidos y seguimiento de cobros.
+    \item Garantizar un acceso diferenciado por roles, de manera que cada perfil utilice una interfaz y un conjunto de operaciones acordes a sus responsabilidades reales dentro del proceso comercial.
+    \item Facilitar al distribuidor la administración operativa del sistema, incluyendo la gestión de usuarios, la auditoría de acciones relevantes, la consulta global de pedidos y la configuración transversal de ciertas políticas del sistema, como el rate limiting.
+    \item Proporcionar al comercial una herramienta móvil y operativa para planificar su jornada, consultar la ficha de sus clientes, preparar pedidos, organizar repartos y registrar el resultado de sus visitas.
+    \item Permitir al cliente profesional consultar el catálogo, revisar cartas de color, preparar pedidos, consultar su historial y conocer el estado logistico de sus entregas cuando exista un reparto real planificado.
+    \item Mantener trazabilidad sobre los procesos criticos del sistema, especialmente en autenticación, gestión administrativa de usuarios, ciclo de vida del pedido y seguimiento de cobros.
+    \item Integrar servicios externos de soporte cuando aporten valor claro al flujo funcional, como almacenamiento de imágenes, geocodificación, cálculo de rutas, generación de QR o soporte de instalación como aplicación web progresiva.
+    \item Asegurar que la aplicación pueda evolucionar de forma incremental, manteniendo una base modular que permita ampliar funcionalidades futuras sin rehacer los módulos ya estabilizados.
+\end{itemize}
+
+\section{Metodologia de captura de requisitos}
 \label{sec:RequirementsCaptureMethodology}
 \input{./sections/development/requirements/RequirementsCaptureMethodology.tex}
 
-\section{División modular de requisitos}
+\section{Division modular de requisitos}
 \label{sec:ModularRequirements}
 \input{./sections/development/requirements/Modules.tex}
 
@@ -28,7 +56,26 @@ En este capítulo se presentan los objetivos y el catálogo de requisitos del nu
 \input{./sections/development/requirements/InformationRequirements.tex}
 
 \section{Reglas de negocio}
-\textcolor{red}{TODO} En el desarrollo del sistema, hay que tener en cuenta las denominadas reglas de negocio, es decir, el conjunto de restricciones, normas o políticas de la organización que deben ser respetadas por el sistema, las cuales suelen ser cambiantes.
+Las reglas de negocio describen restricciones operativas que el sistema debe respetar para reflejar de manera coherente el funcionamiento esperado por el distribuidor y por su red comercial. En la implementación actual, las principales reglas de negocio identificadas son las siguientes:
+
+\begin{itemize}
+    \item Solo los usuarios autenticados, activos y autorizados pueden acceder a las funcionalidades protegidas del sistema.
+    \item El acceso a rutas, vistas y operaciones queda condicionado por el rol del usuario, distinguiendo al menos entre administrador, comercial y cliente profesional.
+    \item Las solicitudes de registro de nuevos clientes no suponen acceso inmediato: deben quedar pendientes de revisión administrativa hasta su aprobacion o rechazo.
+    \item Un cliente profesional puede estar asignado a uno o varios comerciales según la estructura operativa definida por el distribuidor, pero un comercial solo puede operar directamente sobre clientes que tenga asignados.
+    \item Las visitas comerciales deben quedar asociadas a un cliente existente y a un comercial responsable, y su estado debe evolucionar de manera coherente entre planificada, completada, aplazada o cancelada.
+    \item La hora exacta de una visita o entrega no se trata como un dato fijo introducido manualmente, sino como una estimación dependiente de la planificación de ruta y del contexto operativo del día.
+    \item El cliente solo debe visualizar una ETA cuando exista una visita de reparto real, valida y vinculada a pedidos coherentes para la jornada.
+    \item Los pedidos pueden iniciarse como borrador y confirmarse posteriormente, pero no deben saltar arbitrariamente entre estados incompatibles.
+    \item Un mismo cliente no puede acumular más de dos pedidos abiertos pendientes de cobro al mismo tiempo.
+    \item Solo pueden vincularse a una visita de reparto los pedidos confirmados del cliente correcto; no deben poder asociarse pedidos cancelados, ya entregados o pertenecientes a otro cliente.
+    \item Una visita de reparto no debe poder completarse sin pedidos vinculados ni sin la validación QR correspondiente a cada pedido entregado.
+    \item El cierre correcto de una visita de reparto debe marcar como entregados los pedidos asociados, manteniendo sincronizado el estado logistico del pedido con el de la visita.
+    \item Si una visita de reparto se aplaza o se cancela, el sistema debe evitar estados huerfanos o inconsistentes entre visita, pedido y ETA mostrada al cliente.
+    \item El registro de cobro solo aplica al alcance mínimo definido en esta iteración: distinguir entre pedidos pendientes de cobro y pedidos cobrados, con metodo, fecha, notas y usuario responsable.
+    \item La gestión de cobros no incluye por ahora pagos parciales, facturación ni conciliación contable avanzada, por lo que el sistema no debe simular dichas capacidades.
+    \item Las políticas de rate limiting forman parte de la operación del sistema y pueden configurarse globalmente desde administración para proteger el acceso y determinadas APIs frente a uso abusivo.
+\end{itemize}
 
 \section{Análisis GAP}
-\textcolor{red}{TODO} Esta sección es opcional y es de aplicación cuando en la revisión de la técnica se hayan localizado soluciones informáticas que permitan servir de base para el nuevo sistema software. En esta sección se debe identificar y medir las diferencias entre lo que proporcionan dichas soluciones y los requisitos definidos para el proyecto. El resultado de este análisis permitirá identificar cuáles de éstos requisitos ya están solventados total o parcialmente por los distintos sistemas y poder elegir uno de ellos. 
+\textcolor{red}{TODO} Esta sección es opcional y es de aplicación cuando en la revisión de la técnica se hayan localizado soluciones informaticas que permitan servir de base para el nuevo sistema software. En esta sección se debe identificar y medir las diferencias entre lo que proporcionan dichas soluciones y los requisitos definidos para el proyecto. El resultado de este análisis permitira identificar cuales de estos requisitos ya estan solventados total o parcialmente por los distintos sistemas y poder elegir uno de ellos.

@@ -1,4 +1,4 @@
-A continuación se recogen las instrucciones necesarias para evolucionar el software. Este manual está dirigido a desarrolladores que necesiten extender o modificar la aplicación sin perder coherencia con la arquitectura y el alcance actual del proyecto.
+A continuación se recogen las instrucciones necesarias para evolucionar el software. Este manual esta dirigido a desarrolladores que necesiten extender o modificar la aplicación sin perder coherencia con la arquitectura y el alcance actual del proyecto.
 
 \section{Introducción}
 
@@ -9,7 +9,7 @@ El proyecto se desarrolla en un único repositorio con dos bloques claramente di
     \item \texttt{docs/}, que contiene la memoria técnica.
 \end{itemize}
 
-La rama actual del desarrollo cubre el módulo \texttt{M1} y una parte amplia del módulo \texttt{M2}. Por tanto, cualquier cambio debería respetar especialmente la compatibilidad con los flujos de autenticación, perfiles, clientes, visitas, rutas y estimaciones operativas ya existentes.
+El estado actual del desarrollo cubre de forma operativa los módulos \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4}, junto con una capa transversal de administración ya materializada para auditoría y configuración global de rate limiting. Por tanto, cualquier cambio debería respetar especialmente la compatibilidad con los flujos de autenticación, perfiles, clientes, visitas, rutas, catálogo, pedidos, reparto y cobro mínimo.
 
 %\section{Requisitos de desarrollo}
 \input{./sections/backmatter/developerguide/requirements}
@@ -21,12 +21,16 @@ La rama actual del desarrollo cubre el módulo \texttt{M1} y una parte amplia de
 La estructura recomendada para incorporar cambios es la siguiente:
 
 \begin{itemize}
-    \item \texttt{app/}: páginas y layouts.
+    \item \texttt{app/}: páginas, layouts y componentes de entrada por rol.
     \item \texttt{app/api/}: endpoints internos y \textit{Route Handlers}.
     \item \texttt{app/components/}: interfaz reutilizable.
     \item \texttt{app/hooks/api/}: consumo cliente de endpoints.
     \item \texttt{lib/contracts/}: contratos compartidos entre servidor y cliente.
-    \item \texttt{lib/commercial/}: lógica de cálculo del dominio comercial.
+    \item \texttt{lib/commercial/}: lógica de cálculo del dominio comercial y de rutas.
+    \item \texttt{lib/clients/}: lectura de ETA y resumen de reparto para cliente.
+    \item \texttt{lib/orders/}: soporte transversal del dominio de pedidos, incluyendo QR.
+    \item \texttt{lib/geocoding/}: resolución de direcciones y normalización geográfica.
+    \item \texttt{lib/security/}: rate limiting y utilidades de seguridad transversal.
     \item \texttt{lib/typeorm/services/}: acceso a datos y lógica persistente.
 \end{itemize}
 
@@ -42,14 +46,16 @@ Cuando se añada una nueva capacidad, conviene mantener la misma secuencia conce
 
 \subsection{Autenticación, roles y seguridad}
 
-Los puntos de entrada más sensibles están centralizados en dos archivos:
+Los puntos de entrada más sensibles estan centralizados en dos archivos:
 
 \begin{itemize}
-    \item \texttt{auth.ts}: autenticación con credenciales, sesión y trazabilidad de accesos.
+    \item \texttt{auth.ts}: autenticación con credenciales, sesión, validación persistida y trazabilidad de accesos.
     \item \texttt{proxy.ts}: control de acceso por rol, compatibilidad mínima de navegador y rate limiting sobre la API.
 \end{itemize}
 
-Si se incorpora una nueva ruta privada o un nuevo endpoint sensible, debe revisarse su encaje en estos dos puntos. Esto evita que aparezcan flujos accesibles sin protección o inconsistencias entre la navegación y la autorización real.
+Si se incorpora una nueva ruta privada o un nuevo endpoint sensible, debe revisarse su encaje en estos dos puntos. Esto evita que aparezcan flujos accesibles sin protección o inconsistencias entre la navegacion y la autorización real.
+
+Además, las políticas de rate limiting ya no son completamente estáticas: una parte de su configuración puede modificarse desde administración y se persiste en base de datos. Cualquier cambio en este ámbito debe comprobar tanto el catálogo de políticas base como la lógica de sobreescritura persistida.
 
 \subsection{Persistencia y migraciones}
 
@@ -64,26 +70,37 @@ Las pautas recomendadas son:
     \item conservar la trazabilidad entre requisito funcional, entidad y migración.
 \end{itemize}
 
+Actualmente el modelo persistente ya incluye usuarios, auditoría, clientes, comerciales, asignaciones, visitas, rutas, catálogo, coloración, pedidos, líneas de pedido, estados de negocio y configuración global de rate limiting. No conviene documentar nuevas entidades como implementadas si no existen realmente en esta capa.
+
 \subsection{Integraciones externas}
 
 El proyecto ya interactúa con varios servicios externos:
 
 \begin{itemize}
-    \item \texttt{Cloudinary} para imágenes de perfil;
+    \item \texttt{Cloudinary} para imágenes de perfil y catálogo;
     \item \texttt{Nominatim} para geocodificación de direcciones;
     \item \texttt{OSRM} para geometría de rutas;
-    \item el navegador del usuario para geolocalización actual.
+    \item \texttt{QuickChart} para representación del QR de pedido;
+    \item el navegador del usuario para geolocalización actual y, en ciertos dispositivos, captura de imagen para lectura de QR.
 \end{itemize}
 
-Al tocar estas integraciones conviene mantener siempre una ruta de degradación razonable. El código actual ya contempla varios ejemplos: avatar con \textit{fallback}, punto de salida guardado si no hay geolocalización actual, y mensajes explicitando cuándo no se puede calcular una ETA válida.
+Al tocar estas integraciones conviene mantener siempre una ruta de degradacion razonable. El código actual ya contempla varios ejemplos: avatar con \textit{fallback}, punto de salida guardado si no hay geolocalización actual, ETA anulada si el reparto no es coherente y lectura manual del QR cuando el dispositivo no ofrece soporte suficiente.
 
 \subsection{Validación de cambios}
 
-En el estado actual del proyecto no existe una batería completa de tests automatizados de interfaz o integración. Por ello, antes de entregar cambios se recomienda ejecutar como mínimo:
+Antes de entregar cambios se recomienda ejecutar como mínimo:
 
 \begin{lstlisting}[language=bash]
 npm run lint
 npm run typecheck
+npm run build
+\end{lstlisting}
+
+Si el cambio afecta al flujo de pedidos, reparto o cobro, deben añadirse además:
+
+\begin{lstlisting}[language=bash]
+npm run m4:closeout
+npm run m4:ui-check
 \end{lstlisting}
 
 Además, debe comprobarse manualmente el flujo afectado usando el rol correcto. Los recorridos más sensibles hoy son:
@@ -91,25 +108,33 @@ Además, debe comprobarse manualmente el flujo afectado usando el rol correcto. 
 \begin{itemize}
     \item login, logout y redirecciones por rol;
     \item alta y revisión de solicitudes;
-    \item edición de perfil y cambio de contraseña;
+    \item edicion de perfil y cambio de contraseña;
     \item clientes, geolocalización y asignaciones;
-    \item visitas, ruta diaria y ETA para cliente.
+    \item visitas, ruta diaria y ETA para cliente;
+    \item mantenimiento de catálogo y coloración;
+    \item pedidos, entrega con QR y cobro mínimo.
 \end{itemize}
 
 \subsection{Evolución técnica recomendada}
 
-La arquitectura actual es suficiente para el alcance implementado, pero existe una mejora clara de medio plazo: agrupar con más fuerza el módulo comercial por \textit{feature}. Hoy parte de sus tipos, hooks y vistas todavía se encuentran repartidos entre carpetas técnicas distintas. A medida que entren \texttt{M3} y \texttt{M4}, será recomendable profundizar en esa modularización para reducir acoplamiento y duplicidad.
+La arquitectura actual es suficiente para el alcance implementado, pero existen tres mejoras claras de medio plazo:
+
+\begin{itemize}
+    \item reforzar la agrupacion por \textit{feature} en las áreas comercial, catálogo y pedidos para reducir dispersion entre hooks, contratos, servicios y componentes;
+    \item ampliar la automatización de pruebas más allá de las comprobaciones estáticas y los smokes actuales;
+    \item profundizar en la capa PWA y en la observabilidad operativa antes de abordar módulos funcionales de mayor volumen.
+\end{itemize}
 
 \section{Instrucciones para construcción}
 
 La secuencia de construcción local recomendada es la siguiente:
 
 \begin{enumerate}
-    \item levantar PostgreSQL con Docker desde la raíz del repositorio;
+    \item levantar PostgreSQL con Docker desde la raiz del repositorio;
     \item instalar dependencias dentro de \texttt{app-tfg/};
     \item definir \texttt{DATABASE\_URL} y \texttt{AUTH\_SECRET} en \texttt{.env.local};
     \item ejecutar las migraciones;
-    \item arrancar el servidor de desarrollo o generar una compilación de producción.
+    \item arrancar el servidor de desarrollo o generar una compilacion de producción.
 \end{enumerate}
 
 Comandos principales:
@@ -122,7 +147,7 @@ npm run migration:run
 npm run dev
 \end{lstlisting}
 
-Para una comprobación equivalente a producción:
+Para una comprobacion equivalente a producción:
 
 \begin{lstlisting}[language=bash]
 npm run build

@@ -1,108 +1,148 @@
-Este capitulo describe la implementacion real del sistema, centrada en la aplicacion web desarrollada en \texttt{Next.js}, la capa de persistencia basada en \texttt{TypeORM} y la evolucion ya materializada de los modulos \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4}.
+Este capítulo describe la implementación real del sistema, centrada en la aplicación web desarrollada en \texttt{Next.js}, la capa de persistencia basada en \texttt{TypeORM} y la evolución ya materializada de los módulos \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4}, junto con un bloque operativo ya disponible de \texttt{M5} que incluye plantillas reutilizables y preparación asistida de correo técnico, y ciertas capacidades transversales de administración.
 
-\section{Entorno de Construccion}
+\section{Entorno de Construcción}
 \label{sec:ConstructionEnvironment}
 \input{./sections/development/implementation/constructionenvironment.tex}
 
-\section{Codigo Fuente}
+\section{Código Fuente}
 
-La implementacion actual del proyecto se concentra en la carpeta \texttt{app-tfg/}, mientras que la carpeta \texttt{docs/} almacena la memoria tecnica en \LaTeX. Dentro de la aplicacion principal se distinguen los siguientes bloques:
+La implementación actual del proyecto se concentra en la carpeta \texttt{app-tfg/}, mientras que la carpeta \texttt{docs/} almacena la memoria técnica en \LaTeX. Dentro de la aplicación principal se distinguen los siguientes bloques:
 
 \begin{itemize}
-    \item \texttt{app/}: paginas, layouts, \textit{Route Handlers} y componentes de interfaz.
-    \item \texttt{app/api/}: endpoints internos para autenticacion, perfil, administracion, clientes, catalogo y operativa comercial, incluyendo pedidos, cobros y reparto.
+    \item \texttt{app/}: páginas, layouts, \textit{Route Handlers} y componentes de interfaz.
+    \item \texttt{app/api/}: endpoints internos para autenticación, perfil, administración, clientes, catálogo, pedidos, cobros y operativa comercial.
     \item \texttt{app/components/}: componentes reutilizables de interfaz, mapas, formularios, tablas y vistas por rol.
     \item \texttt{app/hooks/api/}: hooks cliente para encapsular llamadas HTTP, estado de carga y mensajes de error.
-    \item \texttt{lib/}: contratos compartidos, logica de negocio, integraciones externas, seguridad y acceso a datos.
-    \item \texttt{lib/commercial/}: planificacion diaria de rutas y logica operativa del modulo comercial.
-    \item \texttt{lib/clients/}: calculo reutilizable de ETA y lectura de reparto para la zona cliente.
-    \item \texttt{lib/orders/}: utilidades transversales del dominio de pedidos, entre ellas la normalizacion y generacion de QR.
-    \item \texttt{migrations/typeorm/}: migraciones versionadas de base de datos para los modulos \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4}.
+    \item \texttt{lib/}: contratos compartidos, lógica de negocio, integraciones externas, seguridad y acceso a datos.
+    \item \texttt{lib/commercial/}: planificación diaria de rutas y lógica operativa del módulo comercial.
+    \item \texttt{lib/clients/}: cálculo reutilizable de ETA y lectura de reparto para la zona cliente.
+    \item \texttt{lib/orders/}: utilidades transversales del dominio de pedidos, entre ellas la generación y normalización de QR.
+    \item \texttt{lib/security/}: políticas de rate limiting y lógica transversal de seguridad.
+    \item \texttt{migrations/typeorm/}: migraciones versionadas de base de datos.
 \end{itemize}
 
-\subsection{Implementacion del modulo M1}
+\subsection{Implementación del módulo M1}
 
-El modulo \texttt{M1} se apoya principalmente en \texttt{auth.ts}, \texttt{proxy.ts}, los endpoints de \texttt{/api/auth/*}, los servicios de usuario de \texttt{lib/typeorm/services/users/} y las entidades de seguridad y trazabilidad.
+El módulo \texttt{M1} se apoya principalmente en \texttt{auth.ts}, \texttt{proxy.ts}, los endpoints de \texttt{/api/auth/*}, los servicios de usuario de \texttt{lib/typeorm/services/users/} y las entidades de seguridad y trazabilidad.
 
-Las piezas mas relevantes son las siguientes:
+Las piezas más relevantes son las siguientes:
 
 \begin{itemize}
-    \item Autenticacion mediante proveedor de credenciales de \texttt{Auth.js}, con sesion \texttt{JWT}.
-    \item Control de acceso por rol en \texttt{proxy.ts}, que protege las rutas \path{/admin}, \path{/commercials} y \path{/clients}.
-    \item Registro de solicitudes de alta y gestion administrativa de estados de cuenta.
-    \item Registro de eventos de acceso y trazabilidad de sesiones exitosas o fallidas.
-    \item Gestion y edicion del perfil propio, incluyendo cambio de contrasena y subida de imagen a \texttt{Cloudinary}.
+    \item autenticación mediante proveedor de credenciales de \texttt{Auth.js}, con sesión \texttt{JWT};
+    \item control de acceso por rol en \texttt{proxy.ts}, que protege las rutas \path{/admin}, \path{/commercials} y \path{/clients};
+    \item registro de solicitudes de alta y gestión administrativa de estados de cuenta;
+    \item registro de eventos de acceso y trazabilidad de sesiones exitosas o fallidas;
+    \item gestión y edicion del perfil propio, incluyendo cambio de contraseña y subida de imagen a \texttt{Cloudinary};
+    \item limitacion de intentos de autenticación y diferenciacion explicita entre credenciales incorrectas y bloqueo temporal por rate limiting.
 \end{itemize}
 
-\subsection{Implementacion del modulo M2}
+\subsection{Implementación del módulo M2}
 
-El modulo \texttt{M2} se reparte entre las rutas de administracion de clientes, la zona comercial, la zona cliente y la logica de planificacion diaria ubicada en \texttt{lib/commercial/}.
+El módulo \texttt{M2} se reparte entre las rutas de administración de clientes, la zona comercial, la zona cliente y la lógica de planificación diaria ubicada en \texttt{lib/commercial/}.
 
 Actualmente ya estan implementados:
 
 \begin{itemize}
-    \item Gestion de clientes profesionales y de sus datos de ficha.
-    \item Asignacion, desasignacion y reasignacion de clientes a comerciales.
-    \item Geolocalizacion de establecimientos mediante busqueda de direccion y confirmacion manual sobre mapa.
-    \item Configuracion operativa del comercial para jornada base, puntos de salida y duracion de visitas.
-    \item Alta, consulta y seguimiento de visitas comerciales por fecha, tipo y estado.
-    \item Previsualizacion de ruta diaria con orden previsto, tiempos estimados, margen disponible e incidencias de franja horaria.
-    \item Consulta por parte del cliente de la hora aproximada de reparto cuando existe una visita de entrega planificada para el dia.
+    \item gestión de clientes profesionales y de sus datos de ficha;
+    \item asignación, desasignación y reasignacion de clientes a comerciales;
+    \item geolocalización de establecimientos mediante búsqueda de dirección y confirmación manual sobre mapa;
+    \item configuración operativa del comercial para jornada base, puntos de salida y duración de visitas;
+    \item alta, consulta y seguimiento de visitas comerciales por fecha, tipo y estado;
+    \item previsualización de ruta diaria con orden previsto, tiempos estimados, margen disponible e incidencias de franja horaria;
+    \item consulta por parte del cliente de la hora aproximada de reparto cuando existe una visita de entrega planificada para el día.
 \end{itemize}
 
-La logica temporal de rutas y estimaciones no reside en la capa visual, sino que se centraliza en \path{lib/commercial/daily-route-planning.ts}. Esta decision permite reutilizar el mismo calculo tanto en el panel comercial como en la tarjeta de ETA que visualiza el cliente.
+La lógica temporal de rutas y estimaciones no reside en la capa visual, sino que se centraliza en \path{lib/commercial/daily-route-planning.ts}. Esta decisión permite reutilizar el mismo cálculo tanto en el panel comercial como en la tarjeta de ETA que visualiza el cliente.
 
-\subsection{Implementacion del modulo M3}
+\subsection{Implementación del módulo M3}
 
-El modulo \texttt{M3} se apoya en las rutas de administracion bajo \texttt{/admin/catalog}, en las vistas publicas de consulta distribuidas entre las zonas cliente y comercial, y en la logica de dominio ubicada en \texttt{lib/typeorm/services/catalog/}.
+El módulo \texttt{M3} se apoya en las rutas de administración bajo \texttt{/admin/catalog}, en las vistas publicas de consulta distribuidas entre las zonas cliente y comercial, y en la lógica de dominio ubicada en \texttt{lib/typeorm/services/catalog/}.
 
 Actualmente ya estan implementados:
 
 \begin{itemize}
-    \item Gestion administrativa de categorias, lineas comerciales, subcategorias jerarquicas y productos.
-    \item Gestion de recursos de apoyo vinculados a productos o lineas, como fichas tecnicas, catalogos comerciales o materiales formativos.
-    \item Consulta del catalogo de productos activos por parte de clientes y comerciales, con filtros por categoria, linea comercial y subcategoria.
-    \item Visualizacion de fichas de producto con informacion comercial, datos tecnicos, recursos asociados y enlaces a coloracion relacionada cuando procede.
-    \item Gestion y consulta de cartas de color y referencias cromaticas, incluyendo navegacion jerarquica por linea comercial y busqueda directa de tonos.
-    \item Subida y reemplazo de imagenes del catalogo mediante \texttt{Cloudinary}, con validacion de tamano, tipo y limpieza de imagenes sustituidas.
+    \item gestión administrativa de categorías, líneas comerciales, subcategorías jerárquicas y productos;
+    \item gestión de recursos de apoyo vinculados a productos o líneas, como fichas técnicas, catálogos comerciales o materiales formativos;
+    \item consulta del catálogo de productos activos por parte de clientes y comerciales, con filtros por categoría, línea comercial y subcategoría;
+    \item visualización de fichas de producto con información comercial, datos técnicos, recursos asociados y enlaces a coloración relacionada cuando procede;
+    \item gestión y consulta de cartas de color y referencias cromáticas, incluyendo navegacion por línea comercial y localizacion directa de tonos;
+    \item subida y reemplazo de imágenes del catálogo mediante \texttt{Cloudinary}, con validación de tamano, tipo y limpieza de imágenes sustituidas.
 \end{itemize}
 
-Desde el punto de vista interno, \texttt{M3} reutiliza la misma aproximacion de servicios transaccionales ya usada en modulos anteriores, pero especializada en el dominio de catalogo. Las validaciones de consistencia entre categoria, linea, subcategoria, estado y recursos asociados se centralizan en \path{catalog-validation.ts} y \path{catalog-internal.ts}. Por su parte, la lectura orientada a cliente y comercial se resuelve desde \path{catalog-reader.ts}, evitando duplicar logica entre el area administrativa y las vistas publicas del catalogo.
+Desde el punto de vista interno, \texttt{M3} reutiliza la misma aproximación de servicios transaccionales ya usada en módulos anteriores, pero especializada en el dominio de catálogo. Las validaciones de consistencia entre categoría, línea, subcategoría, estado y recursos asociados se centralizan en servicios internos de catálogo.
 
-\subsection{Implementacion del modulo M4}
+\subsection{Implementación del módulo M4}
 
-El modulo \texttt{M4} se construye sobre las rutas de pedidos y cobros para cliente, comercial y administrador, los servicios de dominio ubicados en \path{lib/typeorm/services/orders/} y la extension del subsistema de visitas comerciales para soportar repartos reales.
+El módulo \texttt{M4} se construye sobre las rutas de pedidos y cobros para cliente, comercial y administrador, los servicios de dominio ubicados en \path{lib/typeorm/services/orders/} y la extension del subsistema de visitas comerciales para soportar repartos reales.
 
 Actualmente ya estan implementados:
 
 \begin{itemize}
-    \item Creacion, recuperacion y confirmacion de borradores de pedido tanto desde cliente como desde comercial.
-    \item Consulta de historial y detalle de pedidos para cliente, comercial y administrador, con estados de pedido y de cobro diferenciados.
-    \item Regla de negocio que limita a un maximo de dos pedidos abiertos pendientes de cobro por cliente.
-    \item Bandeja comercial de pedidos confirmados pendientes de reparto y vinculacion de dichos pedidos a visitas de tipo \texttt{delivery}.
-    \item Cierre de reparto con validacion QR, transicion de pedidos a \texttt{delivered} y mantenimiento coherente de cancelaciones o aplazamientos.
-    \item Flujo minimo de cobro mediante estados \texttt{pending}/\texttt{paid}, con registro de metodo, fecha, notas y usuario que realiza la accion.
-    \item Consulta de ETA para cliente solo cuando existe una visita de reparto valida y alineada con el pedido.
+    \item creacion, recuperación y confirmación de borradores de pedido tanto desde cliente como desde comercial;
+    \item consulta de historial y detalle de pedidos para cliente, comercial y administrador, con estados de pedido y de cobro diferenciados;
+    \item regla de negocio que limita a un maximo de dos pedidos abiertos pendientes de cobro por cliente;
+    \item bandeja comercial de pedidos confirmados pendientes de reparto y vinculacion de dichos pedidos a visitas de tipo \texttt{delivery};
+    \item cierre de reparto con validación QR, transicion de pedidos a \texttt{delivered} y mantenimiento coherente de cancelaciones o aplazamientos;
+    \item flujo mínimo de cobro mediante estados \texttt{pending}/\texttt{paid}, con registro de metodo, fecha, notas y usuario que realiza la acción;
+    \item consulta de ETA para cliente solo cuando existe una visita de reparto valida y alineada con el pedido.
 \end{itemize}
 
-La logica de negocio del modulo se concentra en \path{order.ts} y \path{commercial-visit.ts}. El helper \path{lib/orders/qr.ts} encapsula la generacion y normalizacion del QR de cada pedido, mientras que \path{lib/clients/delivery-estimate.ts} resuelve la lectura reutilizable de la informacion de reparto que consume la zona cliente. Para la verificacion del modulo se han incorporado ademas los scripts \path{m4-closeout-smoke.ts} y \path{m4-ui-headless-check.mjs}, que permiten revalidar reglas de negocio y recorridos visuales criticos sin depender de comprobaciones manuales aisladas.
+La lógica de negocio del módulo se concentra principalmente en \path{order.ts} y \path{commercial-visit.ts}. El helper \path{lib/orders/qr.ts} encapsula la generación y normalización del QR de cada pedido, mientras que \path{lib/clients/delivery-estimate.ts} resuelve la lectura reutilizable de la información de reparto que consume la zona cliente. Para la verificación del módulo se han incorporado además los scripts \path{m4-closeout-smoke.ts} y \path{m4-ui-headless-check.mjs}.
+
+\subsection{Implementación del módulo M5}
+
+El bloque actual de \texttt{M5} se apoya en las rutas \texttt{/clients/salon-clients}, \texttt{/api/clients/salon-clients/*}, \texttt{/api/clients/salon-service-templates/*} y \texttt{/api/clients/salon-service-result-images}, y en los servicios de dominio ubicados en \path{lib/typeorm/services/salon/}. A nivel persistente, este incremento cubre tanto las tablas del historial técnico del salón como el subsistema de plantillas reutilizables, la referencia cromática concreta utilizada en cada producto de coloración y la galería visual final asociada a cada servicio.
+
+Actualmente ya estan implementados:
+
+\begin{itemize}
+    \item alta y actualización de fichas de clientes finales del salón desde el área \texttt{client};
+    \item registro de servicios con fecha, tipo de tratamiento, resultado y notas generales;
+    \item persistencia separada de la ficha técnica del servicio, con descripción técnica, fórmula y observaciones;
+    \item guardado de plantillas reutilizables de servicio con nombre propio, datos técnicos y productos predefinidos para acelerar registros posteriores;
+    \item registro estructurado de productos utilizados en cada servicio, reutilizando el catálogo activo ya existente en \texttt{M3} y enlazando la tonalidad concreta cuando el producto procede de una carta de color;
+    \item carga de varias imagenes del resultado final por servicio, almacenadas en \texttt{Cloudinary} y persistidas en una tabla hija ordenada para su consulta posterior;
+    \item edición y eliminación posterior de servicios ya registrados, manteniendo coherencia entre ficha técnica, productos usados y sugerencias recalculadas;
+    \item reconstrucción automática de sugerencias de producto a partir del historial técnico y del uso acumulado de producto por cliente del salón;
+    \item consulta integrada del historial técnico completo desde la propia ficha del cliente final, con filtros por texto, tipo de servicio y fecha;
+    \item generación de borradores técnicos por servicio mediante un endpoint específico, con asunto y cuerpo editables en interfaz, copia al portapapeles y apertura opcional del cliente de correo a través de \texttt{mailto}.
+\end{itemize}
+
+Este bloque no incorpora todavía el envío real de correos técnicos a cliente final ni su integración con un proveedor externo, pero deja resuelta la base persistente, el mantenimiento del historial, la reutilización rápida de configuraciones técnicas, la documentación visual del resultado final y la preparación asistida del mensaje técnico para la operativa diaria del salón.
+
+\subsection{Capacidades transversales de administración}
+
+Aunque no constituyen un módulo de negocio independiente del mismo volumen que \texttt{M1} a \texttt{M4}, la aplicación ya incorpora varias capacidades transversales que deben documentarse como parte del estado real del proyecto:
+
+\begin{itemize}
+    \item vista de auditoría administrativa y de accesos desde el área \texttt{/admin};
+    \item configuración global de políticas de rate limiting persistida en base de datos;
+    \item soporte PWA basico mediante manifiesto web, iconos y \textit{service worker};
+    \item compatibilidad mínima de navegador con redirección a pantalla específica de no soporte.
+\end{itemize}
 
 \section{Scripts de Base de datos}
 
-La persistencia se gestiona mediante migraciones de \texttt{TypeORM}. No se han empleado procedimientos almacenados ni disparadores especificos; la logica de negocio se mantiene en servicios TypeScript, lo que simplifica su trazabilidad junto al resto del codigo fuente.
+La persistencia se gestiona mediante migraciones de \texttt{TypeORM}. No se han empleado procedimientos almacenados ni disparadores específicos; la lógica de negocio se mantiene en servicios TypeScript, lo que simplifica su trazabilidad junto al resto del código fuente.
+
+Además de las tablas de negocio principales, la base de datos incorpora pequeños catálogos normalizados para roles, estados y tipos operativos. Esta decisión permite que autenticación, auditoría, visitas, rutas, catálogo y pedidos trabajen contra valores controlados y coherentes con las reglas del dominio.
 
 La serie de migraciones actual queda organizada del siguiente modo:
 
 \begin{itemize}
-    \item Migraciones \texttt{001} a \texttt{005}: tablas base del modulo \texttt{M1}, catalogos de roles y estados, usuarios, solicitudes, logs de acceso y datos semilla iniciales.
-    \item Migraciones \texttt{006} a \texttt{019}: tablas y ajustes del modulo \texttt{M2}, incluyendo clientes, comerciales, asignaciones, configuracion de ruta, geodatos, tipos de visita, modelo de visitas por jornada y estado aplazado.
-    \item Migraciones \texttt{020} a \texttt{028}: estructura del modulo \texttt{M3}, con catalogos auxiliares, jerarquia comercial de categorias y lineas, productos, recursos de apoyo, cartas de color, referencias cromaticas, subcategorias jerarquicas y miniaturas publicas de coloracion.
-    \item Migracion \texttt{029}: catalogos auxiliares del modulo \texttt{M4}, con estados de pedido y de cobro.
-    \item Migracion \texttt{030}: tablas \texttt{orders} y \texttt{order\_lines}, incluyendo importes consolidados y trazabilidad de lineas.
-    \item Migracion \texttt{031}: datos semilla de estados de pedido y del flujo minimo de cobro.
-    \item Migracion \texttt{032}: soporte para referencias cromaticas pedibles y persistencia de borradores.
-    \item Migracion \texttt{033}: vinculacion de pedidos a visitas comerciales de reparto.
-    \item Migracion \texttt{034}: seguimiento minimo de cobro sobre el propio pedido, con metodo, notas, fecha y usuario responsable.
+    \item Migraciones \texttt{001} a \texttt{005}: tablas base del módulo \texttt{M1}, catálogos de roles y estados, usuarios, solicitudes, logs de acceso y datos semilla iniciales.
+    \item Migraciones \texttt{006} a \texttt{019}: tablas y ajustes del módulo \texttt{M2}, incluyendo clientes, comerciales, asignaciones, configuración de ruta, geodatos, tipos de visita, modelo de visitas por jornada y estado aplazado.
+    \item Migraciones \texttt{020} a \texttt{028}: estructura del módulo \texttt{M3}, con catálogos auxiliares, jerarquía comercial de categorías y líneas, productos, recursos de apoyo, cartas de color, referencias cromáticas, subcategorías jerárquicas y miniaturas de coloración.
+    \item Migración \texttt{029}: catálogos auxiliares del módulo \texttt{M4}, con estados de pedido y de cobro.
+    \item Migración \texttt{030}: tablas \texttt{orders} y \texttt{order\_lines}, incluyendo importes consolidados y trazabilidad de líneas.
+    \item Migración \texttt{031}: datos semilla de estados de pedido y del flujo mínimo de cobro.
+    \item Migración \texttt{032}: soporte para referencias cromáticas pedibles y persistencia de borradores.
+    \item Migración \texttt{033}: vinculacion de pedidos a visitas comerciales de reparto.
+    \item Migración \texttt{034}: seguimiento mínimo de cobro sobre el propio pedido, con metodo, notas, fecha y usuario responsable.
+    \item Migración \texttt{035}: tabla \texttt{app\_rate\_limit\_policies} para configuración global de políticas de rate limiting desde administración.
+    \item Migración \texttt{036}: base persistente del primer incremento de \texttt{M5}, con fichas de clientes del salón, servicios, ficha técnica, uso de productos y sugerencias derivadas.
+    \item Migración \texttt{037}: plantillas reutilizables de servicio para \texttt{M5}, con cabecera de plantilla y productos predefinidos asociados.
+    \item Migración \texttt{038}: soporte para tonalidades enlazadas a usos de producto del salón y galería de imagenes de resultado final por servicio.
 \end{itemize}
 
 Esta estrategia permite reconstruir el esquema de forma controlada en cualquier entorno, auditar los cambios estructurales del sistema y extender el proyecto sin depender de modificaciones manuales sobre la base de datos.

@@ -1,41 +1,60 @@
-Durante el desarrollo del presente proyecto se han identificado diversas oportunidades de mejora y líneas de evolución del sistema que no han sido abordadas en esta primera versión, pero que resultan coherentes con los objetivos y el alcance definidos en la introducción.
+Durante el desarrollo del presente proyecto se han identificado diversas oportunidades de mejora y líneas de evolución del sistema que no han sido abordadas en la versión actual, pero que resultan coherentes con la arquitectura y con el alcance funcional definido en el análisis.
 
-En particular, el sistema ha sido concebido con un enfoque modular y extensible, lo que permite la incorporación progresiva de nuevas funcionalidades y la mejora de las ya existentes sin necesidad de rediseñar la arquitectura base. Las líneas de trabajo futuro que se presentan a continuación se organizan en función de los módulos funcionales definidos en el sistema, reflejando así su evolución natural.
+En particular, la aplicación ya dispone de una base operativa sólida en los módulos \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4}. Por ello, las líneas de trabajo futuro no deben entenderse como funcionalidades aún no iniciadas dentro de esos módulos, sino como profundizaciones naturales sobre una base ya implementada y verificada.
 
 \subsection*{M1. Gestión de acceso, alta y autorización de usuarios}
 \begin{itemize}
-    \item Implementación de mecanismos de recuperación de contraseña y verificación de cuentas de usuario.
-    \item Incorporación de medidas adicionales de seguridad frente a accesos indebidos, como la limitación de intentos de autenticación.
-    \item Gestión avanzada de sesiones, incluyendo el control de sesiones activas y su posible revocación.
-    \item Desarrollo de herramientas específicas para la visualización y análisis de los registros de acceso y acciones administrativas.
+    \item Incorporación de recuperación de contraseña, verificación de cuenta y notificaciones asociadas al ciclo de alta.
+    \item Gestión avanzada de sesiones, incluyendo visualización de sesiones activas y revocación explicita por parte del usuario o del administrador.
+    \item Explotacion analitica de los registros de acceso y de las acciones administrativas para apoyo a auditoría operativa.
 \end{itemize}
 
 \subsection*{M2. Gestión comercial y clientes}
 \begin{itemize}
-    \item Incorporación de vistas históricas y métricas agregadas sobre visitas, actividad comercial y cumplimiento de rutas.
-    \item Mejora de la replanificación diaria ante incidencias, cambios de franja o cancelaciones de última hora.
+    \item Incorporación de vistas historicas y metricas agregadas sobre visitas, actividad comercial y cumplimiento de rutas.
+    \item Mejora de la replanificacion diaria ante incidencias, cambios de franja o cancelaciones de última hora.
     \item Mayor automatización en la preparación de jornadas, reutilizando patrones de visitas y configuraciones recurrentes.
 \end{itemize}
 
 \subsection*{M3. Catálogo, productos y coloración}
 \begin{itemize}
-    \item Refuerzo del módulo con importación masiva de productos y mantenimiento asistido del catálogo.
-    \item Incorporación de estados editoriales o flujos de borrador/publicación para contenidos comerciales y técnicos.
-    \item Mejora de la búsqueda semántica, filtrado avanzado y reutilización de recursos de apoyo entre líneas relacionadas.
-    \item Ampliación de la experiencia de coloración con comparativas, agrupaciones comerciales adicionales y material visual complementario.
+    \item Refuerzo del módulo con importacion masiva de productos y mantenimiento asistido del catálogo.
+    \item Incorporación de estados editoriales o flujos de borrador/publicacion para contenidos comerciales y técnicos.
+    \item Mejora de la búsqueda semantica, filtrado avanzado y reutilización de recursos de apoyo entre líneas relacionadas.
+    \item Ampliacion de la experiencia de coloración con comparativas, agrupaciones comerciales adicionales y material visual complementario.
 \end{itemize}
 
 \subsection*{M4. Pedidos, entregas y cobros}
 \begin{itemize}
-    \item Creación de pedidos a partir del catálogo ya implantado en \texttt{M3}, permitiendo seleccionar productos y cantidades sin exponer precios unitarios al cliente.
-    \item Gestión del historial de pedidos por cliente y consulta de su estado dentro del ciclo comercial.
-    \item Modelado de entregas, incidencias logísticas y productos pendientes de servir.
-    \item Registro de cobros totales o parciales y construcción del estado de cuenta asociado a cada cliente.
+    \item Extension del subflujo de cobro hacia pagos parciales, vencimientos y conciliación básica.
+    \item Incorporación de facturación o documentos comerciales derivados del pedido.
+    \item Refuerzo de la logistica con incidencias de entrega, intentos fallidos y seguimiento de pendientes de servir.
+    \item Mejora de la captura operativa del QR y de la experiencia móvil asociada a la confirmación de entrega.
+\end{itemize}
+
+\subsection*{M5. Gestión técnica del salón}
+\begin{itemize}
+    \item Integración del borrador técnico ya disponible con un proveedor real de mensajería, trazabilidad de envíos y estados de entrega o apertura.
+    \item Exportación del historial técnico y trazabilidad documental asociada a cada ficha, aprovechando las plantillas y el seguimiento técnico ya disponibles.
+    \item Gestión avanzada de la galeria visual del resultado final, incorporando reordenación manual, anotaciones sobre cada imagen y posibles comparativas antes/despues.
+    \item Mejora del motor de sugerencias para considerar fórmulas, recurrencia temporal y afinidad entre familias de producto, no solo uso histórico agregado.
+\end{itemize}
+
+\subsection*{M6. Promociones, notificaciones y formaciones}
+\begin{itemize}
+    \item Desarrollo del módulo de promociones, notificaciones y formaciones, actualmente solo analizado a nivel de requisitos.
+\end{itemize}
+
+\subsection*{M7. Administración transversal e integraciones}
+\begin{itemize}
+    \item Evolución de la configuración global actual hacia un panel administrativo más amplio de parámetros de aplicación.
+    \item Incorporación de mecanismos de exportacion o sincronización con herramientas empresariales externas, siempre que se definan de forma concreta y no generica.
+    \item Mejora de la observabilidad técnica, el seguimiento de errores y el control operativo del sistema.
 \end{itemize}
 
 \subsection*{Evolución técnica transversal}
 \begin{itemize}
-    \item Incorporación progresiva de pruebas automatizadas de integración y de interfaz para reducir regresiones manuales.
-    \item Reorganización interna del código por \textit{feature}, especialmente en el área comercial, para facilitar la entrada de \texttt{M4} y módulos posteriores.
-    \item Refuerzo de observabilidad, trazas de errores y utilidades de administración para despliegues más controlados.
+    \item Incorporación progresiva de pruebas automatizadas de integracion y de interfaz para reducir regresiones manuales.
+    \item Reorganización interna adicional del código por \textit{feature}, especialmente en las áreas comercial, catálogo y pedidos.
+    \item Profundización de la capa PWA, ampliando la experiencia offline más allá del \textit{app shell} actual.
 \end{itemize}

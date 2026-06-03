@@ -28,7 +28,6 @@ Los datos asociados a un usuario incluyen:
     \item Fecha de creación de la cuenta.
     \item Fecha de última actualización de la cuenta.
 \end{itemize}
-
 \subsubsection*{Rol}
 
 El sistema debe gestionar los diferentes roles que determinan los permisos y
@@ -41,6 +40,42 @@ Los datos asociados a un rol incluyen:
     \item Código del rol.
     \item Nombre del rol.
     \item Descripción del rol.
+\end{itemize}
+
+\subsubsection*{Estado de usuario}
+
+El sistema debe gestionar un catálogo controlado de estados de usuario para representar de forma consistente la situación operativa de cada cuenta dentro del sistema.
+
+Los datos asociados a un estado de usuario incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Estado de solicitud de registro}
+
+El sistema debe gestionar un catálogo controlado de estados de solicitud para representar el ciclo de revisión de las peticiones de alta.
+
+Los datos asociados a un estado de solicitud incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Origen de solicitud de registro}
+
+El sistema debe gestionar un catálogo controlado de origenes de solicitud para distinguir como se ha generado cada peticion de alta.
+
+Los datos asociados a un origen de solicitud incluyen:
+
+\begin{itemize}
+    \item Identificador del origen.
+    \item Código interno del origen.
+    \item Nombre visible del origen.
 \end{itemize}
 
 \subsubsection*{Solicitud de registro}
@@ -111,6 +146,42 @@ Los datos asociados a un registro de acceso incluyen:
 \end{itemize}
 
 % ------------------------------------------------------------------------------
+\subsubsection*{Tipo de acción administrativa}
+
+El sistema debe gestionar un catálogo controlado de tipos de acción administrativa para clasificar de forma homogenea las operaciones realizadas sobre cuentas de usuario.
+
+Los datos asociados a un tipo de acción administrativa incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo de acción.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
+\subsubsection*{Tipo de evento de acceso}
+
+El sistema debe gestionar un catálogo controlado de tipos de evento de acceso para distinguir entre autenticación, cierre de sesión u otros hitos relevantes de seguridad.
+
+Los datos asociados a un tipo de evento de acceso incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo de evento.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
+\subsubsection*{Tipo de resultado de acceso}
+
+El sistema debe gestionar un catálogo controlado de resultados de acceso para clasificar de forma uniforme los intentos exitosos, fallidos o revocados.
+
+Los datos asociados a un tipo de resultado de acceso incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo de resultado.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
 \subsection{RI-M2}
 % ------------------------------------------------------------------------------
 
@@ -199,6 +270,30 @@ Los datos asociados a una visita comercial incluyen:
 
 La hora concreta de atención no se almacena como un campo fijo de la visita, sino que se deriva diariamente a partir del algoritmo de planificación, la configuración del comercial y la franja horaria admitida por el cliente.
 
+\subsubsection*{Estado de visita comercial}
+
+El sistema debe gestionar un catálogo controlado de estados de visita comercial para representar situaciones como planificada, aplazada, completada o cancelada.
+
+Los datos asociados a un estado de visita comercial incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Tipo de visita comercial}
+
+El sistema debe gestionar un catálogo controlado de tipos de visita comercial para distinguir entre visitas rutinarias, visitas comerciales y visitas de reparto.
+
+Los datos asociados a un tipo de visita comercial incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
 \subsubsection*{Ruta comercial}
 
 El sistema debe permitir organizar las rutas de trabajo de los agentes comerciales. Una ruta representa la planificación persistida de visitas que un comercial debe realizar durante una jornada o recorrido determinado y sirve de soporte para composiciones de ruta mantenidas por el sistema.
@@ -212,6 +307,18 @@ Los datos asociados a una ruta comercial incluyen:
     \item Nombre o descripción de la ruta.
     \item Estado de la ruta.
     \item Fecha de creación de la ruta.
+\end{itemize}
+
+\subsubsection*{Estado de ruta comercial}
+
+El sistema debe gestionar un catálogo controlado de estados de ruta comercial para distinguir rutas abiertas, completadas o canceladas según la evolución de la jornada.
+
+Los datos asociados a un estado de ruta incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
 \end{itemize}
 
 \subsubsection*{Visita en ruta}
@@ -263,7 +370,10 @@ Los datos asociados a un producto incluyen:
     \item Descripción del producto.
     \item Categoría o familia a la que pertenece.
     \item Línea comercial asociada.
+    \item Subcategoría asociada, cuando corresponda.
     \item Imagen principal del producto.
+    \item Formato comercial, cuando exista.
+    \item Packing o número de unidades por envase, cuando corresponda.
     \item Información técnica o modo de aplicación.
     \item Estado del producto dentro del catálogo.
     \item Precio base del producto.
@@ -298,6 +408,24 @@ Los datos asociados a una línea comercial incluyen:
     \item Categoría asociada.
     \item Imagen o recurso gráfico representativo.
     \item Orden o posición de visualización.
+\end{itemize}
+
+\subsubsection*{Subcategoría de producto}
+
+El sistema debe almacenar una clasificación intermedia y jerarquica dentro de cada línea comercial para organizar mejor el catálogo y facilitar su navegacion.
+
+Los datos asociados a una subcategoría de producto incluyen:
+
+\begin{itemize}
+    \item Identificador de la subcategoría.
+    \item Línea comercial asociada.
+    \item Nombre de la subcategoría.
+    \item Descripción de la subcategoría.
+    \item Subcategoría padre, cuando exista una jerarquía.
+    \item Imagen o recurso grafico representativo, cuando exista.
+    \item Orden o posición de visualización.
+    \item Fecha de creacion del registro.
+    \item Fecha de última actualización de la subcategoría.
 \end{itemize}
 
 \subsubsection*{Recurso de apoyo}
@@ -346,16 +474,44 @@ Los datos asociados a una referencia de color incluyen:
     \item Nombre o denominación del tono.
     \item Descripción del tono.
     \item Imagen o muestra visual asociada.
+    \item Miniatura visual asociada, cuando exista.
+    \item Producto del catálogo asociado, cuando la referencia sea pedible.
+    \item Referencia ERP asociada, cuando exista.
+    \item Indicador de si la referencia puede pedirse o solo consultarse.
     \item Orden o posición dentro de la carta.
 \end{itemize}
 
 % ------------------------------------------------------------------------------
+\subsubsection*{Estado de producto}
+
+El sistema debe gestionar un catálogo controlado de estados de producto para distinguir articulos activos, inactivos o descontinuados dentro del catálogo.
+
+Los datos asociados a un estado de producto incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Tipo de recurso de apoyo}
+
+El sistema debe gestionar un catálogo controlado de tipos de recurso de apoyo para clasificar de forma uniforme fichas técnicas, catálogos, documentos o materiales formativos.
+
+Los datos asociados a un tipo de recurso incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
 \subsection{RI-M4}
 % ------------------------------------------------------------------------------
 
 \subsubsection*{Pedido}
 
-El sistema debe almacenar la informacion general asociada a cada pedido realizado por un cliente profesional o por un usuario autorizado en su nombre. Esta informacion permite identificar el pedido, conocer su situacion dentro del flujo comercial y relacionarlo tanto con su ciclo logistico como con su situacion minima de cobro.
+El sistema debe almacenar la información general asociada a cada pedido realizado por un cliente profesional o por un usuario autorizado en su nombre. Esta información permite identificar el pedido, conocer su situación dentro del flujo comercial y relacionarlo tanto con su ciclo logistico como con su situación mínima de cobro.
 
 Los datos asociados a un pedido incluyen:
 
@@ -373,55 +529,55 @@ Los datos asociados a un pedido incluyen:
     \item Importe total del pedido.
     \item Observaciones asociadas al pedido.
     \item Fecha de creacion del pedido.
-    \item Fecha de ultima actualizacion del pedido.
+    \item Fecha de última actualización del pedido.
 \end{itemize}
 
-\subsubsection*{Linea de pedido}
+\subsubsection*{Línea de pedido}
 
-El sistema debe almacenar el detalle de los productos incluidos en cada pedido. Esta informacion permite conocer que productos se han solicitado, en que cantidades y con que instantanea comercial se consolidaron en el momento del pedido.
+El sistema debe almacenar el detalle de los productos incluidos en cada pedido. Esta información permite conocer que productos se han solicitado, en que cantidades y con que instantanea comercial se consolidaron en el momento del pedido.
 
-Los datos asociados a una linea de pedido incluyen:
+Los datos asociados a una línea de pedido incluyen:
 
 \begin{itemize}
-    \item Identificador de la linea de pedido.
+    \item Identificador de la línea de pedido.
     \item Pedido asociado.
-    \item Producto incluido en la linea.
+    \item Producto incluido en la línea.
     \item Referencia cromatica asociada, cuando proceda.
     \item Cantidad solicitada.
     \item Precio unitario consolidado en el momento del pedido.
-    \item Porcentaje de descuento aplicado a la linea.
-    \item Importe total de la linea.
+    \item Porcentaje de descuento aplicado a la línea.
+    \item Importe total de la línea.
     \item Referencia comercial consolidada del producto.
-    \item Codigo y nombre de variante consolidados, cuando existan.
+    \item Código y nombre de variante consolidados, cuando existan.
 \end{itemize}
 
 \subsubsection*{Estado de pedido}
 
-El sistema debe gestionar un catalogo controlado de estados de pedido para representar el ciclo de vida permitido de cada encargo.
+El sistema debe gestionar un catálogo controlado de estados de pedido para representar el ciclo de vida permitido de cada encargo.
 
 Los datos asociados a un estado de pedido incluyen:
 
 \begin{itemize}
     \item Identificador del estado.
-    \item Codigo interno del estado.
+    \item Código interno del estado.
     \item Nombre visible del estado.
 \end{itemize}
 
 \subsubsection*{Estado de cobro del pedido}
 
-El sistema debe gestionar un catalogo controlado de estados de cobro para representar el seguimiento minimo del pago asociado al pedido.
+El sistema debe gestionar un catálogo controlado de estados de cobro para representar el seguimiento mínimo del pago asociado al pedido.
 
 Los datos asociados a un estado de cobro incluyen:
 
 \begin{itemize}
     \item Identificador del estado de cobro.
-    \item Codigo interno del estado.
+    \item Código interno del estado.
     \item Nombre visible del estado.
 \end{itemize}
 
 \subsubsection*{Visita comercial de reparto vinculada}
 
-La implementacion actual reutiliza la entidad de visita comercial del modulo \texttt{M2} para modelar la fase logistica del pedido. Cuando un pedido queda asociado a un reparto, la relacion se almacena mediante una visita comercial de tipo entrega o reparto.
+La implementación actual reutiliza la entidad de visita comercial del módulo \texttt{M2} para modelar la fase logistica del pedido. Cuando un pedido queda asociado a un reparto, la relación se almacena mediante una visita comercial de tipo entrega o reparto.
 
 Los datos relevantes de esa visita vinculada incluyen:
 
@@ -435,7 +591,7 @@ Los datos relevantes de esa visita vinculada incluyen:
     \item Observaciones o resultado asociados a la visita.
 \end{itemize}
 
-En la implementacion actual no existe una entidad de cobro independiente ni una entidad de entrega separada del subsistema de visitas comerciales. El seguimiento minimo del cobro se resuelve sobre el propio pedido y la fase logistica reutiliza visitas comerciales de tipo reparto.
+En la implementación actual no existe una entidad de cobro independiente ni una entidad de entrega separada del subsistema de visitas comerciales. El seguimiento mínimo del cobro se resuelve sobre el propio pedido y la fase logistica reutiliza visitas comerciales de tipo reparto.
 % ------------------------------------------------------------------------------
 \subsection{RI-M5}
 % ------------------------------------------------------------------------------

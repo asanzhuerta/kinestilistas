@@ -1,41 +1,65 @@
-La selección tecnológica del proyecto se ha realizado teniendo en cuenta los objetivos del sistema, la necesidad de construir una aplicación web accesible desde distintos dispositivos y la conveniencia de disponer de una arquitectura mantenible y extensible. Al tratarse de una solución orientada a la gestión comercial y a la centralización de información, se han priorizado tecnologías consolidadas, ampliamente utilizadas en el desarrollo web y compatibles con un despliegue progresivo.
+La selección tecnologica del proyecto se ha realizado atendiendo a tres criterios principales: la necesidad de construir una aplicación web full-stack mantenible, la conveniencia de reutilizar una única base de código para cliente y servidor y la necesidad de integrar servicios externos de soporte para mapas, geocodificación, imágenes y representación de QR.
 
 \subsection{Tecnologías de desarrollo web}
 
-Para el desarrollo de la aplicación se ha seleccionado \textbf{Next.js}, un framework basado en React que permite construir aplicaciones web modernas combinando funcionalidades de frontend y backend dentro de un mismo proyecto. Esta elección facilita el desarrollo de una aplicación full-stack, reduce la necesidad de mantener proyectos separados para cliente y servidor, y permite organizar la lógica de presentación, las rutas y las operaciones de servidor de forma integrada.
+La aplicación se desarrolla sobre \textbf{Next.js}, aprovechando el modelo basado en \textit{App Router}, componentes de servidor y \textit{Route Handlers} para combinar interfaz y operaciones de backend dentro del mismo proyecto \citep{nextjsdocs2026,nextjsroutehandlers2026}. Sobre esta base se utiliza \textbf{React} como librería de componentes de interfaz \citep{reactdocs2026} y \textbf{TypeScript} para tipar contratos, respuestas y servicios de dominio, reforzando la detección temprana de errores \citep{typescriptdocs2026}.
 
-El uso de \textbf{React} permite construir interfaces de usuario basadas en componentes reutilizables, lo que favorece la mantenibilidad del código y la evolución progresiva de la aplicación. Además, se ha empleado \textbf{TypeScript} para mejorar la seguridad del desarrollo mediante tipado estático, reduciendo errores derivados del uso incorrecto de datos y facilitando la comprensión del código.
+Para la capa visual se emplea \textbf{Tailwind CSS}, que permite construir interfaces responsive a partir de clases de utilidad reutilizables \citep{tailwinddocs2026}. Las transiciones y ciertos elementos de realce visual se apoyan en \textbf{Motion for React}, sucesor de Framer Motion para el ecosistema React \citep{motionreactdocs2026}.
 
-Para la capa visual se ha utilizado \textbf{Tailwind CSS}, una herramienta de estilos basada en clases de utilidad que facilita la creación de interfaces responsive. Esta tecnología permite adaptar la aplicación a distintos tamaños de pantalla, aspecto especialmente relevante al tratarse de una herramienta que puede ser utilizada desde ordenadores, tablets y teléfonos móviles.
+\subsection{Persistencia y acceso a datos}
 
-\subsection{Persistencia de datos}
+La persistencia de datos se resuelve con \textbf{PostgreSQL}, elegido por su robustez como base de datos relacional y por su adecuación para modelar usuarios, clientes, catálogo, visitas, pedidos y estados de negocio enlazados entre si \citep{postgresdocs2026}. Sobre ella se utiliza \textbf{TypeORM} como capa ORM, con entidades tipadas y migraciones versionadas que permiten evolucionar el esquema sin perder trazabilidad \citep{typeormentities2026,typeormmigrations2026}.
 
-Como sistema gestor de base de datos se ha escogido \textbf{PostgreSQL}, una base de datos relacional adecuada para representar entidades estructuradas y relaciones entre usuarios, roles, clientes, pedidos u otros elementos del dominio. El uso de una base de datos relacional resulta apropiado para este proyecto, ya que el sistema requiere consistencia en la información, integridad referencial y capacidad de consulta sobre datos vinculados.
-
-Durante el desarrollo se ha empleado una base de datos en entorno local, levantada mediante contenedores Docker, lo que permite reproducir el entorno de forma sencilla y mantener separada la configuración del sistema respecto al equipo físico de desarrollo.
+Este enfoque encaja especialmente bien con el proyecto, ya que la aplicación necesita integridad referencial, control de estados y reconstruccion repetible del esquema en distintos entornos.
 
 \subsection{Autenticación y seguridad}
 
-La autenticación de usuarios constituye una de las bases funcionales del sistema. Para ello se ha utilizado \textbf{Auth.js}, que permite gestionar sesiones, credenciales y control de acceso en aplicaciones desarrolladas con Next.js. Las contraseñas se almacenan de forma segura mediante funciones de hash, evitando guardar credenciales en texto plano.
+La autenticación del sistema se apoya en \textbf{Auth.js}, integrando un proveedor de credenciales, sesiones JWT y callbacks de control para enriquecer el contexto de usuario \citep{authjsdocs2026}. A esta capa se añaden protecciones propias del proyecto:
 
-El sistema incorpora una estructura de roles que permite diferenciar permisos entre los distintos perfiles previstos: administrador, comercial y cliente profesional. Esta separación es fundamental para garantizar que cada usuario solo pueda acceder a las funcionalidades correspondientes a su responsabilidad dentro del sistema.
+\begin{itemize}
+    \item control de acceso por rol sobre rutas privadas;
+    \item rate limiting aplicado sobre la API y sobre el flujo de login;
+    \item trazabilidad de accesos y acciones administrativas;
+    \item compatibilidad mínima de navegador desde el \texttt{proxy} de la aplicación.
+\end{itemize}
 
-\subsection{Entorno de desarrollo y despliegue}
+Las contraseñas no se almacenan en claro, sino mediante verificación hash en el servidor.
 
-Para facilitar la preparación del entorno se ha utilizado \textbf{Docker}, especialmente para la ejecución de servicios auxiliares como la base de datos. Esta herramienta permite definir servicios mediante archivos de configuración y simplifica la reproducción del entorno en otros equipos.
+\subsection{Mapas, geocodificación y rutas}
 
-Como apoyo durante las pruebas en dispositivos externos se ha utilizado \textbf{Cloudflare Tunnel}, que permite exponer temporalmente el entorno local de desarrollo a través de una URL accesible desde otros dispositivos. Esta herramienta resulta útil para validar el comportamiento responsive y PWA de la aplicación en móviles o tablets sin necesidad de realizar un despliegue público definitivo.
+El soporte geográfico del proyecto combina varias tecnologías. La visualización y selección interactiva de ubicaciones se realiza con \textbf{Leaflet} y su adaptación a React \citep{leafletdocs2026}. La resolución de direcciones a coordenadas se apoya en \textbf{Nominatim} \citep{nominatimapi2026}, mientras que el cálculo de geometría de rutas y trayectos se apoya en \textbf{OSRM} \citep{osrmdocs2026}.
+
+Estas integraciones no constituyen un módulo de negocio independiente, pero son esenciales para las funcionalidades ya implementadas de \texttt{M2} y \texttt{M4}, especialmente en la geocodificación de clientes, la previsualización de rutas y la estimación de reparto al cliente.
+
+\subsection{Imágenes externas y QR}
+
+El almacenamiento externo de imágenes se resuelve mediante \textbf{Cloudinary}, tanto para la imagen de perfil de usuario como para las imágenes del catálogo administrado por el distribuidor \citep{cloudinaryupload2026}. Para la representación del QR operativo de cada pedido se utiliza \textbf{QuickChart}, que permite generar imágenes QR a partir de una carga textual estable \citep{quickchartqr2026}.
+
+Esta decisión evita introducir una dependencia adicional de renderizado de QR en el frontend y facilita que la misma referencia pueda reutilizarse para visualización, impresión y validación en reparto.
+
+\subsection{Entorno de desarrollo y acceso desde dispositivos}
+
+Durante el desarrollo local se utiliza \textbf{Docker Desktop} para levantar la base de datos y reproducir el entorno de trabajo de forma estable \citep{dockerdocs2026}. En una fase anterior del proyecto se utilizo \textbf{Cloudflare Tunnel} para exponer temporalmente la aplicación local \citep{cloudflaretunnel2026}. Sin embargo, en la iteración actual se ha pasado a usar preferentemente el sistema de \textbf{Port Forwarding} integrado en \textbf{Visual Studio Code}, sustentado sobre \textbf{Microsoft Dev Tunnels} \citep{vscodeportforwarding2026,microsoftdevtunnelsfaq2026}.
+
+Este cambio responde a criterios prácticos de desarrollo: evita depender de una herramienta adicional externa al editor, resulta gratuito dentro del flujo habitual de trabajo, mantiene un proceso más directo para pruebas desde móvil y permite reutilizar la misma URL del túnel cuando se conserva el mismo \textit{dev tunnel}, lo que resulta especialmente útil para mantener instalada la PWA en dispositivos de prueba sin tener que reinstalarla o regenerar continuamente el punto de acceso.
 
 \subsection{Aplicación web progresiva}
 
-La aplicación se ha planteado con enfoque \textbf{PWA}, permitiendo que pueda comportarse de forma similar a una aplicación instalable en determinados dispositivos. Este enfoque resulta adecuado para el contexto del proyecto, ya que los usuarios previstos pueden necesitar acceder al sistema desde dispositivos móviles durante visitas comerciales, consultas de catálogo o gestión diaria de actividad.
+La aplicación incorpora una capa básica de \textbf{PWA}. En la implementación actual esto se concreta en:
 
-La configuración PWA incluye elementos como el manifiesto de la aplicación, iconos, nombre visible, color de tema y compatibilidad con instalación desde navegador en los dispositivos que lo permitan.
+\begin{itemize}
+    \item un manifiesto web generado desde \path{app/manifest.ts};
+    \item iconos específicos para instalación;
+    \item registro de un \textit{service worker} propio;
+    \item una estrategia sencilla de cache de \textit{app shell} y recuperación desde cache cuando la red falla.
+\end{itemize}
+
+No se trata todavía de una PWA avanzada con sincronización offline completa, pero si de una base coherente con el uso móvil previsto para la aplicación.
+
+La estabilidad del enlace de pruebas externas también influye en esta experiencia. Poder reutilizar una URL persistente del túnel de desarrollo simplifica la instalación continuada de la PWA en dispositivos móviles, ya que el acceso habitual puede mantenerse sobre el mismo origen durante las sesiones de prueba.
 
 \subsection{Herramientas de documentación y apoyo}
 
-La memoria del proyecto se ha elaborado utilizando \textbf{LaTeX}, por su adecuación para documentos académicos extensos y por las facilidades que ofrece para gestionar índices, figuras, tablas, referencias y estructura de capítulos.
+La memoria del proyecto se mantiene en \textbf{LaTeX}, por su adecuación para documentos académicos extensos y por la facilidad con la que gestiona referencias cruzadas, tablas, figuras y bibliografía. Para diagramas y apoyo visual se han utilizado herramientas como \textbf{Draw.io} e \textbf{Inkscape}.
 
-Para la elaboración de diagramas y recursos gráficos se han empleado herramientas como \textbf{Draw.io} e \textbf{Inkscape}, que permiten crear y exportar diagramas en formatos adecuados para su inclusión en la memoria.
-
-En conjunto, las tecnologías seleccionadas permiten desarrollar una solución web moderna, mantenible y preparada para crecer progresivamente, manteniendo una separación clara entre interfaz, lógica de negocio, persistencia de datos y configuración del entorno.
+En conjunto, la pila tecnologica elegida permite sostener una aplicación web moderna, modular y evolutiva, manteniendo una relación directa entre requisitos, implementación y despliegue.

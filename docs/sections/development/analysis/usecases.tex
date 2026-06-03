@@ -1,8 +1,11 @@
-Se asume que los casos de uso en los que interviene el rol de comercial pueden ser igualmente realizados por el rol de administrador, al disponer este de permisos equivalentes o superiores dentro del sistema.
-
 Se asume que los casos de uso en los que interviene el rol de comercial pueden ser igualmente realizados por el rol de administrador, al disponer este de permisos equivalentes o superiores dentro del sistema. Por este motivo, y con el objetivo de mejorar la claridad del modelo, se ha optado por representar únicamente el rol de comercial en los casos de uso compartidos, evitando redundancias innecesarias en los diagramas. No obstante, en aquellos casos en los que existen funcionalidades exclusivas del rol de administrador, este se ha representado explícitamente.
 
-Este enfoque es coherente con el modelado de casos de uso, en el que los actores representan roles que interactúan con el sistema \citep[Ch.~4]{sommerville}.
+Este enfoque es coherente con el modelado de casos de uso, en el que los actores representan roles que interactuan con el sistema \citep[Ch.~4]{sommerville}.
+
+\bigskip
+
+En la versión actual del proyecto, los diagramas asociados a \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4} deben interpretarse como módulos ya implementados y operativos. El caso de \texttt{M5} pasa a una situación intermedia: existe ya una implementación funcional de fichas del salón, alta, edición y borrado de servicios, ficha técnica, plantillas reutilizables, sugerencias derivadas y borradores técnicos editables por servicio, pero el diagrama sigue recogiendo además capacidades aún no construidas, como el envío real del correo a cliente final. Los diagramas de \texttt{M6} y \texttt{M8} conservan valor de análisis y planificación, mientras que \texttt{M7} ocupa otra posición intermedia al disponer ya de auditoría administrativa, configuración global de rate limiting e integraciones de soporte, aunque no de un subsistema amplio de integracion empresarial.
+
 \newpage{\ }
 \subsection{Casos de Uso M1.}
 
@@ -54,7 +57,7 @@ En este módulo se han representado los casos de uso relacionados con los pedido
 \newpage{\ }
 \subsection{Casos de Uso M5.}
 
-En este módulo se han representado los casos de uso relacionados con la gestión interna de peluquerías.
+En este módulo se han representado los casos de uso relacionados con la gestión interna de peluquerías. En la implementación actual ya existe un subconjunto operativo de estos casos de uso, centrado en fichas técnicas internas, historial de servicios con mantenimiento posterior, plantillas reutilizables, uso de productos con tonalidad concreta cuando procede, galería visual del resultado final, sugerencias derivadas y preparación asistida de borradores de correo técnico.
 
 \begin{figure}[H]
     \centering
@@ -66,7 +69,7 @@ En este módulo se han representado los casos de uso relacionados con la gestió
 \newpage{\ }
 \subsection{Casos de Uso M6.}
 
-En este módulo se han representado los casos de uso relacionados con las promociones, notificaciones y formaciones.
+En este módulo se han representado los casos de uso relacionados con promociones, notificaciones y formaciones. Siguen describiendo trabajo futuro.
 
 \begin{figure}[H]
     \centering
@@ -78,7 +81,7 @@ En este módulo se han representado los casos de uso relacionados con las promoc
 \newpage{\ }
 \subsection{Casos de Uso M7.}
 
-En este módulo se han representado los casos de uso relacionados con la administración e integraciones.
+En este módulo se han representado los casos de uso relacionados con administración e integraciones. En la implementación real, la parte hoy desplegada de este bloque se concentra en auditoría, configuración global de rate limiting y soporte transversal a integraciones externas.
 
 \begin{figure}[H]
     \centering
@@ -90,7 +93,7 @@ En este módulo se han representado los casos de uso relacionados con la adminis
 \newpage{\ }
 \subsection{Casos de Uso M8.}
 
-En este módulo se han representado los casos de uso relacionados con funcionalidades adicionales. Dado que las funcionalidades recogidas en este módulo no forman parte del alcance principal de la primera versión del sistema, el diagrama de casos de uso asociado debe interpretarse como una representación conceptual de posibles extensiones futuras de la plataforma.
+En este módulo se han representado los casos de uso relacionados con funcionalidades adicionales. Dado que las funcionalidades recogidas en este módulo no forman parte del alcance principal de la versión actualmente implementada del sistema, el diagrama asociado debe interpretarse como una representación conceptual de posibles extensiones futuras de la plataforma.
 
 \begin{figure}[H]
     \centering

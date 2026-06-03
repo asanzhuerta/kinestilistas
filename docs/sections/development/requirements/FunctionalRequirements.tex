@@ -27,6 +27,7 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
     \item El sistema debe validar las credenciales introducidas de forma segura antes de conceder acceso al sistema.
     \item El sistema debe permitir el acceso únicamente a usuarios que se encuentren activos y autorizados.
     \item El sistema debe impedir el acceso a cuentas no autorizadas, denegadas o desactivadas.
+    \item El sistema debe limitar temporalmente los intentos de autenticación abusivos y diferenciar esta situación de un error simple de credenciales.
     \item El sistema debe registrar los intentos de acceso, tanto exitosos como fallidos, con el fin de garantizar la trazabilidad y seguridad del sistema.
 \end{itemize}
 
@@ -150,10 +151,10 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 
 \begin{itemize}
     \item El sistema debe permitir consultar un catálogo digital de productos profesionales.
-    \item El catálogo debe mostrar información relevante de cada producto, como nombre, referencia, descripción, familia o línea comercial e imagen asociada.
+    \item El catálogo debe mostrar información relevante de cada producto, como nombre, referencia, descripción, categoría, línea comercial, subcategoría, imagen asociada, formato, packing y precio base cuando el rol y el contexto lo permitan.
     \item El sistema debe permitir navegar por el catálogo de forma estructurada según la organización comercial de los productos.
     \item El sistema debe permitir acceder a información técnica asociada a los productos, como modos de aplicación o características técnicas.
-    \item El sistema debe permitir consultar recursos de apoyo relacionados con los productos, como catálogos comerciales, fichas técnicas o material formativo.
+    \item El sistema debe permitir consultar recursos de apoyo relacionados con los productos o con su línea comercial, como catálogos comerciales, fichas técnicas o material formativo.
 \end{itemize}
 
 \vspace{-0.75em}
@@ -161,8 +162,9 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir clasificar los productos en diferentes familias o líneas comerciales (por ejemplo: coloración, tratamientos, acabados u otras categorías).
+    \item El sistema debe permitir clasificar los productos en categorías, líneas comerciales y subcategorías jerárquicas.
     \item El sistema debe permitir localizar productos mediante mecanismos de búsqueda o filtrado basados en dicha clasificación.
+    \item El sistema debe permitir localizar referencias cromáticas dentro de las cartas de color mediante código, nombre o navegacion estructurada.
 \end{itemize}
 
 \vspace{-0.75em}
@@ -171,8 +173,9 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 
 \begin{itemize}
     \item El sistema debe permitir consultar cartas de color asociadas a las líneas de coloración disponibles.
-    \item El sistema debe permitir visualizar las referencias de color organizadas según su nomenclatura comercial.
-    \item El sistema debe facilitar la localización rápida de tonos o referencias concretas dentro de cada carta de color.
+    \item El sistema debe permitir visualizar las referencias de color organizadas según su nomenclatura comercial y su orden de presentacion.
+    \item El sistema debe facilitar la localizacion rapida de tonos o referencias concretas dentro de cada carta de color.
+    \item El sistema debe permitir, cuando proceda, asociar referencias de color a productos pedibles del catálogo.
 \end{itemize}
 
 \vspace{-0.75em}
@@ -180,9 +183,11 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir al distribuidor administrador gestionar el catálogo de productos.
+    \item El sistema debe permitir al distribuidor administrador gestionar categorías, líneas comerciales, subcategorías, productos, recursos de apoyo, cartas de color y referencias cromáticas.
     \item El administrador debe poder añadir, modificar o desactivar productos dentro del sistema.
-    \item El sistema debe permitir actualizar la información asociada a los productos, incluyendo imágenes, descripciones o materiales de apoyo.
+    \item El sistema debe permitir actualizar la información asociada a los productos, incluyendo imágenes, descripciones, datos técnicos y materiales de apoyo.
+    \item El sistema debe permitir subir y reemplazar imágenes de catálogo en almacenamiento externo controlado.
+    \item El sistema debe permitir definir si una referencia de color es pedible y, en su caso, vincularla al producto correspondiente.
 \end{itemize}
 
 % ------------------------------------------------------------------------------
@@ -190,20 +195,20 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 % ------------------------------------------------------------------------------
 
 \vspace{-0.75em}
-\subsubsection{RF-M4-01 Gestion de pedidos}
+\subsubsection{RF-M4-01 Gestión de pedidos}
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir la creacion y gestion de pedidos de productos por parte de clientes profesionales o agentes comerciales autorizados.
-    \item El sistema debe permitir crear, recuperar y seguir editando borradores de pedido antes de su confirmacion.
-    \item El sistema debe permitir seleccionar productos del catalogo, cantidades y, cuando proceda, referencias cromaticas asociadas a cada linea.
-    \item El sistema debe calcular y persistir el importe total del pedido a partir de sus lineas.
+    \item El sistema debe permitir la creacion y gestión de pedidos de productos por parte de clientes profesionales o agentes comerciales autorizados.
+    \item El sistema debe permitir crear, recuperar y seguir editando borradores de pedido antes de su confirmación.
+    \item El sistema debe permitir seleccionar productos del catálogo, cantidades y, cuando proceda, referencias cromáticas asociadas a cada línea.
+    \item El sistema debe calcular y persistir el importe total del pedido a partir de sus líneas.
     \item El sistema debe permitir consultar el estado y el historial de pedidos asociados a cada cliente.
-    \item El sistema debe impedir que un mismo cliente acumule mas de dos pedidos abiertos pendientes de cobro.
+    \item El sistema debe impedir que un mismo cliente acumule más de dos pedidos abiertos pendientes de cobro.
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M4-02 Gestion de entregas y reparto}
+\subsubsection{RF-M4-02 Gestión de entregas y reparto}
 \vspace{-1em}
 
 \begin{itemize}
@@ -211,13 +216,13 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
     \item El sistema debe mostrar al comercial una bandeja de pedidos confirmados pendientes de reparto.
     \item El sistema no debe permitir crear ni completar un reparto sin pedidos confirmados vinculados.
     \item El sistema debe exigir la aportacion de un QR por cada pedido vinculado antes de completar un reparto.
-    \item Si la validacion QR es correcta, el cierre del reparto debe marcar los pedidos vinculados como \texttt{delivered}.
+    \item Si la validación QR es correcta, el cierre del reparto debe marcar los pedidos vinculados como \texttt{delivered}.
     \item Si una visita de reparto se aplaza o se cancela, el sistema debe mantener los pedidos en un estado coherente y sin enlaces huerfanos.
     \item El cliente solo debe visualizar una ETA cuando exista una visita de reparto real y valida asociada a su pedido.
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M4-03 Registro minimo de cobros}
+\subsubsection{RF-M4-03 Registro mínimo de cobros}
 \vspace{-1em}
 
 \begin{itemize}
@@ -225,7 +230,7 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
     \item El sistema debe permitir distinguir, al menos, entre pedidos con cobro \texttt{pending} y pedidos con cobro \texttt{paid}.
     \item El sistema debe permitir registrar metodo de cobro, fecha y notas asociadas al cambio de estado de cobro.
     \item El sistema debe permitir revertir un pedido a \texttt{pending} cuando la regla de negocio vigente lo permita y la consistencia del flujo se mantenga.
-    \item El sistema no cubre en esta iteracion pagos parciales, facturacion ni conciliacion avanzada.
+    \item El sistema no cubre en esta iteración pagos parciales, facturación ni conciliación avanzada.
 \end{itemize}
 
 \vspace{-0.75em}
@@ -236,7 +241,7 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
     \item El sistema debe permitir al cliente consultar el historial y el detalle de sus propios pedidos.
     \item El sistema debe permitir al comercial consultar pedidos, repartos y cobros de los clientes que tiene asignados.
     \item El sistema debe permitir al administrador consultar el historial global de pedidos y abrir su detalle completo.
-    \item El detalle de un pedido debe mostrar, cuando aplique, su estado, su estado de cobro, sus lineas, el QR del paquete y la visita de reparto vinculada.
+    \item El detalle de un pedido debe mostrar, cuando aplique, su estado, su estado de cobro, sus líneas, el QR del paquete y la visita de reparto vinculada.
 \end{itemize}
 % ------------------------------------------------------------------------------
 \subsection{RF-M5}
@@ -373,49 +378,48 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 
 \begin{itemize}
     \item El sistema debe proporcionar un panel de administración accesible únicamente por usuarios con rol de distribuidor administrador.
-    \item El panel de administración debe permitir gestionar los elementos principales del sistema, tales como usuarios, clientes, catálogo de productos, promociones y configuraciones generales.
+    \item El panel de administración debe permitir gestionar los elementos principales del sistema ya implementados, tales como usuarios, clientes, catálogo, pedidos globales, auditoría y configuraciones transversales.
     \item El sistema debe permitir realizar tareas de mantenimiento y actualización de la información almacenada en la plataforma.
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M7-02 Consulta de información operativa}
+\subsubsection{RF-M7-02 Auditoría y trazabilidad administrativa}
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir consultar información operativa relevante para el distribuidor relacionada con la actividad comercial.
-    \item El sistema debe permitir visualizar información agregada sobre pedidos, ventas, cobros y actividad comercial.
-    \item El sistema debe permitir generar resúmenes o informes que faciliten el seguimiento del negocio y la toma de decisiones.
+    \item El sistema debe permitir consultar información de auditoría relevante para el distribuidor relacionada con accesos y acciones administrativas.
+    \item El sistema debe permitir visualizar registros de acceso, resultados de autenticación y cambios de estado o rol realizados sobre usuarios.
+    \item El sistema debe permitir utilizar dicha información como apoyo al seguimiento operativo y de seguridad del sistema.
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M7-03 Integración con sistemas externos}
+\subsubsection{RF-M7-03 Configuración global de rate limiting}
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir la integración con herramientas o servicios externos utilizados en la actividad del distribuidor.
-    \item Entre dichas integraciones podrán contemplarse herramientas de navegación, servicios de mensajería o sistemas de gestión empresarial.
-    \item El sistema debe permitir exportar o intercambiar información con dichos sistemas cuando sea necesario.
+    \item El sistema debe permitir al administrador consultar las políticas globales de rate limiting activas.
+    \item El sistema debe permitir habilitar o deshabilitar políticas concretas y ajustar su número maximo de peticiones y su ventana temporal.
+    \item El sistema debe aplicar estas políticas de forma coherente sobre login y API sin exigir cambios manuales en el código para cada ajuste operativo.
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M7-04 Integración con sistemas de gestión comercial}
+\subsubsection{RF-M7-04 Integraciones externas de soporte}
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir la exportación o sincronización de información comercial con herramientas externas de gestión utilizadas por el distribuidor, como sistemas de facturación o contabilidad.
-    \item El sistema debe facilitar el intercambio de información relacionada con pedidos, clientes o cobros con dichos sistemas externos.
-    \item El sistema debe permitir generar información estructurada que pueda ser utilizada posteriormente en sistemas de gestión empresarial.
+    \item El sistema debe apoyarse en servicios externos de soporte cuando una capacidad implementada lo requiera.
+    \item Entre dichas integraciones ya operativas se incluyen almacenamiento de imágenes, geocodificación, cálculo de rutas y representación del QR operativo de pedido.
+    \item El sistema debe degradar de forma controlada cuando una de estas integraciones no pueda responder o no este disponible temporalmente.
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M7-05 Automatización de pedidos a proveedor}
+\subsubsection{RF-M7-05 Servicios transversales de compatibilidad y soporte}
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir facilitar el proceso de realización de pedidos del distribuidor a la empresa proveedora de productos.
-    \item El sistema debe permitir generar pedidos de reposición a partir de la información registrada en el sistema, como pedidos realizados por clientes o históricos de ventas.
-    \item El sistema debe permitir generar automáticamente propuestas de pedido basadas en el consumo previo o en los productos más demandados.
-    \item El sistema debe permitir exportar o generar dichos pedidos en un formato adecuado para su envío a la empresa proveedora.
+    \item El sistema debe detectar navegadores por debajo del soporte mínimo definido y redirigir a una página informativa.
+    \item El sistema debe exponer un manifiesto web e iconos de instalación para facilitar su uso como aplicación instalable en dispositivos compatibles.
+    \item El sistema debe registrar una capa básica de \textit{service worker} para mejorar la experiencia de uso cuando la conectividad falle de forma puntual.
 \end{itemize}
 
 % ------------------------------------------------------------------------------

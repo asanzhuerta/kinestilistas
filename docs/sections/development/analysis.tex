@@ -9,7 +9,106 @@ Este capítulo cubre el análisis del sistema de información a desarrollar, hac
 \input{./sections/development/analysis/conceptualmodel.tex}
 
 \section{Modelo de Interfaz de Usuario}
-\textcolor{red}{TODO}En esta sección se deberá incluir un prototipo de baja fidelidad o mockup de la interfaz de usuario del sistema. Además, es preciso elaborar un diagrama de navegación, reflejando la secuencia de pantallas a las que tienen acceso los diferentes roles de usuario y la conexión entre éstas.
+La interfaz finalmente implementada responde a una aplicación web responsive orientada a tres perfiles principales: administrador, comercial y cliente profesional. En lugar de una única vista comun para todos los usuarios, el sistema deriva a cada rol hacia un espacio operativo propio tras el inicio de sesión, conservando componentes compartidos como cabeceras, tarjetas de resumen, listados, formularios y vistas de detalle.
+
+La construcción visual del sistema ha seguido una aproximación iterativa: primero se definieron pantallas operativas mínimas para cubrir los módulos \texttt{M1} a \texttt{M4}, y posteriormente se refinaron los flujos de trabajo más sensibles, especialmente los relacionados con detalle de visitas, preparación de pedidos, confirmación de entregas y seguimiento de cobros. Por ello, el modelo de interfaz presentado a continuación debe interpretarse como un wireframe funcional de baja fidelidad derivado de la interfaz realmente desplegada.
+
+\subsection{Wireframes de baja fidelidad}
+
+La Figura~\ref{fig:UIWireframes} resume tres patrones de pantalla que se repiten a lo largo de la aplicación: acceso, trabajo operativo sobre pedidos y detalle de visita de reparto.
+
+\begin{figure}[H]
+    \centering
+    \setlength{\fboxsep}{8pt}
+    \fbox{
+        \begin{minipage}{0.88\textwidth}
+            \textbf{Wireframe A. Acceso al sistema}\\[0.4em]
+            \rule{\textwidth}{0.4pt}\\[-0.1em]
+            Logo / nombre de la aplicación\\
+            Campo de identificador\\
+            Campo de contraseña\\
+            Mensaje de error o bloqueo por rate limiting\\
+            Boton de acceso\\
+            Enlace a registro / recuperación de contexto de usuario
+        \end{minipage}
+    }
+
+    \vspace{0.9em}
+
+    \fbox{
+        \begin{minipage}{0.88\textwidth}
+            \textbf{Wireframe B. Espacio operativo de pedidos}\\[0.4em]
+            \rule{\textwidth}{0.4pt}\\[-0.1em]
+            Cabecera con título, resumen y acciones principales\\
+            Selector de cliente cuando el rol es comercial\\
+            Líneas de pedido con producto, referencia cromatica opcional y cantidad\\
+            Acciones de borrador / confirmación\\
+            Historial de pedidos en la misma vista o en panel inferior\\
+            Acceso al detalle completo del pedido
+        \end{minipage}
+    }
+
+    \vspace{0.9em}
+
+    \fbox{
+        \begin{minipage}{0.88\textwidth}
+            \textbf{Wireframe C. Detalle de visita de reparto}\\[0.4em]
+            \rule{\textwidth}{0.4pt}\\[-0.1em]
+            Cabecera compacta con volver, estado y tipo de visita\\
+            Bloques desplegables de información de visita, cliente y comercial\\
+            Listado visible de pedidos vinculados al reparto\\
+            Panel plegable de acciones sobre la visita\\
+            Flujo de escaneo/introducción de QR y confirmación de entrega
+        \end{minipage}
+    }
+    \caption{Wireframes funcionales de baja fidelidad basados en la interfaz implementada}
+    \label{fig:UIWireframes}
+\end{figure}
+
+Estos wireframes sintetizan decisiones de diseño que se mantienen en toda la aplicación:
+
+\begin{itemize}
+    \item prioridad del uso móvil para comerciales y clientes, con navegacion inferior y vistas compactas;
+    \item acceso rápido a operaciones frecuentes desde la pantalla principal de cada rol;
+    \item separación clara entre listados, detalle y acciones de actualización;
+    \item uso de estados visuales, tarjetas resumen y bloques plegables para reducir ruido en vistas con mucha información operativa.
+\end{itemize}
+
+\subsection{Modelo de navegacion}
+
+La navegacion real del sistema parte de una entrada comun en \texttt{/login}. Tras autenticarse, cada usuario es redirigido a la raiz funcional de su rol, desde donde accede a sus módulos disponibles. La Figura~\ref{fig:NavigationModel} resume este comportamiento.
+
+\begin{figure}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabularx}{\textwidth}{|p{0.17\textwidth}|X|}
+        \hline
+        \textbf{Rol / punto de entrada} & \textbf{Secuencia principal de navegacion implementada} \\
+        \hline
+        Acceso comun & \texttt{/login} $\rightarrow$ redirección a \texttt{/admin}, \texttt{/commercials} o \texttt{/clients} según el rol autenticado. \\
+        \hline
+        Administrador & \texttt{/admin} $\rightarrow$ usuarios, solicitudes, clientes, auditoría, catálogo, pedidos globales y \texttt{/admin/settings}. Desde estos espacios se accede a listados, detalle y formularios de alta o edicion. \\
+        \hline
+        Comercial & \texttt{/commercials} $\rightarrow$ clientes, visitas, rutas, catálogo, coloración, pedidos, cobros y ajustes personales. Desde \texttt{/commercials/orders} se accede al detalle del pedido y desde \texttt{/commercials/visits} al detalle operativo de la visita de reparto. \\
+        \hline
+        Cliente profesional & \texttt{/clients} $\rightarrow$ estimación de reparto, catálogo, coloración y pedidos. Desde \texttt{/clients/orders} se accede al historial y al detalle de cada pedido. \\
+        \hline
+        Flujos transversales & \texttt{/profile} y \texttt{/profile/change-password} quedan disponibles como espacios comunes de perfil. El sistema contempla además \texttt{/register}, \texttt{/unsupported-browser}, páginas de error y rutas API protegidas asociadas a cada área funcional. \\
+        \hline
+    \end{tabularx}
+    \caption{Modelo de navegacion simplificado a partir de las rutas implementadas}
+    \label{fig:NavigationModel}
+\end{figure}
+
+Desde el punto de vista funcional, esta navegacion presenta varias propiedades relevantes para el análisis:
+
+\begin{itemize}
+    \item el administrador concentra las tareas de gobierno del sistema y de mantenimiento de datos maestros;
+    \item el comercial dispone del mayor número de pantallas operativas, al combinar seguimiento de clientes, visitas, rutas y pedidos;
+    \item el cliente profesional accede a una versión más acotada, enfocada en consulta de catálogo, coloración y ciclo de pedido;
+    \item los flujos de detalle siempre se subordinan a un listado o panel principal, evitando navegaciones profundas sin contexto previo;
+    \item las vistas de \texttt{M4} enlazan entre pedido, visita de reparto y seguimiento de cobro para mantener trazabilidad entre operaciones relacionadas.
+\end{itemize}
 
 \section{Modelo de Comportamiento}
 \textcolor{red}{TODO}En esta sección opcional, se incluirá el modelo de comportamiento desarrollado a partir de los casos de uso definidos. Para ello, se realizarán los diagramas de secuencia del sistema, donde se identificarán las operaciones o servicios del sistema. Luego, se detallará el contrato de las operaciones identificadas.

@@ -9,19 +9,21 @@ El repositorio contiene dos bloques principales:
 
 ## Alcance actual
 
-La versión actual cubre el núcleo operativo de los módulos 1, 2 y 3:
+La versión actual cubre de forma operativa los módulos `M1`, `M2`, `M3` y `M4`, e incorpora ya un bloque funcional operativo de `M5`:
 
 - `M1`: solicitud de alta, registro administrado, login con credenciales, control por roles, gestión de usuarios, estados de cuenta, logs de acceso y gestión de perfil.
 - `M2`: gestión de clientes, asignaciones comercial-cliente, geolocalización confirmada, ventanas horarias de visita, visitas comerciales, configuración operativa del comercial, previsualización de ruta diaria y ETA de reparto para cliente.
 - `M3`: gestión administrativa del catálogo, consulta pública de productos, navegación jerárquica por categorías y líneas, subcategorías, recursos de apoyo y exploración de cartas de color con sus referencias.
+- `M4`: borradores y confirmación de pedidos, historial por rol, reparto integrado en visitas comerciales, validación QR de entrega y seguimiento mínimo de cobro.
+- `M5` (bloque operativo actual): fichas de clientes del salon, registro y mantenimiento de servicios, ficha tecnica por servicio, seleccion de tonos de coloracion, galeria visual de resultado final, plantillas reutilizables de servicio, uso de productos, filtrado de historial, sugerencias derivadas del historial tecnico y borradores editables de correo tecnico por servicio.
 
-El módulo `M4` y los módulos posteriores aparecen ya reflejados en navegación y requisitos, pero todavía no forman parte del alcance operativo implementado en esta rama.
+Quedan fuera por ahora el envio real del correo tecnico a cliente final dentro de `M5`, el modulo `M6` y el grueso de `M8`.
 
 ## Roles disponibles
 
 - `admin`: gestiona usuarios, solicitudes de alta, clientes, asignaciones comerciales y el catálogo del módulo `M3`.
 - `commercial`: consulta clientes asignados, visitas, configuración diaria, previsualización de ruta, catálogo y coloración.
-- `client`: consulta la estimación de reparto del día, su propio perfil, el catálogo público y las cartas de color disponibles.
+- `client`: consulta la estimación de reparto del día, su propio perfil, el catálogo público, las cartas de color, sus pedidos y las fichas técnicas internas de su salón.
 
 ## Stack real del proyecto
 
@@ -33,7 +35,7 @@ El módulo `M4` y los módulos posteriores aparecen ya reflejados en navegación
 - `Auth.js / NextAuth 5 beta` con proveedor de credenciales
 - `PostgreSQL 16`
 - `TypeORM 0.3`
-- `Cloudinary` para imágenes de perfil y recursos visuales del catálogo
+- `Cloudinary` para imagenes de perfil, recursos visuales del catalogo y resultados tecnicos del salon
 - `Leaflet` y `react-leaflet` para mapas
 
 ## Estructura del repositorio
@@ -150,6 +152,10 @@ npm run build
 npm run start
 npm run lint
 npm run typecheck
+npm run m5:technical-email-smoke
+npm run m5:service-templates-smoke
+npm run m5:salon-visual-smoke
+npm run migration:create -- ./migrations/typeorm/<nombre>
 npm run migration:run
 npm run migration:show
 ```
@@ -185,14 +191,23 @@ npm run migration:show
 - confirmación de geolocalización y franja horaria en su ficha asociada,
 - consulta del catálogo de productos activos,
 - acceso a fichas técnicas y recursos de apoyo,
-- exploración de coloración por cartas y tonos.
+- exploración de coloración por cartas y tonos,
+- gestión del historial de pedidos y su trazabilidad básica,
+- alta de clientes del salón y consulta de su historial técnico,
+- registro, edicion y eliminacion de servicios con formula, notas tecnicas, productos utilizados y seleccion persistida de tonalidades cuando el producto enlaza referencias de color,
+- subida de varias imagenes de resultado final por servicio tecnico para documentar visualmente el acabado conseguido,
+- guardado y reutilizacion de plantillas tecnicas de servicio con productos predefinidos,
+- filtrado del historial tecnico por texto, tipo y fecha,
+- consulta de sugerencias de producto derivadas del historial tecnico,
+- generacion de borradores tecnicos editables por servicio, con copia al portapapeles y apertura mediante `mailto`.
 
 ## Estado actual y límites conocidos
 
 - el panel comercial ya ofrece previsualización de ruta tanto en el dashboard como en `/commercials/routes`;
 - el módulo `M3` está operativo para administración, comerciales y clientes, aunque sigue centrado en consulta y mantenimiento de catálogo, no en transacción comercial;
-- el panel de cliente ya muestra la ETA del reparto, el perfil, el catálogo y la coloración, mientras que otras tarjetas visibles quedan reservadas para módulos futuros;
-- la base de datos y la documentación funcional ya están preparadas para crecer hacia pedidos, entregas, cobros y formaciones a partir de `M4`.
+- el panel de cliente ya muestra la ETA del reparto, el perfil, el catálogo, la coloración, los pedidos y el primer bloque operativo de fichas técnicas del salón;
+- `M5` sigue siendo parcial: ya genera plantillas reutilizables, gestiona tonos e imagenes finales y prepara borradores tecnicos editables, pero todavia no incluye envio real ni automatizaciones completas de comunicacion hacia cliente final;
+- `M6` y `M8` siguen reservados para iteraciones futuras.
 
 ## Documentación técnica
 
