@@ -41,6 +41,11 @@ const navItems = [
 		href: "/admin/audit",
 	},
 	{
+		title: "Operacion M7",
+		icon: <ReportsIcon className="h-6 w-6" />,
+		href: "/admin/operations",
+	},
+	{
 		title: "Integraciones",
 		icon: <SettingsIcon className="h-6 w-6" />,
 		href: "/admin/integrations",
