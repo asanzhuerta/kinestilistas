@@ -41,6 +41,11 @@ const navItems = [
 		href: "/admin/audit",
 	},
 	{
+		title: "Integraciones",
+		icon: <SettingsIcon className="h-6 w-6" />,
+		href: "/admin/integrations",
+	},
+	{
 		title: "Ajustes globales",
 		icon: <SettingsIcon className="h-6 w-6" />,
 		href: "/admin/settings",

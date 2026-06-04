@@ -165,9 +165,12 @@ Aunque no constituyen un módulo de negocio independiente del mismo volumen que 
 \begin{itemize}
     \item vista de auditoría administrativa y de accesos desde el área \texttt{/admin};
     \item configuración global de políticas de rate limiting persistida en base de datos;
+    \item panel de integraciones y soporte en \path{/admin/integrations}, con inventario operativo de Cloudinary, Nominatim, OSRM y QuickChart, mostrando proveedor, estado de configuración, uso funcional y degradación prevista;
     \item soporte PWA basico mediante manifiesto web, iconos y \textit{service worker};
     \item compatibilidad mínima de navegador con redirección a pantalla específica de no soporte.
 \end{itemize}
+
+El inventario de integraciones se calcula en \path{lib/integrations/operational-status.ts} y se expone también mediante \path{/api/admin/integrations/status}. En este primer incremento no almacena ejecuciones historicas ni sincronizaciones externas; su finalidad es reforzar la observabilidad administrativa de los servicios de soporte que ya sostienen los módulos implementados.
 
 \section{Scripts de Base de datos}
 

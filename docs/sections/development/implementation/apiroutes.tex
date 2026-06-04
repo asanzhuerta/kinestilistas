@@ -249,6 +249,7 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 \endfirsthead
 \apiHeader
 \endhead
+\texttt{GET} & \path{/api/admin/integrations/status} & Admin & Sin parametros. Respuesta \texttt{200}: resumen e inventario operativo de integraciones de soporte.\\
 \texttt{GET} & \path{/api/admin/settings/rate-limits} & Admin & Sin parametros. Respuesta \texttt{200}: politicas de \textit{rate limiting}, valores por defecto y valores configurados.\\
 \texttt{PUT} & \path{/api/admin/settings/rate-limits} & Admin & JSON con \texttt{policies[]}: \texttt{name}, \texttt{enabled}, \texttt{maxRequests}, \texttt{windowMinutes}. Respuesta \texttt{200}: politicas actualizadas.\\
 \end{longtable}

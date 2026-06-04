@@ -19,6 +19,7 @@
 		"m6:communications-smoke": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/m6-communications-smoke.ts",
 		"m6:promotion-discount-smoke": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/m6-promotion-discount-smoke.ts",
 		"m6:closeout": "npm run m6:communications-smoke && npm run m6:promotion-discount-smoke",
+		"m7:integrations-smoke": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/m7-integrations-smoke.ts",
 		"typeorm:cli": "node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
 		"typeorm:ds": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./lib/typeorm/data-source-cli.ts",
 		"migration:create": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json npm run typeorm:cli -- migration:create",

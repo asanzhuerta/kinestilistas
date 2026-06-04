@@ -14,7 +14,7 @@ Desde el punto de vista organizativo, el sistema afecta principalmente a tres ti
 \end{itemize}
 
 \subsection{Alcance de la implementación}
-El alcance de la implementación actual cubre de forma operativa los módulos \texttt{M1}, \texttt{M2}, \texttt{M3}, \texttt{M4}, un primer incremento ya funcional de \texttt{M5} y el núcleo interno de \texttt{M6}, junto con un bloque transversal de administración ya materializado que incluye auditoría de accesos y acciones administrativas, políticas globales de rate limiting e integraciones externas de soporte. En concreto:
+El alcance de la implementación actual cubre de forma operativa los módulos \texttt{M1}, \texttt{M2}, \texttt{M3}, \texttt{M4}, un primer incremento ya funcional de \texttt{M5}, el núcleo interno de \texttt{M6} y un primer bloque operativo de \texttt{M7}, junto con un bloque transversal de administración ya materializado que incluye auditoría de accesos y acciones administrativas, políticas globales de rate limiting e integraciones externas de soporte. En concreto:
 
 \begin{itemize}
     \item \texttt{M1} cubre autenticación, sesiones, solicitudes de registro, gestión de usuarios, perfiles, trazabilidad y protecciones básicas de acceso.
@@ -23,8 +23,9 @@ El alcance de la implementación actual cubre de forma operativa los módulos \t
     \item \texttt{M4} cubre borradores de pedido, confirmación, reparto integrado en visitas comerciales, validación QR, estado mínimo de cobro y trazabilidad por rol.
     \item \texttt{M5} cubre fichas de clientes del salón, registro y mantenimiento de servicios, ficha técnica asociada, selección persistida de tonalidades cuando el producto enlaza referencias de color, galería visual de resultado final, plantillas reutilizables de servicio, uso de productos, filtrado de historial, sugerencias derivadas del historial técnico ya registrado y generación de borradores técnicos editables por servicio.
     \item \texttt{M6} cubre gestión administrativa completa de promociones, segmentos de clientes, asignación manual de clientes a segmentos, consulta de promociones por rol, aplicación de descuentos porcentuales activos sobre borradores y pedidos, publicación y mantenimiento de formaciones, inscripción de usuarios, notificaciones internas segmentadas y recordatorios personales.
+    \item \texttt{M7} cubre auditoría administrativa, configuración global de rate limiting e inventario operativo de integraciones de soporte como Cloudinary, Nominatim, OSRM y QuickChart.
 \end{itemize}
 
-Por el contrario, el envío real de correo técnico mediante proveedor externo dentro de \texttt{M5}, la mensajería externa de \texttt{M6} y la mayor parte de \texttt{M8} permanecen como líneas de evolución futura. Asimismo, dentro de \texttt{M7} no se ha implementado todavía un subsistema amplio de integraciones empresariales, sincronización externa o pedidos a proveedor; la versión actual se limita a las capacidades transversales de administración y soporte realmente presentes en el código.
+Por el contrario, el envío real de correo técnico mediante proveedor externo dentro de \texttt{M5}, la mensajería externa de \texttt{M6} y la mayor parte de \texttt{M8} permanecen como líneas de evolución futura. Asimismo, dentro de \texttt{M7} no se ha implementado todavía un subsistema amplio de integraciones empresariales, sincronización externa o pedidos a proveedor; la versión actual se limita a las capacidades transversales de administración, configuración, observabilidad e inventario de soporte realmente presentes en el código.
 
 En consecuencia, la memoria debe interpretarse distinguiendo entre dos niveles: por un lado, el alcance funcional completo identificado para la aplicación; por otro, el subconjunto efectivamente implementado y verificado en el estado actual del repositorio. El análisis, el diseño y la documentación técnica de los módulos ya construidos se ajustan en este documento al comportamiento real de la aplicación existente.

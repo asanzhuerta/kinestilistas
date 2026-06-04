@@ -46,7 +46,7 @@ El panel de administración concentra actualmente cinco áreas principales:
     \item \textbf{Gestión de clientes}: consulta de clientes y asignaciones entre clientes y comerciales.
     \item \textbf{Gestión de catálogo}: administración de categorías, líneas, subcategorías, productos, recursos de apoyo, cartas de color y referencias cromáticas.
     \item \textbf{Gestión global de pedidos}: consulta del historial global y detalle completo de cada pedido.
-    \item \textbf{Auditoría y configuración}: consulta de accesos y acciones administrativas, y ajuste de políticas globales de rate limiting.
+    \item \textbf{Auditoría y configuración}: consulta de accesos y acciones administrativas, revisión de integraciones de soporte y ajuste de políticas globales de rate limiting.
 \end{itemize}
 
 Las operaciones más habituales para este rol son:
@@ -60,6 +60,7 @@ Las operaciones más habituales para este rol son:
     \item mantener la estructura del catálogo y sus productos asociados;
     \item administrar cartas de color y referencias visuales por línea comercial;
     \item consultar la vista de auditoría en \texttt{/admin/audit}, incluyendo accesos recientes, acciones administrativas y resumen de sesiones activas;
+    \item revisar el inventario de integraciones de soporte en \texttt{/admin/integrations}, incluyendo proveedor, estado, configuración y mecanismo de degradación;
     \item ajustar límites globales de peticiones para login y API desde \texttt{/admin/settings};
     \item revisar el estado completo de un pedido y su trazabilidad de reparto y cobro.
 \end{enumerate}
