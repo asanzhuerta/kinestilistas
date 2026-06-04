@@ -10,11 +10,12 @@ La documentacion siguiente se presenta con una estructura similar a una coleccio
 Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no existe sesion valida y \texttt{403} cuando el rol no esta autorizado. Las validaciones de entrada se responden habitualmente con \texttt{400}, los recursos inexistentes con \texttt{404}, los conflictos de datos con \texttt{409} cuando procede y los errores no controlados con \texttt{500}. Todas las rutas bajo \path{/api} pasan por el control de \textit{rate limiting} del \path{proxy.ts}, que puede responder \texttt{429} si se supera la politica aplicable.
 
 \newcommand{\apiHeader}{\textbf{Metodo} & \textbf{Ruta} & \textbf{Acceso} & \textbf{Entrada y respuesta principal}\\}
-\newcolumntype{A}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcolumntype{A}[1]{>{\hspace{0pt}\arraybackslash}p{#1}}
+\newcommand{\apiTableSetup}{\footnotesize\setlength{\tabcolsep}{3pt}}
 
 \subsubsection{Autenticacion, cuenta y perfil}
 
-{\footnotesize
+{\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
 \caption{Endpoints de autenticacion, cuenta y perfil}\\
 \apiHeader
@@ -32,7 +33,7 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 
 \subsubsection{Administracion de usuarios y solicitudes}
 
-{\footnotesize
+{\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
 \caption{Endpoints administrativos de usuarios}\\
 \apiHeader
@@ -56,7 +57,7 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 
 \subsubsection{Clientes profesionales y asignaciones comerciales}
 
-{\footnotesize
+{\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
 \caption{Endpoints de clientes profesionales y asignacion comercial}\\
 \apiHeader
@@ -80,7 +81,7 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 
 \subsubsection{Visitas, rutas y perfil comercial}
 
-{\footnotesize
+{\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
 \caption{Endpoints de visitas comerciales, rutas y configuracion operativa}\\
 \apiHeader
@@ -105,7 +106,7 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 
 \subsubsection{Catalogo, productos, recursos y coloracion}
 
-{\footnotesize
+{\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
 \caption{Endpoints administrativos de catalogo}\\
 \apiHeader
@@ -147,7 +148,7 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 
 \subsubsection{Pedidos, borradores, reparto y cobro}
 
-{\footnotesize
+{\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
 \caption{Endpoints de pedidos y cobros}\\
 \apiHeader
@@ -176,7 +177,7 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 
 \subsubsection{Historial tecnico de salon}
 
-{\footnotesize
+{\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
 \caption{Endpoints del historial tecnico de salon}\\
 \apiHeader
@@ -201,7 +202,7 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 
 \subsubsection{Comunicaciones internas}
 
-{\footnotesize
+{\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
 \caption{Endpoints de comunicaciones, promociones, formaciones y recordatorios}\\
 \apiHeader
@@ -226,22 +227,22 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 \texttt{GET} & \path{/api/admin/communications/trainings/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: formacion.\\
 \texttt{PATCH} & \path{/api/admin/communications/trainings/:id} & Admin & JSON de formacion. Respuesta \texttt{200}: formacion actualizada.\\
 \texttt{DELETE} & \path{/api/admin/communications/trainings/:id} & Admin & Sin cuerpo. Respuesta \texttt{200}: formacion eliminada.\\
-\texttt{GET} & \path{/api/communications/promotions} & Cliente/comercial & Sin parametros. Respuesta \texttt{200}: promociones visibles para el usuario autenticado.\\
-\texttt{GET} & \path{/api/communications/trainings} & Cliente/comercial & Sin parametros. Respuesta \texttt{200}: formaciones publicadas para el usuario.\\
-\texttt{POST} & \path{/api/communications/trainings/:id/enrollment} & Cliente/comercial & JSON opcional con \texttt{notes}. Respuesta \texttt{201}: inscripcion registrada.\\
-\texttt{DELETE} & \path{/api/communications/trainings/:id/enrollment} & Cliente/comercial & Sin cuerpo. Respuesta \texttt{200}: inscripcion cancelada.\\
-\texttt{GET} & \path{/api/communications/notifications} & Cliente/comercial & Sin parametros. Respuesta \texttt{200}: notificaciones del usuario.\\
-\texttt{PATCH} & \path{/api/communications/notifications} & Cliente/comercial & Sin cuerpo. Respuesta \texttt{200}: todas las notificaciones marcadas como leidas.\\
-\texttt{PATCH} & \path{/api/communications/notifications/:id} & Cliente/comercial & Parametro \texttt{id}. Respuesta \texttt{200}: notificacion marcada como leida.\\
-\texttt{GET} & \path{/api/communications/reminders} & Cliente/comercial & Sin parametros. Respuesta \texttt{200}: recordatorios propios.\\
-\texttt{POST} & \path{/api/communications/reminders} & Cliente/comercial & JSON con \texttt{title}, \texttt{body}, \texttt{scheduledAt}, \texttt{status}. Respuesta \texttt{201}: recordatorio creado.\\
-\texttt{PATCH} & \path{/api/communications/reminders/:id} & Cliente/comercial & JSON con \texttt{status}. Respuesta \texttt{200}: estado del recordatorio actualizado.\\
+\texttt{GET} & \path{/api/communications/promotions} & Cliente y comercial & Sin parametros. Respuesta \texttt{200}: promociones visibles para el usuario autenticado.\\
+\texttt{GET} & \path{/api/communications/trainings} & Cliente y comercial & Sin parametros. Respuesta \texttt{200}: formaciones publicadas para el usuario.\\
+\texttt{POST} & \path{/api/communications/trainings/:id/enrollment} & Cliente y comercial & JSON opcional con \texttt{notes}. Respuesta \texttt{201}: inscripcion registrada.\\
+\texttt{DELETE} & \path{/api/communications/trainings/:id/enrollment} & Cliente y comercial & Sin cuerpo. Respuesta \texttt{200}: inscripcion cancelada.\\
+\texttt{GET} & \path{/api/communications/notifications} & Cliente y comercial & Sin parametros. Respuesta \texttt{200}: notificaciones del usuario.\\
+\texttt{PATCH} & \path{/api/communications/notifications} & Cliente y comercial & Sin cuerpo. Respuesta \texttt{200}: todas las notificaciones marcadas como leidas.\\
+\texttt{PATCH} & \path{/api/communications/notifications/:id} & Cliente y comercial & Parametro \texttt{id}. Respuesta \texttt{200}: notificacion marcada como leida.\\
+\texttt{GET} & \path{/api/communications/reminders} & Cliente y comercial & Sin parametros. Respuesta \texttt{200}: recordatorios propios.\\
+\texttt{POST} & \path{/api/communications/reminders} & Cliente y comercial & JSON con \texttt{title}, \texttt{body}, \texttt{scheduledAt}, \texttt{status}. Respuesta \texttt{201}: recordatorio creado.\\
+\texttt{PATCH} & \path{/api/communications/reminders/:id} & Cliente y comercial & JSON con \texttt{status}. Respuesta \texttt{200}: estado del recordatorio actualizado.\\
 \end{longtable}
 }
 
 \subsubsection{Configuracion transversal}
 
-{\footnotesize
+{\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
 \caption{Endpoints transversales de configuracion}\\
 \apiHeader
