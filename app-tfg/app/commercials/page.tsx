@@ -1,6 +1,8 @@
 import NavCard from "../components/NavCard";
 import PageTransition from "../components/animations/PageTransition";
 import RouteMapCard from "../components/RouteMapCard";
+import { requireCommercialSession } from "@/lib/auth/require-session";
+import { listNotificationsForUser } from "@/lib/typeorm/services/communications/communications";
 
 import {
 	CatalogIcon,
@@ -12,6 +14,7 @@ import {
 	VisitsIcon,
 	RouteIcon,
 	ActivityIcon,
+	ChatIcon,
 	PaymentsIcon,
 	PromotionsIcon,
 	ReportsIcon,
@@ -93,12 +96,17 @@ const sections: Array<{
 			{
 				title: "Promociones",
 				icon: <PromotionsIcon className="h-6 w-6" />,
-				disabled: true,
+				href: "/commercials/promotions",
 			},
 			{
 				title: "Formaciones",
 				icon: <TrainingIcon className="h-6 w-6" />,
-				disabled: true,
+				href: "/commercials/trainings",
+			},
+			{
+				title: "Avisos",
+				icon: <ChatIcon className="h-6 w-6" />,
+				href: "/commercials/notifications",
 			},
 			{
 				title: "Informes",
@@ -109,12 +117,26 @@ const sections: Array<{
 	},
 ];
 
-export default function CommercialsHome() {
+export default async function CommercialsHome() {
+	const session = await requireCommercialSession();
+	const notifications = await listNotificationsForUser(session.user.id);
+	const unreadNotificationsCount = notifications.filter(
+		(notification) => !notification.read_at,
+	).length;
+
 	return (
 		<PageTransition>
 			<RouteMapCard />
 
 			<div className="space-y-6">
+				{unreadNotificationsCount > 0 ? (
+					<div className="rounded-3xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-800 shadow-sm">
+						Tienes {unreadNotificationsCount} aviso
+						{unreadNotificationsCount === 1 ? "" : "s"} pendiente
+						{unreadNotificationsCount === 1 ? "" : "s"} de lectura.
+					</div>
+				) : null}
+
 				{sections.map((section) => (
 					<section
 						key={section.title}
@@ -137,6 +159,12 @@ export default function CommercialsHome() {
 									icon={item.icon}
 									href={item.href}
 									disabled={item.disabled}
+									badgeCount={
+										item.href === "/commercials/notifications"
+											? unreadNotificationsCount
+											: 0
+									}
+									badgeLabel="avisos sin leer"
 								/>
 							))}
 						</div>
