@@ -857,6 +857,8 @@ De forma análoga, el inventario de soporte técnico incorporado en \path{/admin
 
 El resumen operativo de \path{/admin/operations} sigue el mismo criterio: agrega contadores procedentes de auditoría, configuración de rate limiting, inventario de integraciones e inventario de soporte técnico. No introduce nuevas entidades persistentes, sino que ordena información ya disponible para facilitar la revisión administrativa del módulo.
 
+La exportación \texttt{CSV} de auditoría desde \path{/admin/audit} tampoco introduce una entidad nueva. El fichero se genera bajo demanda a partir de \texttt{user\_access\_log} y \texttt{user\_management\_log}, aplicando una ventana temporal y un límite de registros para facilitar la revisión externa de accesos y acciones administrativas sin duplicar persistencia.
+
 \subsubsection*{Exportación o sincronización}
 
 El sistema debe permitir registrar las operaciones de exportación o sincronización de información realizadas con sistemas externos.
