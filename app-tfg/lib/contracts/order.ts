@@ -40,6 +40,9 @@ export type OrderSummaryLine = {
 	color_reference_name: string | null;
 	product_line_name: string | null;
 	quantity: number;
+	unit_price_snapshot: string;
+	discount_percentage: string;
+	line_total: string;
 };
 
 export type OrderSummary = {

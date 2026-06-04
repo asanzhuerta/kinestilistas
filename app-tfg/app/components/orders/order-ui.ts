@@ -1,4 +1,8 @@
-import type { OrderProductOption } from "@/lib/contracts/order";
+import type {
+	OrderProductOption,
+	OrderSummary,
+	OrderSummaryLine,
+} from "@/lib/contracts/order";
 
 export function formatOrderCurrency(amount: string) {
 	const parsed = Number(amount);
@@ -11,6 +15,76 @@ export function formatOrderCurrency(amount: string) {
 		style: "currency",
 		currency: "EUR",
 	});
+}
+
+export function formatOrderCents(cents: number) {
+	return formatOrderCurrency((cents / 100).toFixed(2));
+}
+
+export function formatOrderPercentage(value: string | number) {
+	const parsed = Number(value);
+
+	if (!Number.isFinite(parsed)) {
+		return String(value);
+	}
+
+	return parsed.toLocaleString("es-ES", {
+		maximumFractionDigits: 2,
+		minimumFractionDigits: parsed % 1 === 0 ? 0 : 2,
+	});
+}
+
+export function getOrderLineSubtotalCents(line: OrderSummaryLine) {
+	const unitPrice = Number(line.unit_price_snapshot);
+
+	if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+		return 0;
+	}
+
+	return Math.round(unitPrice * 100) * line.quantity;
+}
+
+export function getOrderLineTotalCents(line: OrderSummaryLine) {
+	const lineTotal = Number(line.line_total);
+
+	if (!Number.isFinite(lineTotal) || lineTotal < 0) {
+		return 0;
+	}
+
+	return Math.round(lineTotal * 100);
+}
+
+export function getOrderLineDiscountCents(line: OrderSummaryLine) {
+	return Math.max(
+		0,
+		getOrderLineSubtotalCents(line) - getOrderLineTotalCents(line),
+	);
+}
+
+export function hasOrderLineDiscount(line: OrderSummaryLine) {
+	return Number(line.discount_percentage) > 0 && getOrderLineDiscountCents(line) > 0;
+}
+
+export function buildOrderLinePromotionLabel(line: OrderSummaryLine) {
+	const targetName = line.product_line_name || line.product_name;
+
+	return `Promocion aplicada: ${formatOrderPercentage(
+		line.discount_percentage,
+	)} % en ${targetName}`;
+}
+
+export function getOrderDiscountSummary(order: OrderSummary | null | undefined) {
+	const discountedLines = order?.lines.filter(hasOrderLineDiscount) ?? [];
+	const totalDiscountCents = discountedLines.reduce(
+		(total, line) => total + getOrderLineDiscountCents(line),
+		0,
+	);
+
+	return {
+		discountedLineCount: discountedLines.length,
+		totalDiscountCents,
+		hasDiscounts: discountedLines.length > 0 && totalDiscountCents > 0,
+	};
 }
 
 export function getOrderStatusClasses(statusCode: string) {
