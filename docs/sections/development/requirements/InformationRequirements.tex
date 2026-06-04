@@ -855,6 +855,8 @@ En el incremento actual de \texttt{M7}, la aplicación no persiste todavía un h
 
 De forma análoga, el inventario de soporte técnico incorporado en \path{/admin/support} no crea una entidad persistente propia. Su información se deriva de elementos ya existentes en el proyecto, como \path{proxy.ts}, \path{app/manifest.ts}, \path{public/sw.js}, los iconos PWA y componentes transversales de experiencia de usuario. Por tanto, actúa como una vista de observabilidad administrativa y no como una tabla adicional del modelo de datos.
 
+El resumen operativo de \path{/admin/operations} sigue el mismo criterio: agrega contadores procedentes de auditoría, configuración de rate limiting, inventario de integraciones e inventario de soporte técnico. No introduce nuevas entidades persistentes, sino que ordena información ya disponible para facilitar la revisión administrativa del módulo.
+
 \subsubsection*{Exportación o sincronización}
 
 El sistema debe permitir registrar las operaciones de exportación o sincronización de información realizadas con sistemas externos.

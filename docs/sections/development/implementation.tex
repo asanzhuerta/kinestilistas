@@ -164,6 +164,7 @@ Aunque no constituyen un módulo de negocio independiente del mismo volumen que 
 
 \begin{itemize}
     \item vista de auditoría administrativa y de accesos desde el área \texttt{/admin};
+    \item panel de operación transversal en \path{/admin/operations}, que agrega auditoría, rate limiting, integraciones y soporte técnico;
     \item configuración global de políticas de rate limiting persistida en base de datos;
     \item panel de integraciones y soporte en \path{/admin/integrations}, con inventario operativo de Cloudinary, Nominatim, OSRM y QuickChart, mostrando proveedor, estado de configuración, uso funcional y degradación prevista;
     \item panel de soporte técnico en \path{/admin/support}, con inventario operativo de compatibilidad de navegador, PWA, \textit{service worker} y formularios seguros ante hidratación;
@@ -174,6 +175,8 @@ Aunque no constituyen un módulo de negocio independiente del mismo volumen que 
 El inventario de integraciones se calcula en \path{lib/integrations/operational-status.ts} y se expone también mediante \path{/api/admin/integrations/status}. En este primer incremento no almacena ejecuciones historicas ni sincronizaciones externas; su finalidad es reforzar la observabilidad administrativa de los servicios de soporte que ya sostienen los módulos implementados.
 
 El inventario de soporte técnico se calcula en \path{lib/support/operational-support.ts} y se expone mediante \path{/api/admin/support/status}. A diferencia de la configuración de rate limiting, no requiere migraciones ni tablas nuevas, ya que inspecciona activos y configuraciones existentes del propio proyecto: \path{proxy.ts}, \path{app/manifest.ts}, \path{public/sw.js}, iconos PWA y componentes transversales.
+
+La vista agregada de operación se calcula en \path{lib/admin/operational-overview.ts} y se expone mediante \path{/api/admin/operations/status}. Este servicio combina contadores de auditoría, estado de políticas de rate limiting y resúmenes de los inventarios de integración y soporte para ofrecer una lectura ejecutiva del estado de \texttt{M7}.
 
 \section{Scripts de Base de datos}
 

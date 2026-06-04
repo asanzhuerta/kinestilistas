@@ -31,7 +31,7 @@ La estructura recomendada para incorporar cambios es la siguiente:
     \item \texttt{lib/orders/}: soporte transversal del dominio de pedidos, incluyendo QR.
     \item \texttt{lib/geocoding/}: resolución de direcciones y normalización geográfica.
     \item \texttt{lib/security/}: rate limiting y utilidades de seguridad transversal.
-    \item \texttt{lib/integrations/} y \texttt{lib/support/}: inventarios administrativos de integraciones externas y soporte técnico/PWA.
+    \item \texttt{lib/integrations/}, \texttt{lib/support/} y \texttt{lib/admin/operational-overview.ts}: inventarios administrativos y resumen operativo de \texttt{M7}.
     \item \texttt{lib/typeorm/services/}: acceso a datos y lógica persistente.
 \end{itemize}
 
@@ -59,6 +59,8 @@ Si se incorpora una nueva ruta privada o un nuevo endpoint sensible, debe revisa
 Además, las políticas de rate limiting ya no son completamente estáticas: una parte de su configuración puede modificarse desde administración y se persiste en base de datos. Cualquier cambio en este ámbito debe comprobar tanto el catálogo de políticas base como la lógica de sobreescritura persistida.
 
 Las vistas de \path{/admin/integrations} y \path{/admin/support} no persisten estado propio: calculan inventarios desde variables de entorno, activos públicos y configuración del proyecto. Si se amplían, conviene mantenerlas como observabilidad ligera salvo que se cree una migración específica para historificar estados.
+
+La vista \path{/admin/operations} agrega esas lecturas con auditoría y rate limiting. Al modificarla, debe comprobarse que no duplique reglas de negocio y que siga delegando en los servicios de detalle existentes.
 
 \subsection{Persistencia y migraciones}
 
