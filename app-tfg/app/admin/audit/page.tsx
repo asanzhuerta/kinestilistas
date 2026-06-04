@@ -1,4 +1,5 @@
 import PageTransition from "@/app/components/animations/PageTransition";
+import Link from "next/link";
 import { getDataSource } from "@/lib/typeorm/data-source";
 import { UserAccessLog } from "@/lib/typeorm/entities/UserAccessLog";
 import { UserManagementLog } from "@/lib/typeorm/entities/UserManagementLog";
@@ -68,15 +69,34 @@ export default async function AdminAuditPage() {
 		<PageTransition>
 			<div className="space-y-6">
 				<section className="glass-card rounded-3xl border border-white/30 bg-white/80 p-6 shadow-xl backdrop-blur">
-					<p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-						M1 · Seguridad y trazabilidad
-					</p>
-					<h1 className="text-3xl font-bold text-slate-900">Auditoria</h1>
-					<p className="mt-2 max-w-3xl text-sm text-slate-600">
-						Aqui puedes revisar los accesos recientes, las acciones
-						administrativas sobre usuarios y una referencia rapida de las
-						sesiones que siguen activas.
-					</p>
+					<div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+						<div>
+							<p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+								M7 - Auditoria y trazabilidad
+							</p>
+							<h1 className="text-3xl font-bold text-slate-900">Auditoria</h1>
+							<p className="mt-2 max-w-3xl text-sm text-slate-600">
+								Aqui puedes revisar los accesos recientes, las acciones
+								administrativas sobre usuarios y una referencia rapida de las
+								sesiones que siguen activas.
+							</p>
+						</div>
+
+						<div className="flex flex-wrap gap-3">
+							<Link
+								href="/api/admin/audit/export?type=access&days=30&limit=200"
+								className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+							>
+								Exportar accesos CSV
+							</Link>
+							<Link
+								href="/api/admin/audit/export?type=management&days=30&limit=200"
+								className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+							>
+								Exportar acciones CSV
+							</Link>
+						</div>
+					</div>
 				</section>
 
 				<section className="grid gap-4 md:grid-cols-3">
@@ -122,7 +142,7 @@ export default async function AdminAuditPage() {
 								<div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
 									<div>
 										<p className="text-sm font-semibold text-slate-900">
-											{log.eventType?.name ?? "Evento"} ·{" "}
+											{log.eventType?.name ?? "Evento"} -{" "}
 											{log.resultType?.name ?? "Resultado"}
 										</p>
 										<p className="mt-1 text-sm text-slate-600">
@@ -198,14 +218,14 @@ export default async function AdminAuditPage() {
 								<div className="mt-3 flex flex-wrap gap-2 text-xs">
 									{log.previousStatus || log.newStatus ? (
 										<span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-slate-600">
-											Estado: {log.previousStatus?.name ?? "-"} →{" "}
+											Estado: {log.previousStatus?.name ?? "-"} {"->"}{" "}
 											{log.newStatus?.name ?? "-"}
 										</span>
 									) : null}
 
 									{log.previousRole || log.newRole ? (
 										<span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-slate-600">
-											Rol: {log.previousRole?.name ?? "-"} →{" "}
+											Rol: {log.previousRole?.name ?? "-"} {"->"}{" "}
 											{log.newRole?.name ?? "-"}
 										</span>
 									) : null}

@@ -164,6 +164,7 @@ Aunque no constituyen un módulo de negocio independiente del mismo volumen que 
 
 \begin{itemize}
     \item vista de auditoría administrativa y de accesos desde el área \texttt{/admin};
+    \item exportación \texttt{CSV} de accesos y acciones administrativas desde \path{/admin/audit}, protegida por rol de administrador;
     \item panel de operación transversal en \path{/admin/operations}, que agrega auditoría, rate limiting, integraciones y soporte técnico;
     \item configuración global de políticas de rate limiting persistida en base de datos;
     \item panel de integraciones y soporte en \path{/admin/integrations}, con inventario operativo de Cloudinary, Nominatim, OSRM y QuickChart, mostrando proveedor, estado de configuración, uso funcional y degradación prevista;
@@ -177,6 +178,8 @@ El inventario de integraciones se calcula en \path{lib/integrations/operational-
 El inventario de soporte técnico se calcula en \path{lib/support/operational-support.ts} y se expone mediante \path{/api/admin/support/status}. A diferencia de la configuración de rate limiting, no requiere migraciones ni tablas nuevas, ya que inspecciona activos y configuraciones existentes del propio proyecto: \path{proxy.ts}, \path{app/manifest.ts}, \path{public/sw.js}, iconos PWA y componentes transversales.
 
 La vista agregada de operación se calcula en \path{lib/admin/operational-overview.ts} y se expone mediante \path{/api/admin/operations/status}. Este servicio combina contadores de auditoría, estado de políticas de rate limiting y resúmenes de los inventarios de integración y soporte para ofrecer una lectura ejecutiva del estado de \texttt{M7}.
+
+La exportación de auditoría se centraliza en \path{lib/admin/audit-export.ts} y se publica mediante \path{/api/admin/audit/export}. El servicio genera bajo demanda ficheros \texttt{CSV} para accesos y acciones administrativas recientes, con límite de filas y ventana temporal configurable por query string. De este modo, el administrador puede conservar evidencias sin duplicar información ni añadir nuevas tablas al modelo físico.
 
 \section{Scripts de Base de datos}
 
