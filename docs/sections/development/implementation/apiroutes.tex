@@ -1,0 +1,254 @@
+\subsection{API interna y Route Handlers}
+\label{subsec:internalApiRoutes}
+
+En \texttt{Next.js}, los \textit{Route Handlers} permiten crear manejadores HTTP personalizados dentro del directorio \texttt{app}, usando las APIs web estandarizadas \texttt{Request} y \texttt{Response} \citep{nextjsroutehandlers2026}. En este proyecto esa capacidad se materializa en la carpeta \path{app/api/}, donde cada fichero \path{route.ts} expone operaciones de lectura o escritura mediante metodos HTTP como \texttt{GET}, \texttt{POST}, \texttt{PUT}, \texttt{PATCH} y \texttt{DELETE}, metodos soportados por la convencion oficial de rutas de \texttt{Next.js} \citep{nextjsroutefile2026}. Desde el punto de vista HTTP, estos metodos expresan la intencion de la peticion, por ejemplo recuperar un recurso, enviar datos, sustituirlos, modificarlos parcialmente o eliminarlos \citep{mdnhttpmethods2026}.
+
+El uso de rutas API internas aporta varias ventajas al proyecto. En primer lugar, permite mantener en el mismo repositorio la interfaz y la frontera de servidor, reduciendo la distancia entre componentes visuales, contratos TypeScript y servicios de dominio. En segundo lugar, encaja con el patron \textit{Backend for Frontend}, recomendado por la propia documentacion de \texttt{Next.js} para adaptar, filtrar o agregar datos antes de entregarlos a la interfaz \citep{nextjsbackendforfrontend2026}. En tercer lugar, evita exponer directamente la base de datos o los servicios internos al navegador: las paginas llaman a \path{/api/...}, mientras que los \textit{Route Handlers} validan sesion, rol, parametros y cuerpo antes de delegar en \path{lib/typeorm/services/}. Por ultimo, esta arquitectura facilita aplicar controles transversales como el \textit{rate limiting} centralizado en \path{proxy.ts}, la normalizacion de errores mediante \path{lib/api/server.ts} y la reutilizacion de contratos compartidos.
+
+La documentacion siguiente se presenta con una estructura similar a una coleccion de Postman: metodo, URL, autenticacion, parametros o cuerpo de entrada y respuesta principal. Postman organiza las peticiones alrededor de estos elementos de solicitud y respuesta, incluyendo URL, parametros, autenticacion, cabeceras y cuerpo \citep{postmanrequests2026}. En las tablas se omiten cabeceras repetitivas como \texttt{Content-Type: application/json} cuando el cuerpo es JSON; cuando se indica \texttt{multipart/form-data}, la ruta espera subida de archivo.
+
+Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no existe sesion valida y \texttt{403} cuando el rol no esta autorizado. Las validaciones de entrada se responden habitualmente con \texttt{400}, los recursos inexistentes con \texttt{404}, los conflictos de datos con \texttt{409} cuando procede y los errores no controlados con \texttt{500}. Todas las rutas bajo \path{/api} pasan por el control de \textit{rate limiting} del \path{proxy.ts}, que puede responder \texttt{429} si se supera la politica aplicable.
+
+\newcommand{\apiHeader}{\textbf{Metodo} & \textbf{Ruta} & \textbf{Acceso} & \textbf{Entrada y respuesta principal}\\}
+\newcommand{\apiColumns}{>{\RaggedRight\arraybackslash}p{0.10\textwidth}>{\RaggedRight\arraybackslash}p{0.27\textwidth}>{\RaggedRight\arraybackslash}p{0.15\textwidth}>{\RaggedRight\arraybackslash}p{0.38\textwidth}}
+
+\subsubsection{Autenticacion, cuenta y perfil}
+
+{\footnotesize
+\begin{longtable}{\apiColumns}
+\caption{Endpoints de autenticacion, cuenta y perfil}\\
+\apiHeader
+\endfirsthead
+\apiHeader
+\endhead
+\texttt{GET/POST} & \path{/api/auth/:nextauth*} & Publico / sesion & Ruta delegada en \texttt{Auth.js} para CSRF, proveedores, callback de credenciales y consulta de sesion. Respuesta gestionada por la libreria.\\
+\texttt{POST} & \path{/api/auth/register-request} & Publico & JSON con \texttt{email}, \texttt{name}, \texttt{password}, \texttt{company} y \texttt{phone}. Respuesta \texttt{201}: solicitud de alta pendiente de revision administrativa.\\
+\texttt{POST} & \path{/api/auth/logout} & Sesion opcional & Sin cuerpo. Registra el cierre de sesion cuando existe sesion activa y devuelve \texttt{\{ ok: true \}}.\\
+\texttt{POST} & \path{/api/account/change-password} & Sesion & \texttt{multipart/form-data} con \texttt{current\_password}, \texttt{new\_password} y \texttt{confirm\_new\_password}. Respuesta: redireccion a la pantalla de cambio de contrasena con exito o error.\\
+\texttt{PATCH} & \path{/api/profile} & Sesion & JSON con datos de perfil: \texttt{name}, \texttt{email}, \texttt{company}, \texttt{phone}, \path{profile_image_url}, nueva contrasena opcional y \texttt{clientProfile}. Respuesta \texttt{200}: perfil actualizado.\\
+\texttt{POST} & \path{/api/profile/upload-image} & Sesion & \texttt{multipart/form-data} con \texttt{file} y \texttt{previousImageUrl}. Respuesta \texttt{200}: \texttt{imageUrl} y \texttt{publicId} de Cloudinary.\\
+\end{longtable}
+}
+
+\subsubsection{Administracion de usuarios y solicitudes}
+
+{\footnotesize
+\begin{longtable}{\apiColumns}
+\caption{Endpoints administrativos de usuarios}\\
+\apiHeader
+\endfirsthead
+\apiHeader
+\endhead
+\texttt{GET} & \path{/api/admin/users} & Admin & Query opcional \texttt{page}, \texttt{pageSize}, \texttt{search}. Respuesta \texttt{200}: listado de usuarios, paginado cuando procede.\\
+\texttt{POST} & \path{/api/admin/users} & Admin & JSON \texttt{CreateAdminUserBody}: \texttt{name}, \texttt{email}, \texttt{password}, \texttt{company}, \texttt{phone}, \texttt{roleId}. Respuesta \texttt{201}: usuario creado.\\
+\texttt{PATCH} & \path{/api/admin/users/:id} & Admin & JSON de perfil administrativo: datos de usuario, rol y estado. Respuesta \texttt{200}: usuario actualizado.\\
+\texttt{PATCH} & \path{/api/admin/users/:id/status} & Admin & JSON con \texttt{statusId}, \texttt{reason} y \texttt{notes}. Respuesta \texttt{200}: estado actualizado y auditado.\\
+\texttt{PATCH} & \path{/api/admin/users/:id/role} & Admin & JSON con \texttt{roleId} o \texttt{newRoleId}, \texttt{reason} y \texttt{notes}. Respuesta \texttt{200}: rol actualizado.\\
+\texttt{PATCH} & \path{/api/admin/users/:id/password} & Admin & JSON con \texttt{newPassword}, \texttt{reason} y \texttt{notes}. Respuesta \texttt{200}: contrasena cambiada.\\
+\texttt{POST} & \path{/api/admin/users/:id/remove} & Admin & Sin cuerpo. Desactiva el usuario indicado y responde con redireccion \texttt{303} al listado, o JSON de error si no puede desactivarse.\\
+\texttt{POST} & \path{/api/admin/register-user} & Admin & JSON \texttt{RegisterAdminUserBody}: \texttt{name}, \texttt{email}, \texttt{password}, \texttt{type}, datos de contacto y comercial opcional. Respuesta \texttt{201}: usuario registrado.\\
+\texttt{GET} & \path{/api/admin/user-requests} & Admin & Sin parametros. Respuesta \texttt{200}: solicitudes de alta recibidas.\\
+\texttt{GET} & \path{/api/admin/user-requests/:id} & Admin & Parametro de ruta \texttt{id}. Respuesta \texttt{200}: detalle de la solicitud.\\
+\texttt{POST} & \path{/api/admin/user-requests/:id/approve} & Admin & JSON opcional con \texttt{commercialId}. Respuesta \texttt{200}: solicitud aprobada y usuario creado o activado.\\
+\texttt{POST} & \path{/api/admin/user-requests/:id/reject} & Admin & JSON, formulario o \texttt{multipart/form-data} con \texttt{reason}. Respuesta \texttt{200}: solicitud rechazada.\\
+\end{longtable}
+}
+
+\subsubsection{Clientes profesionales y asignaciones comerciales}
+
+{\footnotesize
+\begin{longtable}{\apiColumns}
+\caption{Endpoints de clientes profesionales y asignacion comercial}\\
+\apiHeader
+\endfirsthead
+\apiHeader
+\endhead
+\texttt{GET} & \path{/api/admin/clients} & Admin & Sin parametros. Respuesta \texttt{200}: clientes profesionales.\\
+\texttt{POST} & \path{/api/admin/clients} & Admin & JSON \texttt{CreateClientRequestBody}: \texttt{name}, \texttt{contactName}, \texttt{taxId}, direccion, ciudad, usuario asociado y notas. Respuesta \texttt{201}: cliente creado.\\
+\texttt{GET} & \path{/api/clients/:id} & Sesion con acceso & Parametro de ruta \texttt{id}. Admin y comercial pueden leer; cliente solo su propia ficha. Respuesta \texttt{200}: ficha del cliente.\\
+\texttt{PATCH} & \path{/api/clients/:id} & Admin o cliente propietario & JSON \texttt{UpdateClientRequestBody}: datos de ficha, coordenadas, ventana de visita y notas. Respuesta \texttt{200}: cliente actualizado.\\
+\texttt{GET} & \path{/api/clients/:id/geocode} & Admin o cliente propietario & Query \texttt{q} con direccion libre. Respuesta \texttt{200}: coordenadas sugeridas por geocodificacion.\\
+\texttt{GET} & \path{/api/admin/client-commercial-assignments} & Admin & Query \texttt{clientId} o \texttt{commercialId}. Respuesta \texttt{200}: asignacion activa o listado de asignaciones.\\
+\texttt{POST} & \path{/api/admin/client-commercial-assignments} & Admin & JSON con \texttt{mode} igual a \texttt{assign}, \texttt{reassign} o \texttt{unassign}, \texttt{clientId}, \texttt{commercialId} y \texttt{notes}. Respuesta \texttt{200} o \texttt{201}: asignacion resultante.\\
+\texttt{GET} & \path{/api/admin/commercials} & Admin & Sin parametros. Respuesta \texttt{200}: perfiles comerciales disponibles.\\
+\texttt{POST} & \path{/api/admin/commercials} & Admin & JSON \texttt{AdminUpsertCommercialProfileBody}: usuario, codigo empleado, territorio, jornada, duracion de visitas y puntos de ruta. Respuesta \texttt{200}: perfil comercial creado o actualizado.\\
+\texttt{GET} & \path{/api/commercial/clients} & Comercial & Sin parametros. Respuesta \texttt{200}: clientes asignados al comercial autenticado.\\
+\texttt{GET} & \path{/api/commercial/clients/:id} & Comercial & Parametro \texttt{id}; se valida que el cliente pertenezca al comercial. Respuesta \texttt{200}: detalle del cliente.\\
+\texttt{GET} & \path{/api/clients/delivery-estimate} & Cliente & Sin parametros. Respuesta \texttt{200}: estimacion de llegada del reparto planificado para el cliente autenticado.\\
+\end{longtable}
+}
+
+\subsubsection{Visitas, rutas y perfil comercial}
+
+{\footnotesize
+\begin{longtable}{\apiColumns}
+\caption{Endpoints de visitas comerciales, rutas y configuracion operativa}\\
+\apiHeader
+\endfirsthead
+\apiHeader
+\endhead
+\texttt{GET} & \path{/api/admin/commercial-visits} & Admin & Query \texttt{clientId}. Respuesta \texttt{200}: visitas asociadas al cliente.\\
+\texttt{POST} & \path{/api/admin/commercial-visits} & Admin & JSON \texttt{CreateCommercialVisitBody}: \texttt{clientId}, \texttt{commercialId}, fecha, tipo, notas y pedidos vinculados. Respuesta \texttt{201}: visita creada.\\
+\texttt{GET} & \path{/api/admin/commercial-visits/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: detalle de visita y pedidos relacionados.\\
+\texttt{PATCH} & \path{/api/admin/commercial-visits/:id} & Admin & JSON \texttt{UpdateCommercialVisitBody}: fecha, tipo, estado, notas, resultado, QR entregados y pedidos. Respuesta \texttt{200}: visita actualizada.\\
+\texttt{POST} & \path{/api/admin/commercial-routes} & Admin & JSON con \texttt{commercialId}, \texttt{date} y \texttt{name}. Respuesta \texttt{201}: ruta comercial creada.\\
+\texttt{POST} & \path{/api/admin/commercial-routes/add-visit} & Admin & JSON con \texttt{routeId}, \texttt{visitId} y \texttt{order}. Respuesta \texttt{201}: visita agregada a la ruta.\\
+\texttt{GET} & \path{/api/commercial/profile} & Comercial & Sin parametros. Respuesta \texttt{200}: configuracion de jornada, duracion y puntos de ruta del comercial.\\
+\texttt{PATCH} & \path{/api/commercial/profile} & Comercial & JSON \texttt{UpdateCommercialProfileBody}: jornada, duraciones, direcciones y coordenadas de inicio/fin. Respuesta \texttt{200}: perfil actualizado.\\
+\texttt{GET} & \path{/api/commercial/visits} & Comercial & Query opcional \texttt{clientId}, \texttt{dateFrom}, \texttt{dateTo}, \texttt{statusId}, \texttt{visitTypeId}. Respuesta \texttt{200}: visitas filtradas del comercial.\\
+\texttt{POST} & \path{/api/commercial/visits} & Comercial & JSON \texttt{CreateCommercialVisitBody}; el comercial queda limitado a sus clientes asignados. Respuesta \texttt{201}: visita creada.\\
+\texttt{GET} & \path{/api/commercial/visits/:id} & Comercial & Parametro \texttt{id}; acceso limitado al comercial propietario. Respuesta \texttt{200}: detalle de visita.\\
+\texttt{PATCH} & \path{/api/commercial/visits/:id} & Comercial & JSON \texttt{UpdateCommercialVisitBody}: estado, resultado, QR de entrega y pedidos vinculados. Respuesta \texttt{200}: visita actualizada.\\
+\texttt{GET} & \path{/api/commercial/routes/preview} & Comercial & Query opcional \texttt{startLat}, \texttt{startLng}. Respuesta \texttt{200}: puntos de ruta, ETAs, incidencias y resumen temporal del dia.\\
+\end{longtable}
+}
+
+\subsubsection{Catalogo, productos, recursos y coloracion}
+
+{\footnotesize
+\begin{longtable}{\apiColumns}
+\caption{Endpoints administrativos de catalogo}\\
+\apiHeader
+\endfirsthead
+\apiHeader
+\endhead
+\texttt{GET} & \path{/api/admin/catalog/lookups} & Admin & Sin parametros. Respuesta \texttt{200}: estados de producto y tipos de recurso de apoyo.\\
+\texttt{POST} & \path{/api/admin/catalog/upload-image} & Admin & \texttt{multipart/form-data} con \texttt{file} y \texttt{previousImageUrl}. Respuesta \texttt{200}: URL de imagen subida a Cloudinary.\\
+\texttt{GET} & \path{/api/admin/catalog/product-categories} & Admin & Query opcional \texttt{search}. Respuesta \texttt{200}: categorias.\\
+\texttt{POST} & \path{/api/admin/catalog/product-categories} & Admin & JSON con \texttt{name}, \texttt{description}, \texttt{displayOrder}. Respuesta \texttt{201}: categoria creada.\\
+\texttt{GET} & \path{/api/admin/catalog/product-categories/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: categoria.\\
+\texttt{PATCH} & \path{/api/admin/catalog/product-categories/:id} & Admin & JSON de categoria. Respuesta \texttt{200}: categoria actualizada.\\
+\texttt{GET} & \path{/api/admin/catalog/product-lines} & Admin & Query \texttt{productCategoryId}, \texttt{search}. Respuesta \texttt{200}: lineas comerciales.\\
+\texttt{POST} & \path{/api/admin/catalog/product-lines} & Admin & JSON con \texttt{name}, \texttt{description}, \texttt{productCategoryId}, \texttt{imageUrl}, \texttt{displayOrder}. Respuesta \texttt{201}: linea creada.\\
+\texttt{GET} & \path{/api/admin/catalog/product-lines/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: linea comercial.\\
+\texttt{PATCH} & \path{/api/admin/catalog/product-lines/:id} & Admin & JSON de linea comercial. Respuesta \texttt{200}: linea actualizada.\\
+\texttt{GET} & \path{/api/admin/catalog/product-subcategories} & Admin & Query \texttt{search}, \texttt{productLineId}. Respuesta \texttt{200}: subcategorias.\\
+\texttt{POST} & \path{/api/admin/catalog/product-subcategories} & Admin & JSON con \texttt{name}, \texttt{description}, \texttt{productLineId}, \texttt{parentSubcategoryId}, \texttt{imageUrl}, \texttt{displayOrder}. Respuesta \texttt{201}: subcategoria creada.\\
+\texttt{GET} & \path{/api/admin/catalog/product-subcategories/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: subcategoria.\\
+\texttt{PATCH} & \path{/api/admin/catalog/product-subcategories/:id} & Admin & JSON de subcategoria. Respuesta \texttt{200}: subcategoria actualizada.\\
+\texttt{GET} & \path{/api/admin/catalog/products} & Admin & Query \texttt{search}, \texttt{productCategoryId}, \texttt{productLineId}, \texttt{productSubcategoryId}, \texttt{statusId}. Respuesta \texttt{200}: productos.\\
+\texttt{POST} & \path{/api/admin/catalog/products} & Admin & JSON con nombre, referencia, categoria, linea, subcategoria, imagen, formato, embalaje, informacion tecnica, estado, precio y proveedor. Respuesta \texttt{201}: producto creado.\\
+\texttt{GET} & \path{/api/admin/catalog/products/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: producto.\\
+\texttt{PATCH} & \path{/api/admin/catalog/products/:id} & Admin & JSON de producto. Respuesta \texttt{200}: producto actualizado.\\
+\texttt{GET} & \path{/api/admin/catalog/support-resources} & Admin & Query \texttt{search}, \texttt{resourceTypeId}, \texttt{productId}, \texttt{productLineId}. Respuesta \texttt{200}: recursos de apoyo.\\
+\texttt{POST} & \path{/api/admin/catalog/support-resources} & Admin & JSON con \texttt{title}, \texttt{description}, \texttt{resourceTypeId}, \texttt{resourceUrl}, \texttt{productId}, \texttt{productLineId}. Respuesta \texttt{201}: recurso creado.\\
+\texttt{GET} & \path{/api/admin/catalog/support-resources/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: recurso de apoyo.\\
+\texttt{PATCH} & \path{/api/admin/catalog/support-resources/:id} & Admin & JSON de recurso de apoyo. Respuesta \texttt{200}: recurso actualizado.\\
+\texttt{GET} & \path{/api/admin/catalog/color-charts} & Admin & Query \texttt{productLineId}, \texttt{search}. Respuesta \texttt{200}: cartas de color.\\
+\texttt{POST} & \path{/api/admin/catalog/color-charts} & Admin & JSON con \texttt{name}, \texttt{description}, \texttt{productLineId}, \texttt{imageUrl}. Respuesta \texttt{201}: carta creada.\\
+\texttt{GET} & \path{/api/admin/catalog/color-charts/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: carta de color.\\
+\texttt{PATCH} & \path{/api/admin/catalog/color-charts/:id} & Admin & JSON de carta de color. Respuesta \texttt{200}: carta actualizada.\\
+\texttt{GET} & \path{/api/admin/catalog/color-references} & Admin & Query \texttt{colorChartId}, \texttt{search}. Respuesta \texttt{200}: referencias cromaticas.\\
+\texttt{POST} & \path{/api/admin/catalog/color-references} & Admin & JSON con \texttt{colorChartId}, \texttt{code}, \texttt{name}, descripcion, imagen, miniatura y orden. Respuesta \texttt{201}: referencia creada.\\
+\texttt{GET} & \path{/api/admin/catalog/color-references/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: referencia cromatica.\\
+\texttt{PATCH} & \path{/api/admin/catalog/color-references/:id} & Admin & JSON de referencia cromatica. Respuesta \texttt{200}: referencia actualizada.\\
+\end{longtable}
+}
+
+\subsubsection{Pedidos, borradores, reparto y cobro}
+
+{\footnotesize
+\begin{longtable}{\apiColumns}
+\caption{Endpoints de pedidos y cobros}\\
+\apiHeader
+\endfirsthead
+\apiHeader
+\endhead
+\texttt{GET} & \path{/api/clients/orders} & Cliente & Sin parametros. Respuesta \texttt{200}: historial de pedidos del cliente autenticado.\\
+\texttt{POST} & \path{/api/clients/orders} & Cliente & JSON con \texttt{notes} y \texttt{lines} de producto, referencia de color y cantidad. Respuesta \texttt{201}: pedido creado.\\
+\texttt{GET} & \path{/api/clients/orders/:id} & Cliente & Parametro \texttt{id}. Respuesta \texttt{200}: detalle del pedido del cliente.\\
+\texttt{GET} & \path{/api/clients/orders/draft} & Cliente & Sin parametros. Respuesta \texttt{200}: borrador activo del cliente.\\
+\texttt{PUT} & \path{/api/clients/orders/draft} & Cliente & JSON con \texttt{notes} y \texttt{lines}. Respuesta \texttt{200}: borrador guardado.\\
+\texttt{DELETE} & \path{/api/clients/orders/draft} & Cliente & Sin cuerpo. Respuesta \texttt{200}: borrador eliminado.\\
+\texttt{POST} & \path{/api/clients/orders/draft/items} & Cliente & JSON con \texttt{productId}, \texttt{colorReferenceId}, \texttt{quantity}. Respuesta \texttt{200}: linea agregada al borrador.\\
+\texttt{GET} & \path{/api/commercial/orders} & Comercial & Query opcional \texttt{clientId}, \texttt{pendingDeliveryOnly}. Respuesta \texttt{200}: pedidos visibles para el comercial.\\
+\texttt{POST} & \path{/api/commercial/orders} & Comercial & JSON con \texttt{clientId}, \texttt{notes} y \texttt{lines}. Respuesta \texttt{201}: pedido creado para cliente asignado.\\
+\texttt{GET} & \path{/api/commercial/orders/:id} & Comercial & Parametro \texttt{id}. Respuesta \texttt{200}: detalle del pedido accesible para el comercial.\\
+\texttt{PATCH} & \path{/api/commercial/orders/:id} & Comercial & JSON con \texttt{statusId}, \texttt{paymentStatusId}, \texttt{paymentMethod}, \texttt{paymentNotes}. Respuesta \texttt{200}: pedido, reparto o cobro actualizado.\\
+\texttt{GET} & \path{/api/commercial/orders/draft} & Comercial & Query \texttt{clientId}. Respuesta \texttt{200}: borrador del comercial para ese cliente.\\
+\texttt{PUT} & \path{/api/commercial/orders/draft} & Comercial & JSON con \texttt{clientId}, \texttt{notes} y \texttt{lines}. Respuesta \texttt{200}: borrador guardado.\\
+\texttt{DELETE} & \path{/api/commercial/orders/draft} & Comercial & Query \texttt{clientId}. Respuesta \texttt{200}: borrador eliminado.\\
+\texttt{POST} & \path{/api/commercial/orders/draft/items} & Comercial & JSON con \texttt{clientId}, \texttt{productId}, \texttt{colorReferenceId}, \texttt{quantity}. Respuesta \texttt{200}: linea agregada.\\
+\texttt{GET} & \path{/api/admin/orders/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: detalle administrativo del pedido.\\
+\texttt{PATCH} & \path{/api/admin/orders/:id} & Admin & JSON con \texttt{statusId}, \texttt{paymentStatusId}, \texttt{paymentMethod}, \texttt{paymentNotes}. Respuesta \texttt{200}: estado de pedido o cobro actualizado.\\
+\end{longtable}
+}
+
+\subsubsection{Historial tecnico de salon}
+
+{\footnotesize
+\begin{longtable}{\apiColumns}
+\caption{Endpoints del historial tecnico de salon}\\
+\apiHeader
+\endfirsthead
+\apiHeader
+\endhead
+\texttt{GET} & \path{/api/clients/salon-clients} & Cliente & Sin parametros. Respuesta \texttt{200}: clientes finales del salon.\\
+\texttt{POST} & \path{/api/clients/salon-clients} & Cliente & JSON con \texttt{name}, \texttt{phone}, \texttt{email}, \texttt{notes}. Respuesta \texttt{201}: cliente final creado.\\
+\texttt{GET} & \path{/api/clients/salon-clients/:id} & Cliente & Parametro \texttt{id}. Respuesta \texttt{200}: ficha, servicios y sugerencias.\\
+\texttt{PATCH} & \path{/api/clients/salon-clients/:id} & Cliente & JSON de cliente final. Respuesta \texttt{200}: ficha actualizada.\\
+\texttt{POST} & \path{/api/clients/salon-clients/:id/services} & Cliente & JSON con fecha, tipo de servicio, notas, resultado, descripcion tecnica, formula, productos usados e imagenes. Respuesta \texttt{201}: servicio creado.\\
+\texttt{PATCH} & \path{/api/clients/salon-clients/:id/services/:serviceId} & Cliente & JSON de servicio tecnico. Respuesta \texttt{200}: servicio actualizado.\\
+\texttt{DELETE} & \path{/api/clients/salon-clients/:id/services/:serviceId} & Cliente & Sin cuerpo. Respuesta \texttt{200}: servicio eliminado.\\
+\texttt{GET} & \path{/api/clients/salon-clients/:id/services/:serviceId/technical-email} & Cliente & Parametros \texttt{id} y \texttt{serviceId}. Respuesta \texttt{200}: borrador de correo tecnico editable.\\
+\texttt{GET} & \path{/api/clients/salon-service-templates} & Cliente & Sin parametros. Respuesta \texttt{200}: plantillas de servicio del cliente.\\
+\texttt{POST} & \path{/api/clients/salon-service-templates} & Cliente & JSON con nombre, tipo, notas, resultado, descripcion tecnica, formula, notas tecnicas y productos. Respuesta \texttt{201}: plantilla creada.\\
+\texttt{DELETE} & \path{/api/clients/salon-service-templates/:templateId} & Cliente & Parametro \texttt{templateId}. Respuesta \texttt{200}: plantilla eliminada.\\
+\texttt{POST} & \path{/api/clients/salon-service-result-images} & Cliente & \texttt{multipart/form-data} con \texttt{file}. Respuesta \texttt{200}: imagen de resultado subida a Cloudinary.\\
+\texttt{DELETE} & \path{/api/clients/salon-service-result-images} & Cliente & JSON con \texttt{imageUrl}. Respuesta \texttt{200}: imagen de resultado eliminada.\\
+\end{longtable}
+}
+
+\subsubsection{Comunicaciones internas}
+
+{\footnotesize
+\begin{longtable}{\apiColumns}
+\caption{Endpoints de comunicaciones, promociones, formaciones y recordatorios}\\
+\apiHeader
+\endfirsthead
+\apiHeader
+\endhead
+\texttt{GET} & \path{/api/admin/communications/segments} & Admin & Query opcional \texttt{search}. Respuesta \texttt{200}: segmentos de cliente.\\
+\texttt{POST} & \path{/api/admin/communications/segments} & Admin & JSON con \texttt{code}, \texttt{name}, \texttt{description}, \texttt{criteria}. Respuesta \texttt{201}: segmento creado.\\
+\texttt{GET} & \path{/api/admin/communications/segments/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: segmento.\\
+\texttt{PATCH} & \path{/api/admin/communications/segments/:id} & Admin & JSON de segmento. Respuesta \texttt{200}: segmento actualizado.\\
+\texttt{DELETE} & \path{/api/admin/communications/segments/:id} & Admin & Sin cuerpo. Respuesta \texttt{200}: segmento eliminado.\\
+\texttt{GET} & \path{/api/admin/communications/client-segments} & Admin & Query opcional \texttt{search}. Respuesta \texttt{200}: asignaciones cliente-segmento.\\
+\texttt{POST} & \path{/api/admin/communications/client-segments} & Admin & JSON con \texttt{clientId}, \texttt{segmentId}, \texttt{notes}. Respuesta \texttt{201}: asignacion creada.\\
+\texttt{DELETE} & \path{/api/admin/communications/client-segments/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: asignacion eliminada.\\
+\texttt{GET} & \path{/api/admin/communications/promotions} & Admin & Query opcional \texttt{search}. Respuesta \texttt{200}: promociones administrativas.\\
+\texttt{POST} & \path{/api/admin/communications/promotions} & Admin & JSON con titulo, descripcion, tipo, beneficio, fechas, estado y alcance por producto, linea, cliente o segmento. Respuesta \texttt{201}: promocion creada.\\
+\texttt{GET} & \path{/api/admin/communications/promotions/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: promocion.\\
+\texttt{PATCH} & \path{/api/admin/communications/promotions/:id} & Admin & JSON de promocion. Respuesta \texttt{200}: promocion actualizada.\\
+\texttt{DELETE} & \path{/api/admin/communications/promotions/:id} & Admin & Sin cuerpo. Respuesta \texttt{200}: promocion eliminada.\\
+\texttt{GET} & \path{/api/admin/communications/trainings} & Admin & Query opcional \texttt{search}. Respuesta \texttt{200}: formaciones administrativas.\\
+\texttt{POST} & \path{/api/admin/communications/trainings} & Admin & JSON con titulo, descripcion, fecha, ubicacion, modalidad, contenido, estado y capacidad. Respuesta \texttt{201}: formacion creada.\\
+\texttt{GET} & \path{/api/admin/communications/trainings/:id} & Admin & Parametro \texttt{id}. Respuesta \texttt{200}: formacion.\\
+\texttt{PATCH} & \path{/api/admin/communications/trainings/:id} & Admin & JSON de formacion. Respuesta \texttt{200}: formacion actualizada.\\
+\texttt{DELETE} & \path{/api/admin/communications/trainings/:id} & Admin & Sin cuerpo. Respuesta \texttt{200}: formacion eliminada.\\
+\texttt{GET} & \path{/api/communications/promotions} & Cliente/comercial & Sin parametros. Respuesta \texttt{200}: promociones visibles para el usuario autenticado.\\
+\texttt{GET} & \path{/api/communications/trainings} & Cliente/comercial & Sin parametros. Respuesta \texttt{200}: formaciones publicadas para el usuario.\\
+\texttt{POST} & \path{/api/communications/trainings/:id/enrollment} & Cliente/comercial & JSON opcional con \texttt{notes}. Respuesta \texttt{201}: inscripcion registrada.\\
+\texttt{DELETE} & \path{/api/communications/trainings/:id/enrollment} & Cliente/comercial & Sin cuerpo. Respuesta \texttt{200}: inscripcion cancelada.\\
+\texttt{GET} & \path{/api/communications/notifications} & Cliente/comercial & Sin parametros. Respuesta \texttt{200}: notificaciones del usuario.\\
+\texttt{PATCH} & \path{/api/communications/notifications} & Cliente/comercial & Sin cuerpo. Respuesta \texttt{200}: todas las notificaciones marcadas como leidas.\\
+\texttt{PATCH} & \path{/api/communications/notifications/:id} & Cliente/comercial & Parametro \texttt{id}. Respuesta \texttt{200}: notificacion marcada como leida.\\
+\texttt{GET} & \path{/api/communications/reminders} & Cliente/comercial & Sin parametros. Respuesta \texttt{200}: recordatorios propios.\\
+\texttt{POST} & \path{/api/communications/reminders} & Cliente/comercial & JSON con \texttt{title}, \texttt{body}, \texttt{scheduledAt}, \texttt{status}. Respuesta \texttt{201}: recordatorio creado.\\
+\texttt{PATCH} & \path{/api/communications/reminders/:id} & Cliente/comercial & JSON con \texttt{status}. Respuesta \texttt{200}: estado del recordatorio actualizado.\\
+\end{longtable}
+}
+
+\subsubsection{Configuracion transversal}
+
+{\footnotesize
+\begin{longtable}{\apiColumns}
+\caption{Endpoints transversales de configuracion}\\
+\apiHeader
+\endfirsthead
+\apiHeader
+\endhead
+\texttt{GET} & \path{/api/admin/settings/rate-limits} & Admin & Sin parametros. Respuesta \texttt{200}: politicas de \textit{rate limiting}, valores por defecto y valores configurados.\\
+\texttt{PUT} & \path{/api/admin/settings/rate-limits} & Admin & JSON con \texttt{policies[]}: \texttt{name}, \texttt{enabled}, \texttt{maxRequests}, \texttt{windowMinutes}. Respuesta \texttt{200}: politicas actualizadas.\\
+\end{longtable}
+}
