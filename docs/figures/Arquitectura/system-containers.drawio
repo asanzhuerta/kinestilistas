@@ -1,0 +1,55 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Figura 6.2 - Contenedores" id="system-containers">
+    <mxGraphModel dx="1600" dy="950" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Diagrama de contenedores del sistema" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;fontColor=#203040;" parent="1" vertex="1">
+          <mxGeometry x="30" y="20" width="1540" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="browser" value="Navegador / PWA&lt;br/&gt;React, formularios, mapas y capturas" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e6f0ff;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="70" y="300" width="300" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="next" value="Aplicacion Next.js&lt;br/&gt;App Router + Server Components + Route Handlers" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;fontColor=#203040;fontSize=21;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="520" y="210" width="420" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="auth" value="Auth.js + proxy.ts&lt;br/&gt;Sesion, roles, rate limiting y navegador soportado" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e9f8ef;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="520" y="510" width="420" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="PostgreSQL&lt;br/&gt;TypeORM + migraciones" style="shape=cylinder3d;boundedLbl=1;backgroundOutline=1;size=15;rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e2f5ff;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1110" y="190" width="330" height="135" as="geometry" />
+        </mxCell>
+        <mxCell id="media" value="Cloudinary&lt;br/&gt;Almacenamiento multimedia externo" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1110" y="380" width="330" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="routing" value="Nominatim / OSRM&lt;br/&gt;Servicios geograficos HTTP" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1110" y="555" width="330" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="qr" value="QuickChart&lt;br/&gt;Representacion del QR" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1110" y="730" width="330" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0" value="HTML/JSON" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="browser" target="next" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1" value="proteccion" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="next" target="auth" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2" value="usuario/sesion" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="auth" target="db" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3" value="repositorios" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="next" target="db" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4" value="subidas" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="next" target="media" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5" value="rutas" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="next" target="routing" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6" value="QR" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="next" target="qr" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

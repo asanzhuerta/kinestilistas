@@ -37,16 +37,21 @@ La memoria está organizada en partes y capítulos que siguen una secuencia lóg
 \end{itemize}
 
 \subsection{Organización del software entregado}
-\textcolor{red}{TODO: Ampliar bastante esta sección, describiendo el contenido de cada uno de los elementos entregados y la organización del proyecto por carpetas, aunque no se si eso habria que ponerlo aqui o en otra parte del documento.}
-Junto con la presente memoria en formato PDF, se entrega el software desarrollado y los recursos necesarios para su revisión, ejecución y mantenimiento. El contenido entregado incluye:
+Junto con la presente memoria en formato PDF, se entrega el software desarrollado y los recursos necesarios para su revisión, ejecución y mantenimiento. La entrega se ha organizado de forma que permita distinguir claramente entre el código de la aplicación, los recursos de base de datos, la documentación académica y los elementos auxiliares utilizados durante el desarrollo.
 
 \begin{itemize}
-    \item El código fuente de la aplicación web desarrollada.
-    \item Los scripts de base de datos necesarios para crear y preparar la estructura inicial del sistema.
-    \item Los archivos de configuración del entorno de desarrollo y despliegue local.
-    \item El fichero de configuración de Docker Compose utilizado para levantar los servicios necesarios durante el desarrollo.
-    \item Los recursos estáticos empleados por la aplicación, como iconos, imágenes y archivos asociados a la configuración PWA.
-    \item La documentación técnica y de usuario incluida como anexos de la memoria.
+    \item \texttt{app-tfg/}: contiene la aplicación web desarrollada con \texttt{Next.js}. Dentro de esta carpeta se encuentran las rutas de interfaz y API, los componentes reutilizables, los servicios de dominio, la configuración de autenticación, las migraciones de base de datos y los scripts de comprobación empleados durante el desarrollo.
+    \item \texttt{app-tfg/app/}: agrupa la estructura principal de la aplicación según el modelo \textit{App Router}. Incluye las áreas funcionales de administración, comerciales, clientes, autenticación, registro, perfil de usuario, componentes visuales compartidos y rutas HTTP expuestas bajo \texttt{/api}.
+    \item \texttt{app-tfg/lib/}: concentra lógica reutilizable que no pertenece directamente a una página concreta. En esta carpeta se ubican servicios de autenticación, acceso a datos, contratos de API, reglas de seguridad, integración con Cloudinary, geocodificación, catálogo, clientes, comerciales, pedidos y utilidades comunes.
+    \item \texttt{app-tfg/migrations/}: contiene las migraciones versionadas de \texttt{TypeORM}. Estos ficheros describen la evolución incremental del esquema de \texttt{PostgreSQL} y permiten reproducir los cambios estructurales aplicados durante el desarrollo.
+    \item \texttt{app-tfg/public/}: incluye los recursos estáticos servidos por la aplicación, como iconos, imágenes base y elementos asociados a la instalación como aplicación web progresiva.
+    \item \texttt{app-tfg/scripts/}: recoge scripts auxiliares utilizados para tareas de validación, comprobación funcional, carga de entorno y pruebas de cierre de módulos.
+    \item \texttt{db/}: agrupa recursos complementarios de base de datos, incluyendo scripts de inicialización y utilidades de soporte para el entorno local.
+    \item \texttt{docs/}: contiene la memoria del Trabajo Fin de Grado en \LaTeX, su bibliografía, configuración, secciones, anexos y figuras exportadas en los formatos utilizados por el documento.
+    \item \texttt{docker-compose.yml}: define los servicios necesarios para levantar el entorno local, especialmente la base de datos \texttt{PostgreSQL} utilizada por la aplicación.
+    \item \texttt{README.md}: proporciona una descripción general del repositorio y sirve como punto de entrada para localizar la información principal del proyecto.
 \end{itemize}
 
-Esta organización permite reproducir el entorno de desarrollo, revisar la implementación realizada y facilitar la evolución futura del sistema mediante nuevas funcionalidades o integraciones.
+Además de los ficheros fuente, la entrega incluye los archivos de configuración necesarios para ejecutar, construir y comprobar la aplicación, como \texttt{package.json}, \texttt{tsconfig.json}, la configuración de \texttt{Next.js}, la configuración de \texttt{ESLint} y los ficheros de entorno de ejemplo cuando procede. No forman parte de la entrega conceptual los directorios generados automáticamente por las herramientas, como \texttt{node\_modules/} o \texttt{.next/}, ya que pueden reconstruirse a partir de las dependencias y comandos definidos en el proyecto.
+
+Esta organización permite reproducir el entorno de desarrollo, revisar la implementación realizada, consultar la documentación asociada y facilitar la evolución futura del sistema mediante nuevas funcionalidades o integraciones.

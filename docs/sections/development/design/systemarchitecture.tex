@@ -1,5 +1,12 @@
 En esta sección se documenta la arquitectura lógica actual del sistema, centrada en la aplicación web, la organización del código y las integraciones externas necesarias para soportar los módulos ya implementados.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Arquitectura/system-context.pdf}
+    \caption{Diagrama de contexto del sistema}
+    \label{fig:system-context}
+\end{figure}
+
 \subsection{Diseño de alto nivel}
 
 KinEstilistas se implementa como una aplicación web monolitica full-stack. La misma base de código contiene tanto la interfaz de usuario como la lógica de servidor y el acceso a datos, lo que simplifica la trazabilidad entre requisitos, código y despliegue.
@@ -13,6 +20,13 @@ Los contenedores logicos que forman la solución son los siguientes:
     \item \textbf{Servicios externos}: \texttt{Cloudinary} para imágenes, \texttt{Nominatim} para geocodificación, \texttt{OSRM} para rutas y \texttt{QuickChart} para la representación del QR operativo de pedido.
     \item \textbf{Capa PWA básica}: manifiesto web, iconos y \textit{service worker} ligero para soporte instalable y cache mínima.
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Arquitectura/system-containers.pdf}
+    \caption{Diagrama de contenedores del sistema}
+    \label{fig:system-containers}
+\end{figure}
 
 La aplicación resuelve además varias responsabilidades transversales desde una capa comun:
 
@@ -43,6 +57,13 @@ La estructura del código combina una organización por capas técnicas con subd
     \item \texttt{migrations/typeorm/}: evolución versionada del esquema.
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Arquitectura/next-components.pdf}
+    \caption{Diagrama de componentes internos de la aplicación Next.js}
+    \label{fig:next-components}
+\end{figure}
+
 \paragraph{Flujo tipico de una operación protegida}
 
 El flujo interno de una operación sensible sigue de forma general los siguientes pasos:
@@ -64,6 +85,7 @@ La arquitectura actual no separa los módulos como aplicaciones distintas, pero 
     \item \texttt{M2} centraliza clientes, comerciales, visitas y rutas, y presta soporte logico directo a \texttt{M4}.
     \item \texttt{M3} expone el catálogo y la coloración consumidos por cliente, comercial y administrador.
     \item \texttt{M4} reutiliza visitas de \texttt{M2} para reparto y referencias de \texttt{M3} para las líneas de pedido.
+    \item \texttt{M5} se apoya en el catálogo de \texttt{M3} para registrar productos y tonalidades usadas en servicios técnicos del salón.
     \item \texttt{M7}, en su estado actual, no constituye un subsistema aislado de negocio, sino una capa transversal de auditoría, configuración y soporte.
 \end{itemize}
 
@@ -73,6 +95,3 @@ La arquitectura de carpetas actual es adecuada para el alcance ya construido, po
 
 No obstante, el crecimiento conjunto de los módulos comercial, catálogo y pedidos ya apunta a una evolución deseable: reforzar la agrupacion por \textit{feature} para reducir la dispersion entre componentes, hooks, contratos y servicios relacionados con una misma capacidad de negocio.
 
-\subsection{Gestión del almacenamiento persistente y de los activos externos}
-\label{sec:storageDesign}
-\input{./sections/development/design/systemarchitecture/storagedesign.tex}

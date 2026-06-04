@@ -13,6 +13,13 @@ La arquitectura física realmente necesaria para ejecutar la aplicación puede r
 
 Desde el punto de vista del despliegue, la aplicación no separa frontend y backend en productos distintos. La misma instancia de \texttt{Next.js} sirve la interfaz web, resuelve los \textit{Route Handlers}, aplica autenticación, rate limiting y control de acceso, y coordina la lectura y escritura sobre la base de datos.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Arquitectura/physical-deployment.pdf}
+    \caption{Arquitectura física / despliegue local-producción}
+    \label{fig:physical-deployment}
+\end{figure}
+
 En desarrollo local, \texttt{PostgreSQL} se levanta habitualmente con \texttt{Docker Desktop} a partir del \texttt{docker-compose.yml} del repositorio \citep{dockerdocs2026}. En producción, la base de datos puede residir en un servicio gestionado equivalente siempre que proporcione compatibilidad con \texttt{PostgreSQL} y conectividad estable con la aplicación.
 
 \section{Instrucciones de despliegue}
@@ -128,6 +135,9 @@ npm run typecheck
 npm run build
 npm run m4:closeout
 npm run m4:ui-check
+npm run m5:technical-email-smoke
+npm run m5:service-templates-smoke
+npm run m5:salon-visual-smoke
 \end{lstlisting}
 
 \section{Instrucciones para la operación del sistema y mantenimiento del nivel de servicio}

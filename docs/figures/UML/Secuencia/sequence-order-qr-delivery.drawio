@@ -1,0 +1,121 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Secuencia pedido y QR" id="sequence-order-qr-delivery">
+    <mxGraphModel dx="1800" dy="1120" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1120" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Secuencia: creacion de pedido y validacion/reparto QR" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;fontColor=#203040;" parent="1" vertex="1">
+          <mxGeometry x="30" y="20" width="1740" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="actor" value="Cliente / Comercial" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e6f0ff;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="65" y="120" width="240" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-actor" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="185.0" y="195" width="0" height="865" as="geometry" />
+        </mxCell>
+        <mxCell id="ui" value="Pantalla pedidos" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="370" y="120" width="230" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-ui" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="485.0" y="195" width="0" height="865" as="geometry" />
+        </mxCell>
+        <mxCell id="api" value="API pedidos" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="675" y="120" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-api" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="785.0" y="195" width="0" height="865" as="geometry" />
+        </mxCell>
+        <mxCell id="service" value="Servicio dominio" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#fde8e8;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="970" y="120" width="240" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-service" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="1090.0" y="195" width="0" height="865" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="PostgreSQL" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e2f5ff;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1280" y="120" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-db" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="1390.0" y="195" width="0" height="865" as="geometry" />
+        </mxCell>
+        <mxCell id="qr" value="QuickChart / QR" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1540" y="120" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-qr" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="1650.0" y="195" width="0" height="865" as="geometry" />
+        </mxCell>
+        <mxCell id="msg-0" value="1. Edita pedido" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="185.0" y="245" as="sourcePoint" />
+            <mxPoint x="485.0" y="245" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-1" value="2. Guarda borrador" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="485.0" y="320" as="sourcePoint" />
+            <mxPoint x="785.0" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-2" value="3. Valida lineas" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="785.0" y="395" as="sourcePoint" />
+            <mxPoint x="1090.0" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-3" value="4. Persiste pedido" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1090.0" y="470" as="sourcePoint" />
+            <mxPoint x="1390.0" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-4" value="5. Estado pedido" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;dashed=1;dashPattern=8 6;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1390.0" y="545" as="sourcePoint" />
+            <mxPoint x="1090.0" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-5" value="6. Confirma pedido" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="485.0" y="620" as="sourcePoint" />
+            <mxPoint x="785.0" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-6" value="7. Programa reparto" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="785.0" y="695" as="sourcePoint" />
+            <mxPoint x="1090.0" y="695" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-7" value="8. Vincula visita" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1090.0" y="770" as="sourcePoint" />
+            <mxPoint x="1390.0" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-8" value="9. Genera QR entrega" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="485.0" y="845" as="sourcePoint" />
+            <mxPoint x="1650.0" y="845" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-9" value="10. Escanea codigo" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="185.0" y="920" as="sourcePoint" />
+            <mxPoint x="485.0" y="920" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-10" value="11. Valida entrega" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="485.0" y="995" as="sourcePoint" />
+            <mxPoint x="785.0" y="995" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-11" value="12. Marca entregado" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="785.0" y="1045" as="sourcePoint" />
+            <mxPoint x="1090.0" y="1045" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

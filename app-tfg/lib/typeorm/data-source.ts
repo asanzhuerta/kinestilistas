@@ -43,6 +43,13 @@ import { SalonServiceResultImage } from "./entities/SalonServiceResultImage";
 import { SalonProductSuggestion } from "./entities/SalonProductSuggestion";
 import { SalonServiceTemplate } from "./entities/SalonServiceTemplate";
 import { SalonServiceTemplateProductUsage } from "./entities/SalonServiceTemplateProductUsage";
+import { CustomerSegment } from "./entities/CustomerSegment";
+import { ClientCustomerSegment } from "./entities/ClientCustomerSegment";
+import { Promotion } from "./entities/Promotion";
+import { TrainingEvent } from "./entities/TrainingEvent";
+import { TrainingEnrollment } from "./entities/TrainingEnrollment";
+import { AppNotification } from "./entities/AppNotification";
+import { AppReminder } from "./entities/AppReminder";
 
 export const entities = [
 	Role,
@@ -87,6 +94,13 @@ export const entities = [
 	SalonProductSuggestion,
 	SalonServiceTemplate,
 	SalonServiceTemplateProductUsage,
+	CustomerSegment,
+	ClientCustomerSegment,
+	Promotion,
+	TrainingEvent,
+	TrainingEnrollment,
+	AppNotification,
+	AppReminder,
 ];
 
 function createDataSource() {

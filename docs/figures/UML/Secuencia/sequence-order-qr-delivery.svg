@@ -1,0 +1,60 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1800' height='1120' viewBox='0 0 1800 1120'>
+<defs><marker id='arrow' markerWidth='12' markerHeight='12' refX='10' refY='6' orient='auto' markerUnits='strokeWidth'><path d='M2,2 L10,6 L2,10 Z' fill='#8ba3ba'/></marker>
+<filter id='softShadow' x='-10%' y='-10%' width='120%' height='120%'><feDropShadow dx='0' dy='2' stdDeviation='3' flood-color='#19324d' flood-opacity='0.12'/></filter></defs>
+<rect width='100%' height='100%' fill='#fbfcfe'/>
+<text x='900.0' y='44' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='28' font-weight='700' fill='#203040'>Secuencia: creacion de pedido y validacion/reparto QR</text>
+<rect x='65' y='120' width='240' height='75' rx='16' fill='#e6f0ff' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='17' fill='#203040'><tspan x='185.0' y='164.5' font-weight='500'>Cliente / Comercial</tspan></text>
+<line x1='185.0' y1='195.0' x2='185.0' y2='1060.0' stroke='#8ba3ba' stroke-width='2' stroke-dasharray='8 7'/>
+<rect x='370' y='120' width='230' height='75' rx='16' fill='#f1f5f9' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='17' fill='#203040'><tspan x='485.0' y='164.5' font-weight='500'>Pantalla pedidos</tspan></text>
+<line x1='485.0' y1='195.0' x2='485.0' y2='1060.0' stroke='#8ba3ba' stroke-width='2' stroke-dasharray='8 7'/>
+<rect x='675' y='120' width='220' height='75' rx='16' fill='#e0f2fe' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='17' fill='#203040'><tspan x='785.0' y='164.5' font-weight='500'>API pedidos</tspan></text>
+<line x1='785.0' y1='195.0' x2='785.0' y2='1060.0' stroke='#8ba3ba' stroke-width='2' stroke-dasharray='8 7'/>
+<rect x='970' y='120' width='240' height='75' rx='16' fill='#fde8e8' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='17' fill='#203040'><tspan x='1090.0' y='164.5' font-weight='500'>Servicio dominio</tspan></text>
+<line x1='1090.0' y1='195.0' x2='1090.0' y2='1060.0' stroke='#8ba3ba' stroke-width='2' stroke-dasharray='8 7'/>
+<rect x='1280' y='120' width='220' height='75' rx='16' fill='#e2f5ff' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='17' fill='#203040'><tspan x='1390.0' y='164.5' font-weight='500'>PostgreSQL</tspan></text>
+<line x1='1390.0' y1='195.0' x2='1390.0' y2='1060.0' stroke='#8ba3ba' stroke-width='2' stroke-dasharray='8 7'/>
+<rect x='1540' y='120' width='220' height='75' rx='16' fill='#f1f5f9' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='17' fill='#203040'><tspan x='1650.0' y='164.5' font-weight='500'>QuickChart / QR</tspan></text>
+<line x1='1650.0' y1='195.0' x2='1650.0' y2='1060.0' stroke='#8ba3ba' stroke-width='2' stroke-dasharray='8 7'/>
+<line x1='185.0' y1='245.0' x2='485.0' y2='245.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='197.0' y='203.0' width='276.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='335.0' y='225.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>1. Edita pedido</text>
+<line x1='485.0' y1='320.0' x2='785.0' y2='320.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='497.0' y='278.0' width='276.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='635.0' y='300.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>2. Guarda borrador</text>
+<line x1='785.0' y1='395.0' x2='1090.0' y2='395.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='797.0' y='353.0' width='281.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='937.5' y='375.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>3. Valida lineas</text>
+<line x1='1090.0' y1='470.0' x2='1390.0' y2='470.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='1102.0' y='428.0' width='276.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='1240.0' y='450.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>4. Persiste pedido</text>
+<line x1='1390.0' y1='545.0' x2='1090.0' y2='545.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)' stroke-dasharray='8 6'/>
+<rect x='1102.0' y='503.0' width='276.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='1240.0' y='525.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>5. Estado pedido</text>
+<line x1='485.0' y1='620.0' x2='785.0' y2='620.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='497.0' y='578.0' width='276.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='635.0' y='600.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>6. Confirma pedido</text>
+<line x1='785.0' y1='695.0' x2='1090.0' y2='695.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='797.0' y='653.0' width='281.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='937.5' y='675.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>7. Programa reparto</text>
+<line x1='1090.0' y1='770.0' x2='1390.0' y2='770.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='1102.0' y='728.0' width='276.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='1240.0' y='750.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>8. Vincula visita</text>
+<line x1='485.0' y1='845.0' x2='1650.0' y2='845.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='857.5' y='803.0' width='420.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='1067.5' y='825.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>9. Genera QR entrega</text>
+<line x1='185.0' y1='920.0' x2='485.0' y2='920.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='197.0' y='878.0' width='276.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='335.0' y='900.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>10. Escanea codigo</text>
+<line x1='485.0' y1='995.0' x2='785.0' y2='995.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='497.0' y='953.0' width='276.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='635.0' y='975.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>11. Valida entrega</text>
+<line x1='785.0' y1='1045.0' x2='1090.0' y2='1045.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='797.0' y='1003.0' width='281.0' height='34' rx='10' fill='#ffffff' opacity='0.94'/>
+<text x='937.5' y='1025.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='15' fill='#203040'>12. Marca entregado</text>
+</svg>

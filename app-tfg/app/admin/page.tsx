@@ -2,6 +2,7 @@ import NavCard from "../components/NavCard";
 import PageTransition from "../components/animations/PageTransition";
 import {
 	CatalogIcon,
+	ChatIcon,
 	ClientsIcon,
 	OrderIcon,
 	ReportsIcon,
@@ -28,6 +29,11 @@ const navItems = [
 		title: "Pedidos",
 		icon: <OrderIcon className="h-6 w-6" />,
 		href: "/admin/orders",
+	},
+	{
+		title: "Comunicaciones",
+		icon: <ChatIcon className="h-6 w-6" />,
+		href: "/admin/communications",
 	},
 	{
 		title: "Auditoria",

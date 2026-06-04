@@ -5,6 +5,8 @@ type NavCardProps = {
 	icon: React.ReactNode;
 	href?: string;
 	disabled?: boolean;
+	badgeCount?: number;
+	badgeLabel?: string;
 };
 
 export default function NavCard({
@@ -12,9 +14,20 @@ export default function NavCard({
 	icon,
 	href,
 	disabled = false,
+	badgeCount = 0,
+	badgeLabel = "pendientes",
 }: NavCardProps) {
 	const content = (
 		<>
+			{badgeCount > 0 ? (
+				<span
+					aria-label={`${badgeCount} ${badgeLabel}`}
+					className="absolute right-2 top-2 rounded-full border border-rose-200 bg-rose-500 px-2 py-0.5 text-[10px] font-semibold leading-none text-white shadow-sm"
+				>
+					{badgeCount > 9 ? "9+" : badgeCount}
+				</span>
+			) : null}
+
 			<div
 				className={`mb-3 text-black opacity-90 transition ${
 					disabled ? "" : "group-hover:scale-110"
@@ -29,7 +42,7 @@ export default function NavCard({
 		</>
 	);
 
-	const className = `glass-card group flex h-24 flex-col items-center justify-center rounded-2xl px-2 py-3 transition ${
+	const className = `glass-card group relative flex h-24 flex-col items-center justify-center rounded-2xl px-2 py-3 transition ${
 		disabled
 			? "cursor-not-allowed opacity-55"
 			: "active:scale-[0.97] hover:bg-white/20"

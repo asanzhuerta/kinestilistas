@@ -1,0 +1,58 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Figura 6.1 - Contexto" id="system-context">
+    <mxGraphModel dx="1500" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Diagrama de contexto del sistema" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;fontColor=#203040;" parent="1" vertex="1">
+          <mxGeometry x="30" y="20" width="1440" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" value="Administrador&lt;br/&gt;Gestiona usuarios, clientes, catalogo y pedidos" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e6f0ff;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="80" y="170" width="260" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="commercial" value="Comercial&lt;br/&gt;Visitas, rutas, pedidos y cobros" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e9f8ef;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="80" y="350" width="260" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="client" value="Cliente profesional&lt;br/&gt;Catalogo, pedidos y fichas tecnicas" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#efe9ff;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="80" y="530" width="260" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="system" value="KinEstilistas&lt;br/&gt;Aplicacion web full-stack" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;fontColor=#203040;fontSize=22;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="550" y="280" width="370" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="cloudinary" value="Cloudinary&lt;br/&gt;Imagenes de perfil, catalogo y resultados" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1120" y="125" width="300" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="geo" value="Nominatim / OSRM&lt;br/&gt;Geocodificacion y rutas" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1120" y="285" width="300" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="quickchart" value="QuickChart&lt;br/&gt;QR operativo de pedido" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1120" y="445" width="300" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="postgres" value="PostgreSQL&lt;br/&gt;Datos estructurados del negocio" style="shape=cylinder3d;boundedLbl=1;backgroundOutline=1;size=15;rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e2f5ff;strokeColor=#8ba3ba;fontColor=#203040;fontSize=18;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1120" y="605" width="300" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0" value="HTTPS" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="admin" target="system" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1" value="HTTPS/PWA" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="commercial" target="system" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2" value="HTTPS/PWA" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="client" target="system" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3" value="imagenes" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="system" target="cloudinary" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4" value="mapas/rutas" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="system" target="geo" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5" value="QR" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="system" target="quickchart" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6" value="lectura/escritura" style="rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#8ba3ba;fontColor=#65758b;fontSize=14;" parent="1" source="system" target="postgres" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

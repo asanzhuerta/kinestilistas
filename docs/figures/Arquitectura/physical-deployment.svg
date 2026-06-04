@@ -1,0 +1,40 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1700' height='1000' viewBox='0 0 1700 1000'>
+<defs><marker id='arrow' markerWidth='12' markerHeight='12' refX='10' refY='6' orient='auto' markerUnits='strokeWidth'><path d='M2,2 L10,6 L2,10 Z' fill='#8ba3ba'/></marker>
+<filter id='softShadow' x='-10%' y='-10%' width='120%' height='120%'><feDropShadow dx='0' dy='2' stdDeviation='3' flood-color='#19324d' flood-opacity='0.12'/></filter></defs>
+<rect width='100%' height='100%' fill='#fbfcfe'/>
+<text x='850.0' y='44' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='28' font-weight='700' fill='#203040'>Arquitectura fisica / despliegue local-produccion</text>
+<line x1='245.0' y1='340.0' x2='245.0' y2='470.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='155.0' y='379.0' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='245.0' y='397.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>desarrollo</text>
+<line x1='245.0' y1='340.0' x2='245.0' y2='730.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='155.0' y='509.0' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='245.0' y='527.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>commits</text>
+<line x1='410.0' y1='790.0' x2='600.0' y2='410.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='415.0' y='574.0' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='505.0' y='592.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>codigo</text>
+<line x1='990.0' y1='410.0' x2='1160.0' y2='262.5' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='985.0' y='310.2' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='1075.0' y='328.2' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>despliegue</text>
+<line x1='1340.0' y1='345.0' x2='1340.0' y2='455.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='1250.0' y='374.0' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='1340.0' y='392.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>DATABASE_URL</text>
+<line x1='1340.0' y1='345.0' x2='1340.0' y2='710.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='1250.0' y='501.5' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='1340.0' y='519.5' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>HTTPS</text>
+<rect x='80' y='180' width='330' height='160' rx='16' fill='#e6f0ff' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='245.0' y='246.1' font-weight='700'>Entorno local</tspan><tspan x='245.0' y='267.4' font-weight='500'>Windows + VS Code/Codex</tspan><tspan x='245.0' y='288.6' font-weight='500'>npm run dev</tspan></text>
+<rect x='80' y='470' width='330' height='130' rx='18' fill='#e2f5ff' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<ellipse cx='245.0' cy='490' rx='165.0' ry='18' fill='#e2f5ff' stroke='#8ba3ba' stroke-width='2'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='245.0' y='531.8' font-weight='700'>Docker Desktop</tspan><tspan x='245.0' y='553.0' font-weight='500'>PostgreSQL local</tspan></text>
+<rect x='80' y='730' width='330' height='120' rx='16' fill='#f1f5f9' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='245.0' y='786.8' font-weight='700'>GitHub</tspan><tspan x='245.0' y='808.0' font-weight='500'>Repositorio, ramas y versionado</tspan></text>
+<rect x='600' y='330' width='390' height='160' rx='16' fill='#fff7ed' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='795.0' y='406.8' font-weight='700'>Pipeline manual</tspan><tspan x='795.0' y='428.0' font-weight='500'>npm install, migration:run, build</tspan></text>
+<rect x='1160' y='180' width='360' height='165' rx='16' fill='#e0f2fe' stroke='#0284c7' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='1340.0' y='248.6' font-weight='700'>Nodo produccion</tspan><tspan x='1340.0' y='269.9' font-weight='500'>Next.js / Node.js</tspan><tspan x='1340.0' y='291.1' font-weight='500'>Servidor full-stack</tspan></text>
+<rect x='1160' y='455' width='360' height='130' rx='18' fill='#e2f5ff' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<ellipse cx='1340.0' cy='475' rx='180.0' ry='18' fill='#e2f5ff' stroke='#8ba3ba' stroke-width='2'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='1340.0' y='516.8' font-weight='700'>PostgreSQL gestionado</tspan><tspan x='1340.0' y='538.0' font-weight='500'>Datos persistentes</tspan></text>
+<rect x='1160' y='710' width='360' height='140' rx='16' fill='#f1f5f9' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='1340.0' y='766.1' font-weight='700'>Servicios externos</tspan><tspan x='1340.0' y='787.4' font-weight='500'>Cloudinary, Nominatim, OSRM,</tspan><tspan x='1340.0' y='808.6' font-weight='500'>QuickChart</tspan></text>
+</svg>

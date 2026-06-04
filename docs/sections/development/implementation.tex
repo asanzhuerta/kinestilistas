@@ -1,4 +1,4 @@
-Este capítulo describe la implementación real del sistema, centrada en la aplicación web desarrollada en \texttt{Next.js}, la capa de persistencia basada en \texttt{TypeORM} y la evolución ya materializada de los módulos \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4}, junto con un bloque operativo ya disponible de \texttt{M5} que incluye plantillas reutilizables y preparación asistida de correo técnico, y ciertas capacidades transversales de administración.
+Este capítulo describe la implementación real del sistema, centrada en la aplicación web desarrollada en \texttt{Next.js}, la capa de persistencia basada en \texttt{TypeORM} y la evolución ya materializada de los módulos \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4}, junto con bloques operativos ya disponibles de \texttt{M5} y \texttt{M6}, y ciertas capacidades transversales de administración.
 
 \section{Entorno de Construcción}
 \label{sec:ConstructionEnvironment}
@@ -18,8 +18,25 @@ La implementación actual del proyecto se concentra en la carpeta \texttt{app-tf
     \item \texttt{lib/clients/}: cálculo reutilizable de ETA y lectura de reparto para la zona cliente.
     \item \texttt{lib/orders/}: utilidades transversales del dominio de pedidos, entre ellas la generación y normalización de QR.
     \item \texttt{lib/security/}: políticas de rate limiting y lógica transversal de seguridad.
+    \item \texttt{lib/typeorm/services/communications/}: reglas de negocio del centro de comunicaciones, promociones, formaciones, notificaciones y recordatorios.
     \item \texttt{migrations/typeorm/}: migraciones versionadas de base de datos.
 \end{itemize}
+
+\subsection{Criterios transversales de implementación}
+
+La construcción se ha guiado por varios criterios comunes a todos los módulos, con el objetivo de evitar que cada funcionalidad evolucione de forma aislada:
+
+\begin{itemize}
+    \item mantener las páginas y componentes centrados en presentación, delegando reglas de negocio en servicios de dominio;
+    \item utilizar \textit{Route Handlers} como frontera entre interfaz y servidor, con validaciones de entrada antes de llegar a persistencia;
+    \item centralizar contratos y tipos compartidos para reducir discrepancias entre cliente y servidor;
+    \item versionar cualquier cambio estructural de base de datos mediante migraciones trazables;
+    \item reutilizar catálogos persistentes para roles, estados y tipos operativos, evitando literales dispersos en el código;
+    \item aislar integraciones externas en helpers o servicios concretos para facilitar su sustitución o degradación controlada;
+    \item preservar la coherencia entre roles, de modo que una misma entidad de negocio pueda ser consultada desde cliente, comercial o administrador sin duplicar reglas incompatibles.
+\end{itemize}
+
+Estos criterios permiten que el sistema siga siendo comprensible a medida que crecen los módulos y facilitan la localización de responsabilidades cuando se incorporan nuevas funcionalidades.
 
 \subsection{Implementación del módulo M1}
 
@@ -110,6 +127,34 @@ Actualmente ya estan implementados:
 
 Este bloque no incorpora todavía el envío real de correos técnicos a cliente final ni su integración con un proveedor externo, pero deja resuelta la base persistente, el mantenimiento del historial, la reutilización rápida de configuraciones técnicas, la documentación visual del resultado final y la preparación asistida del mensaje técnico para la operativa diaria del salón.
 
+\subsection{Implementación del módulo M6}
+
+El módulo \texttt{M6} se apoya en tres bloques principales:
+
+\begin{itemize}
+    \item área administrativa de comunicaciones en \path{/admin/communications};
+    \item páginas de consulta para cliente y comercial en promociones, formaciones y avisos;
+    \item \textit{Route Handlers} separados entre administración y consumo por usuario.
+\end{itemize}
+
+La lógica de negocio queda centralizada en \path{lib/typeorm/services/communications/communications.ts}.
+
+Actualmente ya están implementados:
+
+\begin{itemize}
+    \item gestión administrativa de segmentos de cliente, con alta, edición, borrado, código, nombre, descripción y criterios comerciales;
+    \item asignación manual de clientes profesionales a segmentos, con trazabilidad del administrador responsable y notas internas;
+    \item creación, edición, cambio de estado y borrado con confirmación inline de promociones con estado \texttt{draft}, \texttt{active} o \texttt{archived}, periodo de vigencia y asociación opcional a producto, línea comercial, cliente o segmento;
+    \item consulta de promociones activas por parte de clientes y comerciales, aplicando en cliente la visibilidad derivada de su asignación a segmentos;
+    \item creación, edición, publicación, cancelación, finalización y borrado con confirmación inline de formaciones con modalidad, fecha, ubicación, contenido, capacidad opcional y estado de ciclo de vida;
+    \item inscripción y cancelación de inscripción a formaciones publicadas, validando en servidor la disponibilidad de plazas;
+    \item generación de notificaciones internas cuando se publican promociones o formaciones relevantes, respetando en promociones el alcance global, por cliente o por segmento definido por administración;
+    \item consulta y marcado de lectura de notificaciones por parte de clientes y comerciales, con indicador de avisos sin leer en sus paneles de inicio;
+    \item creación y seguimiento de recordatorios personales con fecha programada y estados \texttt{pending}, \texttt{done} o \texttt{cancelled}.
+\end{itemize}
+
+El alcance actual de \texttt{M6} se limita a comunicación interna dentro de la aplicación. No se realiza todavía envío real por correo electrónico, \textit{WhatsApp} u otros proveedores externos, ni se aplican automáticamente descuentos promocionales sobre los importes de pedido. Estas dos líneas quedan documentadas como evolución futura.
+
 \subsection{Capacidades transversales de administración}
 
 Aunque no constituyen un módulo de negocio independiente del mismo volumen que \texttt{M1} a \texttt{M4}, la aplicación ya incorpora varias capacidades transversales que deben documentarse como parte del estado real del proyecto:
@@ -143,6 +188,7 @@ La serie de migraciones actual queda organizada del siguiente modo:
     \item Migración \texttt{036}: base persistente del primer incremento de \texttt{M5}, con fichas de clientes del salón, servicios, ficha técnica, uso de productos y sugerencias derivadas.
     \item Migración \texttt{037}: plantillas reutilizables de servicio para \texttt{M5}, con cabecera de plantilla y productos predefinidos asociados.
     \item Migración \texttt{038}: soporte para tonalidades enlazadas a usos de producto del salón y galería de imagenes de resultado final por servicio.
+    \item Migración \texttt{039}: base persistente de \texttt{M6}, con segmentos de cliente, asignaciones cliente-segmento, promociones, formaciones, inscripciones, notificaciones internas y recordatorios.
 \end{itemize}
 
 Esta estrategia permite reconstruir el esquema de forma controlada en cualquier entorno, auditar los cambios estructurales del sistema y extender el proyecto sin depender de modificaciones manuales sobre la base de datos.

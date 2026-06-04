@@ -2,6 +2,18 @@ A partir de los requisitos de información definidos en la \autoref{sec:Informat
 
 Para mejorar la legibilidad, el modelo conceptual se presenta por módulos. En cada módulo se recogen las clases del dominio ya existentes en la implementación o, cuando el módulo no esta construido todavía, las clases previstas a nivel analitico.
 
+\begin{figure}[H]
+      \centering
+      \fbox{%
+            \begin{minipage}[c][0.34\textheight][c]{0.88\linewidth}
+                  \centering
+                  Espacio reservado para incorporar el modelo conceptual global de datos definitivo.
+            \end{minipage}%
+      }
+      \caption{Modelo conceptual global de datos pendiente de incorporacion}
+      \label{fig:global-conceptual-model}
+\end{figure}
+
 % ------------------------------------------------------------------------------
 \subsection{Modelo conceptual de datos M1}
 % ------------------------------------------------------------------------------
@@ -724,14 +736,22 @@ La clase \textit{Promoción} representa las ofertas o condiciones comerciales de
             Descripción de la promoción.
       \item \textit{promotion\_type}
             Tipo de promoción definida.
-      \item \textit{value}
+      \item \textit{benefit}
             Valor o beneficio asociado a la promoción.
-      \item \textit{valid\_from}
+      \item \textit{start\_date}
             Fecha de inicio de vigencia.
-      \item \textit{valid\_to}
+      \item \textit{end\_date}
             Fecha de fin de vigencia.
       \item \textit{status}
             Estado actual de la promoción.
+      \item \textit{product}
+            Producto asociado, cuando corresponda.
+      \item \textit{product\_line}
+            Línea comercial asociada, cuando corresponda.
+      \item \textit{client}
+            Cliente concreto destinatario, cuando corresponda.
+      \item \textit{customer\_segment}
+            Segmento de clientes destinatario, cuando corresponda.
       \item \textit{created\_at}
             Fecha de creación de la promoción.
       \item \textit{updated\_at}
@@ -748,9 +768,11 @@ La clase \textit{Promoción} representa las ofertas o condiciones comerciales de
       \item \textbf{RT-PR2 — Vigencia coherente}
             Si la promoción tiene fecha de fin, esta debe ser posterior o igual a la fecha de inicio.
       \item \textbf{RT-PR3 — Estado válido}
-            El estado de la promoción solo puede tomar valores definidos por el sistema.
+            El estado de la promoción solo puede tomar los valores \texttt{draft}, \texttt{active} o \texttt{archived}.
       \item \textbf{RT-PR4 — Coherencia temporal}
             Si el atributo \textit{updated\_at} tiene valor, este debe ser posterior o igual a la fecha de creación de la promoción.
+      \item \textbf{RT-PR5 — Destinatario exclusivo}
+            Una promoción no puede estar dirigida simultáneamente a un cliente concreto y a un segmento de clientes.
 
 \end{itemize}
 
@@ -764,6 +786,8 @@ La clase \textit{Categoría de cliente} representa los grupos o segmentos comerc
 
       \item \textit{id}
             Identificador único de la categoría.
+      \item \textit{code}
+            Código interno único del segmento.
       \item \textit{name}
             Nombre de la categoría.
       \item \textit{description}
@@ -783,7 +807,9 @@ La clase \textit{Categoría de cliente} representa los grupos o segmentos comerc
 
       \item \textbf{RT-CC1 — Nombre obligatorio}
             Toda categoría de cliente debe disponer de un nombre identificativo.
-      \item \textbf{RT-CC2 — Coherencia temporal}
+      \item \textbf{RT-CC2 — Código único}
+            Toda categoría de cliente debe disponer de un código único para su uso interno.
+      \item \textbf{RT-CC3 — Coherencia temporal}
             Si el atributo \textit{updated\_at} tiene valor, este debe ser posterior o igual a la fecha de creación de la categoría.
 
 \end{itemize}
@@ -802,10 +828,12 @@ La clase \textit{Asignación de cliente a categoría} representa la pertenencia 
             Cliente profesional asociado.
       \item \textit{client\_category}
             Categoría asignada al cliente.
-      \item \textit{assigned\_at}
+      \item \textit{assigned\_by\_user}
+            Usuario administrador que realiza la asignación, cuando corresponda.
+      \item \textit{notes}
+            Notas internas asociadas a la asignación.
+      \item \textit{created\_at}
             Fecha de asignación.
-      \item \textit{assignment\_type}
-            Tipo u origen de la asignación, cuando corresponda.
 
 \end{itemize}
 
@@ -836,20 +864,20 @@ La clase \textit{Notificación} representa los avisos o mensajes generados por e
             Usuario destinatario de la notificación.
       \item \textit{title}
             Título de la notificación.
-      \item \textit{message}
+      \item \textit{body}
             Contenido del mensaje.
-      \item \textit{type}
+      \item \textit{notification\_type}
             Tipo de notificación.
       \item \textit{channel}
             Canal utilizado para la notificación.
-      \item \textit{is\_read}
-            Indica si la notificación ha sido leída.
+      \item \textit{source\_type}
+            Tipo de entidad origen de la notificación, cuando corresponda.
+      \item \textit{source\_id}
+            Identificador de la entidad origen, cuando corresponda.
       \item \textit{read\_at}
             Fecha de lectura de la notificación.
       \item \textit{created\_at}
             Fecha de creación de la notificación.
-      \item \textit{sent\_at}
-            Fecha y hora de envío de la notificación, cuando corresponda.
 
 \end{itemize}
 
@@ -864,9 +892,7 @@ La clase \textit{Notificación} representa los avisos o mensajes generados por e
       \item \textbf{RT-N3 — Coherencia de lectura}
             Si la notificación está marcada como leída, debe existir una fecha de lectura asociada.
       \item \textbf{RT-N4 — Canal válido de notificación}
-            El canal de notificación debe pertenecer al conjunto de canales definidos por el sistema.
-      \item \textbf{RT-N5 — Coherencia temporal del envío}
-            Si el atributo \textit{sent\_at} tiene valor, este debe ser posterior o igual a la fecha de creación de la notificación.
+            En la implementación actual el canal persistido es \texttt{in\_app}; otros canales quedan como evolución futura.
 
 \end{itemize}
 
@@ -884,7 +910,7 @@ La clase \textit{Recordatorio} representa avisos programados asociados a eventos
             Usuario destinatario del recordatorio.
       \item \textit{title}
             Título o descripción breve del recordatorio.
-      \item \textit{message}
+      \item \textit{body}
             Contenido del recordatorio.
       \item \textit{scheduled\_at}
             Fecha y hora programada para el recordatorio.
@@ -924,14 +950,18 @@ La clase \textit{Formación} representa las actividades formativas ofrecidas por
             Nombre de la formación.
       \item \textit{description}
             Descripción de la actividad formativa.
-      \item \textit{scheduled\_at}
+      \item \textit{starts\_at}
             Fecha y hora de celebración.
       \item \textit{location}
-            Ubicación o modalidad de la formación.
+            Ubicación física o enlace de la formación.
+      \item \textit{modality}
+            Modalidad de la formación.
       \item \textit{content}
             Información adicional o contenido de la formación.
       \item \textit{status}
             Estado de la formación.
+      \item \textit{capacity}
+            Capacidad máxima, cuando corresponda.
       \item \textit{created\_at}
             Fecha de creación del registro.
       \item \textit{updated\_at}
@@ -946,8 +976,10 @@ La clase \textit{Formación} representa las actividades formativas ofrecidas por
       \item \textbf{RT-F1 — Fecha obligatoria}
             Toda formación debe tener una fecha de celebración definida.
       \item \textbf{RT-F2 — Estado válido}
-            El estado de la formación debe pertenecer al conjunto definido por el sistema.
-      \item \textbf{RT-F3 — Coherencia temporal}
+            El estado de la formación debe pertenecer al conjunto \texttt{draft}, \texttt{published}, \texttt{cancelled} o \texttt{completed}.
+      \item \textbf{RT-F3 — Capacidad válida}
+            Si se define capacidad, esta debe ser un entero positivo.
+      \item \textbf{RT-F4 — Coherencia temporal}
             Si el atributo \textit{updated\_at} tiene valor, este debe ser posterior o igual a la fecha de creación.
 
 \end{itemize}
@@ -968,6 +1000,8 @@ La clase \textit{Inscripción a formación} representa la participación solicit
             Usuario inscrito.
       \item \textit{registered\_at}
             Fecha de inscripción.
+      \item \textit{updated\_at}
+            Fecha de última actualización de la inscripción.
       \item \textit{status}
             Estado de la inscripción.
       \item \textit{notes}
@@ -982,7 +1016,7 @@ La clase \textit{Inscripción a formación} representa la participación solicit
       \item \textbf{RT-EN1 — Asociación obligatoria de la inscripción}
             Toda inscripción debe estar asociada a una formación existente y a un usuario existente.
       \item \textbf{RT-EN2 — Estado válido de la inscripción}
-            El estado de la inscripción debe pertenecer al conjunto definido por el sistema.
+            El estado de la inscripción debe pertenecer al conjunto \texttt{registered}, \texttt{cancelled} o \texttt{attended}.
       \item \textbf{RT-EN3 — Unicidad de inscripción}
             Un mismo usuario no debe aparecer más de una vez inscrito en la misma formación.
 
