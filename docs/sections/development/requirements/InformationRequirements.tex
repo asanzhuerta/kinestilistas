@@ -861,6 +861,8 @@ La exportación \texttt{CSV} de auditoría desde \path{/admin/audit} tampoco int
 
 El diagnóstico de rate limiting expuesto en \path{/admin/settings} y en \path{/api/admin/settings/rate-limits/status} reutiliza la configuración efectiva de políticas y sus valores por defecto. Por tanto, tampoco amplía el modelo de datos: resume la tabla de sobrescrituras persistidas y el catálogo estático de políticas definido en código.
 
+La exportación del informe operativo de \texttt{M7} desde \path{/admin/operations} sigue la misma aproximación. El fichero \texttt{CSV} se genera a partir del resumen agregado ya calculado para la vista de operación transversal, por lo que no registra nuevas filas ni introduce tablas adicionales.
+
 \subsubsection*{Exportación o sincronización}
 
 El sistema debe permitir registrar las operaciones de exportación o sincronización de información realizadas con sistemas externos.

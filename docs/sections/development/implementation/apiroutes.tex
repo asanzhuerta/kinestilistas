@@ -250,6 +250,7 @@ Como convencion general, las rutas autenticadas devuelven \texttt{401} cuando no
 \apiHeader
 \endhead
 \texttt{GET} & \path{/api/admin/operations/status} & Admin & Sin parametros. Respuesta \texttt{200}: resumen agregado de operacion transversal de \texttt{M7}.\\
+\texttt{GET} & \path{/api/admin/operations/report} & Admin & Sin parametros. Respuesta \texttt{200}: fichero \texttt{CSV} descargable con el informe operativo de \texttt{M7}.\\
 \texttt{GET} & \path{/api/admin/audit/export} & Admin & Query \texttt{type} igual a \texttt{access} o \texttt{management}, \texttt{days} y \texttt{limit} opcionales. Respuesta \texttt{200}: fichero \texttt{CSV} descargable con registros recientes de auditoria.\\
 \texttt{GET} & \path{/api/admin/integrations/status} & Admin & Sin parametros. Respuesta \texttt{200}: resumen e inventario operativo de integraciones de soporte.\\
 \texttt{GET} & \path{/api/admin/support/status} & Admin & Sin parametros. Respuesta \texttt{200}: resumen e inventario operativo de soporte tecnico, PWA y compatibilidad.\\

@@ -37,12 +37,20 @@ export default async function AdminOperationsPage() {
 						tecnico. Sirve como punto de entrada rapido para revisar el estado
 						del modulo 7.
 					</p>
-					<Link
-						href="/admin"
-						className="mt-4 inline-flex w-fit rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white"
-					>
-						Volver al panel
-					</Link>
+					<div className="mt-4 flex flex-wrap gap-3">
+						<Link
+							href="/admin"
+							className="inline-flex w-fit rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white"
+						>
+							Volver al panel
+						</Link>
+						<Link
+							href="/api/admin/operations/report"
+							className="inline-flex w-fit rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+						>
+							Exportar informe CSV
+						</Link>
+					</div>
 				</section>
 
 				<section className="grid gap-4 md:grid-cols-4">

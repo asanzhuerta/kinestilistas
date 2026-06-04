@@ -71,6 +71,7 @@ La evidencia automatizada disponible para el estado actual del repositorio se ha
     \item \texttt{npm run m7:operations-smoke}
     \item \texttt{npm run m7:audit-export-smoke}
     \item \texttt{npm run m7:rate-limit-smoke}
+    \item \texttt{npm run m7:operations-report-smoke}
     \item \texttt{npm run m7:closeout}
     \item \texttt{npm run migration:run}
 \end{itemize}
@@ -98,7 +99,9 @@ El tercer incremento de \texttt{M7} incorpora el panel \path{/admin/operations}.
 
 El cuarto incremento de \texttt{M7} refuerza la trazabilidad administrativa mediante exportación \texttt{CSV} desde \path{/admin/audit}. La comprobación \texttt{npm run m7:audit-export-smoke} valida que se generan los ficheros de accesos y acciones administrativas con cabeceras, tipo de contenido y nombres de archivo consistentes.
 
-El quinto incremento de \texttt{M7} incorpora el diagnóstico agregado de rate limiting en \path{/admin/settings} y \path{/api/admin/settings/rate-limits/status}. La comprobación \texttt{npm run m7:rate-limit-smoke} valida que se diagnostican las políticas esperadas, que cada una expone límites efectivos, valores por defecto y estado operativo, y que el resumen agregado es coherente. El script \texttt{npm run m7:closeout} encadena las comprobaciones de integraciones, soporte, operación, exportación de auditoría y rate limiting para repetir el cierre del módulo completo.
+El quinto incremento de \texttt{M7} incorpora el diagnóstico agregado de rate limiting en \path{/admin/settings} y \path{/api/admin/settings/rate-limits/status}. La comprobación \texttt{npm run m7:rate-limit-smoke} valida que se diagnostican las políticas esperadas, que cada una expone límites efectivos, valores por defecto y estado operativo, y que el resumen agregado es coherente.
+
+El sexto incremento de \texttt{M7} añade la exportación \texttt{CSV} del informe operativo desde \path{/admin/operations}. La comprobación \texttt{npm run m7:operations-report-smoke} valida que el informe contiene la cabecera esperada, que incluye los cuatro bloques transversales y que conserva un número suficiente de métricas para cada sección. El script \texttt{npm run m7:closeout} encadena las comprobaciones de integraciones, soporte, operación, exportación de auditoría, rate limiting e informe operativo para repetir el cierre del módulo completo.
 
 \subsection{Pruebas Funcionales}
 
@@ -111,7 +114,7 @@ Las comprobaciones funcionales prioritarias se organizan por módulo:
     \item \texttt{M4}: borradores de pedido en cliente y comercial, confirmación y cancelacion coherente, bandeja de pedidos pendientes de reparto, visita de entrega con validación QR, paso a \texttt{delivered}, subflujo mínimo de cobro y trazabilidad cruzada desde admin.
     \item \texttt{M5}: alta de clientes del salón, edición de ficha base, registro, edición y borrado de servicios con ficha técnica, selección de tonalidades de color, galería de imagenes finales, plantillas reutilizables, filtrado del historial, uso de productos, sugerencias derivadas y generación de borradores técnicos editables con persistencia real sobre la base de datos.
     \item \texttt{M6}: gestión, edición y borrado de promociones, segmentos y formaciones desde administración, visibilidad de promociones activas por rol, aplicación de descuentos promocionales sobre borradores y pedidos, inscripción a formaciones publicadas, notificaciones internas segmentadas y recordatorios personales.
-    \item \texttt{M7}: consulta administrativa de auditoría, exportación \texttt{CSV} de accesos y acciones administrativas, configuración y diagnóstico de rate limiting, inventario operativo de integraciones de soporte, panel de soporte técnico/PWA y resumen ejecutivo de operación transversal.
+    \item \texttt{M7}: consulta administrativa de auditoría, exportación \texttt{CSV} de accesos y acciones administrativas, configuración y diagnóstico de rate limiting, inventario operativo de integraciones de soporte, panel de soporte técnico/PWA, resumen ejecutivo de operación transversal e informe operativo exportable.
 \end{itemize}
 
 En \texttt{M4}, la regresion funcional más sensible consiste en comprobar que el mismo pedido se mantiene coherente al pasar por tres contextos distintos: cliente, comercial y administrador. Por ello, cualquier cambio en entidades, serializadores, servicios de pedido o lógica de visitas de reparto debe revalidarse en esos tres recorridos.
@@ -140,7 +143,7 @@ La Tabla~\ref{tab:test-traceability} resume la relación entre los módulos prin
         \hline
         \texttt{M6} & Promociones, segmentos, descuentos aplicados al pedido, formaciones, inscripciones, notificaciones internas segmentadas y recordatorios. & Typecheck, lint, build, \texttt{migration:run}, \texttt{m6:communications-smoke}, \texttt{m6:promotion-discount-smoke}, \texttt{m6:closeout} y validación manual en navegador local con datos temporales de promoción, pedido con descuento y formación. \\
         \hline
-        \texttt{M7} & Auditoría administrativa, exportación \texttt{CSV} de trazabilidad, configuración y diagnóstico de rate limiting, inventario de integraciones de soporte, soporte técnico/PWA y resumen de operación transversal. & Typecheck, lint, build, \texttt{migration:run}, \texttt{m7:integrations-smoke}, \texttt{m7:support-smoke}, \texttt{m7:operations-smoke}, \texttt{m7:audit-export-smoke}, \texttt{m7:rate-limit-smoke}, \texttt{m7:closeout} y revisión de \path{/admin/audit}, \path{/admin/operations}, \path{/admin/integrations}, \path{/admin/support} y \path{/admin/settings}. \\
+        \texttt{M7} & Auditoría administrativa, exportación \texttt{CSV} de trazabilidad, configuración y diagnóstico de rate limiting, inventario de integraciones de soporte, soporte técnico/PWA, resumen de operación transversal e informe operativo exportable. & Typecheck, lint, build, \texttt{migration:run}, \texttt{m7:integrations-smoke}, \texttt{m7:support-smoke}, \texttt{m7:operations-smoke}, \texttt{m7:audit-export-smoke}, \texttt{m7:rate-limit-smoke}, \texttt{m7:operations-report-smoke}, \texttt{m7:closeout} y revisión de \path{/admin/audit}, \path{/admin/operations}, \path{/admin/integrations}, \path{/admin/support} y \path{/admin/settings}. \\
         \hline
     \end{tabularx}
     \caption{Trazabilidad resumida entre módulos funcionales y evidencias de prueba}
