@@ -1,13 +1,39 @@
-En este último capítulo se detallan las lecciones aprendidas tras el desarrollo del presente proyecto y se identifican las posibles oportunidades de mejora sobre el software desarrollado.
+En este último capítulo se resumen los resultados obtenidos tras el desarrollo del proyecto, se valora el grado de cumplimiento de los objetivos definidos inicialmente y se identifican las principales lecciones aprendidas. También se recogen posibles líneas de evolución futura coherentes con la arquitectura y con el alcance funcional ya construido.
 
 \section{Objetivos alcanzados}
-\textcolor{red}{TODO} Este apartado debe resumir los objetivos generales y específicos alcanzados, relacionándolos con todo lo descrito en el capítulo de introducción.
+
+El objetivo principal del proyecto era desarrollar una aplicación web que centralizase y digitalizase los procesos más relevantes de la actividad comercial de un distribuidor de productos capilares profesionales. El resultado obtenido cumple este propósito dentro del alcance definido para el Trabajo Fin de Grado, ya que el sistema permite trabajar desde una única plataforma sobre usuarios, clientes profesionales, visitas, rutas, catálogo, coloración, pedidos, reparto, cobro mínimo, seguimiento técnico del salón, promociones, formaciones, notificaciones internas y administración transversal.
+
+Respecto a los objetivos específicos planteados en la introducción, el grado de cumplimiento puede resumirse de la siguiente forma:
+
+\begin{itemize}
+    \item La gestión de pedidos entre distribuidor, comerciales y peluquerías se ha implementado mediante borradores, confirmación, líneas de producto, trazabilidad por estado, reparto vinculado a visitas comerciales, validación mediante QR y seguimiento mínimo del cobro.
+    \item El control de la actividad comercial se ha reforzado con la gestión de clientes profesionales, asignaciones comercial-cliente, geocodificación, planificación diaria, visitas, rutas, estimaciones de llegada y consulta de actividad desde distintos perfiles.
+    \item La reducción de procesos manuales se materializa en la centralización de información que antes podía depender de hojas de cálculo, registros dispersos o comunicación informal: usuarios, catálogo, clientes, pedidos, visitas, promociones y auditoría quedan integrados en una misma base de datos.
+    \item Las peluquerías profesionales disponen de herramientas digitales propias, incluyendo acceso al catálogo, consulta de coloración, historial de pedidos, información de reparto y un bloque de seguimiento técnico interno del salón con fichas, servicios, productos utilizados, tonalidades, imágenes finales, plantillas y borradores técnicos de correo.
+    \item La relación entre distribuidor y clientes se mejora mediante promociones segmentadas, descuentos aplicables al pedido, formaciones, avisos internos, recordatorios y una trazabilidad administrativa que facilita el seguimiento de la operación.
+\end{itemize}
+
+El sistema no se limita a una maqueta visual, sino que incorpora persistencia real en PostgreSQL, migraciones versionadas, control de acceso por rol, validaciones de negocio, servicios de dominio, rutas API, pantallas funcionales y comprobaciones de cierre para los módulos desarrollados. Los módulos \texttt{M1} a \texttt{M7} quedan documentados y verificados con distintos niveles de profundidad, mientras que \texttt{M8} permanece expresamente delimitado como evolución futura.
 
 \section{Lecciones aprendidas}
-\textcolor{red}{TODO} A continuación, se detallan las buenas prácticas adquiridas, tanto tecnológicas como procedimentales, así como cualquier otro aspecto de interés.
-Resumir cuantitativamente el tiempo y esfuerzo dedicados al proyecto a lo largo de su desarrollo, en lugar de escribir un sencillo 'he trabajado mucho en este proyecto'.
+
+Desde el punto de vista técnico, una de las principales lecciones del proyecto ha sido la importancia de mantener una separación clara entre dominio, persistencia, contratos compartidos e interfaz. A medida que el sistema crece, esta separación permite que funcionalidades como pedidos, promociones, rutas o auditoría evolucionen sin duplicar reglas de negocio ni mezclar responsabilidades entre componentes.
+
+También ha resultado especialmente relevante el tratamiento de la seguridad como una parte transversal del sistema y no como una funcionalidad aislada. La autenticación, la autorización por rol, el control de rutas protegidas, la auditoría de accesos, las acciones administrativas y las políticas de rate limiting condicionan el resto de módulos y obligan a validar tanto la navegación visible como el acceso real a las API.
+
+Otra lección importante ha sido la necesidad de documentar el sistema de forma incremental. La memoria no se ha entendido únicamente como un documento final, sino como una herramienta para contrastar el alcance implementado con el análisis, el diseño, las migraciones, las pruebas y las decisiones técnicas adoptadas. Esto ha ayudado a evitar inconsistencias entre lo que se describe y lo que realmente existe en el repositorio.
+
+En cuanto al esfuerzo, la planificación final estima unas \textbf{400 horas aproximadas} de trabajo, distribuidas entre análisis, diseño, construcción, validación y documentación. La desviación respecto a la estimación inicial ha sido moderada, concentrándose sobre todo en la documentación, en la consolidación de los flujos principales y en la validación de cierres funcionales por módulo.
+
+Desde el punto de vista procedimental, el enfoque iterativo e incremental ha sido adecuado para un proyecto de este tamaño. Dividir el sistema en módulos ha permitido avanzar por bloques coherentes, cerrar funcionalmente cada incremento, documentarlo y validar que las nuevas capacidades no rompían las anteriores. Esta forma de trabajo resulta especialmente útil en un dominio con múltiples perfiles de usuario y procesos de negocio conectados entre sí.
+
+\section{Valoración final}
+
+El resultado final constituye una base funcional sólida para la digitalización de la actividad comercial descrita. Aunque existen líneas de mejora y ampliaciones naturales, la aplicación ya permite demostrar un flujo completo desde la autenticación hasta la operación diaria: administración de usuarios, gestión de clientes, catálogo, planificación comercial, pedidos, reparto, cobro mínimo, seguimiento técnico, comunicaciones internas y supervisión transversal.
+
+La principal fortaleza del proyecto es que combina funcionalidad de negocio con decisiones técnicas defendibles: arquitectura full-stack, modelo relacional, migraciones, roles, trazabilidad, integración con servicios externos, diseño responsive, soporte PWA básico y validación progresiva. La principal limitación es que algunas capacidades avanzadas, como mensajería externa, facturación completa, pagos parciales, automatizaciones más complejas o funcionalidades de \texttt{M8}, quedan fuera del alcance implementado y se plantean como trabajo futuro.
 
 \section{Trabajo futuro}
 \label{sec:futurework}
 \input{./sections/epilogue/conclusions/futurework.tex}
-
