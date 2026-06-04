@@ -54,6 +54,18 @@ En particular, la aplicación ya dispone de una base operativa sólida en los m�
     \item Mejora de la observabilidad técnica, el seguimiento de errores y el control operativo del sistema.
 \end{itemize}
 
+\subsection*{Automatización de albaranes y facturación con Factusol}
+
+Una línea de evolución especialmente relevante consiste en conectar el flujo de pedidos y reparto de la aplicación con TeamSystem Factusol mediante una capa de automatización externa. Esta integración permitiría convertir pedidos confirmados o entregados en documentos comerciales, sincronizar clientes y artículos, generar albaranes, marcar documentos como facturados y devolver a la aplicación estados administrativos de facturación o cobro.
+
+La opción técnicamente más limpia sería utilizar \texttt{n8n} como orquestador de procesos. Sus nodos de \textit{webhook} permiten iniciar flujos desde llamadas HTTP entrantes, mientras que el nodo \textit{HTTP Request} permite consumir servicios REST de terceros \citep{n8n-webhook,n8n-http-request}. En este escenario, la aplicación podría publicar un evento cuando un pedido pasase a estado entregado; \texttt{n8n} validaría el pedido, transformaría las líneas al formato esperado por Factusol y llamaría a la API correspondiente.
+
+La viabilidad concreta depende de la modalidad contratada por el cliente. TeamSystem indica que Factusol puede trabajar en local o con datos en nube, y que su ciclo comercial incluye presupuestos, pedidos, albaranes, facturas, cobros, generación de facturas desde albaranes y exportación de documentos \citep{sdelsol-factusol}. Además, API DELSOL permite acceder de forma automatizada a datos de sus soluciones en nube, incluyendo TeamSystem Factusol, y su documentación expone operaciones de autenticación, lectura, inserción y actualización de registros \citep{sdelsol-api,sdelsol-api-doc}. Por tanto, si el cliente dispone de Factusol en nube con acceso a API, la integración debería plantearse como un flujo API-to-API.
+
+Si el cliente trabaja exclusivamente con Factusol local, la integración sería menos directa. En ese caso habría que valorar alternativas como exportación/importación controlada de ficheros, sincronización periódica, uso de herramientas oficiales como TeamSystem Preventa para el trabajo comercial en ruta, o automatización asistida sobre escritorio. Preventa enlaza con Factusol o Delsol para transmitir ventas y recibir datos, aunque la propia documentación indica que la conexión no es en tiempo real: la información se transfiere antes de su uso y se devuelve al finalizar la jornada \citep{sdelsol-preventa}. Esta opción podría encajar si el objetivo prioritario fuese automatizar la operativa comercial móvil, pero no sustituye a una integración directa desde la aplicación desarrollada.
+
+Como propuesta de implantación gradual, se recomienda abordar primero una prueba de concepto limitada: sincronizar catálogo y clientes, generar un albarán desde un pedido entregado, registrar en la aplicación el identificador devuelto por Factusol y dejar constancia de errores o reintentos. Solo después debería ampliarse hacia generación de facturas, conciliación de cobros, facturación electrónica o automatización fiscal, ya que estas áreas tienen mayor impacto administrativo y normativo.
+
 \subsection*{Evolución técnica transversal}
 \begin{itemize}
     \item Incorporación progresiva de pruebas automatizadas de integracion y de interfaz para reducir regresiones manuales.
