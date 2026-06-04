@@ -10,7 +10,11 @@ import type {
 } from "@/lib/contracts/order";
 import { ROLE_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { formatDateTime } from "@/lib/utils/user-utils";
-import { getOrderPaymentStatusClasses } from "./order-ui";
+import {
+	formatOrderCents,
+	getOrderDiscountSummary,
+	getOrderPaymentStatusClasses,
+} from "./order-ui";
 
 type OrderClientOption = {
 	id: string;
@@ -272,6 +276,10 @@ export default function OrderWorkspace({
 			).length,
 		};
 	}, [clientOptions, orders]);
+	const draftDiscountSummary = useMemo(
+		() => getOrderDiscountSummary(draftOrder),
+		[draftOrder],
+	);
 
 	const filteredProductOptions = useMemo(
 		() =>
@@ -754,6 +762,26 @@ export default function OrderWorkspace({
 											{formatDateTime(draftOrder.updated_at)}
 										</span>
 									</p>
+									{draftDiscountSummary.hasDiscounts ? (
+										<div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
+											<p className="font-semibold">
+												Promocion aplicable detectada
+											</p>
+											<p className="mt-1">
+												Se han descontado{" "}
+												<span className="font-semibold">
+													{formatOrderCents(
+														draftDiscountSummary.totalDiscountCents,
+													)}
+												</span>{" "}
+												en {draftDiscountSummary.discountedLineCount}{" "}
+												{draftDiscountSummary.discountedLineCount === 1
+													? "linea"
+													: "lineas"}{" "}
+												del borrador.
+											</p>
+										</div>
+									) : null}
 								</div>
 							) : null}
 
@@ -1086,6 +1114,15 @@ export default function OrderWorkspace({
 												<p className="mt-2 text-lg font-semibold text-slate-900">
 													{formatCurrency(order.total_amount)}
 												</p>
+												{getOrderDiscountSummary(order).hasDiscounts ? (
+													<p className="mt-1 text-xs font-semibold text-emerald-700">
+														Promo -{" "}
+														{formatOrderCents(
+															getOrderDiscountSummary(order)
+																.totalDiscountCents,
+														)}
+													</p>
+												) : null}
 											</div>
 											<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
 												<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">

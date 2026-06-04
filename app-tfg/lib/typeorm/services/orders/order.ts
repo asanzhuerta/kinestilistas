@@ -23,11 +23,13 @@ import { Client } from "@/lib/typeorm/entities/Client";
 import { User } from "@/lib/typeorm/entities/User";
 import { Order } from "@/lib/typeorm/entities/Order";
 import { OrderLine } from "@/lib/typeorm/entities/OrderLine";
+import { Promotion } from "@/lib/typeorm/entities/Promotion";
 import { OrderPaymentStatus } from "@/lib/typeorm/entities/OrderPaymentStatus";
 import { OrderStatus } from "@/lib/typeorm/entities/OrderStatus";
 import { CommercialVisit } from "@/lib/typeorm/entities/CommercialVisit";
 import { ColorReference } from "@/lib/typeorm/entities/ColorReference";
 import { ClientCommercialAssignment } from "@/lib/typeorm/entities/ClientCommercialAssignment";
+import { ClientCustomerSegment } from "@/lib/typeorm/entities/ClientCustomerSegment";
 import { getClientByUserId } from "@/lib/typeorm/services/commercial/client";
 import {
 	canCommercialAccessClient,
@@ -99,6 +101,18 @@ type PreparedOrderLineRecord = {
 	variantNameSnapshot: string | null;
 };
 
+type ActivePromotionDiscount = {
+	id: string;
+	title: string;
+	benefit: string;
+	discountPercentage: number;
+	endDate: string;
+	productId: string | null;
+	productLineId: string | null;
+	clientId: string | null;
+	customerSegmentId: string | null;
+};
+
 const ORDER_STATUS_TRANSITION_IDS_BY_CODE: Record<string, number[]> = {
 	created: [ORDER_STATUS_IDS.CONFIRMED, ORDER_STATUS_IDS.CANCELLED],
 	confirmed: [ORDER_STATUS_IDS.CANCELLED],
@@ -145,6 +159,110 @@ function parseMoneyToCents(value: string | number) {
 
 function formatCents(cents: number) {
 	return (cents / 100).toFixed(2);
+}
+
+function parsePromotionDiscountPercentage(promotion: Promotion) {
+	const normalizedType = normalizeText(promotion.promotion_type).toLowerCase();
+
+	if (
+		!normalizedType.includes("descuento") &&
+		!normalizedType.includes("discount")
+	) {
+		return null;
+	}
+
+	const match = normalizeText(promotion.benefit)
+		.replace(",", ".")
+		.match(/(\d+(?:\.\d+)?)/);
+	const parsed = Number(match?.[1]);
+
+	if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 100) {
+		return null;
+	}
+
+	return parsed;
+}
+
+function formatDiscountPercentage(discountPercentage: number) {
+	return discountPercentage.toFixed(2);
+}
+
+function applyPercentageDiscountToCents(
+	amountCents: number,
+	discountPercentage: number,
+) {
+	const basisPoints = Math.round(discountPercentage * 100);
+	const discountedAmount = Math.round(
+		(amountCents * Math.max(0, 10000 - basisPoints)) / 10000,
+	);
+
+	return Math.max(0, discountedAmount);
+}
+
+function getPromotionSpecificityScore(promotion: ActivePromotionDiscount) {
+	return (
+		(promotion.clientId ? 8 : 0) +
+		(promotion.customerSegmentId ? 4 : 0) +
+		(promotion.productId ? 2 : 0) +
+		(promotion.productLineId ? 1 : 0)
+	);
+}
+
+function isPromotionDiscountBetter(
+	candidate: ActivePromotionDiscount,
+	current: ActivePromotionDiscount | null,
+) {
+	if (!current) {
+		return true;
+	}
+
+	if (candidate.discountPercentage !== current.discountPercentage) {
+		return candidate.discountPercentage > current.discountPercentage;
+	}
+
+	const candidateSpecificity = getPromotionSpecificityScore(candidate);
+	const currentSpecificity = getPromotionSpecificityScore(current);
+
+	if (candidateSpecificity !== currentSpecificity) {
+		return candidateSpecificity > currentSpecificity;
+	}
+
+	return candidate.endDate < current.endDate;
+}
+
+function promotionAppliesToProduct(
+	promotion: ActivePromotionDiscount,
+	product: Product,
+) {
+	const targetsProduct = Boolean(promotion.productId);
+	const targetsProductLine = Boolean(promotion.productLineId);
+
+	if (!targetsProduct && !targetsProductLine) {
+		return true;
+	}
+
+	return (
+		promotion.productId === product.id ||
+		promotion.productLineId === product.product_line_id
+	);
+}
+
+function findBestPromotionDiscountForProduct(
+	promotions: ActivePromotionDiscount[],
+	product: Product,
+) {
+	return promotions.reduce<ActivePromotionDiscount | null>(
+		(bestPromotion, promotion) => {
+			if (!promotionAppliesToProduct(promotion, product)) {
+				return bestPromotion;
+			}
+
+			return isPromotionDiscountBetter(promotion, bestPromotion)
+				? promotion
+				: bestPromotion;
+		},
+		null,
+	);
 }
 
 function buildOrderLineMergeKey(line: {
@@ -222,6 +340,9 @@ function buildOrderSummaryLine(line: OrderLine): OrderSummaryLine {
 		color_reference_name: line.variant_name_snapshot ?? null,
 		product_line_name: line.product?.productLine?.name ?? null,
 		quantity: Number(line.quantity ?? 0),
+		unit_price_snapshot: String(line.unit_price_snapshot ?? "0.00"),
+		discount_percentage: String(line.discount_percentage ?? "0.00"),
+		line_total: String(line.line_total ?? "0.00"),
 	};
 }
 
@@ -759,8 +880,66 @@ async function ensureOrderActors(
 	}
 }
 
+async function listActivePromotionDiscountsForClient(
+	manager: Awaited<ReturnType<typeof getDataSource>>["manager"],
+	clientId: string,
+) {
+	const today = new Date().toISOString().slice(0, 10);
+	const promotions = await manager
+		.getRepository(Promotion)
+		.createQueryBuilder("promotion")
+		.leftJoin(
+			ClientCustomerSegment,
+			"clientSegment",
+			[
+				"clientSegment.segment_id = promotion.customer_segment_id",
+				"clientSegment.client_id = :clientId",
+			].join(" AND "),
+			{ clientId },
+		)
+		.where("promotion.status = :status", { status: "active" })
+		.andWhere("promotion.start_date <= :today", { today })
+		.andWhere("promotion.end_date >= :today", { today })
+		.andWhere(
+			[
+				"(",
+				"(promotion.client_id IS NULL AND promotion.customer_segment_id IS NULL)",
+				"OR promotion.client_id = :clientId",
+				"OR clientSegment.id IS NOT NULL",
+				")",
+			].join(" "),
+			{ clientId },
+		)
+		.getMany();
+
+	return promotions
+		.map((promotion) => {
+			const discountPercentage = parsePromotionDiscountPercentage(promotion);
+
+			if (discountPercentage === null) {
+				return null;
+			}
+
+			return {
+				id: promotion.id,
+				title: promotion.title,
+				benefit: promotion.benefit,
+				discountPercentage,
+				endDate: promotion.end_date,
+				productId: promotion.product_id,
+				productLineId: promotion.product_line_id,
+				clientId: promotion.client_id,
+				customerSegmentId: promotion.customer_segment_id,
+			} satisfies ActivePromotionDiscount;
+		})
+		.filter(
+			(promotion): promotion is ActivePromotionDiscount => promotion !== null,
+		);
+}
+
 async function prepareOrderLineRecords(
 	manager: Awaited<ReturnType<typeof getDataSource>>["manager"],
+	clientId: string,
 	lines: NormalizedOrderLineInput[],
 ) {
 	if (lines.length === 0) {
@@ -823,6 +1002,8 @@ async function prepareOrderLineRecords(
 	const productVariantCountMap = new Map(
 		productVariantCounts.map((row) => [row.productId, Number(row.count ?? 0)]),
 	);
+	const activePromotionDiscounts =
+		await listActivePromotionDiscountsForClient(manager, clientId);
 
 	let totalAmountCents = 0;
 	const lineRecords = lines.map((line) => {
@@ -881,7 +1062,19 @@ async function prepareOrderLineRecords(
 		}
 
 		const unitPriceCents = parseMoneyToCents(product.base_price);
-		const lineTotalCents = unitPriceCents * line.quantity;
+		const lineSubtotalCents = unitPriceCents * line.quantity;
+		const promotionDiscount = findBestPromotionDiscountForProduct(
+			activePromotionDiscounts,
+			product,
+		);
+		const discountPercentage = promotionDiscount?.discountPercentage ?? 0;
+		const lineTotalCents =
+			discountPercentage > 0
+				? applyPercentageDiscountToCents(
+						lineSubtotalCents,
+						discountPercentage,
+					)
+				: lineSubtotalCents;
 		totalAmountCents += lineTotalCents;
 
 		return {
@@ -889,7 +1082,7 @@ async function prepareOrderLineRecords(
 			colorReferenceId: selectedColorReference?.id ?? null,
 			quantity: line.quantity,
 			unitPriceSnapshot: formatCents(unitPriceCents),
-			discountPercentage: "0.00",
+			discountPercentage: formatDiscountPercentage(discountPercentage),
 			lineTotal: formatCents(lineTotalCents),
 			orderReferenceSnapshot:
 				selectedColorReference?.erp_reference ||
@@ -923,6 +1116,7 @@ async function persistOrderRecord(
 	const orderLineRepo = manager.getRepository(OrderLine);
 	const { totalAmountCents, lineRecords } = await prepareOrderLineRecords(
 		manager,
+		input.clientId,
 		input.lines,
 	);
 

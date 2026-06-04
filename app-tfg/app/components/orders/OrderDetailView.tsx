@@ -9,10 +9,16 @@ import { buildOrderQrImageUrl, buildOrderQrPayload } from "@/lib/orders/qr";
 import { ROLE_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { formatDateTime } from "@/lib/utils/user-utils";
 import {
+	buildOrderLinePromotionLabel,
+	formatOrderCents,
 	formatOrderCurrency,
+	getOrderDiscountSummary,
+	getOrderLineDiscountCents,
+	getOrderLineSubtotalCents,
 	getOrderPaymentMethodLabel,
 	getOrderPaymentStatusClasses,
 	getOrderStatusClasses,
+	hasOrderLineDiscount,
 } from "./order-ui";
 
 type RelatedLink = {
@@ -58,6 +64,7 @@ export default function OrderDetailView({
 	} | null>(null);
 
 	const order = detail.order;
+	const discountSummary = getOrderDiscountSummary(order);
 	const isBusy = updatingStatusId !== null || updatingPaymentStatusId !== null;
 	const canUpdateStatus =
 		Boolean(updateApiPath) && detail.availableStatusTransitions.length > 0;
@@ -301,6 +308,12 @@ export default function OrderDetailView({
 								<p className="mt-2 text-lg font-semibold text-slate-900">
 									{formatOrderCurrency(order.total_amount)}
 								</p>
+								{discountSummary.hasDiscounts ? (
+									<p className="mt-1 text-xs font-semibold text-emerald-700">
+										Promo -{" "}
+										{formatOrderCents(discountSummary.totalDiscountCents)}
+									</p>
+								) : null}
 							</div>
 							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
 								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -650,6 +663,20 @@ export default function OrderDetailView({
 										</p>
 									</div>
 								</div>
+								{hasOrderLineDiscount(line) ? (
+									<div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+										<p className="font-semibold">
+											{buildOrderLinePromotionLabel(line)}
+										</p>
+										<p className="mt-1">
+											Antes{" "}
+											{formatOrderCents(getOrderLineSubtotalCents(line))}
+											{" - "}ahorro{" "}
+											{formatOrderCents(getOrderLineDiscountCents(line))}
+											{" - "}final {formatOrderCurrency(line.line_total)}
+										</p>
+									</div>
+								) : null}
 							</div>
 						))}
 					</div>
