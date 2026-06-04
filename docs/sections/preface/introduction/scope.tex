@@ -1,6 +1,6 @@
 Con el fin de alcanzar los objetivos descritos anteriormente, resulta necesario delimitar con precision el alcance funcional y organizativo del sistema, así como identificar que partes de ese alcance forman ya parte de la implementación actual del proyecto.
 
-El sistema desarrollado en este Trabajo Fin de Grado esta orientado a apoyar la actividad comercial de un distribuidor de productos capilares profesionales y a mejorar su relación operativa con los salones clientes. La aplicación centraliza en una única plataforma los procesos de acceso seguro, gestión de clientes profesionales, planificación de visitas y rutas, consulta de catálogo técnico-comercial, gestión del flujo de pedido, reparto y cobro mínimo, y un bloque operativo de seguimiento técnico interno del salón con plantillas reutilizables, tonalidades de color y preparación asistida de correo técnico.
+El sistema desarrollado en este Trabajo Fin de Grado esta orientado a apoyar la actividad comercial de un distribuidor de productos capilares profesionales y a mejorar su relación operativa con los salones clientes. La aplicación centraliza en una única plataforma los procesos de acceso seguro, gestión de clientes profesionales, planificación de visitas y rutas, consulta de catálogo técnico-comercial, gestión del flujo de pedido, reparto y cobro mínimo, seguimiento técnico interno del salón con plantillas reutilizables, tonalidades de color y preparación asistida de correo técnico, y comunicación comercial interna mediante promociones, formaciones, avisos y recordatorios.
 
 La solución se ha construido como una aplicación web accesible desde distintos dispositivos, con interfaz responsive y soporte de instalación basico mediante manifiesto web y registro de un \textit{service worker}. Esto permite utilizar la aplicación desde ordenadores, tabletas y telefonos móviles, manteniendo un único punto de entrada para los distintos perfiles del sistema.
 
@@ -8,13 +8,13 @@ La solución se ha construido como una aplicación web accesible desde distintos
 Desde el punto de vista organizativo, el sistema afecta principalmente a tres tipos de usuarios:
 
 \begin{itemize}
-    \item El distribuidor administrador, responsable de la gestión de usuarios, clientes, catálogo, pedidos globales, auditoría y configuración transversal de la aplicación.
-    \item Los comerciales, que utilizan el sistema para gestionar sus clientes asignados, registrar visitas, consultar el catálogo, preparar pedidos, organizar repartos y registrar cobros mínimos.
-    \item Los clientes profesionales, que acceden al catálogo, consultan su información de reparto, mantienen su perfil y gestionan su propio historial de pedidos.
+    \item El distribuidor administrador, responsable de la gestión de usuarios, clientes, catálogo, pedidos globales, comunicaciones internas, auditoría y configuración transversal de la aplicación.
+    \item Los comerciales, que utilizan el sistema para gestionar sus clientes asignados, registrar visitas, consultar el catálogo, preparar pedidos, organizar repartos, registrar cobros mínimos y consultar promociones, formaciones y avisos.
+    \item Los clientes profesionales, que acceden al catálogo, consultan su información de reparto, mantienen su perfil, gestionan su propio historial de pedidos y reciben comunicaciones comerciales internas.
 \end{itemize}
 
 \subsection{Alcance de la implementación}
-El alcance de la implementación actual cubre de forma operativa los módulos \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4}, junto con un primer incremento ya funcional de \texttt{M5} y un bloque transversal de administración ya materializado que incluye auditoría de accesos y acciones administrativas, políticas globales de rate limiting e integraciones externas de soporte. En concreto:
+El alcance de la implementación actual cubre de forma operativa los módulos \texttt{M1}, \texttt{M2}, \texttt{M3}, \texttt{M4}, un primer incremento ya funcional de \texttt{M5} y el núcleo interno de \texttt{M6}, junto con un bloque transversal de administración ya materializado que incluye auditoría de accesos y acciones administrativas, políticas globales de rate limiting e integraciones externas de soporte. En concreto:
 
 \begin{itemize}
     \item \texttt{M1} cubre autenticación, sesiones, solicitudes de registro, gestión de usuarios, perfiles, trazabilidad y protecciones básicas de acceso.
@@ -22,8 +22,9 @@ El alcance de la implementación actual cubre de forma operativa los módulos \t
     \item \texttt{M3} cubre la administración y consulta del catálogo, incluyendo categorías, líneas, subcategorías, productos, recursos de apoyo, cartas de color y referencias cromáticas.
     \item \texttt{M4} cubre borradores de pedido, confirmación, reparto integrado en visitas comerciales, validación QR, estado mínimo de cobro y trazabilidad por rol.
     \item \texttt{M5} cubre fichas de clientes del salón, registro y mantenimiento de servicios, ficha técnica asociada, selección persistida de tonalidades cuando el producto enlaza referencias de color, galería visual de resultado final, plantillas reutilizables de servicio, uso de productos, filtrado de historial, sugerencias derivadas del historial técnico ya registrado y generación de borradores técnicos editables por servicio.
+    \item \texttt{M6} cubre gestión administrativa completa de promociones, segmentos de clientes, asignación manual de clientes a segmentos, consulta de promociones por rol, publicación y mantenimiento de formaciones, inscripción de usuarios, notificaciones internas segmentadas y recordatorios personales.
 \end{itemize}
 
-Por el contrario, el envío real de correo técnico mediante proveedor externo dentro de \texttt{M5}, el módulo \texttt{M6} y la mayor parte de \texttt{M8} permanecen como líneas de evolución futura. Asimismo, dentro de \texttt{M7} no se ha implementado todavía un subsistema amplio de integraciones empresariales, sincronización externa o pedidos a proveedor; la versión actual se limita a las capacidades transversales de administración y soporte realmente presentes en el código.
+Por el contrario, el envío real de correo técnico mediante proveedor externo dentro de \texttt{M5}, la mensajería externa de \texttt{M6} y la mayor parte de \texttt{M8} permanecen como líneas de evolución futura. Asimismo, dentro de \texttt{M7} no se ha implementado todavía un subsistema amplio de integraciones empresariales, sincronización externa o pedidos a proveedor; la versión actual se limita a las capacidades transversales de administración y soporte realmente presentes en el código.
 
 En consecuencia, la memoria debe interpretarse distinguiendo entre dos niveles: por un lado, el alcance funcional completo identificado para la aplicación; por otro, el subconjunto efectivamente implementado y verificado en el estado actual del repositorio. El análisis, el diseño y la documentación técnica de los módulos ya construidos se ajustan en este documento al comportamiento real de la aplicación existente.

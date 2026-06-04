@@ -1,0 +1,42 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='950' viewBox='0 0 1600 950'>
+<defs><marker id='arrow' markerWidth='12' markerHeight='12' refX='10' refY='6' orient='auto' markerUnits='strokeWidth'><path d='M2,2 L10,6 L2,10 Z' fill='#8ba3ba'/></marker>
+<filter id='softShadow' x='-10%' y='-10%' width='120%' height='120%'><feDropShadow dx='0' dy='2' stdDeviation='3' flood-color='#19324d' flood-opacity='0.12'/></filter></defs>
+<rect width='100%' height='100%' fill='#fbfcfe'/>
+<text x='800.0' y='44' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='28' font-weight='700' fill='#203040'>Diagrama de contenedores del sistema</text>
+<line x1='370.0' y1='375.0' x2='520.0' y2='315.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='355.0' y='319.0' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='445.0' y='337.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>HTML/JSON</text>
+<line x1='730.0' y1='420.0' x2='730.0' y2='510.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='640.0' y='439.0' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='730.0' y='457.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>proteccion</text>
+<line x1='940.0' y1='585.0' x2='1110.0' y2='257.5' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='935.0' y='395.2' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='1025.0' y='413.2' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>usuario/sesion</text>
+<line x1='940.0' y1='315.0' x2='1110.0' y2='257.5' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='935.0' y='260.2' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='1025.0' y='278.2' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>repositorios</text>
+<line x1='940.0' y1='315.0' x2='1110.0' y2='440.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='935.0' y='351.5' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='1025.0' y='369.5' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>subidas</text>
+<line x1='940.0' y1='315.0' x2='1110.0' y2='615.0' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='935.0' y='439.0' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='1025.0' y='457.0' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>rutas</text>
+<line x1='940.0' y1='315.0' x2='1110.0' y2='782.5' stroke='#8ba3ba' stroke-width='2.2' marker-end='url(#arrow)'/>
+<rect x='935.0' y='522.8' width='180' height='24' rx='8' fill='#ffffff' opacity='0.9'/>
+<text x='1025.0' y='540.8' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='14' fill='#65758b'>QR</text>
+<rect x='70' y='300' width='300' height='150' rx='16' fill='#e6f0ff' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='220.0' y='361.1' font-weight='700'>Navegador / PWA</tspan><tspan x='220.0' y='382.4' font-weight='500'>React, formularios, mapas y</tspan><tspan x='220.0' y='403.6' font-weight='500'>capturas</tspan></text>
+<rect x='520' y='210' width='420' height='210' rx='16' fill='#e0f2fe' stroke='#0284c7' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='21' fill='#203040'><tspan x='730.0' y='298.8' font-weight='700'>Aplicacion Next.js</tspan><tspan x='730.0' y='323.6' font-weight='500'>App Router + Server Components +</tspan><tspan x='730.0' y='348.4' font-weight='500'>Route Handlers</tspan></text>
+<rect x='520' y='510' width='420' height='150' rx='16' fill='#e9f8ef' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='730.0' y='571.1' font-weight='700'>Auth.js + proxy.ts</tspan><tspan x='730.0' y='592.4' font-weight='500'>Sesion, roles, rate limiting y navegador</tspan><tspan x='730.0' y='613.6' font-weight='500'>soportado</tspan></text>
+<rect x='1110' y='190' width='330' height='135' rx='18' fill='#e2f5ff' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<ellipse cx='1275.0' cy='210' rx='165.0' ry='18' fill='#e2f5ff' stroke='#8ba3ba' stroke-width='2'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='1275.0' y='254.3' font-weight='700'>PostgreSQL</tspan><tspan x='1275.0' y='275.5' font-weight='500'>TypeORM + migraciones</tspan></text>
+<rect x='1110' y='380' width='330' height='120' rx='16' fill='#f1f5f9' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='1275.0' y='426.1' font-weight='700'>Cloudinary</tspan><tspan x='1275.0' y='447.4' font-weight='500'>Almacenamiento multimedia</tspan><tspan x='1275.0' y='468.6' font-weight='500'>externo</tspan></text>
+<rect x='1110' y='555' width='330' height='120' rx='16' fill='#f1f5f9' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='1275.0' y='611.8' font-weight='700'>Nominatim / OSRM</tspan><tspan x='1275.0' y='633.0' font-weight='500'>Servicios geograficos HTTP</tspan></text>
+<rect x='1110' y='730' width='330' height='105' rx='16' fill='#f1f5f9' stroke='#8ba3ba' stroke-width='2' filter='url(#softShadow)'/>
+<text text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='18' fill='#203040'><tspan x='1275.0' y='779.3' font-weight='700'>QuickChart</tspan><tspan x='1275.0' y='800.5' font-weight='500'>Representacion del QR</tspan></text>
+</svg>

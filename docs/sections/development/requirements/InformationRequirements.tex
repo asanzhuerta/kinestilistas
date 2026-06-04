@@ -716,19 +716,19 @@ Para cada promoción el sistema debe registrar:
     \item Fecha de última actualización de la promoción.
 \end{itemize}
 
-\subsubsection*{Categoría de cliente}
+\subsubsection*{Asignación de cliente a categoría}
 
-El sistema debe permitir almacenar categorías de clientes utilizadas para segmentar a las peluquerías usuarias del sistema en función de criterios comerciales o de uso definidos por el distribuidor.
+El sistema debe permitir almacenar la relación entre clientes profesionales y categorías comerciales, de forma que una promoción pueda mostrarse únicamente a los clientes incluidos en el segmento correspondiente.
 
-Para cada categoría de cliente el sistema debe registrar:
+Para cada asignación de cliente a categoría el sistema debe registrar:
 
 \begin{itemize}
-    \item Identificador de la categoría.
-    \item Nombre de la categoría.
-    \item Descripción de la categoría, en caso de existir.
-    \item Criterios o condiciones asociados a la categoría, cuando corresponda.
-    \item Fecha de creación de la categoría.
-    \item Fecha de última actualización de la categoría.
+    \item Identificador de la asignación.
+    \item Cliente profesional asignado.
+    \item Categoría o segmento asociado.
+    \item Usuario administrador que realiza la asignación, cuando corresponda.
+    \item Notas internas de la asignación, en caso de existir.
+    \item Fecha de creación de la asignación.
 \end{itemize}
 
 \subsubsection*{Categoría de cliente}
@@ -759,8 +759,8 @@ Para cada notificación el sistema debe registrar:
     \item Contenido o mensaje de la notificación.
     \item Tipo de notificación.
     \item Canal de notificación utilizado.
+    \item Tipo y entidad origen de la notificación, cuando proceda.
     \item Fecha y hora de creación de la notificación.
-    \item Fecha y hora de envío, cuando corresponda.
     \item Estado de lectura de la notificación.
     \item Fecha de lectura, cuando corresponda.
 \end{itemize}
@@ -795,6 +795,7 @@ Para cada formación el sistema debe registrar:
     \item Ubicación o modalidad de realización.
     \item Contenido o información adicional de la formación.
     \item Estado de la formación.
+    \item Capacidad máxima, cuando corresponda.
     \item Fecha de creación del registro de formación.
     \item Fecha de última actualización de la formación.
 \end{itemize}

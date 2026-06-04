@@ -1,0 +1,109 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Secuencia login" id="sequence-login-protected-access">
+    <mxGraphModel dx="1700" dy="980" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="980" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Secuencia: inicio de sesion y acceso protegido" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=24;fontColor=#203040;" parent="1" vertex="1">
+          <mxGeometry x="30" y="20" width="1640" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="u" value="Usuario" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e6f0ff;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="70" y="120" width="190" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-u" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="165.0" y="195" width="0" height="725" as="geometry" />
+        </mxCell>
+        <mxCell id="b" value="Navegador" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="330" y="120" width="210" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-b" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="435.0" y="195" width="0" height="725" as="geometry" />
+        </mxCell>
+        <mxCell id="p" value="proxy.ts" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e9f8ef;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="610" y="120" width="200" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-p" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="710.0" y="195" width="0" height="725" as="geometry" />
+        </mxCell>
+        <mxCell id="a" value="Auth.js" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="875" y="120" width="210" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-a" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="980.0" y="195" width="0" height="725" as="geometry" />
+        </mxCell>
+        <mxCell id="page" value="Route/Page" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#fff3d7;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1145" y="120" width="210" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-page" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="1250.0" y="195" width="0" height="725" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="PostgreSQL" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e2f5ff;strokeColor=#8ba3ba;fontColor=#203040;fontSize=17;spacing=8;align=center;verticalAlign=middle;" parent="1" vertex="1">
+          <mxGeometry x="1430" y="120" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="life-db" value="" style="shape=line;html=1;strokeColor=#8ba3ba;dashed=1;dashPattern=8 6;" parent="1" vertex="1">
+          <mxGeometry x="1540.0" y="195" width="0" height="725" as="geometry" />
+        </mxCell>
+        <mxCell id="msg-0" value="1. Credenciales" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="165.0" y="250" as="sourcePoint" />
+            <mxPoint x="435.0" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-1" value="2. Formulario login" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="435.0" y="325" as="sourcePoint" />
+            <mxPoint x="980.0" y="325" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-2" value="3. Consulta usuario" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980.0" y="400" as="sourcePoint" />
+            <mxPoint x="1540.0" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-3" value="4. Perfil activo" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;dashed=1;dashPattern=8 6;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1540.0" y="475" as="sourcePoint" />
+            <mxPoint x="980.0" y="475" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-4" value="5. Cookie segura" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;dashed=1;dashPattern=8 6;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980.0" y="550" as="sourcePoint" />
+            <mxPoint x="435.0" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-5" value="6. Ruta protegida" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="435.0" y="640" as="sourcePoint" />
+            <mxPoint x="710.0" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-6" value="7. Verifica sesion/rol" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="710.0" y="715" as="sourcePoint" />
+            <mxPoint x="980.0" y="715" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-7" value="8. Autoriza acceso" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="710.0" y="790" as="sourcePoint" />
+            <mxPoint x="1250.0" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-8" value="9. Carga dashboard" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1250.0" y="865" as="sourcePoint" />
+            <mxPoint x="1540.0" y="865" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg-9" value="10. Vista por rol" style="endArrow=block;html=1;rounded=0;strokeColor=#8ba3ba;fontColor=#203040;fontSize=15;labelBackgroundColor=#ffffff;dashed=1;dashPattern=8 6;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1250.0" y="915" as="sourcePoint" />
+            <mxPoint x="435.0" y="915" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

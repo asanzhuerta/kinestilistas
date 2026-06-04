@@ -292,6 +292,7 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 
 \begin{itemize}
     \item El sistema debe permitir registrar los productos utilizados en los servicios realizados en el salón.
+    \item Cuando el producto utilizado corresponda a coloración, el sistema debe permitir asociar la tonalidad o referencia cromática concreta utilizada.
     \item El sistema debe permitir consultar el uso de productos en los distintos servicios registrados.
     \item Esta información podrá utilizarse para analizar el uso de productos de la marca en los tratamientos realizados por las peluquerías.
 \end{itemize}
@@ -307,14 +308,24 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 \end{itemize}
 
 \vspace{-0.75em}
-\subsubsection{RF-M5-07 Contacto por correo a partir de la ficha técnica del cliente}
+\subsubsection{RF-M5-07 Plantillas reutilizables e imágenes del resultado final}
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir generar un correo electrónico dirigido al cliente del salón a partir de la información registrada en su ficha técnica.
-    \item El correo generado podrá incluir información relevante sobre los tratamientos realizados, productos utilizados, recomendaciones basadas en el historial técnico del cliente o promociones que quiera ofrecer los profesionales del salón a sus clientes.
-    \item El sistema debe permitir personalizar el contenido del correo antes de su envío, permitiendo al profesional adaptar el mensaje a las necesidades específicas de cada cliente.
-    \item Además, el sistema deberá estar integrado con un servicio de mensajería externa para facilitar el envío de estos correos electrónicos a los clientes del salón, permitiendo una comunicación directa y personalizada basada en la información técnica registrada en la plataforma.
+    \item El sistema debe permitir guardar plantillas reutilizables de servicios técnicos para acelerar el registro de tratamientos frecuentes.
+    \item Las plantillas deben poder incluir información técnica base y productos predefinidos asociados al tratamiento.
+    \item El sistema debe permitir adjuntar una o varias imágenes del resultado final de un servicio, de forma que el historial técnico conserve evidencia visual del trabajo realizado.
+\end{itemize}
+
+\vspace{-0.75em}
+\subsubsection{RF-M5-08 Contacto por correo a partir de la ficha técnica del cliente}
+\vspace{-1em}
+
+\begin{itemize}
+    \item El sistema debe permitir generar un borrador de correo electrónico dirigido al cliente del salón a partir de la información registrada en un servicio técnico.
+    \item El borrador generado podrá incluir información relevante sobre el tratamiento realizado, productos utilizados, observaciones técnicas y recomendaciones basadas en el historial del cliente.
+    \item El sistema debe permitir personalizar el asunto y el contenido antes de su uso, permitiendo al profesional adaptar el mensaje a las necesidades específicas de cada cliente.
+    \item En el alcance actual, el sistema debe facilitar la copia del borrador o su apertura mediante el cliente de correo configurado en el dispositivo, sin requerir todavía integración directa con un proveedor externo de envío.
 \end{itemize}
 
 % ------------------------------------------------------------------------------
@@ -329,8 +340,10 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
     \item El sistema debe permitir al distribuidor administrador crear y gestionar promociones comerciales dirigidas a los clientes profesionales.
     \item El sistema debe permitir asociar dichas promociones a productos, líneas de producto, clientes específicos o periodos de tiempo determinados.
     \item El sistema debe permitir definir condiciones promocionales tales como descuentos, ventajas comerciales u ofertas especiales aplicables durante un periodo determinado.
+    \item El sistema debe permitir editar, activar, archivar o eliminar promociones desde el panel administrativo cuando sea necesario.
     \item El sistema debe permitir mostrar las promociones activas a los usuarios autorizados dentro de la aplicación.
-    \item El sistema debe permitir que las promociones aplicables puedan ser consideradas durante el proceso de creación de pedidos.
+    \item El sistema debe permitir diferenciar promociones en borrador, activas o archivadas para controlar su visibilidad.
+    \item En la iteración actual, las promociones se muestran como información comercial dentro de la aplicación, sin aplicar todavía descuentos automáticos sobre el cálculo del pedido.
 \end{itemize}
 
 \vspace{-0.75em}
@@ -340,7 +353,8 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 \begin{itemize}
     \item El sistema debe permitir clasificar a los clientes en diferentes categorías dependiendo del uso que hagan de la aplicación, por ejemplo, clientes \textit{Platino}, \textit{Oro} o \textit{Plata}.
     \item El sistema debe permitir asociar promociones comerciales a determinadas categorías de clientes, de forma que solo los clientes incluidos en dichas categorías puedan acceder a las promociones asociadas.
-    \item El sistema debe permitir gestionar la asignación de clientes a las distintas categorías, ya sea de forma manual por parte del administrador o de forma automática en función de criterios comerciales definidos por el distribuidor.
+    \item El sistema debe permitir gestionar manualmente la asignación de clientes a las distintas categorías por parte del administrador.
+    \item La asignación automática en función de criterios comerciales o de uso queda contemplada como evolución futura del módulo.
 \end{itemize}
 
 \vspace{-0.75em}
@@ -350,9 +364,12 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 \begin{itemize}
     \item El sistema debe permitir generar y enviar notificaciones o avisos a los usuarios del sistema relacionados con eventos relevantes de la aplicación.
     \item Entre estos eventos podrán incluirse promociones activas, pedidos realizados, cambios en el estado de los pedidos o visitas comerciales programadas.
+    \item Las notificaciones asociadas a promociones deberán respetar el alcance definido para la promoción: global, por cliente concreto o por categoría de cliente.
     \item El sistema debe permitir programar recordatorios asociados a determinadas acciones o eventos del sistema, por ejemplo, recordatorios de visitas comerciales o fechas de entrega de pedidos.
-    \item Las notificaciones deberán mostrarse dentro de la aplicación y podrán utilizar mecanismos de aviso compatibles con el dispositivo del usuario.
-    \item Adicionalmente, el sistema deberá estar integrado con un servicio de mensajería externa para enviar notificaciones por correo electrónico o \textit{WhatsApp} a los usuarios cuando sea necesario.
+    \item Las notificaciones deberán mostrarse dentro de la aplicación y permitir marcar su estado de lectura.
+    \item El sistema debe mostrar un indicador de avisos pendientes en los paneles de inicio de los roles que reciben comunicaciones internas.
+    \item El sistema debe permitir crear recordatorios personales con fecha programada y estado de seguimiento.
+    \item La integración con servicios externos de mensajería, correo electrónico o \textit{WhatsApp} queda fuera del alcance implementado en esta iteración.
 \end{itemize}
 
 \vspace{-0.75em}
@@ -360,11 +377,12 @@ La identificación de los requisitos funcionales se ha realizado mediante identi
 \vspace{-1em}
 
 \begin{itemize}
-    \item El sistema debe permitir al distribuidor administrador publicar y gestionar actividades formativas dirigidas a los clientes profesionales.
+    \item El sistema debe permitir al distribuidor administrador crear, editar, publicar, cancelar, completar o eliminar actividades formativas dirigidas a los clientes profesionales.
     \item El sistema debe permitir mostrar un calendario o listado de formaciones disponibles para los usuarios autorizados.
     \item El sistema debe permitir consultar la información asociada a cada formación, incluyendo fecha, ubicación, descripción o contenido de la actividad.
     \item El sistema debe permitir actualizar o desactivar las formaciones publicadas cuando sea necesario.
     \item El sistema debe permitir a los usuarios interesados inscribirse en las formaciones disponibles, registrando su participación para facilitar la organización de las actividades formativas.
+    \item El sistema debe permitir limitar la inscripción mediante una capacidad máxima opcional.
     \item Estas inscripciones pueden estar sujetas a criterios de autorización definidos por el distribuidor, como la categoría del cliente, criterios comerciales o la disponibilidad de plazas.
 \end{itemize}
 

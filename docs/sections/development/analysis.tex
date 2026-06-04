@@ -9,6 +9,7 @@ Este capítulo cubre el análisis del sistema de información a desarrollar, hac
 \input{./sections/development/analysis/conceptualmodel.tex}
 
 \section{Modelo de Interfaz de Usuario}
+\label{sec:uiModel}
 La interfaz finalmente implementada responde a una aplicación web responsive orientada a tres perfiles principales: administrador, comercial y cliente profesional. En lugar de una única vista comun para todos los usuarios, el sistema deriva a cada rol hacia un espacio operativo propio tras el inicio de sesión, conservando componentes compartidos como cabeceras, tarjetas de resumen, listados, formularios y vistas de detalle.
 
 La construcción visual del sistema ha seguido una aproximación iterativa: primero se definieron pantallas operativas mínimas para cubrir los módulos \texttt{M1} a \texttt{M4}, y posteriormente se refinaron los flujos de trabajo más sensibles, especialmente los relacionados con detalle de visitas, preparación de pedidos, confirmación de entregas y seguimiento de cobros. Por ello, el modelo de interfaz presentado a continuación debe interpretarse como un wireframe funcional de baja fidelidad derivado de la interfaz realmente desplegada.
@@ -110,5 +111,144 @@ Desde el punto de vista funcional, esta navegacion presenta varias propiedades r
     \item las vistas de \texttt{M4} enlazan entre pedido, visita de reparto y seguimiento de cobro para mantener trazabilidad entre operaciones relacionadas.
 \end{itemize}
 
+\subsection{Capturas reales de la interfaz}
+
+Las siguientes capturas proceden de la aplicación ejecutada en entorno local y muestran el estado visual real de los flujos principales. Se han seleccionado pantallas representativas de acceso, administración, trabajo comercial, consulta de catálogo, coloración, pedidos y vista cliente.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/login.png}
+        \caption{Login}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/admin-panel.png}
+        \caption{Panel admin}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/client-dashboard.png}
+        \caption{Vista cliente}
+    \end{subfigure}
+    \caption{Capturas reales de acceso y paneles por rol}
+    \label{fig:ui-real-access-roles}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/commercial-clients.png}
+        \caption{Clientes}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/commercial-visits.png}
+        \caption{Visitas}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/commercial-routes-map.png}
+        \caption{Rutas y mapa}
+    \end{subfigure}
+    \caption{Capturas reales del espacio comercial}
+    \label{fig:ui-real-commercial}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/client-catalog.png}
+        \caption{Catálogo}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/client-coloration.png}
+        \caption{Coloración}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/client-orders.png}
+        \caption{Pedidos}
+    \end{subfigure}
+    \caption{Capturas reales de catálogo, coloración y pedidos}
+    \label{fig:ui-real-client-modules}
+\end{figure}
+
+Como evidencia visual especifica del modulo \texttt{M6}, se han incorporado tambien capturas del centro administrativo de comunicaciones y de las vistas finales usadas por cliente y comercial. Estas pantallas muestran la publicacion de promociones, el acceso a formaciones, las notificaciones internas y el indicador de avisos pendientes desde los paneles de rol.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/m6-admin-communications.png}
+        \caption{Admin comunicaciones}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/m6-client-dashboard-notification.png}
+        \caption{Panel cliente}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/m6-commercial-promotions.png}
+        \caption{Promociones comercial}
+    \end{subfigure}
+    \caption{Capturas reales del modulo M6 por perfil de usuario}
+    \label{fig:ui-real-m6-role-summary}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/m6-client-promotions.png}
+        \caption{Promociones cliente}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/m6-client-trainings.png}
+        \caption{Formaciones}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{./figures/Capturas/m6-client-notifications.png}
+        \caption{Avisos}
+    \end{subfigure}
+    \caption{Capturas reales de promociones, formaciones y avisos del modulo M6}
+    \label{fig:ui-real-m6-user-flows}
+\end{figure}
+
 \section{Modelo de Comportamiento}
-\textcolor{red}{TODO}En esta sección opcional, se incluirá el modelo de comportamiento desarrollado a partir de los casos de uso definidos. Para ello, se realizarán los diagramas de secuencia del sistema, donde se identificarán las operaciones o servicios del sistema. Luego, se detallará el contrato de las operaciones identificadas.
+El modelo de comportamiento se centra en los flujos que cruzan varias capas de la aplicación y que, por tanto, son especialmente relevantes para verificar la coherencia entre interfaz, autenticación, servicios de dominio y persistencia.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/UML/Secuencia/sequence-login-protected-access.pdf}
+    \caption{Diagrama de secuencia: inicio de sesión y acceso protegido}
+    \label{fig:seq-login-protected-access}
+\end{figure}
+
+La Figura~\ref{fig:seq-login-protected-access} resume el acceso al sistema: el usuario introduce credenciales, \texttt{Auth.js} valida la identidad contra \texttt{PostgreSQL}, se genera una cookie de sesión segura y \texttt{proxy.ts} controla el acceso posterior a rutas protegidas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/UML/Secuencia/sequence-order-qr-delivery.pdf}
+    \caption{Diagrama de secuencia: creación de pedido y validación/reparto QR}
+    \label{fig:seq-order-qr-delivery}
+\end{figure}
+
+La Figura~\ref{fig:seq-order-qr-delivery} recoge el flujo de pedido y reparto: la pantalla de pedidos registra líneas, la API valida productos y tonos, el servicio de dominio persiste el pedido, se vincula la entrega a una visita comercial y el QR permite confirmar la entrega desde el detalle operativo.

@@ -1,14 +1,45 @@
-En este capítulo se recoge el diseño de la arquitectura del sistema informático, la parametrización del software base (opcional), el diseño físico de datos y el diseño detallado de la interfaz de usuario.
+En este capítulo se recoge el diseño técnico del sistema a partir de las decisiones realmente adoptadas durante el desarrollo. La documentación se centra en la arquitectura lógica, la configuración de la aplicación, el diseño físico de datos y los criterios de interfaz que permiten entender cómo se materializan los requisitos en una solución ejecutable.
 
 \section{Arquitectura del Sistema}
 \label{sec:SystemArchitecture}
 \input{./sections/development/design/systemarchitecture.tex}
 
-\section{Parametrización del software base}
-En esta sección (opcional), se detallan las modificaciones a realizar sobre el software base, que son requeridas para la correcta construcción del sistema. En esta sección incluiremos las  actuaciones necesarias sobre la interfaz de administración del sistema, sobre el código fuente o sobre el modelo de datos.
+\section{Parametrización y configuración del sistema}
+
+El proyecto no parte de un software empresarial preexistente que deba parametrizarse, sino de una aplicación desarrollada a medida sobre \texttt{Next.js}. Por tanto, la parametrización relevante se concentra en la configuración técnica y operativa necesaria para adaptar la misma base de código a distintos entornos de ejecución.
+
+Los principales puntos de configuración son los siguientes:
+
+\begin{itemize}
+    \item \textbf{Conexión a base de datos}: definida mediante \texttt{DATABASE\_URL}, permite apuntar la aplicación a una instancia local de \texttt{PostgreSQL} o a una base de datos gestionada en producción.
+    \item \textbf{Autenticación}: \texttt{AUTH\_SECRET} protege la generación y validación de sesión, mientras que la lógica de roles se controla desde las entidades persistidas y el middleware de acceso.
+    \item \textbf{Almacenamiento multimedia}: las variables de \texttt{Cloudinary} activan la subida de imágenes de perfil, catálogo y resultados visuales de servicios.
+    \item \textbf{Servicios geográficos}: los endpoints de \texttt{Nominatim} y \texttt{OSRM} permiten ajustar geocodificación y cálculo de rutas sin modificar la lógica de negocio.
+    \item \textbf{Políticas operativas}: el rate limiting se configura desde administración y se persiste en base de datos, lo que permite ajustar límites sin redesplegar la aplicación.
+    \item \textbf{Capa PWA}: el manifiesto web, iconos y \textit{service worker} proporcionan una instalación básica y una experiencia más cercana a aplicación móvil.
+\end{itemize}
+
+Esta separación entre código fuente y configuración favorece que el sistema pueda ejecutarse en local para desarrollo, en un entorno de demostración o en producción con cambios mínimos sobre variables de entorno e infraestructura.
 
 \section{Diseño Físico de Datos}
-En esta sección se define la estructura física de datos que utilizará el sistema, a partir del modelo de conceptual de clases, de manera que teniendo presente los requisitos establecidos para el sistema de información y las particularidades del entorno tecnológico, se consiga un acceso eficiente de los datos. La estructura física se compone de tablas, índices, procedimientos almacenados, secuencias y otros elementos dependientes del SGBD a utilizar.
+\label{sec:storageDesign}
+
+El diseño físico de datos traduce las necesidades de información del sistema a una estructura relacional versionada mediante migraciones. La aplicación utiliza \texttt{PostgreSQL} como fuente de verdad para los datos transaccionales y delega en servicios externos aquellos activos que no conviene almacenar como binarios en la base de datos.
+
+\input{./sections/development/design/systemarchitecture/storagedesign.tex}
 
 \section{Diseño de la Interfaz de Usuario} 
-En esta sección se detallarán los principios a tener en cuenta a la hora de implementar la interfaz de usuario del sistema, incluyendo el conjunto de estilos (colores, tipografías, iconografía, etc.) y el conjunto de componentes visuales que se utilizarán. Se incluirá, además, un prototipo de alta fidelidad con el diseño de algunas de las pantallas del sistema.
+El diseño de interfaz se ha planteado como una interfaz web responsive orientada a uso operativo diario. No se busca una interfaz genérica de administración, sino una experiencia diferenciada por rol que reduzca fricción en las tareas más frecuentes de cada usuario.
+
+Los criterios principales aplicados son:
+
+\begin{itemize}
+    \item \textbf{Separación por rol}: administrador, comercial y cliente profesional acceden a espacios de trabajo distintos, con navegación y acciones acordes a sus responsabilidades.
+    \item \textbf{Prioridad móvil}: las pantallas de comercial y cliente se han diseñado para funcionar correctamente en dispositivos pequeños, ya que muchas operaciones se realizan durante visitas, repartos o atención en salón.
+    \item \textbf{Jerarquía por tarjetas}: los paneles principales utilizan tarjetas de resumen, bloques plegables y estados visuales para presentar información compleja sin saturar la pantalla.
+    \item \textbf{Acciones contextualizadas}: las operaciones sensibles, como confirmar un pedido, cerrar una visita de reparto o marcar un cobro, aparecen asociadas al detalle correspondiente y no como acciones globales descontextualizadas.
+    \item \textbf{Feedback explícito}: formularios, subidas de imagen, validaciones QR y cambios de estado muestran mensajes de carga, error o confirmación para reducir ambigüedad.
+    \item \textbf{Reutilización visual}: botones, formularios, tablas, insignias de estado, tarjetas y componentes de mapa mantienen patrones comunes entre módulos para facilitar el aprendizaje.
+\end{itemize}
+
+En la Sección~\ref{sec:uiModel} se presenta el modelo de navegación y en las Figuras~\ref{fig:ui-real-access-roles}, \ref{fig:ui-real-commercial}, \ref{fig:ui-real-client-modules}, \ref{fig:ui-real-m6-role-summary} y \ref{fig:ui-real-m6-user-flows} se recogen capturas reales de la interfaz. Estas capturas actúan como evidencia visual del diseño finalmente implementado y sustituyen a prototipos aislados, ya que el proyecto ha evolucionado de forma incremental hasta una aplicación funcional.

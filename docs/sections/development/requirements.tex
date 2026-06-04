@@ -78,4 +78,29 @@ Las reglas de negocio describen restricciones operativas que el sistema debe res
 \end{itemize}
 
 \section{Análisis GAP}
-\textcolor{red}{TODO} Esta sección es opcional y es de aplicación cuando en la revisión de la técnica se hayan localizado soluciones informaticas que permitan servir de base para el nuevo sistema software. En esta sección se debe identificar y medir las diferencias entre lo que proporcionan dichas soluciones y los requisitos definidos para el proyecto. El resultado de este análisis permitira identificar cuales de estos requisitos ya estan solventados total o parcialmente por los distintos sistemas y poder elegir uno de ellos.
+El análisis GAP compara las necesidades funcionales y organizativas del distribuidor con las soluciones identificadas durante el estudio del contexto. El objetivo no es únicamente determinar si existe una herramienta capaz de resolver una tarea aislada, sino comprobar si alguna alternativa cubre de forma integrada el flujo completo descrito por los requisitos del sistema: gestión de usuarios, clientes, visitas, rutas, catálogo, pedidos, repartos, trazabilidad y acceso diferenciado por roles.
+
+Las soluciones consideradas como referencia son las herramientas ofimáticas ya conocidas por el distribuidor, las aplicaciones y canales digitales existentes de la empresa central y una plataforma sectorial de gestión de citas como Booksy. Cada una de ellas aporta valor en una parte concreta del problema, pero ninguna cubre por sí sola el conjunto de requisitos definidos para el nuevo sistema.
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabularx}{\linewidth}{|p{0.24\linewidth}|X|X|}
+        \hline
+        \textbf{Solución analizada} & \textbf{Cobertura aportada} & \textbf{Brecha respecto a los requisitos del sistema} \\
+        \hline
+        Hojas de cálculo, Microsoft Access y Google Sheets & Permiten registrar datos de forma flexible, mantener listados, realizar consultas sencillas y elaborar informes manuales. & No proporcionan una aplicación integrada con roles, sesiones, trazabilidad, validación de estados, experiencia móvil, cálculo de rutas, QR de entrega ni acceso directo para clientes profesionales. \\
+        \hline
+        Aplicación móvil y web oficial de KIN Cosmetics & Cubren parcialmente la consulta de catálogo, información técnica y contenidos asociados a productos de la marca. & No resuelven la gestión operativa del distribuidor: clientes asignados, visitas comerciales, rutas, pedidos propios, reparto, seguimiento de cobro ni administración local de usuarios. \\
+        \hline
+        Plataformas sectoriales como Booksy & Digitalizan procesos propios de salones de belleza, especialmente agenda, reservas y relación con clientes finales. & Su enfoque está orientado a la peluquería como negocio de atención al público, no al distribuidor B2B. No cubren logística de reparto, pedidos a distribuidor, catálogo propio, validación QR ni trazabilidad comercial del proveedor. \\
+        \hline
+    \end{tabularx}
+    \caption{Comparación GAP entre soluciones existentes y requisitos del sistema}
+    \label{tab:gap-analysis}
+\end{table}
+
+A partir de esta comparación se concluye que las alternativas existentes resuelven necesidades parciales, pero dejan sin cubrir la integración transversal requerida por el proyecto. La brecha principal se encuentra en la unión de tres dimensiones que actualmente aparecen separadas: la gestión comercial interna del distribuidor, la experiencia digital del cliente profesional y el seguimiento logístico de pedidos y repartos.
+
+Por este motivo se justifica el desarrollo de una solución específica. La aplicación propuesta no sustituye únicamente a una hoja de cálculo o a un catálogo digital, sino que actúa como sistema de información centralizado para coordinar usuarios, clientes, comerciales, catálogo, pedidos y visitas sobre una misma base de datos. Esta decisión permite cubrir los requisitos funcionales y no funcionales definidos, reducir duplicidades y dejar preparada una arquitectura extensible para futuras ampliaciones.
