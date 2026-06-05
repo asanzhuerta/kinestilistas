@@ -823,6 +823,7 @@ export default function OrderWorkspace({
 											</label>
 											<select
 												id={`order-product-${line.localId}`}
+												aria-label={`Referencia ${index + 1}`}
 												value={buildSelectionValue(
 													line.productId,
 													line.colorReferenceId,
@@ -850,6 +851,7 @@ export default function OrderWorkspace({
 											</label>
 											<input
 												id={`order-quantity-${line.localId}`}
+												aria-label={`Cantidad de la referencia ${index + 1}`}
 												type="number"
 												min={1}
 												step={1}
@@ -896,6 +898,7 @@ export default function OrderWorkspace({
 								</label>
 								<textarea
 									id="order-notes"
+									aria-label="Observaciones del pedido"
 									value={notes}
 									onChange={(event) => setNotes(event.target.value)}
 									rows={4}

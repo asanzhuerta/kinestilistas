@@ -9,12 +9,14 @@ type Props = {
 	promotions: PromotionView[];
 };
 
+const dateFormatter = new Intl.DateTimeFormat("es-ES", {
+	day: "2-digit",
+	month: "short",
+	year: "numeric",
+});
+
 function formatDate(value: string) {
-	return new Intl.DateTimeFormat("es-ES", {
-		day: "2-digit",
-		month: "short",
-		year: "numeric",
-	}).format(new Date(`${value}T00:00:00`));
+	return dateFormatter.format(new Date(`${value}T00:00:00`));
 }
 
 export default function PromotionsOverview({

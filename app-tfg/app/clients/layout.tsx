@@ -21,7 +21,7 @@ export default async function ClientLayout({
 			<PageHeaderProvider>
 				<div className="lg:flex lg:min-h-screen">
 					<RoleSidebar
-						role="client"
+						appRole="client"
 						userName={user?.name ?? session.user.name}
 						userEmail={user?.email ?? session.user.email}
 						userImageUrl={user?.profile_image_url ?? session.user.image}

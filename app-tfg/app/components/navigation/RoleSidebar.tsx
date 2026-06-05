@@ -33,7 +33,7 @@ import {
 } from "./role-sidebar-items";
 
 type RoleSidebarProps = {
-	role: RoleSidebarRole;
+	appRole: RoleSidebarRole;
 	userName?: string | null;
 	userEmail?: string | null;
 	userImageUrl?: string | null;
@@ -81,7 +81,7 @@ function isActiveHref(pathname: string, href: string) {
 }
 
 export default function RoleSidebar({
-	role,
+	appRole,
 	userName,
 	userEmail,
 	userImageUrl,
@@ -91,9 +91,9 @@ export default function RoleSidebar({
 	const [isMobileMounted, setIsMobileMounted] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(true);
 	const closeTimeoutRef = useRef<number | null>(null);
-	const labels = roleSidebarLabels[role];
-	const sections = roleSidebarSections[role];
-	const roleDisplayName = roleDisplayNames[role];
+	const labels = roleSidebarLabels[appRole];
+	const sections = roleSidebarSections[appRole];
+	const roleDisplayName = roleDisplayNames[appRole];
 	const sidebarStyle = {
 		"--role-sidebar-width": isExpanded ? "18rem" : "5rem",
 		"--sidebar-motion-duration": `${MOBILE_SIDEBAR_ANIMATION_MS}ms`,
@@ -156,7 +156,6 @@ export default function RoleSidebar({
 				aria-label="Abrir menu de navegacion"
 				aria-expanded={isMobileOpen}
 				aria-controls="role-sidebar"
-				aria-hidden={isMobileMounted}
 				tabIndex={isMobileMounted ? -1 : undefined}
 			>
 				Menu
@@ -172,7 +171,6 @@ export default function RoleSidebar({
 				}`}
 				onClick={closeMobileSidebar}
 				aria-label="Cerrar menu"
-				aria-hidden={!isMobileOpen}
 				tabIndex={isMobileOpen ? undefined : -1}
 			/>
 

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
 import { requestJson } from "@/lib/api/client";
@@ -152,7 +152,16 @@ function buildServiceSearchValue(service: SalonServiceSummary) {
 		.toLocaleLowerCase("es");
 }
 
-export default function SalonClientDetailView({
+export default function SalonClientDetailView(props: Props) {
+	return (
+		<SalonClientDetailViewContent
+			key={props.initialDetail.salonClient.id}
+			{...props}
+		/>
+	);
+}
+
+function SalonClientDetailViewContent({
 	initialDetail,
 	initialTemplates,
 	productOptions,
@@ -204,51 +213,6 @@ export default function SalonClientDetailView({
 	const [technicalEmailFeedback, setTechnicalEmailFeedback] =
 		useState<FeedbackState>(null);
 	const [isUploadingResultImages, setIsUploadingResultImages] = useState(false);
-
-	useEffect(() => {
-		setName(detail.salonClient.name);
-		setPhone(detail.salonClient.phone ?? "");
-		setEmail(detail.salonClient.email ?? "");
-		setNotes(detail.salonClient.notes ?? "");
-	}, [detail.salonClient]);
-
-	useEffect(() => {
-		if (!editingServiceId) {
-			return;
-		}
-
-		const editingServiceStillExists = detail.services.some(
-			(service) => service.id === editingServiceId,
-		);
-
-		if (!editingServiceStillExists) {
-			void cleanupTransientResultImages(resultImages);
-			setEditingServiceId(null);
-			setServiceDate(new Date().toISOString().slice(0, 10));
-			setServiceType("");
-			setServiceNotes("");
-			setServiceResult("");
-			setTechnicalDescription("");
-			setFormula("");
-			setTechnicalNotes("");
-			setProductUsages([createEmptyProductUsage("usage-1")]);
-			setResultImages([]);
-		}
-	}, [detail.services, editingServiceId, resultImages]);
-
-	useEffect(() => {
-		if (!technicalEmailDraftServiceId) {
-			return;
-		}
-
-		const technicalEmailServiceStillExists = detail.services.some(
-			(service) => service.id === technicalEmailDraftServiceId,
-		);
-
-		if (!technicalEmailServiceStillExists) {
-			resetTechnicalEmailDraft();
-		}
-	}, [detail.services, technicalEmailDraftServiceId]);
 
 	async function cleanupTransientResultImages(images: EditableResultImage[]) {
 		const transientImages = images.filter((image) => !image.persisted);
@@ -933,10 +897,14 @@ export default function SalonClientDetailView({
 
 						<form className="mt-5 space-y-4" onSubmit={handleProfileSubmit}>
 							<div>
-								<label className="mb-2 block text-sm font-medium text-slate-700">
+								<label
+									htmlFor="salon-client-name"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
 									Nombre
 								</label>
 								<input
+									id="salon-client-name"
 									value={name}
 									onChange={(event) => setName(event.target.value)}
 									className={inputClassName}
@@ -945,10 +913,14 @@ export default function SalonClientDetailView({
 							</div>
 
 							<div>
-								<label className="mb-2 block text-sm font-medium text-slate-700">
+								<label
+									htmlFor="salon-client-phone"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
 									Telefono
 								</label>
 								<input
+									id="salon-client-phone"
 									value={phone}
 									onChange={(event) => setPhone(event.target.value)}
 									className={inputClassName}
@@ -957,10 +929,14 @@ export default function SalonClientDetailView({
 							</div>
 
 							<div>
-								<label className="mb-2 block text-sm font-medium text-slate-700">
+								<label
+									htmlFor="salon-client-email"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
 									Correo
 								</label>
 								<input
+									id="salon-client-email"
 									type="email"
 									value={email}
 									onChange={(event) => setEmail(event.target.value)}
@@ -970,10 +946,14 @@ export default function SalonClientDetailView({
 							</div>
 
 							<div>
-								<label className="mb-2 block text-sm font-medium text-slate-700">
+								<label
+									htmlFor="salon-client-notes"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
 									Notas generales
 								</label>
 								<textarea
+									id="salon-client-notes"
 									value={notes}
 									onChange={(event) => setNotes(event.target.value)}
 									className={textareaClassName}
@@ -1084,10 +1064,14 @@ export default function SalonClientDetailView({
 						<div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4">
 							<div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
 								<div>
-									<label className="mb-2 block text-sm font-medium text-slate-700">
+									<label
+										htmlFor="salon-template-name"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
 										Nombre de la plantilla
 									</label>
 									<input
+										id="salon-template-name"
 										value={templateName}
 										onChange={(event) => setTemplateName(event.target.value)}
 										className={inputClassName}
@@ -1250,10 +1234,14 @@ export default function SalonClientDetailView({
 
 							<div className="grid gap-4 md:grid-cols-2">
 								<div>
-									<label className="mb-2 block text-sm font-medium text-slate-700">
+									<label
+										htmlFor="salon-service-date"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
 										Fecha del servicio
 									</label>
 									<input
+										id="salon-service-date"
 										type="date"
 										value={serviceDate}
 										onChange={(event) => setServiceDate(event.target.value)}
@@ -1262,10 +1250,14 @@ export default function SalonClientDetailView({
 									/>
 								</div>
 								<div>
-									<label className="mb-2 block text-sm font-medium text-slate-700">
+									<label
+										htmlFor="salon-service-type"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
 										Tipo de servicio
 									</label>
 									<input
+										id="salon-service-type"
 										value={serviceType}
 										onChange={(event) => setServiceType(event.target.value)}
 										className={inputClassName}
@@ -1278,10 +1270,14 @@ export default function SalonClientDetailView({
 							<div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
 								<div className="space-y-4">
 									<div>
-										<label className="mb-2 block text-sm font-medium text-slate-700">
+										<label
+											htmlFor="salon-service-result"
+											className="mb-2 block text-sm font-medium text-slate-700"
+										>
 											Resumen del resultado
 										</label>
 										<textarea
+											id="salon-service-result"
 											value={serviceResult}
 											onChange={(event) => setServiceResult(event.target.value)}
 											className={textareaClassName}
@@ -1303,6 +1299,7 @@ export default function SalonClientDetailView({
 											</div>
 											<label className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
 												<input
+													aria-label="Imagenes del resultado final"
 													type="file"
 													accept="image/*"
 													multiple
@@ -1360,10 +1357,14 @@ export default function SalonClientDetailView({
 									</div>
 								</div>
 								<div>
-									<label className="mb-2 block text-sm font-medium text-slate-700">
+									<label
+										htmlFor="salon-service-notes"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
 										Notas del servicio
 									</label>
 									<textarea
+										id="salon-service-notes"
 										value={serviceNotes}
 										onChange={(event) => setServiceNotes(event.target.value)}
 										className={textareaClassName}
@@ -1375,10 +1376,14 @@ export default function SalonClientDetailView({
 
 							<div className="grid gap-4 md:grid-cols-3">
 								<div className="md:col-span-2">
-									<label className="mb-2 block text-sm font-medium text-slate-700">
+									<label
+										htmlFor="salon-technical-description"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
 										Descripcion tecnica
 									</label>
 									<textarea
+										id="salon-technical-description"
 										value={technicalDescription}
 										onChange={(event) =>
 											setTechnicalDescription(event.target.value)
@@ -1389,10 +1394,14 @@ export default function SalonClientDetailView({
 									/>
 								</div>
 								<div>
-									<label className="mb-2 block text-sm font-medium text-slate-700">
+									<label
+										htmlFor="salon-service-formula"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
 										Formula
 									</label>
 									<textarea
+										id="salon-service-formula"
 										value={formula}
 										onChange={(event) => setFormula(event.target.value)}
 										className={textareaClassName}
@@ -1403,10 +1412,14 @@ export default function SalonClientDetailView({
 							</div>
 
 							<div>
-								<label className="mb-2 block text-sm font-medium text-slate-700">
+								<label
+									htmlFor="salon-technical-notes"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
 									Notas tecnicas
 								</label>
 								<textarea
+									id="salon-technical-notes"
 									value={technicalNotes}
 									onChange={(event) => setTechnicalNotes(event.target.value)}
 									className={textareaClassName}
@@ -1455,6 +1468,7 @@ export default function SalonClientDetailView({
 
 											<div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_160px]">
 												<select
+													aria-label={`Producto usado ${index + 1}`}
 													value={productUsage.selectionId}
 													onChange={(event) =>
 														updateProductUsage(
@@ -1475,6 +1489,7 @@ export default function SalonClientDetailView({
 												</select>
 
 												<input
+													aria-label={`Cantidad usada del producto ${index + 1}`}
 													value={productUsage.quantityUsed}
 													onChange={(event) =>
 														updateProductUsage(
@@ -1490,6 +1505,7 @@ export default function SalonClientDetailView({
 											</div>
 
 											<textarea
+												aria-label={`Notas del producto usado ${index + 1}`}
 												value={productUsage.notes}
 												onChange={(event) =>
 													updateProductUsage(
@@ -1555,12 +1571,14 @@ export default function SalonClientDetailView({
 
 						<div className="mb-5 grid gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-2 xl:grid-cols-4">
 							<input
+								aria-label="Buscar en historial tecnico"
 								value={historySearch}
 								onChange={(event) => setHistorySearch(event.target.value)}
 								className={inputClassName}
 								placeholder="Buscar por tecnica, formula o producto"
 							/>
 							<select
+								aria-label="Filtrar historial por tipo de servicio"
 								value={historyServiceType}
 								onChange={(event) => setHistoryServiceType(event.target.value)}
 								className={inputClassName}
@@ -1573,12 +1591,14 @@ export default function SalonClientDetailView({
 								))}
 							</select>
 							<input
+								aria-label="Filtrar historial desde fecha"
 								type="date"
 								value={historyDateFrom}
 								onChange={(event) => setHistoryDateFrom(event.target.value)}
 								className={inputClassName}
 							/>
 							<input
+								aria-label="Filtrar historial hasta fecha"
 								type="date"
 								value={historyDateTo}
 								onChange={(event) => setHistoryDateTo(event.target.value)}
@@ -1698,9 +1718,9 @@ export default function SalonClientDetailView({
 													<div className="mt-4 space-y-4">
 														<div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
 															<div>
-																<label className="mb-2 block text-sm font-medium text-slate-700">
+																<p className="mb-2 block text-sm font-medium text-slate-700">
 																	Destinataria
-																</label>
+																</p>
 																<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
 																	<p className="font-semibold text-slate-900">
 																		{technicalEmailDraft.recipient_name}
@@ -1712,9 +1732,9 @@ export default function SalonClientDetailView({
 																</div>
 															</div>
 															<div>
-																<label className="mb-2 block text-sm font-medium text-slate-700">
+																<p className="mb-2 block text-sm font-medium text-slate-700">
 																	Generado
-																</label>
+																</p>
 																<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
 																	{formatDateShort(technicalEmailDraft.generated_at)}
 																</div>
@@ -1722,10 +1742,15 @@ export default function SalonClientDetailView({
 														</div>
 
 														<div>
-															<label className="mb-2 block text-sm font-medium text-slate-700">
+															<label
+																htmlFor={`technical-email-subject-${service.id}`}
+																className="mb-2 block text-sm font-medium text-slate-700"
+															>
 																Asunto
 															</label>
 															<input
+																id={`technical-email-subject-${service.id}`}
+																aria-label="Asunto del correo tecnico"
 																value={technicalEmailSubject}
 																onChange={(event) =>
 																	setTechnicalEmailSubject(event.target.value)
@@ -1735,10 +1760,15 @@ export default function SalonClientDetailView({
 														</div>
 
 														<div>
-															<label className="mb-2 block text-sm font-medium text-slate-700">
+															<label
+																htmlFor={`technical-email-body-${service.id}`}
+																className="mb-2 block text-sm font-medium text-slate-700"
+															>
 																Cuerpo del correo
 															</label>
 															<textarea
+																id={`technical-email-body-${service.id}`}
+																aria-label="Cuerpo del correo tecnico"
 																value={technicalEmailBody}
 																onChange={(event) =>
 																	setTechnicalEmailBody(event.target.value)

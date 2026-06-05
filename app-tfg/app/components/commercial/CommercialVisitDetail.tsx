@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import DataTable from "@/app/components/DataTable";
 import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
@@ -15,6 +15,10 @@ import {
 	extractOrderIdFromQrValue,
 	normalizeOrderQrValues,
 } from "@/lib/orders/qr";
+import type {
+	CommercialVisitDetail as CommercialVisitDetailData,
+	UpdateCommercialVisitBody,
+} from "@/lib/contracts/commercial-visit";
 import {
 	formatOrderCurrency,
 	getOrderStatusClassesById,
@@ -67,13 +71,19 @@ const infoColumns: InfoColumn[] = [
 	},
 ];
 
-const DEFAULT_VISIT_FORM_STATE: VisitFormState = {
-	scheduledForDate: "",
-	visitTypeId: "",
-	statusId: "",
-	notes: "",
-	result: "",
-};
+type SaveCommercialVisit = (
+	payload: UpdateCommercialVisitBody,
+) => Promise<CommercialVisitDetailData | null>;
+
+function buildVisitFormState(visit: CommercialVisitDetailData): VisitFormState {
+	return {
+		scheduledForDate: visit.scheduled_for_date,
+		visitTypeId: String(visit.visit_type_id),
+		statusId: String(visit.status_id),
+		notes: visit.notes ?? "",
+		result: visit.result ?? "",
+	};
+}
 
 function CollapsibleSection({
 	title,
@@ -124,33 +134,82 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 		error,
 		save,
 	} = useCommercialVisit(visitId);
+
+	if (!visit) {
+		return (
+			<PageTransition>
+				<div className="space-y-4">
+					<div className="glass-card rounded-3xl border border-white/30 bg-white/75 p-5 shadow-xl backdrop-blur sm:p-6">
+						<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+							<div className="min-w-0">
+								<H1Title
+									title="Detalle de visita"
+									subtitle="Consulta la visita y abre solo los bloques que necesites."
+								/>
+							</div>
+
+							<Link
+								href="/commercials/visits"
+								className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+							>
+								← Volver a visitas
+							</Link>
+						</div>
+					</div>
+
+					{loading ? (
+						<section className="glass-card rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
+							<p className="text-sm text-slate-600">Cargando visita...</p>
+						</section>
+					) : null}
+
+					{!loading && error ? (
+						<section className="glass-card rounded-3xl border border-red-200 bg-red-50/80 p-6 shadow-xl backdrop-blur">
+							<h2 className="text-lg font-semibold text-red-700">
+								No se pudo cargar la visita
+							</h2>
+							<p className="mt-2 text-sm text-red-600">{error}</p>
+						</section>
+					) : null}
+				</div>
+			</PageTransition>
+		);
+	}
+
+	return (
+		<CommercialVisitDetailContent
+			key={visit.id}
+			visit={visit}
+			loading={loading}
+			error={error}
+			save={save}
+		/>
+	);
+}
+
+function CommercialVisitDetailContent({
+	visit,
+	loading,
+	error,
+	save,
+}: {
+	visit: CommercialVisitDetailData;
+	loading: boolean;
+	error: string;
+	save: SaveCommercialVisit;
+}) {
 	const [saving, setSaving] = useState(false);
 	const [success, setSuccess] = useState("");
 	const [submissionError, setSubmissionError] = useState("");
 	const [deliveredOrderQrInput, setDeliveredOrderQrInput] = useState("");
 	const [qrScanFeedback, setQrScanFeedback] = useState("");
 	const [scannerOpen, setScannerOpen] = useState(false);
-	const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
-	const [formState, setFormState] = useState<VisitFormState>(
-		DEFAULT_VISIT_FORM_STATE,
+	const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>(() =>
+		visit.linkedOrders.map((order) => order.id),
 	);
-
-	useEffect(() => {
-		if (!visit) {
-			return;
-		}
-
-		setFormState({
-			scheduledForDate: visit.scheduled_for_date,
-			visitTypeId: String(visit.visit_type_id),
-			statusId: String(visit.status_id),
-			notes: visit.notes ?? "",
-			result: visit.result ?? "",
-		});
-		setSelectedOrderIds(visit.linkedOrders.map((order) => order.id));
-		setDeliveredOrderQrInput("");
-		setQrScanFeedback("");
-	}, [visit]);
+	const [formState, setFormState] = useState<VisitFormState>(() =>
+		buildVisitFormState(visit),
+	);
 
 	const canEditPlanning = useMemo(
 		() => visit?.status_id === 1 || visit?.status_id === 4,
@@ -408,6 +467,10 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			});
 
 			if (visitData) {
+				setFormState(buildVisitFormState(visitData));
+				setSelectedOrderIds(visitData.linkedOrders.map((order) => order.id));
+				setDeliveredOrderQrInput("");
+				setQrScanFeedback("");
 				setSuccess("Entrega confirmada correctamente.");
 				setScannerOpen(false);
 			}
@@ -465,6 +528,10 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			});
 
 			if (visitData) {
+				setFormState(buildVisitFormState(visitData));
+				setSelectedOrderIds(visitData.linkedOrders.map((order) => order.id));
+				setDeliveredOrderQrInput("");
+				setQrScanFeedback("");
 				setSuccess("Visita actualizada correctamente.");
 			}
 		} catch (err) {

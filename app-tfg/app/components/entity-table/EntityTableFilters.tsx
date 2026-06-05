@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type {
 	EntitySortDirection,
 	EntitySortField,
@@ -63,20 +63,6 @@ export default function EntityTableFilters({
 	config,
 }: Props) {
 	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-	const [contentHeight, setContentHeight] = useState(0);
-	const contentRef = useRef<HTMLDivElement | null>(null);
-
-	useEffect(() => {
-		const updateHeight = () => {
-			if (contentRef.current) {
-				setContentHeight(contentRef.current.scrollHeight);
-			}
-		};
-
-		updateHeight();
-		window.addEventListener("resize", updateHeight);
-		return () => window.removeEventListener("resize", updateHeight);
-	}, [isFiltersOpen, filteredCount, totalCount]);
 
 	return (
 		<div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-md md:p-5">
@@ -99,14 +85,13 @@ export default function EntityTableFilters({
 			</div>
 
 			<div
-				className="overflow-hidden transition-all duration-300 ease-in-out"
-				style={{
-					maxHeight: isFiltersOpen ? `${contentHeight}px` : "0px",
-					opacity: isFiltersOpen ? 1 : 0,
-					marginTop: isFiltersOpen ? "1rem" : "0rem",
-				}}
+				className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin-top] duration-300 ease-in-out ${
+					isFiltersOpen
+						? "mt-4 grid-rows-[1fr] opacity-100"
+						: "mt-0 grid-rows-[0fr] opacity-0"
+				}`}
 			>
-				<div ref={contentRef} className="space-y-4">
+				<div className="min-h-0 space-y-4 overflow-hidden">
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
 						<div>
 							<label

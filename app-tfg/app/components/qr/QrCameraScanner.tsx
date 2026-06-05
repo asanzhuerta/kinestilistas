@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type DetectionResponse = {
 	accepted: boolean;
@@ -47,19 +47,14 @@ export default function QrCameraScanner({
 }: Props) {
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-	const [isSupported, setIsSupported] = useState(false);
 	const [statusMessage, setStatusMessage] = useState("");
 	const [isProcessingImage, setIsProcessingImage] = useState(false);
+	const isSupported = Boolean(getBarcodeDetectorConstructor());
 
-	useEffect(() => {
-		setIsSupported(!!getBarcodeDetectorConstructor());
-	}, []);
-
-	useEffect(() => {
-		if (!isOpen) {
-			setStatusMessage("");
-		}
-	}, [isOpen]);
+	function handleClose() {
+		setStatusMessage("");
+		onClose();
+	}
 
 	async function detectFromImageFile(file: File) {
 		const BarcodeDetectorConstructor = getBarcodeDetectorConstructor();
@@ -94,7 +89,7 @@ export default function QrCameraScanner({
 				setStatusMessage(response.message);
 
 				if (response.stop) {
-					onClose();
+					handleClose();
 				}
 			} finally {
 				bitmap.close();
@@ -124,6 +119,7 @@ export default function QrCameraScanner({
 				<input
 					ref={fileInputRef}
 					type="file"
+					aria-label="Capturar o seleccionar imagen con QR"
 					accept="image/*"
 					capture="environment"
 					onChange={(event) => {
@@ -149,7 +145,7 @@ export default function QrCameraScanner({
 
 					<button
 						type="button"
-						onClick={onClose}
+						onClick={handleClose}
 						className="rounded-2xl border border-white/15 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10"
 					>
 						Cerrar

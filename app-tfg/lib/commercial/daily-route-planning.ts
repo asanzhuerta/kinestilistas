@@ -7,6 +7,23 @@ import { MADRID_TIME_ZONE, parseTimeToMinutes } from "@/lib/utils/time";
 
 const APPROX_TRAVEL_SPEED_KMH = 28;
 
+const madridDateFormatter = new Intl.DateTimeFormat("en-CA", {
+	timeZone: MADRID_TIME_ZONE,
+	year: "numeric",
+	month: "2-digit",
+	day: "2-digit",
+});
+
+const madridClockFormatter = new Intl.DateTimeFormat("en-GB", {
+	timeZone: MADRID_TIME_ZONE,
+	hour: "2-digit",
+	minute: "2-digit",
+	hour12: false,
+	year: "numeric",
+	month: "2-digit",
+	day: "2-digit",
+});
+
 export type RoutePlanningCommercial = {
 	workday_start_time: string | null;
 	workday_end_time: string | null;
@@ -80,12 +97,7 @@ function formatMinutesAsTimeLabel(value: number) {
 }
 
 function getMadridDateParts(date: Date) {
-	const parts = new Intl.DateTimeFormat("en-CA", {
-		timeZone: MADRID_TIME_ZONE,
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-	}).formatToParts(date);
+	const parts = madridDateFormatter.formatToParts(date);
 
 	return {
 		year: parts.find((part) => part.type === "year")?.value ?? "1970",
@@ -95,15 +107,7 @@ function getMadridDateParts(date: Date) {
 }
 
 function getCurrentMadridClock(date = new Date()): MadridClock {
-	const parts = new Intl.DateTimeFormat("en-GB", {
-		timeZone: MADRID_TIME_ZONE,
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: false,
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-	}).formatToParts(date);
+	const parts = madridClockFormatter.formatToParts(date);
 
 	const year = parts.find((part) => part.type === "year")?.value ?? "1970";
 	const month = parts.find((part) => part.type === "month")?.value ?? "01";

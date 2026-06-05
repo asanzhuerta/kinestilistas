@@ -50,12 +50,16 @@ export default function ProfileDetailsSection({
 			}
 		>
 			<div className={cardClass}>
-				<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+				<label
+					htmlFor="profile-company"
+					className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+				>
 					Empresa
-				</p>
+				</label>
 
 				{isEditableMode ? (
 					<input
+						id="profile-company"
 						type="text"
 						value={formData.company}
 						onChange={onChange("company")}
@@ -67,12 +71,16 @@ export default function ProfileDetailsSection({
 			</div>
 
 			<div className={cardClass}>
-				<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+				<label
+					htmlFor="profile-phone"
+					className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+				>
 					Telefono
-				</p>
+				</label>
 
 				{isEditableMode ? (
 					<input
+						id="profile-phone"
 						type="text"
 						value={formData.phone}
 						onChange={onChange("phone")}

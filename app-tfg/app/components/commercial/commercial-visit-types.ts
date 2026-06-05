@@ -38,6 +38,10 @@ export const COMMERCIAL_VISIT_TYPE_OPTIONS = [
 	{ id: 2, label: "Rutinaria" },
 ] as const;
 
+const visitDateFormatter = new Intl.DateTimeFormat("es-ES", {
+	dateStyle: "medium",
+});
+
 export function getVisitStatusLabel(statusId: number) {
 	switch (statusId) {
 		case 1:
@@ -90,7 +94,5 @@ export function formatVisitDate(value: string | null | undefined) {
 		return "-";
 	}
 
-	return new Intl.DateTimeFormat("es-ES", {
-		dateStyle: "medium",
-	}).format(date);
+	return visitDateFormatter.format(date);
 }

@@ -326,6 +326,7 @@ export default function AdminRateLimitSettingsForm() {
 												</label>
 												<input
 													id={`max-requests-${policy.name}`}
+													aria-label={`Maximo de intentos para ${policy.title}`}
 													type="number"
 													min="1"
 													step="1"
@@ -349,6 +350,7 @@ export default function AdminRateLimitSettingsForm() {
 												</label>
 												<input
 													id={`window-minutes-${policy.name}`}
+													aria-label={`Duracion de la ventana para ${policy.title}`}
 													type="number"
 													min="1"
 													step="1"

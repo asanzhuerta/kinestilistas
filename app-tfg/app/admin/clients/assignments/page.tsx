@@ -391,6 +391,7 @@ function AdminClientCommercialAssignmentsPageContent() {
 							</div>
 
 							<input
+								aria-label="Buscar cliente"
 								type="text"
 								value={clientSearch}
 								onChange={(event) => setClientSearch(event.target.value)}

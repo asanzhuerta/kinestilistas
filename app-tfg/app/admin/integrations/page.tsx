@@ -14,11 +14,13 @@ const statusStyles: Record<IntegrationStatusCode, string> = {
 	not_configured: "border-rose-200 bg-rose-50 text-rose-700",
 };
 
+const dateTimeFormatter = new Intl.DateTimeFormat("es-ES", {
+	dateStyle: "short",
+	timeStyle: "short",
+});
+
 function formatDateTime(value: string) {
-	return new Intl.DateTimeFormat("es-ES", {
-		dateStyle: "short",
-		timeStyle: "short",
-	}).format(new Date(value));
+	return dateTimeFormatter.format(new Date(value));
 }
 
 export default function AdminIntegrationsPage() {

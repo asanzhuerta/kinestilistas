@@ -20,7 +20,7 @@ export default async function CommercialLayout({
 			<PageHeaderProvider>
 				<div className="lg:flex lg:min-h-screen">
 					<RoleSidebar
-						role="commercial"
+						appRole="commercial"
 						userName={user?.name ?? session.user.name}
 						userEmail={user?.email ?? session.user.email}
 						userImageUrl={user?.profile_image_url ?? session.user.image}

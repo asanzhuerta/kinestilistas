@@ -18,6 +18,16 @@ import { getActiveAssignmentByCommercialAndClient } from "@/lib/typeorm/services
 import { normalizeText } from "@/lib/utils/text";
 import { parseTimeToMinutes } from "@/lib/utils/time";
 
+const madridClockFormatter = new Intl.DateTimeFormat("en-GB", {
+	timeZone: "Europe/Madrid",
+	year: "numeric",
+	month: "2-digit",
+	day: "2-digit",
+	hour: "2-digit",
+	minute: "2-digit",
+	hour12: false,
+});
+
 // --------------------------------------------------------------------------
 // Funciones auxiliares para normalización de datos
 // --------------------------------------------------------------------------
@@ -59,15 +69,7 @@ function normalizeDateOnlyForUpdate(value: string | null | undefined) {
 }
 
 function getMadridClock(date = new Date()) {
-	const parts = new Intl.DateTimeFormat("en-GB", {
-		timeZone: "Europe/Madrid",
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: false,
-	}).formatToParts(date);
+	const parts = madridClockFormatter.formatToParts(date);
 
 	const year = parts.find((part) => part.type === "year")?.value ?? "1970";
 	const month = parts.find((part) => part.type === "month")?.value ?? "01";

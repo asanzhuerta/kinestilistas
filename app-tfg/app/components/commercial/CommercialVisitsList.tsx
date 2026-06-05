@@ -64,14 +64,24 @@ function buildPendingDeliveryOrdersQuery() {
 	return `/api/commercial/orders?${searchParams.toString()}`;
 }
 
+const orderCurrencyFormatter = new Intl.NumberFormat("es-ES", {
+	style: "currency",
+	currency: "EUR",
+	maximumFractionDigits: 2,
+});
+
+const orderDateFormatter = new Intl.DateTimeFormat("es-ES", {
+	dateStyle: "medium",
+});
+
 function formatOrderCurrency(value: string | number | null | undefined) {
 	const amount = Number(value ?? 0);
 
-	return new Intl.NumberFormat("es-ES", {
-		style: "currency",
-		currency: "EUR",
-		maximumFractionDigits: 2,
-	}).format(Number.isFinite(amount) ? amount : 0);
+	return orderCurrencyFormatter.format(Number.isFinite(amount) ? amount : 0);
+}
+
+function formatOrderCreatedAt(value: string) {
+	return orderDateFormatter.format(new Date(value));
 }
 
 const DELIVERY_VISIT_TYPE_ID = "1";
@@ -683,9 +693,7 @@ export default function CommercialVisitsList() {
 													<div>
 														<p className="text-sm font-semibold text-slate-900">
 															Pedido del{" "}
-															{new Intl.DateTimeFormat("es-ES", {
-																dateStyle: "medium",
-															}).format(new Date(order.created_at))}
+															{formatOrderCreatedAt(order.created_at)}
 														</p>
 														<p className="text-xs text-slate-500">
 															{order.line_count} linea
@@ -942,6 +950,7 @@ export default function CommercialVisitsList() {
 										</label>
 										<select
 											id="create-visit-client"
+											aria-label="Cliente"
 											value={clientId}
 											onChange={(event) =>
 												handleCreateVisitClientChange(event.target.value)
@@ -967,6 +976,7 @@ export default function CommercialVisitsList() {
 										</label>
 										<select
 											id="create-visit-type"
+											aria-label="Tipo de visita"
 											value={visitTypeId}
 											onChange={(event) =>
 												handleCreateVisitTypeChange(event.target.value)
@@ -994,6 +1004,7 @@ export default function CommercialVisitsList() {
 										</label>
 										<input
 											id="create-visit-date"
+											aria-label="Dia de la visita"
 											type="date"
 											value={scheduledForDate}
 											onChange={(event) =>
@@ -1049,9 +1060,7 @@ export default function CommercialVisitsList() {
 																	<div className="flex flex-wrap items-center justify-between gap-2">
 																		<p className="text-sm font-semibold text-slate-900">
 																			Pedido del{" "}
-																			{new Intl.DateTimeFormat("es-ES", {
-																				dateStyle: "medium",
-																			}).format(new Date(order.created_at))}
+																			{formatOrderCreatedAt(order.created_at)}
 																		</p>
 																		<p className="text-sm font-medium text-slate-900">
 																			{formatOrderCurrency(order.total_amount)}
@@ -1092,6 +1101,7 @@ export default function CommercialVisitsList() {
 										</label>
 										<textarea
 											id="create-visit-notes"
+											aria-label="Notas"
 											value={notes}
 											onChange={(event) => setNotes(event.target.value)}
 											rows={4}

@@ -109,6 +109,7 @@ export default function ClientProfileFieldsSection({
 				{isEditable ? (
 					<input
 						id={config.id}
+						aria-label={config.label}
 						type={config.type ?? "text"}
 						value={value}
 						onChange={onChange(config.field)}
@@ -225,6 +226,7 @@ export default function ClientProfileFieldsSection({
 						{isEditable ? (
 							<textarea
 								id="client-notes"
+								aria-label="Notas"
 								value={formData.notes}
 								onChange={onChange("notes")}
 								rows={compact ? 3 : 4}

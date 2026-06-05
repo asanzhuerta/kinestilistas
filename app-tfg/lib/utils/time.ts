@@ -1,5 +1,12 @@
 export const MADRID_TIME_ZONE = "Europe/Madrid";
 
+const madridDatePartFormatter = new Intl.DateTimeFormat("en-CA", {
+	timeZone: MADRID_TIME_ZONE,
+	year: "numeric",
+	month: "2-digit",
+	day: "2-digit",
+});
+
 export function parseTimeToMinutes(value: string | null | undefined) {
 	const normalized = String(value ?? "").trim();
 
@@ -49,16 +56,8 @@ export function formatTimeLabel(
 	return value.slice(0, 5);
 }
 
-export function getDatePartsInTimeZone(
-	date = new Date(),
-	timeZone = MADRID_TIME_ZONE,
-) {
-	const parts = new Intl.DateTimeFormat("en-CA", {
-		timeZone,
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-	}).formatToParts(date);
+export function getDatePartsInMadrid(date = new Date()) {
+	const parts = madridDatePartFormatter.formatToParts(date);
 
 	return {
 		year: parts.find((part) => part.type === "year")?.value ?? "1970",
@@ -68,10 +67,7 @@ export function getDatePartsInTimeZone(
 }
 
 export function getTodayDateInMadrid(date = new Date()) {
-	const { year, month, day } = getDatePartsInTimeZone(
-		date,
-		MADRID_TIME_ZONE,
-	);
+	const { year, month, day } = getDatePartsInMadrid(date);
 
 	return `${year}-${month}-${day}`;
 }

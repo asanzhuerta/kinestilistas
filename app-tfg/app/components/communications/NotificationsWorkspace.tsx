@@ -24,14 +24,16 @@ const emptyReminderForm = {
 	scheduledAt: "",
 };
 
+const dateTimeFormatter = new Intl.DateTimeFormat("es-ES", {
+	day: "2-digit",
+	month: "short",
+	year: "numeric",
+	hour: "2-digit",
+	minute: "2-digit",
+});
+
 function formatDateTime(value: string) {
-	return new Intl.DateTimeFormat("es-ES", {
-		day: "2-digit",
-		month: "short",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	}).format(new Date(value));
+	return dateTimeFormatter.format(new Date(value));
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -256,6 +258,7 @@ export default function NotificationsWorkspace({
 
 					<form onSubmit={createReminder} className="space-y-3">
 						<input
+							aria-label="Titulo del recordatorio"
 							required
 							placeholder="Titulo"
 							value={reminderForm.title}
@@ -268,6 +271,7 @@ export default function NotificationsWorkspace({
 							className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
 						/>
 						<textarea
+							aria-label="Descripcion del recordatorio"
 							required
 							placeholder="Descripcion"
 							value={reminderForm.body}
@@ -280,6 +284,7 @@ export default function NotificationsWorkspace({
 							className="min-h-20 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
 						/>
 						<input
+							aria-label="Fecha y hora del recordatorio"
 							required
 							type="datetime-local"
 							value={reminderForm.scheduledAt}

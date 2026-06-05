@@ -47,22 +47,26 @@ const proposalStatusStyles: Record<SupplierOrderProposalStatus, string> = {
 	archived: "border-slate-200 bg-slate-100 text-slate-600",
 };
 
+const dateTimeFormatter = new Intl.DateTimeFormat("es-ES", {
+	dateStyle: "short",
+	timeStyle: "short",
+});
+
+const moneyFormatter = new Intl.NumberFormat("es-ES", {
+	style: "currency",
+	currency: "EUR",
+});
+
 function formatDateTime(value: string | null) {
 	if (!value) {
 		return "Sin registros";
 	}
 
-	return new Intl.DateTimeFormat("es-ES", {
-		dateStyle: "short",
-		timeStyle: "short",
-	}).format(new Date(value));
+	return dateTimeFormatter.format(new Date(value));
 }
 
 function formatMoney(value: number) {
-	return new Intl.NumberFormat("es-ES", {
-		style: "currency",
-		currency: "EUR",
-	}).format(value);
+	return moneyFormatter.format(value);
 }
 
 function selectedValues(select: HTMLSelectElement) {

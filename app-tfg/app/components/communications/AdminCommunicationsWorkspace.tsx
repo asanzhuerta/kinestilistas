@@ -74,6 +74,20 @@ function getErrorMessage(error: unknown, fallback: string) {
 	return error instanceof ApiClientError ? error.message : fallback;
 }
 
+const dateFormatter = new Intl.DateTimeFormat("es-ES", {
+	day: "2-digit",
+	month: "short",
+	year: "numeric",
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat("es-ES", {
+	day: "2-digit",
+	month: "short",
+	year: "numeric",
+	hour: "2-digit",
+	minute: "2-digit",
+});
+
 function formatDate(value: string) {
 	const parsed = new Date(`${value}T00:00:00`);
 
@@ -81,11 +95,7 @@ function formatDate(value: string) {
 		return value;
 	}
 
-	return new Intl.DateTimeFormat("es-ES", {
-		day: "2-digit",
-		month: "short",
-		year: "numeric",
-	}).format(parsed);
+	return dateFormatter.format(parsed);
 }
 
 function formatDateTime(value: string) {
@@ -95,13 +105,7 @@ function formatDateTime(value: string) {
 		return value;
 	}
 
-	return new Intl.DateTimeFormat("es-ES", {
-		day: "2-digit",
-		month: "short",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	}).format(parsed);
+	return dateTimeFormatter.format(parsed);
 }
 
 function toDateTimeLocal(value: string) {
@@ -660,6 +664,7 @@ export default function AdminCommunicationsWorkspace({
 						</div>
 
 						<input
+							aria-label="Titulo de la promocion"
 							required
 							placeholder="Titulo"
 							value={promotionForm.title}
@@ -672,6 +677,7 @@ export default function AdminCommunicationsWorkspace({
 							className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
 						/>
 						<textarea
+							aria-label="Descripcion de la promocion"
 							required
 							placeholder="Descripcion"
 							value={promotionForm.description}
@@ -685,6 +691,7 @@ export default function AdminCommunicationsWorkspace({
 						/>
 						<div className="grid gap-3 md:grid-cols-2">
 							<input
+								aria-label="Tipo de promocion"
 								required
 								placeholder="Tipo"
 								value={promotionForm.promotionType}
@@ -697,6 +704,7 @@ export default function AdminCommunicationsWorkspace({
 								className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
 							/>
 							<input
+								aria-label="Beneficio de la promocion"
 								required
 								placeholder="Beneficio"
 								value={promotionForm.benefit}
@@ -709,6 +717,7 @@ export default function AdminCommunicationsWorkspace({
 								className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
 							/>
 							<input
+								aria-label="Fecha de inicio de la promocion"
 								required
 								type="date"
 								value={promotionForm.startDate}
@@ -721,6 +730,7 @@ export default function AdminCommunicationsWorkspace({
 								className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
 							/>
 							<input
+								aria-label="Fecha de fin de la promocion"
 								required
 								type="date"
 								value={promotionForm.endDate}
@@ -733,6 +743,7 @@ export default function AdminCommunicationsWorkspace({
 								className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
 							/>
 							<select
+								aria-label="Estado de la promocion"
 								value={promotionForm.status}
 								onChange={(event) =>
 									setPromotionForm((current) => ({
@@ -747,6 +758,7 @@ export default function AdminCommunicationsWorkspace({
 								<option value="archived">Archivada</option>
 							</select>
 							<select
+								aria-label="Linea opcional de la promocion"
 								value={promotionForm.productLineId}
 								onChange={(event) =>
 									setPromotionForm((current) => ({
@@ -764,6 +776,7 @@ export default function AdminCommunicationsWorkspace({
 								))}
 							</select>
 							<select
+								aria-label="Producto opcional de la promocion"
 								value={promotionForm.productId}
 								onChange={(event) =>
 									setPromotionForm((current) => ({
@@ -782,6 +795,7 @@ export default function AdminCommunicationsWorkspace({
 								))}
 							</select>
 							<select
+								aria-label="Cliente opcional de la promocion"
 								value={promotionForm.clientId}
 								onChange={(event) =>
 									setPromotionForm((current) => ({
@@ -800,6 +814,7 @@ export default function AdminCommunicationsWorkspace({
 								))}
 							</select>
 							<select
+								aria-label="Segmento opcional de la promocion"
 								value={promotionForm.customerSegmentId}
 								onChange={(event) =>
 									setPromotionForm((current) => ({
@@ -943,6 +958,7 @@ export default function AdminCommunicationsWorkspace({
 							</p>
 						</div>
 						<input
+							aria-label="Titulo de la formacion"
 							required
 							placeholder="Titulo"
 							value={trainingForm.title}
@@ -955,6 +971,7 @@ export default function AdminCommunicationsWorkspace({
 							className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
 						/>
 						<textarea
+							aria-label="Descripcion de la formacion"
 							required
 							placeholder="Descripcion"
 							value={trainingForm.description}
@@ -968,6 +985,7 @@ export default function AdminCommunicationsWorkspace({
 						/>
 						<div className="grid gap-3 md:grid-cols-2">
 							<input
+								aria-label="Fecha y hora de inicio de la formacion"
 								required
 								type="datetime-local"
 								value={trainingForm.startsAt}
@@ -980,6 +998,7 @@ export default function AdminCommunicationsWorkspace({
 								className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
 							/>
 							<input
+								aria-label="Ubicacion o enlace de la formacion"
 								placeholder="Ubicacion o enlace"
 								value={trainingForm.location}
 								onChange={(event) =>
@@ -991,6 +1010,7 @@ export default function AdminCommunicationsWorkspace({
 								className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
 							/>
 							<select
+								aria-label="Modalidad de la formacion"
 								value={trainingForm.modality}
 								onChange={(event) =>
 									setTrainingForm((current) => ({
@@ -1005,6 +1025,7 @@ export default function AdminCommunicationsWorkspace({
 								<option value="hybrid">Mixta</option>
 							</select>
 							<select
+								aria-label="Estado de la formacion"
 								value={trainingForm.status}
 								onChange={(event) =>
 									setTrainingForm((current) => ({
@@ -1020,6 +1041,7 @@ export default function AdminCommunicationsWorkspace({
 								<option value="completed">Completada</option>
 							</select>
 							<input
+								aria-label="Capacidad de la formacion"
 								type="number"
 								min="1"
 								placeholder="Capacidad opcional"
@@ -1034,6 +1056,7 @@ export default function AdminCommunicationsWorkspace({
 							/>
 						</div>
 						<textarea
+							aria-label="Contenido o temario de la formacion"
 							placeholder="Contenido / temario"
 							value={trainingForm.content}
 							onChange={(event) =>
@@ -1165,6 +1188,7 @@ export default function AdminCommunicationsWorkspace({
 							</p>
 						</div>
 						<input
+							aria-label="Codigo interno del segmento"
 							required
 							placeholder="Codigo interno"
 							value={segmentForm.code}
@@ -1177,6 +1201,7 @@ export default function AdminCommunicationsWorkspace({
 							className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
 						/>
 						<input
+							aria-label="Nombre del segmento"
 							required
 							placeholder="Nombre"
 							value={segmentForm.name}
@@ -1189,6 +1214,7 @@ export default function AdminCommunicationsWorkspace({
 							className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
 						/>
 						<textarea
+							aria-label="Descripcion del segmento"
 							placeholder="Descripcion"
 							value={segmentForm.description}
 							onChange={(event) =>
@@ -1200,6 +1226,7 @@ export default function AdminCommunicationsWorkspace({
 							className="min-h-20 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
 						/>
 						<textarea
+							aria-label="Criterios comerciales del segmento"
 							placeholder="Criterios comerciales"
 							value={segmentForm.criteria}
 							onChange={(event) =>
@@ -1296,6 +1323,7 @@ export default function AdminCommunicationsWorkspace({
 							</p>
 						</div>
 						<select
+							aria-label="Cliente para asignar segmento"
 							required
 							value={assignmentForm.clientId}
 							onChange={(event) =>
@@ -1315,6 +1343,7 @@ export default function AdminCommunicationsWorkspace({
 							))}
 						</select>
 						<select
+							aria-label="Segmento a asignar"
 							required
 							value={assignmentForm.segmentId}
 							onChange={(event) =>
@@ -1333,6 +1362,7 @@ export default function AdminCommunicationsWorkspace({
 							))}
 						</select>
 						<textarea
+							aria-label="Notas internas de la asignacion"
 							placeholder="Notas internas"
 							value={assignmentForm.notes}
 							onChange={(event) =>

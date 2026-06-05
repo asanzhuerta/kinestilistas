@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SafeForm from "@/app/components/forms/SafeForm";
 import { ApiClientError, requestJson } from "@/lib/api/client";
@@ -69,7 +69,13 @@ function getSubmitButtonLabel(
 	return isEditing ? `Guardar ${entityLabel}` : `Crear ${entityLabel}`;
 }
 
-export default function CatalogAdminForm({
+export default function CatalogAdminForm(props: Props) {
+	const formKey = props.editingId ?? "new";
+
+	return <CatalogAdminFormContent key={formKey} {...props} />;
+}
+
+function CatalogAdminFormContent({
 	entityLabel,
 	entityLabelPlural,
 	basePath,
@@ -96,16 +102,6 @@ export default function CatalogAdminForm({
 		Record<string, string>
 	>({});
 	const isEditing = Boolean(editingId);
-
-	useEffect(() => {
-		setFormValues(initialValues);
-		setErrorMessage("");
-		setImageStatusMessages({});
-	}, [initialValues]);
-
-	useEffect(() => {
-		setSuccessMessage("");
-	}, [editingId]);
 
 	function handleTextFieldChange(name: string, value: string) {
 		setFormValues((current) => {
@@ -331,6 +327,7 @@ export default function CatalogAdminForm({
 								{field.type === "textarea" ? (
 									<textarea
 										id={field.name}
+										aria-label={field.label}
 										required={field.required}
 										placeholder={field.placeholder}
 										value={getFieldStringValue(currentValue)}
@@ -344,6 +341,7 @@ export default function CatalogAdminForm({
 								{field.type === "text" || field.type === "number" ? (
 									<input
 										id={field.name}
+										aria-label={field.label}
 										type={field.type}
 										required={field.required}
 										placeholder={field.placeholder}
@@ -360,6 +358,7 @@ export default function CatalogAdminForm({
 								{field.type === "select" ? (
 									<select
 										id={field.name}
+										aria-label={field.label}
 										required={field.required}
 										value={getFieldStringValue(currentValue)}
 										onChange={(event) =>

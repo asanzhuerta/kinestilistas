@@ -4,15 +4,17 @@ import { getDataSource } from "@/lib/typeorm/data-source";
 import { UserAccessLog } from "@/lib/typeorm/entities/UserAccessLog";
 import { UserManagementLog } from "@/lib/typeorm/entities/UserManagementLog";
 
+const dateTimeFormatter = new Intl.DateTimeFormat("es-ES", {
+	dateStyle: "short",
+	timeStyle: "short",
+});
+
 function formatDateTime(value: Date | null) {
 	if (!value) {
 		return "Sin fecha";
 	}
 
-	return new Intl.DateTimeFormat("es-ES", {
-		dateStyle: "short",
-		timeStyle: "short",
-	}).format(value);
+	return dateTimeFormatter.format(value);
 }
 
 function formatUserLabel(user: { name?: string | null; email?: string | null } | null) {

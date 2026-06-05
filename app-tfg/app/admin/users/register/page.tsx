@@ -110,6 +110,7 @@ export default function AdminRegisterUserPage() {
 					</h2>
 
 					<select
+						aria-label="Tipo de usuario"
 						name="type"
 						value={userType}
 						onChange={(event) => {
@@ -162,6 +163,7 @@ export default function AdminRegisterUserPage() {
 					) : null}
 
 					<input
+						aria-label="Nombre completo"
 						name="name"
 						type="text"
 						placeholder="Nombre completo"
@@ -171,6 +173,7 @@ export default function AdminRegisterUserPage() {
 					/>
 
 					<input
+						aria-label="Correo electronico"
 						name="email"
 						type="email"
 						placeholder="Correo electronico"
@@ -180,6 +183,7 @@ export default function AdminRegisterUserPage() {
 					/>
 
 					<input
+						aria-label="Empresa"
 						name="company"
 						type="text"
 						placeholder="Empresa"
@@ -189,6 +193,7 @@ export default function AdminRegisterUserPage() {
 					/>
 
 					<input
+						aria-label="Telefono"
 						name="phone"
 						type="tel"
 						placeholder="Telefono"

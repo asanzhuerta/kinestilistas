@@ -49,6 +49,7 @@ export default function CatalogImageUploadField({
 				id={`${fieldName}-upload`}
 				ref={fileInputRef}
 				type="file"
+				aria-label={label}
 				accept="image/*"
 				onChange={handleFileChange}
 				className="hidden"

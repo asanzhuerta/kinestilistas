@@ -110,6 +110,7 @@ export default function RegisterPage() {
 						</h2>
 
 						<input
+							aria-label="Nombre completo"
 							name="name"
 							type="text"
 							placeholder="Nombre completo"
@@ -119,6 +120,7 @@ export default function RegisterPage() {
 						/>
 
 						<input
+							aria-label="Correo electronico"
 							name="email"
 							type="email"
 							placeholder="Correo electrónico"
@@ -128,6 +130,7 @@ export default function RegisterPage() {
 						/>
 
 						<input
+							aria-label="Empresa"
 							name="company"
 							type="text"
 							placeholder="Empresa"
@@ -137,6 +140,7 @@ export default function RegisterPage() {
 						/>
 
 						<input
+							aria-label="Telefono"
 							name="phone"
 							type="tel"
 							placeholder="Teléfono"

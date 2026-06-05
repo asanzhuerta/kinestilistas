@@ -19,7 +19,7 @@ export default async function AdminLayout({
 			<PageHeaderProvider>
 				<div className="lg:flex">
 					<RoleSidebar
-						role="admin"
+						appRole="admin"
 						userName={user?.name ?? session.user.name}
 						userEmail={user?.email ?? session.user.email}
 						userImageUrl={user?.profile_image_url ?? session.user.image}

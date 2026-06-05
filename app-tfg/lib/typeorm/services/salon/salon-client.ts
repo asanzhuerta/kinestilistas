@@ -297,6 +297,13 @@ function formatQuantity(value: string | number | null | undefined) {
 	});
 }
 
+const serviceEmailDateFormatter = new Intl.DateTimeFormat("es-ES", {
+	day: "numeric",
+	month: "long",
+	year: "numeric",
+	timeZone: "UTC",
+});
+
 function formatServiceDateForEmail(value: string) {
 	const parsed = new Date(`${value}T00:00:00.000Z`);
 
@@ -304,12 +311,7 @@ function formatServiceDateForEmail(value: string) {
 		return value;
 	}
 
-	return new Intl.DateTimeFormat("es-ES", {
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-		timeZone: "UTC",
-	}).format(parsed);
+	return serviceEmailDateFormatter.format(parsed);
 }
 
 function buildColorToneLabel(params: {

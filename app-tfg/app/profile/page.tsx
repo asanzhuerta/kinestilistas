@@ -35,7 +35,7 @@ export default async function ProfilePage() {
 			<div className="bg-overlay fixed inset-0 -z-10" />
 			<div className="lg:flex lg:min-h-[100svh]">
 				<RoleSidebar
-					role={role}
+					appRole={role}
 					userName={user.name ?? session.user.name}
 					userEmail={user.email ?? session.user.email}
 					userImageUrl={user.profile_image_url ?? session.user.image}
