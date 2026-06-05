@@ -45,6 +45,12 @@ Las imágenes principales del catálogo, las cartas de color y las galerías té
 
 Para mantener la reutilización existente, el componente \path{app/components/users/UserAvatar.tsx} acepta ahora parámetros de tamaño intrínseco y \texttt{sizes}. Los avatares personales conservan tamaños pequeños, mientras que las tarjetas de producto pueden pedir una imagen de mayor resolución acorde con el espacio real que ocupan.
 
+\subsection{Cache selectiva de datos de catálogo}
+
+La aplicación aplica cache de datos de forma limitada sobre lecturas casi estáticas del catálogo activo y de la coloración disponible para cliente y comercial. Esta capa se implementa con la cache de datos de \texttt{Next.js}, asociando las consultas compartidas a un tag de catálogo y a una revalidación temporal corta \citep{nextjscaching2026}.
+
+La política se mantiene deliberadamente conservadora: no se cachean pedidos, rutas, promociones activas, sesiones, perfiles ni datos privados de operación diaria. Cuando administración crea o modifica productos, líneas, subcategorías, cartas de color, referencias cromáticas o recursos de apoyo, los servicios de escritura invalidan el tag correspondiente para evitar que las vistas instaladas o navegadas desde cliente y comercial conserven información obsoleta.
+
 \subsection{Herramientas de trabajo}
 
 Durante el desarrollo del proyecto se han utilizado principalmente:

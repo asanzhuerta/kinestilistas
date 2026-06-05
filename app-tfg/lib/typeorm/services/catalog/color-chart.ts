@@ -4,6 +4,7 @@ import type {
 	AdminUpsertColorReferenceBody,
 } from "@/lib/contracts/product-catalog";
 import { PENDING_REFERENCE_PREFIX } from "@/lib/catalog/product-reference";
+import { revalidateCatalogCache } from "@/lib/cache/catalog-cache";
 import { ColorChart } from "@/lib/typeorm/entities/ColorChart";
 import { ColorReference } from "@/lib/typeorm/entities/ColorReference";
 import { Product } from "@/lib/typeorm/entities/Product";
@@ -121,7 +122,10 @@ export async function createColorChart(input: AdminUpsertColorChartBody) {
 			return repo.save(colorChart);
 		});
 
-		return getColorChartById(createdColorChart.id);
+		const colorChart = await getColorChartById(createdColorChart.id);
+		revalidateCatalogCache();
+
+		return colorChart;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,
@@ -175,7 +179,10 @@ export async function updateColorChart(
 			"catalog/color-chart",
 		);
 
-		return getColorChartById(updatedColorChart.id);
+		const colorChart = await getColorChartById(updatedColorChart.id);
+		revalidateCatalogCache();
+
+		return colorChart;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,
@@ -282,7 +289,10 @@ export async function createColorReference(
 			return repo.save(colorReference);
 		});
 
-		return getColorReferenceById(createdColorReference.id);
+		const colorReference = await getColorReferenceById(createdColorReference.id);
+		revalidateCatalogCache();
+
+		return colorReference;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,
@@ -366,7 +376,10 @@ export async function updateColorReference(
 			"catalog/color-reference-thumb",
 		);
 
-		return getColorReferenceById(updatedColorReference.id);
+		const colorReference = await getColorReferenceById(updatedColorReference.id);
+		revalidateCatalogCache();
+
+		return colorReference;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,

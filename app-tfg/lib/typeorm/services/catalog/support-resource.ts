@@ -1,5 +1,6 @@
 import { getDataSource } from "@/lib/typeorm/data-source";
 import type { AdminUpsertSupportResourceBody } from "@/lib/contracts/product-catalog";
+import { revalidateCatalogCache } from "@/lib/cache/catalog-cache";
 import { SupportResource } from "@/lib/typeorm/entities/SupportResource";
 import { normalizeSupportResourceWriteInput } from "./catalog-validation";
 import {
@@ -116,7 +117,10 @@ export async function createSupportResource(
 			return repo.save(supportResource);
 		});
 
-		return getSupportResourceById(createdSupportResource.id);
+		const supportResource = await getSupportResourceById(createdSupportResource.id);
+		revalidateCatalogCache();
+
+		return supportResource;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,
@@ -184,7 +188,10 @@ export async function updateSupportResource(
 			return repo.save(supportResource);
 		});
 
-		return getSupportResourceById(updatedSupportResource.id);
+		const supportResource = await getSupportResourceById(updatedSupportResource.id);
+		revalidateCatalogCache();
+
+		return supportResource;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,

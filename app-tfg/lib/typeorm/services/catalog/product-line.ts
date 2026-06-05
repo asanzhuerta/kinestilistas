@@ -1,5 +1,6 @@
 import { getDataSource } from "@/lib/typeorm/data-source";
 import type { AdminUpsertProductLineBody } from "@/lib/contracts/product-catalog";
+import { revalidateCatalogCache } from "@/lib/cache/catalog-cache";
 import { ProductLine } from "@/lib/typeorm/entities/ProductLine";
 import { normalizeProductLineWriteInput } from "./catalog-validation";
 import {
@@ -79,7 +80,10 @@ export async function createProductLine(input: AdminUpsertProductLineBody) {
 			return repo.save(productLine);
 		});
 
-		return getProductLineById(createdProductLine.id);
+		const productLine = await getProductLineById(createdProductLine.id);
+		revalidateCatalogCache();
+
+		return productLine;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,
@@ -151,7 +155,10 @@ export async function updateProductLine(
 			"catalog/product-line",
 		);
 
-		return getProductLineById(updatedProductLine.id);
+		const productLine = await getProductLineById(updatedProductLine.id);
+		revalidateCatalogCache();
+
+		return productLine;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,

@@ -1,5 +1,6 @@
 import { PRODUCT_STATUS_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { isSyntheticProductReference } from "@/lib/catalog/product-reference";
+import { createCatalogDataCache } from "@/lib/cache/catalog-cache";
 import { listColorCharts, getColorChartById, listColorReferences } from "./color-chart";
 import { getProductById, listProducts } from "./product";
 import { listSupportResources } from "./support-resource";
@@ -26,13 +27,13 @@ function shouldIncludeRelatedColorCharts(product: NonNullable<Awaited<ReturnType
 	);
 }
 
-export async function listActiveCatalogProducts() {
+async function listActiveCatalogProductsUncached() {
 	return listProducts({
 		statusId: PRODUCT_STATUS_IDS.ACTIVE,
 	});
 }
 
-export async function getActiveCatalogProductDetail(productId: string) {
+async function getActiveCatalogProductDetailUncached(productId: string) {
 	const product = await getProductById(productId);
 
 	if (!product || product.status_id !== PRODUCT_STATUS_IDS.ACTIVE) {
@@ -83,7 +84,7 @@ export async function getActiveCatalogProductDetail(productId: string) {
 	};
 }
 
-export async function listCatalogColorChartsWithReferences() {
+async function listCatalogColorChartsWithReferencesUncached() {
 	const [colorCharts, colorReferences] = await Promise.all([
 		listColorCharts(),
 		listColorReferences(),
@@ -95,6 +96,26 @@ export async function listCatalogColorChartsWithReferences() {
 	};
 }
 
-export async function getCatalogColorChartDetail(colorChartId: string) {
+async function getCatalogColorChartDetailUncached(colorChartId: string) {
 	return getColorChartById(colorChartId);
 }
+
+export const listActiveCatalogProducts = createCatalogDataCache(
+	listActiveCatalogProductsUncached,
+	["catalog", "active-products"],
+);
+
+export const getActiveCatalogProductDetail = createCatalogDataCache(
+	getActiveCatalogProductDetailUncached,
+	["catalog", "active-product-detail"],
+);
+
+export const listCatalogColorChartsWithReferences = createCatalogDataCache(
+	listCatalogColorChartsWithReferencesUncached,
+	["catalog", "color-charts-with-references"],
+);
+
+export const getCatalogColorChartDetail = createCatalogDataCache(
+	getCatalogColorChartDetailUncached,
+	["catalog", "color-chart-detail"],
+);

@@ -1,6 +1,7 @@
 import { getDataSource } from "@/lib/typeorm/data-source";
 import type { EntityManager } from "typeorm";
 import type { AdminUpsertProductSubcategoryBody } from "@/lib/contracts/product-catalog";
+import { revalidateCatalogCache } from "@/lib/cache/catalog-cache";
 import { Product } from "@/lib/typeorm/entities/Product";
 import { ProductSubcategory } from "@/lib/typeorm/entities/ProductSubcategory";
 import { normalizeProductSubcategoryWriteInput } from "./catalog-validation";
@@ -177,7 +178,12 @@ export async function createProductSubcategory(
 			return repo.save(productSubcategory);
 		});
 
-		return getProductSubcategoryById(createdProductSubcategory.id);
+		const productSubcategory = await getProductSubcategoryById(
+			createdProductSubcategory.id,
+		);
+		revalidateCatalogCache();
+
+		return productSubcategory;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,
@@ -314,7 +320,12 @@ export async function updateProductSubcategory(
 			"catalog/product-subcategory",
 		);
 
-		return getProductSubcategoryById(updatedProductSubcategory.id);
+		const productSubcategory = await getProductSubcategoryById(
+			updatedProductSubcategory.id,
+		);
+		revalidateCatalogCache();
+
+		return productSubcategory;
 	} catch (error) {
 		rethrowCatalogPersistenceError(
 			error,
