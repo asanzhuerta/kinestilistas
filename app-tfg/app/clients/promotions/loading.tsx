@@ -4,7 +4,7 @@ export default function ClientPromotionsLoading() {
 	return (
 		<RouteLoadingState
 			title="Promociones"
-			subtitle="Buscando promociones activas aplicables a tu perfil y segmento."
+			subtitle="Buscando promociones activas aplicables a tu perfil y rango."
 			variant="grid"
 		/>
 	);

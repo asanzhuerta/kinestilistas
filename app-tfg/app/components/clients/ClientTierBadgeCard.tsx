@@ -93,7 +93,7 @@ export default function ClientTierBadgeCard({
 				</div>
 				<div className="rounded-2xl border border-white/60 bg-white/65 px-4 py-3">
 					<p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-						Segmentos
+						Rangos
 					</p>
 					<p className="mt-1 text-2xl font-bold text-slate-900">
 						{tier.assignedSegments.length}

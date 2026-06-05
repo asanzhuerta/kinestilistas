@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 		return NextResponse.json(segments, { status: 200 });
 	} catch (error) {
 		console.error("[admin/communications/segments][GET] error:", error);
-		return jsonFromError(error, "Error al listar segmentos");
+		return jsonFromError(error, "Error al listar rangos");
 	}
 }
 
@@ -49,6 +49,6 @@ export async function POST(request: Request) {
 		return NextResponse.json(segment, { status: 201 });
 	} catch (error) {
 		console.error("[admin/communications/segments][POST] error:", error);
-		return jsonFromError(error, "Error al crear segmento");
+		return jsonFromError(error, "Error al crear rango");
 	}
 }

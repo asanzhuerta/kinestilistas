@@ -50,6 +50,6 @@ export async function POST(request: Request) {
 		return NextResponse.json(assignment, { status: 201 });
 	} catch (error) {
 		console.error("[admin/communications/client-segments][POST] error:", error);
-		return jsonFromError(error, "Error al asignar segmento");
+		return jsonFromError(error, "Error al asignar rango");
 	}
 }

@@ -45,7 +45,7 @@ export default async function AdminCommunicationsPage() {
 		<div className="space-y-6">
 			<H1Title
 				title="Comunicaciones"
-				subtitle="Promociones, formaciones, segmentacion y avisos internos"
+				subtitle="Promociones, formaciones, rangos y avisos internos"
 			/>
 
 			<AdminCommunicationsWorkspace

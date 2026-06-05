@@ -85,39 +85,9 @@ export const roleSidebarSections: Record<
 			items: [
 				{ title: "Catalogo", href: "/admin/catalog", icon: "catalog" },
 				{
-					title: "Categorias",
-					href: "/admin/catalog/product-categories",
-					icon: "catalog",
-				},
-				{
-					title: "Lineas",
-					href: "/admin/catalog/product-lines",
-					icon: "catalog",
-				},
-				{
-					title: "Subcategorias",
-					href: "/admin/catalog/product-subcategories",
-					icon: "catalog",
-				},
-				{
-					title: "Productos",
-					href: "/admin/catalog/products",
-					icon: "orders",
-				},
-				{
 					title: "Cartas color",
 					href: "/admin/catalog/color-charts",
 					icon: "color",
-				},
-				{
-					title: "Referencias color",
-					href: "/admin/catalog/color-references",
-					icon: "color",
-				},
-				{
-					title: "Recursos soporte",
-					href: "/admin/catalog/support-resources",
-					icon: "training",
 				},
 			],
 		},

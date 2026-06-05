@@ -84,7 +84,7 @@ export function serializeClientSegmentAssignment(
 		clientName: assignment.client?.name ?? "Cliente",
 		clientEmail: assignment.client?.user?.email ?? null,
 		segmentId: assignment.segment_id,
-		segmentName: assignment.segment?.name ?? "Segmento",
+		segmentName: assignment.segment?.name ?? "Rango",
 		segmentCode: assignment.segment?.code ?? "",
 		notes: assignment.notes,
 		createdAt: toIsoString(assignment.created_at),

@@ -302,28 +302,7 @@ export default function CatalogHierarchyWorkspace({
 
 	return (
 		<div className="space-y-6">
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<div className="flex flex-wrap gap-3 text-sm text-slate-600">
-					<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-						<span className="font-semibold text-slate-900">
-							{productCategories.length}
-						</span>{" "}
-						categorias
-					</div>
-					<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-						<span className="font-semibold text-slate-900">
-							{productLines.length}
-						</span>{" "}
-						lineas
-					</div>
-					<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-						<span className="font-semibold text-slate-900">
-							{productSubcategories.length}
-						</span>{" "}
-						subcategorias
-					</div>
-				</div>
-
+			<div className="flex flex-wrap items-center justify-end gap-3">
 				<div className="flex flex-wrap gap-2">
 					<Link
 						href="/admin/catalog/product-categories/new"

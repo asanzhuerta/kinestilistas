@@ -141,9 +141,6 @@ export default function ColorChartHierarchyWorkspace({
 			),
 		[colorCharts],
 	);
-	const colorChartsWithImageCount = colorCharts.filter((colorChart) =>
-		Boolean(colorChart.image_url),
-	).length;
 	const lineBadgeClassMap = useMemo(
 		() =>
 			buildCategoryBadgeClassMap(
@@ -180,28 +177,7 @@ export default function ColorChartHierarchyWorkspace({
 
 	return (
 		<div className="space-y-6">
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<div className="flex flex-wrap gap-3 text-sm text-slate-600">
-					<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-						<span className="font-semibold text-slate-900">
-							{filteredChartGroups.length}
-						</span>{" "}
-						lineas con cartas
-					</div>
-					<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-						<span className="font-semibold text-slate-900">
-							{colorCharts.length}
-						</span>{" "}
-						cartas
-					</div>
-					<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-						<span className="font-semibold text-slate-900">
-							{colorChartsWithImageCount}
-						</span>{" "}
-						con imagen
-					</div>
-				</div>
-
+			<div className="flex flex-wrap items-center justify-end gap-3">
 				<div className="flex flex-wrap gap-2">
 					<Link
 						href="/admin/catalog/color-references"
