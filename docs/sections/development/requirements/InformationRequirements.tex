@@ -851,7 +851,7 @@ Para cada integración externa el sistema debe registrar:
     \item Fecha de última actualización de la integración.
 \end{itemize}
 
-En el incremento actual de \texttt{M7}, la aplicación persiste ya un registro básico de integraciones externas y operaciones de intercambio. Esta información se consulta desde \path{/admin/enterprise-operations} y permite diferenciar el inventario técnico calculado de los servicios de soporte respecto al registro empresarial de integraciones, estados, configuraciones y ejecuciones. La integración con Factusol mediante \texttt{n8n} queda registrada como punto preparado, aunque su automatización completa depende de credenciales y configuración real del cliente.
+En el incremento actual de \texttt{M7}, la aplicación persiste ya un registro básico de integraciones externas y operaciones de intercambio. Esta información se consulta desde \path{/admin/enterprise-operations} y permite diferenciar el inventario técnico calculado de los servicios de soporte respecto al registro empresarial de integraciones, estados, configuraciones y ejecuciones. \textcolor{red}{La integración con Factusol mediante \texttt{n8n} queda registrada como punto preparado, aunque su automatización completa depende de credenciales y configuración real del cliente.}
 
 De forma análoga, el inventario de soporte técnico incorporado en \path{/admin/support} no crea una entidad persistente propia. Su información se deriva de elementos ya existentes en el proyecto, como \path{proxy.ts}, \path{app/manifest.ts}, \path{public/sw.js}, los iconos PWA y componentes transversales de experiencia de usuario. Por tanto, actúa como una vista de observabilidad administrativa y no como una tabla adicional del modelo de datos.
 
@@ -922,86 +922,86 @@ Para cada línea de propuesta el sistema debe registrar:
 \end{itemize}
 
 % ------------------------------------------------------------------------------
-\subsection{RI-M8}
+\subsection{\textcolor{red}{RI-M8}}
 % ------------------------------------------------------------------------------
 
-\subsubsection*{Consulta de recomendación de tratamientos}
+\subsubsection*{\textcolor{red}{Consulta de recomendación de tratamientos}}
 
-El sistema podrá permitir registrar consultas de recomendación de tratamientos realizadas por los profesionales a partir de determinadas características técnicas del cabello del cliente.
+\textcolor{red}{El sistema podrá permitir registrar consultas de recomendación de tratamientos realizadas por los profesionales a partir de determinadas características técnicas del cabello del cliente.}
 
-Para cada consulta de recomendación el sistema podrá registrar:
+\textcolor{red}{Para cada consulta de recomendación el sistema podrá registrar:}
 
 \begin{itemize}
-    \item Identificador de la consulta.
-    \item Usuario profesional que realiza la consulta.
-    \item Cliente del salón asociado, cuando corresponda.
-    \item Tipo de cabello.
-    \item Estado o condición del cabello.
-    \item Tratamientos previos relevantes, cuando se indiquen.
-    \item Observaciones o parámetros técnicos adicionales, cuando correspondan.
-    \item Fecha de realización de la consulta.
+    \item \textcolor{red}{Identificador de la consulta.}
+    \item \textcolor{red}{Usuario profesional que realiza la consulta.}
+    \item \textcolor{red}{Cliente del salón asociado, cuando corresponda.}
+    \item \textcolor{red}{Tipo de cabello.}
+    \item \textcolor{red}{Estado o condición del cabello.}
+    \item \textcolor{red}{Tratamientos previos relevantes, cuando se indiquen.}
+    \item \textcolor{red}{Observaciones o parámetros técnicos adicionales, cuando correspondan.}
+    \item \textcolor{red}{Fecha de realización de la consulta.}
 \end{itemize}
 
-\subsubsection*{Recomendación de tratamiento}
+\subsubsection*{\textcolor{red}{Recomendación de tratamiento}}
 
-El sistema podrá almacenar las recomendaciones generadas a partir de una consulta de recomendación de tratamientos. Estas recomendaciones podrán incluir productos o combinaciones de tratamientos disponibles en el catálogo.
+\textcolor{red}{El sistema podrá almacenar las recomendaciones generadas a partir de una consulta de recomendación de tratamientos. Estas recomendaciones podrán incluir productos o combinaciones de tratamientos disponibles en el catálogo.}
 
-Para cada recomendación de tratamiento el sistema podrá registrar:
+\textcolor{red}{Para cada recomendación de tratamiento el sistema podrá registrar:}
 
 \begin{itemize}
-    \item Identificador de la recomendación.
-    \item Consulta de recomendación asociada.
-    \item Producto recomendado, cuando corresponda.
-    \item Descripción o justificación de la recomendación.
-    \item Nivel de relevancia o prioridad de la sugerencia, cuando corresponda.
-    \item Fecha de generación de la recomendación.
+    \item \textcolor{red}{Identificador de la recomendación.}
+    \item \textcolor{red}{Consulta de recomendación asociada.}
+    \item \textcolor{red}{Producto recomendado, cuando corresponda.}
+    \item \textcolor{red}{Descripción o justificación de la recomendación.}
+    \item \textcolor{red}{Nivel de relevancia o prioridad de la sugerencia, cuando corresponda.}
+    \item \textcolor{red}{Fecha de generación de la recomendación.}
 \end{itemize}
 
-\subsubsection*{Simulación de coloración}
+\subsubsection*{\textcolor{red}{Simulación de coloración}}
 
-El sistema podrá permitir registrar simulaciones visuales realizadas para previsualizar posibles cambios coloración capilar.
+\textcolor{red}{El sistema podrá permitir registrar simulaciones visuales realizadas para previsualizar posibles cambios coloración capilar.}
 
-Para cada simulación el sistema podrá registrar:
+\textcolor{red}{Para cada simulación el sistema podrá registrar:}
 
 \begin{itemize}
-    \item Identificador de la simulación.
-    \item Imagen utilizada para la simulación, cuando se conserve.
-    \item Descripción del cambio simulado.
-    \item Resultado generado o referencia al resultado visual obtenido.
-    \item Fecha de realización de la simulación.
+    \item \textcolor{red}{Identificador de la simulación.}
+    \item \textcolor{red}{Imagen utilizada para la simulación, cuando se conserve.}
+    \item \textcolor{red}{Descripción del cambio simulado.}
+    \item \textcolor{red}{Resultado generado o referencia al resultado visual obtenido.}
+    \item \textcolor{red}{Fecha de realización de la simulación.}
 \end{itemize}
 
-\subsubsection*{Reconocimiento de producto mediante cámara}
+\subsubsection*{\textcolor{red}{Reconocimiento de producto mediante cámara}}
 
-El sistema podrá permitir registrar operaciones de reconocimiento de productos realizadas a partir de imágenes o códigos de barras capturados con la cámara del dispositivo.
+\textcolor{red}{El sistema podrá permitir registrar operaciones de reconocimiento de productos realizadas a partir de imágenes o códigos de barras capturados con la cámara del dispositivo.}
 
-Para cada operación de reconocimiento el sistema podrá registrar:
+\textcolor{red}{Para cada operación de reconocimiento el sistema podrá registrar:}
 
 \begin{itemize}
-    \item Identificador de la operación de reconocimiento.
-    \item Usuario que realiza la operación.
-    \item Imagen capturada o referencia al recurso utilizado, cuando corresponda.
-    \item Código de barras detectado, cuando corresponda.
-    \item Producto identificado, cuando se obtenga coincidencia.
-    \item Finalidad de la operación, como consulta o apoyo a pedido.
-    \item Fecha y hora de la operación.
+    \item \textcolor{red}{Identificador de la operación de reconocimiento.}
+    \item \textcolor{red}{Usuario que realiza la operación.}
+    \item \textcolor{red}{Imagen capturada o referencia al recurso utilizado, cuando corresponda.}
+    \item \textcolor{red}{Código de barras detectado, cuando corresponda.}
+    \item \textcolor{red}{Producto identificado, cuando se obtenga coincidencia.}
+    \item \textcolor{red}{Finalidad de la operación, como consulta o apoyo a pedido.}
+    \item \textcolor{red}{Fecha y hora de la operación.}
 \end{itemize}
 
-\subsubsection*{Reserva online}
+\subsubsection*{\textcolor{red}{Reserva online}}
 
-El sistema podrá permitir registrar solicitudes de cita realizadas por clientes finales de una peluquería usuaria del sistema.
+\textcolor{red}{El sistema podrá permitir registrar solicitudes de cita realizadas por clientes finales de una peluquería usuaria del sistema.}
 
-Para cada reserva online el sistema podrá registrar:
+\textcolor{red}{Para cada reserva online el sistema podrá registrar:}
 
 \begin{itemize}
-    \item Identificador de la reserva.
-    \item Cliente profesional o peluquería a la que se dirige la reserva.
-    \item Cliente final que solicita la cita.
-    \item Nombre de la persona que realiza la reserva.
-    \item Teléfono o correo electrónico de contacto.
-    \item Fecha y hora solicitadas para la cita.
-    \item Servicio solicitado, cuando corresponda.
-    \item Observaciones asociadas a la reserva, cuando existan.
-    \item Estado de la reserva.
-    \item Fecha de creación de la solicitud.
+    \item \textcolor{red}{Identificador de la reserva.}
+    \item \textcolor{red}{Cliente profesional o peluquería a la que se dirige la reserva.}
+    \item \textcolor{red}{Cliente final que solicita la cita.}
+    \item \textcolor{red}{Nombre de la persona que realiza la reserva.}
+    \item \textcolor{red}{Teléfono o correo electrónico de contacto.}
+    \item \textcolor{red}{Fecha y hora solicitadas para la cita.}
+    \item \textcolor{red}{Servicio solicitado, cuando corresponda.}
+    \item \textcolor{red}{Observaciones asociadas a la reserva, cuando existan.}
+    \item \textcolor{red}{Estado de la reserva.}
+    \item \textcolor{red}{Fecha de creación de la solicitud.}
 \end{itemize}

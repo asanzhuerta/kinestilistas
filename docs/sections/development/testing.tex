@@ -25,7 +25,7 @@ Esta rutina ofrece una senal rapida sobre errores de tipado, problemas de compil
 
 \section{Pruebas Unitarias}
 
-En la versión actual no se ha incorporado todavía una bateria formal de pruebas unitarias con un \textit{runner} dedicado. Aun así, parte de la validación de bajo nivel se apoya en tres mecanismos que reducen errores locales antes de integrar cambios:
+\textcolor{red}{En la versión actual no se ha incorporado todavía una bateria formal de pruebas unitarias con un \textit{runner} dedicado.} Aun así, parte de la validación de bajo nivel se apoya en tres mecanismos que reducen errores locales antes de integrar cambios:
 
 \begin{itemize}
     \item el tipado estricto de \texttt{TypeScript} sobre contratos, componentes y servicios;
@@ -33,7 +33,7 @@ En la versión actual no se ha incorporado todavía una bateria formal de prueba
     \item las validaciones normalizadas de entrada antes de persistir cambios, lo que limita estados inconsistentes en operaciones de administración, catálogo, reparto, cobro y seguimiento técnico del salón.
 \end{itemize}
 
-La ausencia de una suite unitaria completa sigue siendo una mejora pendiente, pero la separación actual de servicios facilita su incorporación futura.
+\textcolor{red}{La ausencia de una suite unitaria completa sigue siendo una mejora pendiente}, pero la separación actual de servicios facilita su incorporación futura.
 
 \section{Pruebas de Integracion}
 
@@ -204,7 +204,7 @@ En el estado actual del proyecto, las comprobaciones no funcionales se concentra
     \item validación de tamano, tipo y procedencia de imágenes subidas a \texttt{Cloudinary}.
 \end{itemize}
 
-No se ha abordado todavía una campana específica de rendimiento, carga o pruebas automatizadas de interfaz con un \textit{framework} dedicado, por lo que estas áreas permanecen como trabajo de mejora futura.
+\textcolor{red}{No se ha abordado todavía una campana específica de rendimiento, carga o pruebas automatizadas de interfaz con un \textit{framework} dedicado, por lo que estas áreas permanecen como trabajo de mejora futura.}
 
 \section{Pruebas de Aceptacion}
 
@@ -219,4 +219,4 @@ La aceptacion de la versión actual del sistema se interpreta como la disponibil
     \item el núcleo de comunicación interna \texttt{promocion -> publicacion -> consulta por rol}, \texttt{promocion -> pedido -> descuento aplicado} y \texttt{formacion -> publicacion -> inscripcion} queda operativo dentro de la aplicación.
 \end{itemize}
 
-Con este umbral cubierto, el siguiente salto funcional razonable del proyecto no pasa ya por incorporar \texttt{M4}, sino por consolidar documentalmente su alcance final y, en futuras iteraciones, ampliar el dominio de cobros hacia pagos parciales, facturación y conciliación avanzada si el proyecto lo requiere.
+Con este umbral cubierto, el siguiente salto funcional razonable del proyecto no pasa ya por incorporar \texttt{M4}, sino por consolidar documentalmente su alcance final y, \textcolor{red}{en futuras iteraciones, ampliar el dominio de cobros hacia pagos parciales, facturación y conciliación avanzada si el proyecto lo requiere.}

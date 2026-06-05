@@ -73,7 +73,7 @@ Las reglas de negocio describen restricciones operativas que el sistema debe res
     \item El cierre correcto de una visita de reparto debe marcar como entregados los pedidos asociados, manteniendo sincronizado el estado logistico del pedido con el de la visita.
     \item Si una visita de reparto se aplaza o se cancela, el sistema debe evitar estados huerfanos o inconsistentes entre visita, pedido y ETA mostrada al cliente.
     \item El registro de cobro solo aplica al alcance mínimo definido en esta iteración: distinguir entre pedidos pendientes de cobro y pedidos cobrados, con metodo, fecha, notas y usuario responsable.
-    \item La gestión de cobros no incluye por ahora pagos parciales, facturación ni conciliación contable avanzada, por lo que el sistema no debe simular dichas capacidades.
+    \item \textcolor{red}{La gestión de cobros no incluye por ahora pagos parciales, facturación ni conciliación contable avanzada, por lo que el sistema no debe simular dichas capacidades.}
     \item Las políticas de rate limiting forman parte de la operación del sistema y pueden configurarse globalmente desde administración para proteger el acceso y determinadas APIs frente a uso abusivo.
 \end{itemize}
 

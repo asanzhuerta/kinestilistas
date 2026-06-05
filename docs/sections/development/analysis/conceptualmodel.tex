@@ -1,16 +1,16 @@
 A partir de los requisitos de información definidos en la \autoref{sec:InformationRequirements}, se ha elaborado el modelo conceptual de datos correspondiente. Este modelo describe las principales entidades de información que intervienen en el sistema, sus atributos y las relaciones más relevantes entre ellas.
 
-Para mejorar la legibilidad, el modelo conceptual se presenta por módulos. En cada módulo se recogen las clases del dominio ya existentes en la implementación o, cuando el módulo no esta construido todavía, las clases previstas a nivel analitico.
+Para mejorar la legibilidad, el modelo conceptual se presenta por módulos. En cada módulo se recogen las clases del dominio ya existentes en la implementación o, \textcolor{red}{cuando el módulo no esta construido todavía, las clases previstas a nivel analitico}.
 
 \begin{figure}[H]
       \centering
       \fbox{%
             \begin{minipage}[c][0.34\textheight][c]{0.88\linewidth}
                   \centering
-                  Espacio reservado para incorporar el modelo conceptual global de datos definitivo.
+                  \textcolor{red}{Espacio reservado para incorporar el modelo conceptual global de datos definitivo.}
             \end{minipage}%
       }
-      \caption{Modelo conceptual global de datos pendiente de incorporacion}
+      \caption{\textcolor{red}{Modelo conceptual global de datos pendiente de incorporacion}}
       \label{fig:global-conceptual-model}
 \end{figure}
 
@@ -892,7 +892,7 @@ La clase \textit{Notificación} representa los avisos o mensajes generados por e
       \item \textbf{RT-N3 — Coherencia de lectura}
             Si la notificación está marcada como leída, debe existir una fecha de lectura asociada.
       \item \textbf{RT-N4 — Canal válido de notificación}
-            En la implementación actual el canal persistido es \texttt{in\_app}; otros canales quedan como evolución futura.
+            \textcolor{red}{En la implementación actual el canal persistido es \texttt{in\_app}; otros canales quedan como evolución futura.}
 
 \end{itemize}
 
@@ -1236,4 +1236,4 @@ La clase \textit{Línea de propuesta de pedido a proveedor} representa cada uno 
 \subsection{Modelo conceptual de datos M8}
 % ------------------------------------------------------------------------------
 
-El módulo \texttt{M8} recoge líneas de evolución futura, como recomendación, simulación visual, reconocimiento adicional de producto o reservas online. Estas capacidades no forman parte del modelo persistente implementado en la versión actual del proyecto.
+\textcolor{red}{El módulo \texttt{M8} recoge líneas de evolución futura, como recomendación, simulación visual, reconocimiento adicional de producto o reservas online. Estas capacidades no forman parte del modelo persistente implementado en la versión actual del proyecto.}
