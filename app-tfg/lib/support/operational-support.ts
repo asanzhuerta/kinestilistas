@@ -60,13 +60,16 @@ function formatPresence(isPresent: boolean) {
 
 function resolveServiceWorkerStatus(swContent: string) {
 	const hasCacheName = swContent.includes("CACHE_NAME");
-	const hasFetchFallback =
-		swContent.includes("fetch(request).catch") &&
-		swContent.includes("caches.match(request)");
+	const hasOfflineFallback =
+		swContent.includes("OFFLINE_URL") &&
+		swContent.includes("caches.match(OFFLINE_URL)");
+	const excludesPrivateApi =
+		swContent.includes('url.pathname.startsWith("/api/")') &&
+		swContent.includes("isPrivateOrApiRequest");
 	const hasInstallLifecycle =
 		swContent.includes("install") && swContent.includes("activate");
 
-	return hasCacheName && hasFetchFallback && hasInstallLifecycle
+	return hasCacheName && hasOfflineFallback && excludesPrivateApi && hasInstallLifecycle
 		? "ready"
 		: "warning";
 }
@@ -163,9 +166,9 @@ export function listSupportCapabilityItems(now = new Date()) {
 					? resolveServiceWorkerStatus(swContent)
 					: "missing",
 				description:
-					"Service worker registrado desde el layout raiz para cachear el shell minimo y recuperar recursos GET desde cache ante fallos puntuales.",
+					"Service worker registrado desde el layout raiz para cachear el shell minimo, iconos, manifiesto y una pantalla offline segura.",
 				operationalUse:
-					"Mejora la tolerancia ante cortes breves de conectividad en pantallas ya visitadas.",
+					"Mejora la tolerancia ante cortes breves de conectividad sin cachear respuestas privadas de API, pedidos, rutas o perfiles.",
 				degradationBehavior:
 					"Si el service worker no se registra, la aplicacion opera en modo web normal sin cache offline de soporte.",
 				evidence: [
@@ -178,10 +181,16 @@ export function listSupportCapabilityItems(now = new Date()) {
 						value: swContent.match(/CACHE_NAME\s*=\s*"([^"]+)"/)?.[1] ?? "No detectada",
 					},
 					{
-						label: "Fallback fetch",
-						value: swContent.includes("caches.match(request)")
+						label: "Fallback offline",
+						value: swContent.includes("caches.match(OFFLINE_URL)")
 							? "Definido"
 							: "No detectado",
+					},
+					{
+						label: "Exclusion API",
+						value: swContent.includes('url.pathname.startsWith("/api/")')
+							? "Definida"
+							: "No detectada",
 					},
 				],
 			},

@@ -44,7 +44,6 @@ next-env.d.ts
 *.sql
 
 # Archivos generados por next-pwa
-public/sw.js
 public/workbox-*.js
 
 # plantilla de ejemplo
