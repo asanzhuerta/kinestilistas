@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import AppBackgroundCrossfade from "./components/layout/AppBackgroundCrossfade";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
 		<html lang="es">
 			<body className="antialiased">
 				<ServiceWorkerRegister />
+				<AppBackgroundCrossfade />
 
 				{children}
 			</body>
