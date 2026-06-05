@@ -39,6 +39,7 @@ export default function UserProfileCard({
 	user,
 	clientProfile = null,
 	mode = "view",
+	layout = "default",
 	title,
 	subtitle,
 	roles = EMPTY_CATALOG_OPTIONS,
@@ -52,6 +53,7 @@ export default function UserProfileCard({
 	const isAdminEditMode = mode === "admin-edit";
 	const isEditableMode = isSelfEditMode || isAdminEditMode;
 	const isClientUser = user.role.code === "client";
+	const isCompactLayout = layout === "compact";
 
 	const showPasswordSection =
 		isAdminEditMode || (isSelfEditMode && allowPasswordChange);
@@ -311,19 +313,139 @@ export default function UserProfileCard({
 		}
 	};
 
+	const titleBlock =
+		title || subtitle ? (
+			<div className={isCompactLayout ? "mb-3" : "mb-4"}>
+				{title ? (
+					<h2
+						className={
+							isCompactLayout
+								? "text-xl font-semibold text-slate-800"
+								: "text-2xl font-semibold text-slate-800"
+						}
+					>
+						{title}
+					</h2>
+				) : null}
+
+				{subtitle ? (
+					<p className="mt-1 text-sm text-slate-600">{subtitle}</p>
+				) : null}
+			</div>
+		) : null;
+
+	if (isCompactLayout) {
+		return (
+			<div className="w-full">
+				{titleBlock}
+
+				<SafeForm
+					onSubmit={handleSubmit}
+					className="rounded-[28px] border border-white/45 bg-white/90 p-3 shadow-2xl shadow-slate-950/10 backdrop-blur-xl sm:p-4 2xl:p-5"
+				>
+					<div className="grid gap-4 xl:grid-cols-[minmax(250px,300px)_minmax(0,1fr)]">
+						<aside className="grid gap-3 xl:content-start">
+							<ProfileIdentitySection
+								user={user}
+								formData={formData}
+								isViewMode={isViewMode}
+								isSelfEditMode={isSelfEditMode}
+								isAdminEditMode={isAdminEditMode}
+								displayedProfileImage={displayedProfileImage}
+								profileImageStatusText={profileImageStatusText}
+								isUploadingImage={isUploadingImage}
+								fileInputRef={fileInputRef}
+								onChange={handleChange}
+								onFileChange={handleProfileImageUpload}
+								onOpenFilePicker={openFilePicker}
+								compact
+							/>
+
+							{showPasswordSection ? (
+								<ProfilePasswordSection
+									password={formData.password}
+									confirmPassword={formData.confirmPassword}
+									onPasswordChange={(value) =>
+										setFormData((prev) => ({ ...prev, password: value }))
+									}
+									onConfirmPasswordChange={(value) =>
+										setFormData((prev) => ({
+											...prev,
+											confirmPassword: value,
+										}))
+									}
+									compact
+								/>
+							) : null}
+
+							<ProfileFeedbackMessages
+								errorMessage={errorMessage}
+								successMessage={successMessage}
+								compact
+							/>
+
+							<ProfileActionsSection
+								isViewMode={isViewMode}
+								isSelfEditMode={isSelfEditMode}
+								isAdminEditMode={isAdminEditMode}
+								isSaving={isSaving}
+								submitLabel={submitLabel}
+								backHref={backHref}
+								onReset={resetForm}
+								compact
+							/>
+						</aside>
+
+						<div className="min-w-0 space-y-3">
+							<ProfileDetailsSection
+								formData={formData}
+								isEditableMode={isEditableMode}
+								isAdminEditMode={isAdminEditMode}
+								roles={roles}
+								createdAt={createdAt}
+								lastLoginAt={lastLoginAt}
+								onChange={handleChange}
+								userCompany={user.company}
+								userPhone={user.phone}
+								compact
+							/>
+
+							{isClientUser ? (
+								<ClientProfileFieldsSection
+									formData={{
+										client_name: formData.client_name,
+										contact_name: formData.contact_name,
+										tax_id: formData.tax_id,
+										address: formData.address,
+										city: formData.city,
+										postal_code: formData.postal_code,
+										province: formData.province,
+										lat: formData.lat,
+										lng: formData.lng,
+										visit_window_start_time:
+											formData.visit_window_start_time,
+										visit_window_end_time: formData.visit_window_end_time,
+										notes: formData.notes,
+									}}
+									onChange={handleClientFieldChange}
+									onConfirmLocation={handleClientLocationConfirmed}
+									isEditable={isEditableMode}
+									isAdminEditMode={isAdminEditMode}
+									clientId={clientProfile?.id ?? user.id}
+									allowLocationEdit={isSelfEditMode || isAdminEditMode}
+									compact
+								/>
+							) : null}
+						</div>
+					</div>
+				</SafeForm>
+			</div>
+		);
+	}
+
 	return (
 		<div className="mx-auto mt-6 w-full max-w-4xl">
-			{title || subtitle ? (
-				<div className="mb-4">
-					{title ? (
-						<h2 className="text-2xl font-semibold text-slate-800">{title}</h2>
-					) : null}
-
-					{subtitle ? (
-						<p className="mt-1 text-sm text-slate-600">{subtitle}</p>
-					) : null}
-				</div>
-			) : null}
+			{titleBlock}
 
 			<SafeForm
 				onSubmit={handleSubmit}

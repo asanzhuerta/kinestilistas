@@ -8,7 +8,7 @@ const ClientLocationPickerMap = dynamic(
 	{
 		ssr: false,
 		loading: () => (
-			<div className="h-[420px] rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+			<div className="h-[260px] rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
 				Cargando mapa...
 			</div>
 		),
@@ -25,6 +25,15 @@ type Props = {
 	isAdminEditMode?: boolean;
 	clientId?: string;
 	allowLocationEdit?: boolean;
+	compact?: boolean;
+};
+
+type TextFieldConfig = {
+	field: keyof ClientFormDataState;
+	id: string;
+	label: string;
+	type?: string;
+	spanClass?: string;
 };
 
 function formatCoordinate(value: string) {
@@ -39,6 +48,7 @@ export default function ClientProfileFieldsSection({
 	isAdminEditMode = false,
 	clientId,
 	allowLocationEdit = false,
+	compact = false,
 }: Props) {
 	const hasConfirmedLocation = Boolean(formData.lat && formData.lng);
 	const initialSearchQuery = [
@@ -50,224 +60,99 @@ export default function ClientProfileFieldsSection({
 		.filter(Boolean)
 		.join(", ");
 	const mapResetKey = clientId ? `${clientId}:${formData.lat}:${formData.lng}` : "";
+	const cardClass = compact
+		? "rounded-2xl bg-slate-50/85 p-3"
+		: "rounded-xl bg-slate-50 p-4";
+	const inputClass =
+		"mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400";
+	const labelClass =
+		"text-xs font-semibold uppercase tracking-wide text-slate-500";
+	const fields: TextFieldConfig[] = [
+		{
+			field: "client_name",
+			id: "client-name",
+			label: "Nombre del establecimiento",
+		},
+		{
+			field: "contact_name",
+			id: "client-contact-name",
+			label: "Persona de contacto",
+		},
+		{ field: "tax_id", id: "client-tax-id", label: "Identificador fiscal" },
+		{ field: "address", id: "client-address", label: "Direccion" },
+		{ field: "city", id: "client-city", label: "Ciudad" },
+		{ field: "postal_code", id: "client-postal-code", label: "Codigo postal" },
+		{ field: "province", id: "client-province", label: "Provincia / zona" },
+		{
+			field: "visit_window_start_time",
+			id: "client-visit-window-start",
+			label: "Inicio visitas",
+			type: "time",
+		},
+		{
+			field: "visit_window_end_time",
+			id: "client-visit-window-end",
+			label: "Fin visitas",
+			type: "time",
+		},
+	];
+
+	function renderField(config: TextFieldConfig) {
+		const value = String(formData[config.field] ?? "");
+
+		return (
+			<div key={config.id} className={`${cardClass} ${config.spanClass ?? ""}`}>
+				<label htmlFor={config.id} className={labelClass}>
+					{config.label}
+				</label>
+
+				{isEditable ? (
+					<input
+						id={config.id}
+						type={config.type ?? "text"}
+						value={value}
+						onChange={onChange(config.field)}
+						className={inputClass}
+					/>
+				) : (
+					<p className="mt-1 text-sm text-slate-800">{value || "-"}</p>
+				)}
+			</div>
+		);
+	}
 
 	return (
-		<div className="mt-6">
-			<div className="mb-3">
-				<h3 className="text-lg font-semibold text-slate-800">
+		<div className={compact ? "space-y-3" : "mt-6"}>
+			<div className={compact ? "mb-1" : "mb-3"}>
+				<h3
+					className={
+						compact
+							? "text-base font-semibold text-slate-800"
+							: "text-lg font-semibold text-slate-800"
+					}
+				>
 					Datos del cliente profesional
 				</h3>
 				<p className="mt-1 text-sm text-slate-600">
-					Información comercial, de localización y de disponibilidad para visitas.
+					Informacion comercial, localizacion y disponibilidad para visitas.
 				</p>
 			</div>
 
-			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-				<div className="rounded-xl bg-slate-50 p-4">
-					<label
-						htmlFor="client-name"
-						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-					>
-						Nombre del establecimiento
-					</label>
+			<div
+				className={
+					compact
+						? "grid grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-4"
+						: "grid grid-cols-1 gap-4 md:grid-cols-2"
+				}
+			>
+				{fields.map(renderField)}
 
-					{isEditable ? (
-						<input
-							id="client-name"
-							type="text"
-							value={formData.client_name}
-							onChange={onChange("client_name")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						/>
-					) : (
-						<p className="mt-1 text-sm text-slate-800">
-							{formData.client_name || "-"}
-						</p>
-					)}
-				</div>
-
-				<div className="rounded-xl bg-slate-50 p-4">
-					<label
-						htmlFor="client-contact-name"
-						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-					>
-						Persona de contacto
-					</label>
-
-					{isEditable ? (
-						<input
-							id="client-contact-name"
-							type="text"
-							value={formData.contact_name}
-							onChange={onChange("contact_name")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						/>
-					) : (
-						<p className="mt-1 text-sm text-slate-800">
-							{formData.contact_name || "-"}
-						</p>
-					)}
-				</div>
-
-				<div className="rounded-xl bg-slate-50 p-4">
-					<label
-						htmlFor="client-tax-id"
-						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-					>
-						Identificador fiscal
-					</label>
-
-					{isEditable ? (
-						<input
-							id="client-tax-id"
-							type="text"
-							value={formData.tax_id}
-							onChange={onChange("tax_id")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						/>
-					) : (
-						<p className="mt-1 text-sm text-slate-800">{formData.tax_id || "-"}</p>
-					)}
-				</div>
-
-				<div className="rounded-xl bg-slate-50 p-4">
-					<label
-						htmlFor="client-address"
-						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-					>
-						Dirección
-					</label>
-
-					{isEditable ? (
-						<input
-							id="client-address"
-							type="text"
-							value={formData.address}
-							onChange={onChange("address")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						/>
-					) : (
-						<p className="mt-1 text-sm text-slate-800">{formData.address || "-"}</p>
-					)}
-				</div>
-
-				<div className="rounded-xl bg-slate-50 p-4">
-					<label
-						htmlFor="client-city"
-						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-					>
-						Ciudad
-					</label>
-
-					{isEditable ? (
-						<input
-							id="client-city"
-							type="text"
-							value={formData.city}
-							onChange={onChange("city")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						/>
-					) : (
-						<p className="mt-1 text-sm text-slate-800">{formData.city || "-"}</p>
-					)}
-				</div>
-
-				<div className="rounded-xl bg-slate-50 p-4">
-					<label
-						htmlFor="client-postal-code"
-						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-					>
-						Código postal
-					</label>
-
-					{isEditable ? (
-						<input
-							id="client-postal-code"
-							type="text"
-							value={formData.postal_code}
-							onChange={onChange("postal_code")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						/>
-					) : (
-						<p className="mt-1 text-sm text-slate-800">
-							{formData.postal_code || "-"}
-						</p>
-					)}
-				</div>
-
-				<div className="rounded-xl bg-slate-50 p-4">
-					<label
-						htmlFor="client-province"
-						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-					>
-						Provincia / zona
-					</label>
-
-					{isEditable ? (
-						<input
-							id="client-province"
-							type="text"
-							value={formData.province}
-							onChange={onChange("province")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						/>
-					) : (
-						<p className="mt-1 text-sm text-slate-800">
-							{formData.province || "-"}
-						</p>
-					)}
-				</div>
-
-				<div className="rounded-xl bg-slate-50 p-4">
-					<label
-						htmlFor="client-visit-window-start"
-						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-					>
-						Inicio de visitas
-					</label>
-
-					{isEditable ? (
-						<input
-							id="client-visit-window-start"
-							type="time"
-							value={formData.visit_window_start_time}
-							onChange={onChange("visit_window_start_time")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						/>
-					) : (
-						<p className="mt-1 text-sm text-slate-800">
-							{formData.visit_window_start_time || "-"}
-						</p>
-					)}
-				</div>
-
-				<div className="rounded-xl bg-slate-50 p-4">
-					<label
-						htmlFor="client-visit-window-end"
-						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-					>
-						Fin de visitas
-					</label>
-
-					{isEditable ? (
-						<input
-							id="client-visit-window-end"
-							type="time"
-							value={formData.visit_window_end_time}
-							onChange={onChange("visit_window_end_time")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						/>
-					) : (
-						<p className="mt-1 text-sm text-slate-800">
-							{formData.visit_window_end_time || "-"}
-						</p>
-					)}
-				</div>
-
-				<div className="rounded-xl bg-slate-50 p-4 md:col-span-2">
-					<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-						Estado de geolocalización
-					</p>
+				<div
+					className={`${cardClass} ${
+						compact ? "2xl:col-span-2" : "md:col-span-2"
+					}`}
+				>
+					<p className={labelClass}>Estado de geolocalizacion</p>
 
 					<div
 						className={`mt-2 rounded-2xl px-4 py-3 text-sm ${
@@ -277,8 +162,8 @@ export default function ClientProfileFieldsSection({
 						}`}
 					>
 						{hasConfirmedLocation
-							? "Ubicación confirmada. Si cambias la dirección, vuelve a validarla en el mapa."
-							: "Dirección pendiente de confirmar en mapa. Puedes guardar sin hacerlo y el sistema intentará geocodificarla automáticamente."}
+							? "Ubicacion confirmada. Si cambias la direccion, vuelve a validarla en el mapa."
+							: "Direccion pendiente de confirmar en mapa. Puedes guardar sin hacerlo y el sistema intentara geocodificarla automaticamente."}
 					</div>
 
 					<div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -294,14 +179,17 @@ export default function ClientProfileFieldsSection({
 				</div>
 
 				{clientId ? (
-					<div className="rounded-3xl border border-slate-200 bg-white p-4 md:col-span-2">
-						<div className="mb-4">
+					<div
+						className={`rounded-3xl border border-slate-200 bg-white p-3 ${
+							compact ? "2xl:col-span-2" : "md:col-span-2"
+						}`}
+					>
+						<div className="mb-3">
 							<h4 className="text-base font-semibold text-slate-900">
-								Confirmación en mapa
+								Confirmacion en mapa
 							</h4>
 							<p className="mt-1 text-sm text-slate-600">
-								Busca la dirección y ajusta el marcador si hace falta para
-								confirmar la ubicación exacta del establecimiento.
+								Busca la direccion y ajusta el marcador si hace falta.
 							</p>
 						</div>
 
@@ -313,22 +201,24 @@ export default function ClientProfileFieldsSection({
 								confirmedLng={formData.lng ? Number(formData.lng) : null}
 								initialSearchQuery={initialSearchQuery}
 								onConfirmLocation={onConfirmLocation}
+								compact={compact}
 							/>
 						) : (
 							<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-								La ubicación solo puede confirmarse desde edición propia del
-								cliente o edición administrativa.
+								La ubicacion solo puede confirmarse desde edicion propia del
+								cliente o edicion administrativa.
 							</div>
 						)}
 					</div>
 				) : null}
 
 				{isAdminEditMode ? (
-					<div className="rounded-xl bg-slate-50 p-4 md:col-span-2">
-						<label
-							htmlFor="client-notes"
-							className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-						>
+					<div
+						className={`${cardClass} ${
+							compact ? "2xl:col-span-4" : "md:col-span-2"
+						}`}
+					>
+						<label htmlFor="client-notes" className={labelClass}>
 							Notas
 						</label>
 
@@ -337,11 +227,13 @@ export default function ClientProfileFieldsSection({
 								id="client-notes"
 								value={formData.notes}
 								onChange={onChange("notes")}
-								rows={4}
-								className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
+								rows={compact ? 3 : 4}
+								className={inputClass}
 							/>
 						) : (
-							<p className="mt-1 text-sm text-slate-800">{formData.notes || "-"}</p>
+							<p className="mt-1 text-sm text-slate-800">
+								{formData.notes || "-"}
+							</p>
 						)}
 					</div>
 				) : null}

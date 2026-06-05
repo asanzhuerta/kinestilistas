@@ -56,6 +56,7 @@ export type UserProfileCardProps = {
 	user: UserProfileCardUser;
 	clientProfile?: ClientProfileData | null;
 	mode?: UserProfileCardMode;
+	layout?: "default" | "compact";
 	title?: string;
 	subtitle?: string;
 	roles?: CatalogOption[];

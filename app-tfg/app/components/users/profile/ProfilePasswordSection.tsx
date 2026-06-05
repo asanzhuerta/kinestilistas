@@ -5,6 +5,7 @@ type Props = {
 	confirmPassword: string;
 	onPasswordChange: (value: string) => void;
 	onConfirmPasswordChange: (value: string) => void;
+	compact?: boolean;
 };
 
 export default function ProfilePasswordSection({
@@ -12,9 +13,16 @@ export default function ProfilePasswordSection({
 	confirmPassword,
 	onPasswordChange,
 	onConfirmPasswordChange,
+	compact = false,
 }: Props) {
 	return (
-		<div className="mt-6 rounded-xl bg-slate-50 p-4">
+		<div
+			className={
+				compact
+					? "rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4"
+					: "mt-6 rounded-xl bg-slate-50 p-4"
+			}
+		>
 			<p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
 				Cambiar contraseña
 			</p>
