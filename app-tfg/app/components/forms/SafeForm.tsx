@@ -8,6 +8,7 @@ type SafeFormProps = Omit<
 > & {
 	children: React.ReactNode;
 	disableUntilHydrated?: boolean;
+	legend?: string;
 };
 
 /**
@@ -26,6 +27,7 @@ export default function SafeForm({
 	className = "",
 	noValidate = true,
 	disableUntilHydrated = true,
+	legend = "Formulario",
 	...props
 }: SafeFormProps) {
 	const isHydrated = useSyncExternalStore(
@@ -47,6 +49,7 @@ export default function SafeForm({
 				disabled={disableUntilHydrated && !isHydrated}
 				className="contents"
 			>
+				<legend className="sr-only">{legend}</legend>
 				{children}
 			</fieldset>
 		</form>

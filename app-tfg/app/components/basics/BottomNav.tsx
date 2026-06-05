@@ -32,7 +32,7 @@ export default function BottomNav(params: { props?: Props }) {
 				<Link href={landingPageUrl} className="flex-1">
 					<div className="flex flex-col items-center opacity-100 transition-opacity hover:opacity-80">
 						<HomeIcon className="mb-1 h-6 w-6 text-black" />
-						<span className="text-[10px] uppercase tracking-tight text-black">
+						<span className="text-xs uppercase tracking-tight text-black">
 							Inicio
 						</span>
 					</div>
@@ -41,7 +41,7 @@ export default function BottomNav(params: { props?: Props }) {
 				<Link href="/profile" className="flex-1">
 					<div className="flex flex-col items-center opacity-60 transition-opacity hover:opacity-100">
 						<ProfileIcon className="mb-1 h-6 w-6 text-black" />
-						<span className="text-[10px] uppercase tracking-tight text-black">
+						<span className="text-xs uppercase tracking-tight text-black">
 							Perfil
 						</span>
 					</div>
@@ -51,7 +51,7 @@ export default function BottomNav(params: { props?: Props }) {
 					<Link href={settingsHref || "/"} className="flex-1">
 						<div className="flex flex-col items-center opacity-60 transition-opacity hover:opacity-100">
 							<SettingsIcon className="mb-1 h-6 w-6 text-black" />
-							<span className="text-[10px] uppercase tracking-tight text-black">
+							<span className="text-xs uppercase tracking-tight text-black">
 								Ajustes
 							</span>
 						</div>
@@ -59,11 +59,12 @@ export default function BottomNav(params: { props?: Props }) {
 				) : null}
 
 				<button
+					type="button"
 					onClick={handleLogout}
 					className="flex flex-1 flex-col items-center opacity-60 transition-opacity hover:opacity-100"
 				>
 					<LogoutIcon className="mb-1 h-6 w-6 text-black" />
-					<span className="text-[10px] uppercase tracking-tight text-black">
+					<span className="text-xs uppercase tracking-tight text-black">
 						Cerrar sesión
 					</span>
 				</button>

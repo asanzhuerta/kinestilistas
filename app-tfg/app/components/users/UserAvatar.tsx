@@ -121,7 +121,7 @@ export default function UserAvatar({
 			{shouldShowImage ? (
 				<Image
 					src={imageUrl ?? ""}
-					alt={name ?? "Avatar de usuario"}
+					alt="Foto de perfil"
 					width={avatarSize.pixels}
 					height={avatarSize.pixels}
 					className={imageClassName}

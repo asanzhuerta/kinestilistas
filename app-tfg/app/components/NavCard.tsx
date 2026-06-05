@@ -22,7 +22,7 @@ export default function NavCard({
 			{badgeCount > 0 ? (
 				<span
 					aria-label={`${badgeCount} ${badgeLabel}`}
-					className="absolute right-2 top-2 rounded-full border border-rose-200 bg-rose-500 px-2 py-0.5 text-[10px] font-semibold leading-none text-white shadow-sm"
+					className="absolute right-2 top-2 rounded-full border border-rose-200 bg-rose-500 px-2 py-0.5 text-xs font-semibold leading-none text-white shadow-sm"
 				>
 					{badgeCount > 9 ? "9+" : badgeCount}
 				</span>

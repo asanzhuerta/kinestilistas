@@ -28,7 +28,7 @@ export default function H1Title({
 			<h1 className="text-1xl text-center uppercase tracking-widest text-black sm:text-3xl">
 				{title}
 			</h1>
-			<p className="mt-1 text-center text-[10px] uppercase tracking-[0.2em] text-black/80 sm:text-[15px]">
+			<p className="mt-1 text-center text-xs uppercase tracking-[0.18em] text-black/80 sm:text-[15px]">
 				{subtitle}
 			</p>
 		</header>

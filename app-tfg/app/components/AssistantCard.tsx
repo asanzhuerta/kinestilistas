@@ -16,7 +16,7 @@ export default function AssistantCard() {
           <span className="block text-sm font-medium text-black">
             Asistente Virtual
           </span>
-          <span className="block text-[10px] uppercase tracking-wider text-black/60">
+          <span className="block text-xs uppercase tracking-wide text-black/60">
             ¿En qué puedo ayudarte hoy?
           </span>
         </div>
