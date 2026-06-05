@@ -4,6 +4,7 @@ body {
 	margin: 0;
 	font-family:
 		"Segoe UI", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+	background: #f8fafc;
 }
 
 .glass-card {
@@ -24,6 +25,7 @@ body {
 .app-bg {
 	position: relative;
 	min-height: 100svh;
+	z-index: 1;
 	--app-bg-image-desktop: url("/bgs/fondo-default-PC.jpg");
 	--app-bg-image-mobile: url("/bgs/fondo-default-Mobile.jpg");
 }
@@ -48,23 +50,57 @@ body {
 	--app-bg-image-mobile: url("/bgs/fondo-login-Mobile.jpg");
 }
 
-.app-bg::before {
-	content: "";
+.app-background-crossfade {
 	position: fixed;
 	inset: 0;
-	z-index: -2;
+	z-index: 0;
+	overflow: hidden;
+	pointer-events: none;
+	background: #f8fafc;
+}
+
+.app-background-layer {
+	position: absolute;
+	inset: 0;
 	background-image:
-		var(--app-bg-image-desktop), url("/bgs/fondo-default-PC.jpg");
+		var(--app-background-desktop), url("/bgs/fondo-default-PC.jpg");
 	background-attachment: fixed;
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;
+	opacity: 0;
+	transform: scale(1.01);
+	transition:
+		opacity 780ms cubic-bezier(0.22, 1, 0.36, 1),
+		transform 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+	will-change: opacity, transform;
+}
+
+.app-background-layer-visible {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.app-background-layer-enter {
+	animation: appBackgroundFadeIn 780ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes appBackgroundFadeIn {
+	from {
+		opacity: 0;
+		transform: scale(1.01);
+	}
+
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 
 @media (max-width: 768px) {
-	.app-bg::before {
+	.app-background-layer {
 		background-image:
-			var(--app-bg-image-mobile), url("/bgs/fondo-default-Mobile.jpg");
+			var(--app-background-mobile), url("/bgs/fondo-default-Mobile.jpg");
 	}
 }
 
@@ -141,6 +177,10 @@ body {
 	[data-sidebar-motion]::before,
 	[data-sidebar-motion]::after {
 		transition-duration: var(--sidebar-motion-duration, 320ms) !important;
+	}
+
+	.app-background-layer {
+		transition-duration: 0.01ms !important;
 	}
 }
 
