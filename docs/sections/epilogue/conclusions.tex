@@ -14,7 +14,7 @@ Respecto a los objetivos específicos planteados en la introducción, el grado d
     \item La relación entre distribuidor y clientes se mejora mediante promociones segmentadas, descuentos aplicables al pedido, formaciones, avisos internos, recordatorios y una trazabilidad administrativa que facilita el seguimiento de la operación.
 \end{itemize}
 
-El sistema no se limita a una maqueta visual, sino que incorpora persistencia real en PostgreSQL, migraciones versionadas, control de acceso por rol, validaciones de negocio, servicios de dominio, rutas API, pantallas funcionales y comprobaciones de cierre para los módulos desarrollados. Los módulos \texttt{M1} a \texttt{M7} quedan documentados y verificados con distintos niveles de profundidad, mientras que \texttt{M8} permanece expresamente delimitado como evolución futura.
+El sistema no se limita a una maqueta visual, sino que incorpora persistencia real en PostgreSQL, migraciones versionadas, control de acceso por rol, validaciones de negocio, servicios de dominio, rutas API, pantallas funcionales y comprobaciones de cierre para los módulos desarrollados. Los módulos \texttt{M1} a \texttt{M7} quedan documentados y verificados con distintos niveles de profundidad, mientras que \textcolor{red}{\texttt{M8} permanece expresamente delimitado como evolución futura}.
 
 \section{Lecciones aprendidas}
 
@@ -32,7 +32,7 @@ Desde el punto de vista procedimental, el enfoque iterativo e incremental ha sid
 
 El resultado final constituye una base funcional sólida para la digitalización de la actividad comercial descrita. Aunque existen líneas de mejora y ampliaciones naturales, la aplicación ya permite demostrar un flujo completo desde la autenticación hasta la operación diaria: administración de usuarios, gestión de clientes, catálogo, planificación comercial, pedidos, reparto, cobro mínimo, seguimiento técnico, comunicaciones internas, supervisión transversal y registro empresarial de integraciones/propuestas a proveedor.
 
-La principal fortaleza del proyecto es que combina funcionalidad de negocio con decisiones técnicas defendibles: arquitectura full-stack, modelo relacional, migraciones, roles, trazabilidad, integración con servicios externos, diseño responsive, soporte PWA básico y validación progresiva. La principal limitación es que algunas capacidades avanzadas, como mensajería externa, facturación completa, pagos parciales, automatizaciones más complejas o funcionalidades de \texttt{M8}, quedan fuera del alcance implementado y se plantean como trabajo futuro.
+La principal fortaleza del proyecto es que combina funcionalidad de negocio con decisiones técnicas defendibles: arquitectura full-stack, modelo relacional, migraciones, roles, trazabilidad, integración con servicios externos, diseño responsive, soporte PWA básico y validación progresiva. \textcolor{red}{La principal limitación es que algunas capacidades avanzadas, como mensajería externa, facturación completa, pagos parciales, automatizaciones más complejas o funcionalidades de \texttt{M8}, quedan fuera del alcance implementado y se plantean como trabajo futuro.}
 
 \section{Trabajo futuro}
 \label{sec:futurework}

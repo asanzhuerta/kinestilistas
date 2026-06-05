@@ -4,7 +4,7 @@ Este enfoque es coherente con el modelado de casos de uso, en el que los actores
 
 \bigskip
 
-En la versión actual del proyecto, los diagramas asociados a \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4} deben interpretarse como módulos ya implementados y operativos. El caso de \texttt{M5} pasa a una situación intermedia: existe ya una implementación funcional de fichas del salón, alta, edición y borrado de servicios, ficha técnica, plantillas reutilizables, sugerencias derivadas y borradores técnicos editables por servicio, pero el diagrama sigue recogiendo además capacidades aún no construidas, como el envío real del correo a cliente final. En \texttt{M6} ya existe un núcleo interno de promociones, segmentación, formaciones, notificaciones, recordatorios y descuentos promocionales aplicados al pedido, aunque la mensajería externa sigue siendo planificación futura. El diagrama de \texttt{M8} conserva valor de análisis y planificación, mientras que \texttt{M7} dispone ya de auditoría administrativa, configuración global de rate limiting, resumen operativo, integraciones de soporte, soporte técnico/PWA y un primer subsistema persistente para integraciones empresariales, operaciones de intercambio y propuestas de pedido a proveedor.
+En la versión actual del proyecto, los diagramas asociados a \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4} deben interpretarse como módulos ya implementados y operativos. El caso de \texttt{M5} pasa a una situación intermedia: existe ya una implementación funcional de fichas del salón, alta, edición y borrado de servicios, ficha técnica, plantillas reutilizables, sugerencias derivadas y borradores técnicos editables por servicio, pero \textcolor{red}{el diagrama sigue recogiendo además capacidades aún no construidas, como el envío real del correo a cliente final}. En \texttt{M6} ya existe un núcleo interno de promociones, segmentación, formaciones, notificaciones, recordatorios y descuentos promocionales aplicados al pedido, aunque \textcolor{red}{la mensajería externa sigue siendo planificación futura}. \textcolor{red}{El diagrama de \texttt{M8} conserva valor de análisis y planificación}, mientras que \texttt{M7} dispone ya de auditoría administrativa, configuración global de rate limiting, resumen operativo, integraciones de soporte, soporte técnico/PWA y un primer subsistema persistente para integraciones empresariales, operaciones de intercambio y propuestas de pedido a proveedor.
 
 \newpage{\ }
 \subsection{Casos de Uso M1.}
@@ -69,7 +69,7 @@ En este módulo se han representado los casos de uso relacionados con la gestió
 \newpage{\ }
 \subsection{Casos de Uso M6.}
 
-En este módulo se han representado los casos de uso relacionados con promociones, notificaciones y formaciones. La implementación actual cubre ya el flujo interno principal: administración de promociones, segmentación manual, publicación de formaciones, notificaciones dentro de la aplicación, recordatorios personales y aplicación de descuentos promocionales sobre pedidos. Las integraciones multicanal externas siguen formando parte de la evolución futura.
+En este módulo se han representado los casos de uso relacionados con promociones, notificaciones y formaciones. La implementación actual cubre ya el flujo interno principal: administración de promociones, segmentación manual, publicación de formaciones, notificaciones dentro de la aplicación, recordatorios personales y aplicación de descuentos promocionales sobre pedidos. \textcolor{red}{Las integraciones multicanal externas siguen formando parte de la evolución futura.}
 
 \begin{figure}[H]
     \centering
@@ -91,13 +91,13 @@ En este módulo se han representado los casos de uso relacionados con administra
 \end{figure}
 
 \newpage{\ }
-\subsection{Casos de Uso M8.}
+\subsection{\textcolor{red}{Casos de Uso M8.}}
 
-En este módulo se han representado los casos de uso relacionados con funcionalidades adicionales. Dado que las funcionalidades recogidas en este módulo no forman parte del alcance principal de la versión actualmente implementada del sistema, el diagrama asociado debe interpretarse como una representación conceptual de posibles extensiones futuras de la plataforma.
+\textcolor{red}{En este módulo se han representado los casos de uso relacionados con funcionalidades adicionales. Dado que las funcionalidades recogidas en este módulo no forman parte del alcance principal de la versión actualmente implementada del sistema, el diagrama asociado debe interpretarse como una representación conceptual de posibles extensiones futuras de la plataforma.}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{./figures/UML/CasosDeUso/M8_CasosDeUso.pdf}
-    \caption{Casos de Uso M8. Funcionalidades adicionales}
+    \caption{\textcolor{red}{Casos de Uso M8. Funcionalidades adicionales}}
     \label{fig:M8_CasosDeUso}
 \end{figure}
