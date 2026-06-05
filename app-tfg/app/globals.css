@@ -24,6 +24,28 @@ body {
 .app-bg {
 	position: relative;
 	min-height: 100svh;
+	--app-bg-image-desktop: url("/bgs/fondo-default-PC.jpg");
+	--app-bg-image-mobile: url("/bgs/fondo-default-Mobile.jpg");
+}
+
+.app-bg-admin {
+	--app-bg-image-desktop: url("/bgs/fondo-admin-PC.jpg");
+	--app-bg-image-mobile: url("/bgs/fondo-admin-Mobile.jpg");
+}
+
+.app-bg-client {
+	--app-bg-image-desktop: url("/bgs/fondo-client-PC.jpg");
+	--app-bg-image-mobile: url("/bgs/fondo-client-Mobile.jpg");
+}
+
+.app-bg-commercial {
+	--app-bg-image-desktop: url("/bgs/fondo-commercial-PC.jpg");
+	--app-bg-image-mobile: url("/bgs/fondo-commercial-Mobile.jpg");
+}
+
+.app-bg-login {
+	--app-bg-image-desktop: url("/bgs/fondo-login-PC.jpg");
+	--app-bg-image-mobile: url("/bgs/fondo-login-Mobile.jpg");
 }
 
 .app-bg::before {
@@ -31,7 +53,8 @@ body {
 	position: fixed;
 	inset: 0;
 	z-index: -2;
-	background-image: url("/bgs/fondo-default-PC.jpg");
+	background-image:
+		var(--app-bg-image-desktop), url("/bgs/fondo-default-PC.jpg");
 	background-attachment: fixed;
 	background-size: cover;
 	background-position: center;
@@ -40,7 +63,8 @@ body {
 
 @media (max-width: 768px) {
 	.app-bg::before {
-		background-image: url("/bgs/fondo-default-Mobile.jpg");
+		background-image:
+			var(--app-bg-image-mobile), url("/bgs/fondo-default-Mobile.jpg");
 	}
 }
 

@@ -13,7 +13,7 @@ export default async function AdminLayout({
 	const user = await getUserById(session.user.id);
 
 	return (
-		<main className="app-bg min-h-screen w-full text-slate-800">
+		<main className="app-bg app-bg-admin min-h-screen w-full text-slate-800">
 			<div className="bg-overlay fixed inset-0 -z-10" />
 
 			<PageHeaderProvider>

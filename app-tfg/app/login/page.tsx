@@ -64,7 +64,7 @@ export default function LoginPage() {
 	}
 
 	return (
-		<main className="app-bg min-h-[100svh] w-full px-4 py-4 text-slate-800">
+		<main className="app-bg app-bg-login min-h-[100svh] w-full px-4 py-4 text-slate-800">
 			<HeaderTitle
 				title="KinEstilistas "
 				subtitle="Alta Peluqueria &amp; Estetica"
