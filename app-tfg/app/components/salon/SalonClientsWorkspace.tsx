@@ -126,50 +126,74 @@ export default function SalonClientsWorkspace({
 
 					<form className="mt-5 space-y-4" onSubmit={handleSubmit}>
 						<div>
-							<label className="mb-2 block text-sm font-medium text-slate-700">
+							<label
+								htmlFor="salon-client-name"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
 								Nombre
 							</label>
 							<input
+								id="salon-client-name"
+								name="name"
 								value={name}
 								onChange={(event) => setName(event.target.value)}
 								className={inputClassName}
 								placeholder="Nombre del cliente"
+								autoComplete="name"
 								disabled={isSubmitting}
 							/>
 						</div>
 
 						<div>
-							<label className="mb-2 block text-sm font-medium text-slate-700">
+							<label
+								htmlFor="salon-client-phone"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
 								Telefono
 							</label>
 							<input
+								id="salon-client-phone"
+								name="phone"
+								type="tel"
 								value={phone}
 								onChange={(event) => setPhone(event.target.value)}
 								className={inputClassName}
 								placeholder="Telefono de contacto"
+								autoComplete="tel"
 								disabled={isSubmitting}
 							/>
 						</div>
 
 						<div>
-							<label className="mb-2 block text-sm font-medium text-slate-700">
+							<label
+								htmlFor="salon-client-email"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
 								Correo
 							</label>
 							<input
+								id="salon-client-email"
+								name="email"
 								type="email"
 								value={email}
 								onChange={(event) => setEmail(event.target.value)}
 								className={inputClassName}
 								placeholder="correo@ejemplo.com"
+								autoComplete="email"
 								disabled={isSubmitting}
 							/>
 						</div>
 
 						<div>
-							<label className="mb-2 block text-sm font-medium text-slate-700">
+							<label
+								htmlFor="salon-client-notes"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
 								Notas generales
 							</label>
 							<textarea
+								id="salon-client-notes"
+								name="notes"
 								value={notes}
 								onChange={(event) => setNotes(event.target.value)}
 								className={textareaClassName}

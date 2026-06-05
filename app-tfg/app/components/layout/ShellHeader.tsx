@@ -33,7 +33,7 @@ export default function ShellHeader({ className = "" }: ShellHeaderProps) {
 					<h1 className="text-1xl uppercase tracking-widest text-black sm:text-3xl">
 						Kinestilistas
 					</h1>
-					<p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-black/80 sm:text-[15px]">
+					<p className="mt-1 text-xs uppercase tracking-[0.18em] text-black/80 sm:text-[15px]">
 						Alta Peluqueria &amp; Estetica
 					</p>
 				</div>
@@ -44,7 +44,7 @@ export default function ShellHeader({ className = "" }: ShellHeaderProps) {
 							{pageHeader?.title}
 						</h2>
 						{pageHeader?.subtitle?.trim() ? (
-							<p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-black/80 sm:text-[13px] xl:text-[15px]">
+							<p className="mt-2 text-xs uppercase tracking-[0.18em] text-black/80 sm:text-[13px] xl:text-[15px]">
 								{pageHeader.subtitle}
 							</p>
 						) : null}

@@ -77,29 +77,48 @@ export default function LoginPage() {
 				<div className="mx-auto mt-6 w-full max-w-sm">
 					<SafeForm
 						onSubmit={handleSubmit}
+						legend="Credenciales de acceso"
 						className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-md"
 					>
 						<h2 className="mb-2 text-center text-xl font-semibold">
 							Iniciar sesion
 						</h2>
 
-						<input
-							name="identifier"
-							type="text"
-							placeholder="Correo, telefono o usuario"
-							autoComplete="username"
-							required
-							className="w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-black"
-						/>
+						<div className="space-y-2 text-left">
+							<label
+								htmlFor="login-identifier"
+								className="text-sm font-semibold text-slate-700"
+							>
+								Correo, telefono o usuario
+							</label>
+							<input
+								id="login-identifier"
+								name="identifier"
+								type="text"
+								placeholder="Correo, telefono o usuario"
+								autoComplete="username"
+								required
+								className="w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-black"
+							/>
+						</div>
 
-						<input
-							name="password"
-							type="password"
-							placeholder="Contrasena"
-							autoComplete="current-password"
-							required
-							className="w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-black"
-						/>
+						<div className="space-y-2 text-left">
+							<label
+								htmlFor="login-password"
+								className="text-sm font-semibold text-slate-700"
+							>
+								Contrasena
+							</label>
+							<input
+								id="login-password"
+								name="password"
+								type="password"
+								placeholder="Contrasena"
+								autoComplete="current-password"
+								required
+								className="w-full rounded-lg border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-black"
+							/>
+						</div>
 
 						<SubmitButton
 							isSubmitting={loading}
