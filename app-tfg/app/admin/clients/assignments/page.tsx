@@ -342,29 +342,6 @@ function AdminClientCommercialAssignmentsPageContent() {
 	return (
 		<PageTransition>
 			<div className="space-y-6">
-				<div className="flex flex-wrap gap-3 text-sm text-slate-600">
-					<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-						<span className="font-semibold text-slate-900">
-							{clients.length}
-						</span>{" "}
-						clientes totales
-					</div>
-
-					<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-						<span className="font-semibold text-slate-900">
-							{commercials.length}
-						</span>{" "}
-						comerciales disponibles
-					</div>
-
-					<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-						<span className="font-semibold text-slate-900">
-							{filteredClients.length}
-						</span>{" "}
-						clientes visibles
-					</div>
-				</div>
-
 				{error ? (
 					<div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
 						{error}

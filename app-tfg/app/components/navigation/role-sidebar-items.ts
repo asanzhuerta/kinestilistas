@@ -38,7 +38,7 @@ export const roleSidebarLabels: Record<
 > = {
 	admin: {
 		title: "Administrador",
-		subtitle: "Gestion global",
+		subtitle: "Gestión global",
 		homeHref: "/admin",
 	},
 	commercial: {
@@ -66,26 +66,17 @@ export const roleSidebarSections: Record<
 			],
 		},
 		{
-			title: "Gestion",
+			title: "Gestión",
 			items: [
-				{ title: "Usuarios", href: "/admin/users", icon: "clients" },
-				{ title: "Listado usuarios", href: "/admin/users/list", icon: "clients" },
-				{ title: "Alta usuario", href: "/admin/users/register", icon: "profile" },
 				{
-					title: "Solicitudes",
-					href: "/admin/users/requests",
-					icon: "chat",
-				},
-				{ title: "Clientes", href: "/admin/clients", icon: "clients" },
-				{
-					title: "Listado clientes",
-					href: "/admin/clients/list",
+					title: "Gestión de usuarios",
+					href: "/admin/users",
 					icon: "clients",
 				},
 				{
-					title: "Asignaciones",
-					href: "/admin/clients/assignments",
-					icon: "route",
+					title: "Gestión de clientes",
+					href: "/admin/clients",
+					icon: "clients",
 				},
 			],
 		},

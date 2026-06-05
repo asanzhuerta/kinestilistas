@@ -337,12 +337,12 @@ export default function UserProfileCard({
 	if (isCompactLayout) {
 		return (
 			<div className="w-full">
-				{titleBlock}
-
 				<SafeForm
 					onSubmit={handleSubmit}
 					className="rounded-[28px] border border-white/45 bg-white/90 p-3 shadow-2xl shadow-slate-950/10 backdrop-blur-xl sm:p-4 2xl:p-5"
 				>
+					{titleBlock}
+
 					<div className="grid gap-4 xl:grid-cols-[minmax(250px,300px)_minmax(0,1fr)]">
 						<aside className="grid gap-3 xl:content-start">
 							<ProfileIdentitySection

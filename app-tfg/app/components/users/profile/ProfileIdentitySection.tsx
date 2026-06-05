@@ -48,6 +48,32 @@ export default function ProfileIdentitySection({
 	onOpenFilePicker,
 	compact = false,
 }: Props) {
+	const statusBadges = (
+		<div
+			className={
+				compact
+					? "mt-3 flex flex-wrap justify-center gap-2"
+					: "mt-3 flex flex-wrap gap-2"
+			}
+		>
+			<span
+				className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getRoleClassesLight(
+					user.role.code,
+				)}`}
+			>
+				{getRoleLabel(user.role.code)}
+			</span>
+
+			<span
+				className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClassesLight(
+					user.status.code,
+				)}`}
+			>
+				{getStatusLabel(user.status.code)}
+			</span>
+		</div>
+	);
+
 	return (
 		<div
 			className={
@@ -62,6 +88,8 @@ export default function ProfileIdentitySection({
 				size={compact ? "lg" : "xl"}
 				className={compact ? "mx-auto shadow-md shadow-slate-950/10" : ""}
 			/>
+
+			{compact ? statusBadges : null}
 
 			<div className={compact ? "mt-3 min-w-0" : "min-w-0 flex-1"}>
 				{/* ---------------------------------------------------------------- */}
@@ -178,23 +206,7 @@ export default function ProfileIdentitySection({
 					</div>
 				) : null}
 
-				<div className={compact ? "mt-3 flex flex-wrap justify-center gap-2" : "mt-3 flex flex-wrap gap-2"}>
-					<span
-						className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getRoleClassesLight(
-							user.role.code,
-						)}`}
-					>
-						{getRoleLabel(user.role.code)}
-					</span>
-
-					<span
-						className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClassesLight(
-							user.status.code,
-						)}`}
-					>
-						{getStatusLabel(user.status.code)}
-					</span>
-				</div>
+				{compact ? null : statusBadges}
 			</div>
 		</div>
 	);
