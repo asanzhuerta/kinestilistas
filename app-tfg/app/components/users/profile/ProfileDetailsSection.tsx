@@ -20,6 +20,7 @@ type Props = {
 	) => void;
 	userCompany?: string | null;
 	userPhone?: string | null;
+	compact?: boolean;
 };
 
 export default function ProfileDetailsSection({
@@ -32,10 +33,23 @@ export default function ProfileDetailsSection({
 	onChange,
 	userCompany,
 	userPhone,
+	compact = false,
 }: Props) {
+	const cardClass = compact
+		? "rounded-2xl bg-slate-50/85 p-3"
+		: "rounded-xl bg-slate-50 p-4";
+	const inputClass =
+		"mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400";
+
 	return (
-		<div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-			<div className="rounded-xl bg-slate-50 p-4">
+		<div
+			className={
+				compact
+					? "grid grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-4"
+					: "mt-6 grid grid-cols-1 gap-4 md:grid-cols-2"
+			}
+		>
+			<div className={cardClass}>
 				<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
 					Empresa
 				</p>
@@ -45,16 +59,16 @@ export default function ProfileDetailsSection({
 						type="text"
 						value={formData.company}
 						onChange={onChange("company")}
-						className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
+						className={inputClass}
 					/>
 				) : (
 					<p className="mt-1 text-sm text-slate-800">{userCompany || "-"}</p>
 				)}
 			</div>
 
-			<div className="rounded-xl bg-slate-50 p-4">
+			<div className={cardClass}>
 				<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-					Teléfono
+					Telefono
 				</p>
 
 				{isEditableMode ? (
@@ -62,7 +76,7 @@ export default function ProfileDetailsSection({
 						type="text"
 						value={formData.phone}
 						onChange={onChange("phone")}
-						className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
+						className={inputClass}
 					/>
 				) : (
 					<p className="mt-1 text-sm text-slate-800">{userPhone || "-"}</p>
@@ -70,34 +84,31 @@ export default function ProfileDetailsSection({
 			</div>
 
 			{isAdminEditMode ? (
-				<>
-					<div className="rounded-xl bg-slate-50 p-4">
-						<label
-							htmlFor="profile-role"
-							className="text-xs font-semibold uppercase tracking-wide text-slate-500"
-						>
-							Rol
-						</label>
-						<select
-							id="profile-role"
-							value={String(formData.roleId)}
-							onChange={onChange("roleId")}
-							className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
-						>
-							{roles
-								.filter((role) => role.name !== "Administrador")
-								.map((role) => (
-									<option key={role.id} value={role.id}>
-										{role.name}
-									</option>
-								))}
-						</select>
-					</div>
-
-				</>
+				<div className={cardClass}>
+					<label
+						htmlFor="profile-role"
+						className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+					>
+						Rol
+					</label>
+					<select
+						id="profile-role"
+						value={String(formData.roleId)}
+						onChange={onChange("roleId")}
+						className={inputClass}
+					>
+						{roles
+							.filter((role) => role.name !== "Administrador")
+							.map((role) => (
+								<option key={role.id} value={role.id}>
+									{role.name}
+								</option>
+							))}
+					</select>
+				</div>
 			) : null}
 
-			<div className="rounded-xl bg-slate-50 p-4">
+			<div className={cardClass}>
 				<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
 					Fecha de alta
 				</p>
@@ -106,9 +117,9 @@ export default function ProfileDetailsSection({
 				</p>
 			</div>
 
-			<div className="rounded-xl bg-slate-50 p-4">
+			<div className={cardClass}>
 				<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-					Último login
+					Ultimo login
 				</p>
 				<p className="mt-1 text-sm text-slate-800">
 					{lastLoginAt ? formatDate(lastLoginAt) : "-"}

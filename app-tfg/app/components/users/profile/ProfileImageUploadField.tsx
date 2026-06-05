@@ -5,6 +5,7 @@ type Props = {
 	fileInputRef: React.RefObject<HTMLInputElement | null>;
 	onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	onOpenFilePicker: () => void;
+	compact?: boolean;
 };
 
 export default function ProfileImageUploadField({
@@ -14,6 +15,7 @@ export default function ProfileImageUploadField({
 	fileInputRef,
 	onFileChange,
 	onOpenFilePicker,
+	compact = false,
 }: Props) {
 	return (
 		<div>
@@ -24,7 +26,7 @@ export default function ProfileImageUploadField({
 				Foto de perfil
 			</label>
 
-			<div className="mt-2 flex flex-col gap-3">
+			<div className={compact ? "mt-2 flex flex-col gap-2" : "mt-2 flex flex-col gap-3"}>
 				<input
 					id="profile-image-upload"
 					ref={fileInputRef}
@@ -40,13 +42,17 @@ export default function ProfileImageUploadField({
 						type="button"
 						onClick={onOpenFilePicker}
 						disabled={isUploadingImage}
-						className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+						className={`rounded-xl bg-slate-900 font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 ${
+							compact ? "px-3 py-2 text-xs" : "px-4 py-2 text-sm"
+						}`}
 					>
 						{displayedProfileImage ? "Cambiar foto" : "Seleccionar archivo"}
 					</button>
 
 					{profileImageStatusText ? (
-						<p className="text-sm text-slate-500">{profileImageStatusText}</p>
+						<p className={compact ? "text-xs text-slate-500" : "text-sm text-slate-500"}>
+							{profileImageStatusText}
+						</p>
 					) : null}
 				</div>
 			</div>

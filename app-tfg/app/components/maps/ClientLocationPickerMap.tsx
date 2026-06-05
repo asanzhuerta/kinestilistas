@@ -17,6 +17,7 @@ type ClientLocationPickerMapProps = {
 	confirmedLng?: number | null;
 	initialSearchQuery?: string;
 	onConfirmLocation: (lat: number, lng: number) => void;
+	compact?: boolean;
 };
 
 type LatLng = {
@@ -65,6 +66,7 @@ export default function ClientLocationPickerMap({
 	confirmedLng = null,
 	initialSearchQuery = "",
 	onConfirmLocation,
+	compact = false,
 }: ClientLocationPickerMapProps) {
 	const initialPosition =
 		confirmedLat !== null && confirmedLng !== null
@@ -151,8 +153,14 @@ export default function ClientLocationPickerMap({
 	}
 
 	return (
-		<div className="space-y-4">
-			<div className="rounded-3xl border border-slate-200 bg-white p-4">
+		<div className={compact ? "space-y-3" : "space-y-4"}>
+			<div
+				className={
+					compact
+						? "rounded-2xl border border-slate-200 bg-white p-3"
+						: "rounded-3xl border border-slate-200 bg-white p-4"
+				}
+			>
 				<label
 					htmlFor="client-location-search"
 					className="text-sm font-medium text-slate-700"
@@ -169,14 +177,18 @@ export default function ClientLocationPickerMap({
 						defaultValue={initialSearchQuery}
 						onKeyDown={handleSearchKeyDown}
 						placeholder="Calle, número, ciudad..."
-						className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+					className={`min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 ${
+						compact ? "py-2" : "py-3"
+					}`}
 					/>
 
 					<button
 						type="button"
 						onClick={() => void handleSearchAddress()}
 						disabled={searching}
-						className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+						className={`inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 ${
+							compact ? "py-2" : "py-3"
+						}`}
 					>
 						{searching ? "Buscando..." : "Buscar"}
 					</button>
@@ -194,7 +206,7 @@ export default function ClientLocationPickerMap({
 					center={[position.lat, position.lng]}
 					zoom={16}
 					scrollWheelZoom
-					style={{ height: "420px", width: "100%" }}
+					style={{ height: compact ? "220px" : "420px", width: "100%" }}
 				>
 					<TileLayer
 						attribution="&copy; OpenStreetMap contributors"
@@ -230,13 +242,19 @@ export default function ClientLocationPickerMap({
 				</MapContainer>
 			</div>
 
-			<div className="rounded-3xl border border-slate-200 bg-white p-4">
-				<p className="text-sm text-slate-600">
+			<div
+				className={
+					compact
+						? "rounded-2xl border border-slate-200 bg-white p-3"
+						: "rounded-3xl border border-slate-200 bg-white p-4"
+				}
+			>
+				<p className={compact ? "text-xs text-slate-600" : "text-sm text-slate-600"}>
 					Haz clic en el mapa o arrastra el marcador hasta la ubicación exacta
 					del establecimiento.
 				</p>
 
-				<div className="mt-3 grid gap-3 md:grid-cols-2">
+				<div className={compact ? "mt-2 grid gap-2 md:grid-cols-2" : "mt-3 grid gap-3 md:grid-cols-2"}>
 					<div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
 						<span className="font-medium text-slate-700">Latitud:</span>{" "}
 						<span className="text-slate-900">{position.lat.toFixed(6)}</span>
@@ -248,11 +266,13 @@ export default function ClientLocationPickerMap({
 					</div>
 				</div>
 
-				<div className="mt-4 flex flex-wrap items-center gap-3">
+				<div className={compact ? "mt-3 flex flex-wrap items-center gap-2" : "mt-4 flex flex-wrap items-center gap-3"}>
 					<button
 						type="button"
 						onClick={handleConfirmLocation}
-						className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+						className={`inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 ${
+							compact ? "py-2" : "py-3"
+						}`}
 					>
 						Confirmar ubicación
 					</button>

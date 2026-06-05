@@ -30,6 +30,7 @@ type Props = {
 	) => void;
 	onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	onOpenFilePicker: () => void;
+	compact?: boolean;
 };
 
 export default function ProfileIdentitySection({
@@ -45,12 +46,24 @@ export default function ProfileIdentitySection({
 	onChange,
 	onFileChange,
 	onOpenFilePicker,
+	compact = false,
 }: Props) {
 	return (
-		<div className="flex flex-col gap-6 md:flex-row md:items-start">
-			<UserAvatar name={user.name} imageUrl={displayedProfileImage} size="xl" />
+		<div
+			className={
+				compact
+					? "rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4"
+					: "flex flex-col gap-6 md:flex-row md:items-start"
+			}
+		>
+			<UserAvatar
+				name={user.name}
+				imageUrl={displayedProfileImage}
+				size={compact ? "lg" : "xl"}
+				className={compact ? "mx-auto shadow-md shadow-slate-950/10" : ""}
+			/>
 
-			<div className="min-w-0 flex-1">
+			<div className={compact ? "mt-3 min-w-0" : "min-w-0 flex-1"}>
 				{/* ---------------------------------------------------------------- */}
 				{/* MODO 1: VIEW                                                     */}
 				{/* ---------------------------------------------------------------- */}
@@ -67,7 +80,7 @@ export default function ProfileIdentitySection({
 				{/* MODO 2: EDIT (perfil propio)                                      */}
 				{/* ---------------------------------------------------------------- */}
 				{isSelfEditMode ? (
-					<div className="grid grid-cols-1 gap-4">
+					<div className={compact ? "grid grid-cols-1 gap-3" : "grid grid-cols-1 gap-4"}>
 						<div>
 							<label
 								htmlFor="profile-name"
@@ -109,6 +122,7 @@ export default function ProfileIdentitySection({
 							fileInputRef={fileInputRef}
 							onFileChange={onFileChange}
 							onOpenFilePicker={onOpenFilePicker}
+							compact={compact}
 						/>
 					</div>
 				) : null}
@@ -117,7 +131,7 @@ export default function ProfileIdentitySection({
 				{/* MODO 3: ADMIN-EDIT                                                */}
 				{/* ---------------------------------------------------------------- */}
 				{isAdminEditMode ? (
-					<div className="grid grid-cols-1 gap-4">
+					<div className={compact ? "grid grid-cols-1 gap-3" : "grid grid-cols-1 gap-4"}>
 						<div>
 							<label
 								htmlFor="profile-name"
@@ -159,11 +173,12 @@ export default function ProfileIdentitySection({
 							fileInputRef={fileInputRef}
 							onFileChange={onFileChange}
 							onOpenFilePicker={onOpenFilePicker}
+							compact={compact}
 						/>
 					</div>
 				) : null}
 
-				<div className="mt-3 flex flex-wrap gap-2">
+				<div className={compact ? "mt-3 flex flex-wrap justify-center gap-2" : "mt-3 flex flex-wrap gap-2"}>
 					<span
 						className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getRoleClassesLight(
 							user.role.code,

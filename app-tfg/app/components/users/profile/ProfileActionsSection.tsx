@@ -9,6 +9,7 @@ type Props = {
 	submitLabel?: string;
 	backHref?: string;
 	onReset: () => void;
+	compact?: boolean;
 };
 
 export default function ProfileActionsSection({
@@ -19,17 +20,20 @@ export default function ProfileActionsSection({
 	submitLabel,
 	backHref,
 	onReset,
+	compact = false,
 }: Props) {
 	if (isViewMode) {
 		return null;
 	}
 
 	return (
-		<div className="mt-6 flex flex-wrap gap-3">
+		<div className={compact ? "flex flex-wrap gap-2" : "mt-6 flex flex-wrap gap-3"}>
 			<SubmitButton
 				isSubmitting={isSaving}
 				submittingText="Guardando..."
-				className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+				className={`rounded-xl bg-slate-900 text-sm font-medium text-white hover:bg-slate-800 ${
+					compact ? "px-3 py-2" : "px-4 py-2"
+				}`}
 			>
 				{submitLabel ?? "Guardar cambios"}
 			</SubmitButton>
@@ -38,7 +42,9 @@ export default function ProfileActionsSection({
 				<button
 					type="button"
 					onClick={onReset}
-					className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+					className={`rounded-xl border border-slate-300 bg-white text-sm font-medium text-slate-700 transition hover:bg-slate-50 ${
+						compact ? "px-3 py-2" : "px-4 py-2"
+					}`}
 				>
 					Restablecer
 				</button>
@@ -47,7 +53,9 @@ export default function ProfileActionsSection({
 			{isAdminEditMode && backHref ? (
 				<Link
 					href={backHref}
-					className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+					className={`rounded-xl border border-slate-300 bg-white text-sm font-medium text-slate-700 transition hover:bg-slate-50 ${
+						compact ? "px-3 py-2" : "px-4 py-2"
+					}`}
 				>
 					Cancelar
 				</Link>
