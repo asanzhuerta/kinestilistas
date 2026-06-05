@@ -5,7 +5,7 @@ En esta sección se describe el entorno tecnologico realmente utilizado para con
 La versión actual del sistema se apoya en el siguiente conjunto de tecnologías:
 
 \begin{itemize}
-    \item \texttt{Next.js 16} como framework full-stack principal \citep{nextjsdocs2026,nextjsroutehandlers2026}.
+    \item \texttt{Next.js 16} como framework full-stack principal, incluyendo \textit{App Router}, \textit{Route Handlers} y estados de carga por segmento \citep{nextjsdocs2026,nextjsroutehandlers2026,nextjsloading2026}.
     \item \texttt{React 19} para la construcción de la interfaz \citep{reactdocs2026}.
     \item \texttt{TypeScript 5} como lenguaje de implementación \citep{typescriptdocs2026}.
     \item \texttt{Tailwind CSS 4} para el estilo visual \citep{tailwinddocs2026}.
@@ -31,6 +31,12 @@ La aplicación expone un \texttt{manifest} web propio mediante \path{app/manifes
 \end{itemize}
 
 No se ha construido todavía una experiencia \textit{offline-first} completa, pero la base PWA ya forma parte del código real del proyecto. De cara a la validación móvil, esta capa se beneficia de poder reutilizar una URL externa estable durante distintas sesiones de prueba. El panel \path{/admin/support} permite revisar desde administración el estado operativo de esta capa, junto con el control de navegador compatible y otras protecciones transversales.
+
+\subsection{Estados de carga y navegación percibida}
+
+La aplicación incorpora estados de carga por segmento mediante ficheros \path{loading.tsx} del \textit{App Router}. Esta convención permite que \texttt{Next.js} muestre una interfaz provisional mientras se resuelven datos de servidor en secciones con consultas más pesadas, como catálogo, coloración, pedidos, fichas de salón, rutas, comunicaciones, auditoría y operaciones administrativas.
+
+Estos estados no modifican las reglas de negocio ni introducen nuevas entidades persistentes. Su finalidad es mejorar la experiencia de navegación: en lugar de esperar ante una transición vacía, el usuario visualiza una estructura esqueleto coherente con la página que se está cargando. La implementación se centraliza en \path{app/components/loading/RouteLoadingState.tsx}, reutilizado por las distintas rutas para mantener consistencia visual y evitar duplicación de marcado.
 
 \subsection{Herramientas de trabajo}
 

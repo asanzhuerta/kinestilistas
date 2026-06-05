@@ -29,6 +29,7 @@ La construcción se ha guiado por varios criterios comunes a todos los módulos,
 \begin{itemize}
     \item mantener las páginas y componentes centrados en presentación, delegando reglas de negocio en servicios de dominio;
     \item utilizar \textit{Route Handlers} como frontera entre interfaz y servidor, con validaciones de entrada antes de llegar a persistencia;
+    \item aprovechar convenciones del \textit{App Router}, como los estados \path{loading.tsx}, para mejorar la navegación percibida sin mezclar lógica de negocio con la capa visual;
     \item centralizar contratos y tipos compartidos para reducir discrepancias entre cliente y servidor;
     \item versionar cualquier cambio estructural de base de datos mediante migraciones trazables;
     \item reutilizar catálogos persistentes para roles, estados y tipos operativos, evitando literales dispersos en el código;
@@ -173,6 +174,7 @@ Aunque no constituyen un módulo de negocio independiente del mismo volumen que 
     \item panel de integraciones y soporte en \path{/admin/integrations}, con inventario operativo de Cloudinary, Nominatim, OSRM y QuickChart, mostrando proveedor, estado de configuración, uso funcional y degradación prevista;
     \item panel de soporte técnico en \path{/admin/support}, con inventario operativo de compatibilidad de navegador, PWA, \textit{service worker} y formularios seguros ante hidratación;
     \item panel de operaciones empresariales en \path{/admin/enterprise-operations}, con configuraciones persistidas, integraciones externas, operaciones de intercambio y propuestas de pedido a proveedor;
+    \item estados de carga por segmento para rutas con consultas de servidor relevantes, entre ellas catálogo, coloración, pedidos, fichas de salón, rutas, comunicaciones, auditoría y operaciones;
     \item soporte PWA basico mediante manifiesto web, iconos y \textit{service worker};
     \item compatibilidad mínima de navegador con redirección a pantalla específica de no soporte.
 \end{itemize}
