@@ -16,8 +16,6 @@ export default async function ClientLayout({
 
 	return (
 		<main className="app-bg app-bg-client flex min-h-screen w-full flex-col text-slate-800">
-			<div className="bg-overlay fixed inset-0 -z-10" />
-
 			<PageHeaderProvider>
 				<div className="lg:flex lg:min-h-screen">
 					<RoleSidebar

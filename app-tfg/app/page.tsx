@@ -7,8 +7,8 @@ import HeaderTitle from "./components/basics/HeaderTitle";
 
 const workflowItems = [
 	"Cliente profesional",
-	"Catalogo y coloracion",
-	"Pedido con promocion",
+	"Catálogo y coloración",
+	"Pedido con promoción",
 	"Ruta y entrega QR",
 ];
 
@@ -17,9 +17,6 @@ export default function Home() {
 
 	return (
 		<main className="app-bg relative min-h-screen overflow-hidden text-slate-950">
-			<div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.92),rgba(255,255,255,0.55)_36%,rgba(15,23,42,0.28)_100%)]" />
-			<div className="fixed inset-0 -z-10 bg-gradient-to-br from-white/80 via-white/35 to-slate-950/35" />
-
 			<section className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-5 sm:px-8 lg:px-10">
 				<HeaderTitle title="Kinestilistas" />
 
@@ -30,13 +27,13 @@ export default function Home() {
 				>
 					<div className="max-w-3xl">
 						<h1 className="text-balance text-5xl font-black leading-[0.94] tracking-[-0.07em] text-slate-950 sm:text-6xl lg:text-7xl">
-							La gestion diaria de tu salon, con mirada profesional.
+							La gestión diaria de tu salón, con mirada profesional.
 						</h1>
 
 						<p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700 sm:text-xl">
-							Kinestilistas centraliza catalogo, coloracion, clientes,
+							Kinestilistas centraliza catálogo, coloración, clientes,
 							pedidos, rutas, promociones y seguimiento comercial para que el
-							equipo trabaje con menos ruido y mas contexto.
+							equipo trabaje con menos ruido y más contexto.
 						</p>
 
 						<div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -87,7 +84,7 @@ export default function Home() {
 													{index === 0
 														? "Perfil, nivel y datos comerciales"
 														: index === 1
-															? "Productos, tonos y soporte tecnico"
+															? "Productos, tonos y soporte técnico"
 															: index === 2
 																? "Descuentos activos y borrador"
 																: "Reparto validado y trazabilidad"}
