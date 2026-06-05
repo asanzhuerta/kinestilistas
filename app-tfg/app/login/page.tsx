@@ -64,17 +64,19 @@ export default function LoginPage() {
 	}
 
 	return (
-		<main className="app-bg app-bg-login min-h-[100svh] w-full px-4 py-4 text-slate-800">
-			<HeaderTitle
-				title="KinEstilistas"
-				subtitle="Alta Peluquería &amp; Estética"
-			/>
+		<main className="app-bg app-bg-login min-h-[100svh] w-full overflow-hidden px-4 py-4 text-slate-800">
+			<div className="absolute inset-x-4 top-4 z-10 mx-auto max-w-[120rem]">
+				<HeaderTitle
+					title="KinEstilistas"
+					subtitle="Alta Peluquería &amp; Estética"
+				/>
+			</div>
 
 			<PageTransition
 				isLeaving={leaving}
-				className="mx-auto max-w-2xl rounded-2xl p-6 text-center"
+				className="relative z-20 mx-auto flex min-h-[calc(100svh-2rem)] w-full max-w-2xl flex-col items-center justify-center pt-28 text-center sm:pt-32 lg:pt-0"
 			>
-				<div className="mx-auto mt-6 w-full max-w-sm">
+				<div className="w-full max-w-sm">
 					<SafeForm
 						onSubmit={handleSubmit}
 						legend="Credenciales de acceso"
@@ -134,7 +136,7 @@ export default function LoginPage() {
 					</SafeForm>
 				</div>
 
-				<div className="mx-auto mt-6 w-full max-w-sm text-center">
+				<div className="mt-6 w-full max-w-sm text-center">
 					<p className="text-sm text-slate-600">
 						¿Nuevo cliente?{" "}
 						<Link

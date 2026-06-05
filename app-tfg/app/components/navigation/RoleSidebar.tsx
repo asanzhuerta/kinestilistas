@@ -89,7 +89,7 @@ export default function RoleSidebar({
 	const pathname = usePathname();
 	const [isMobileOpen, setIsMobileOpen] = useState(false);
 	const [isMobileMounted, setIsMobileMounted] = useState(false);
-	const [isExpanded, setIsExpanded] = useState(true);
+	const [isExpanded, setIsExpanded] = useState(false);
 	const closeTimeoutRef = useRef<number | null>(null);
 	const labels = roleSidebarLabels[role];
 	const sections = roleSidebarSections[role];
