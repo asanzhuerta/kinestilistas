@@ -50,6 +50,9 @@ function EntityCard({
 	const isCatalogProductVariant = cardVariant === "catalog-product";
 	const isColorReferenceVariant = cardVariant === "color-reference";
 	const hasSubtitle = item.subtitle.trim().length > 0;
+	const hasSecondaryImage = Boolean(
+		item.secondaryImageUrl || item.secondaryImageLabel,
+	);
 	const motionProps = shouldReduceMotion
 		? {
 				initial: false,
@@ -134,18 +137,43 @@ function EntityCard({
 				className="group flex h-full flex-col rounded-[1.75rem] border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-950/10"
 			>
 				<div className="relative overflow-hidden rounded-[1.45rem] border border-slate-100 bg-white shadow-inner shadow-slate-950/5">
-					<div className="aspect-[4/3] w-full p-3 sm:aspect-[5/4] xl:aspect-[4/3]">
-						<UserAvatar
-							name={item.title}
-							imageUrl={item.imageUrl}
-							size="xl"
-							shape="soft-square"
-							imageFit="contain"
-							imagePositionClass="object-center"
-							imagePaddingClass="p-0"
-							imageBackgroundClass="bg-white"
-							className="h-full w-full rounded-[1.2rem] text-5xl"
-						/>
+					<div
+						className={`grid min-h-[15rem] gap-2 p-3 ${
+							hasSecondaryImage
+								? "grid-cols-[minmax(0,1fr)_4.75rem]"
+								: "grid-cols-1"
+						}`}
+					>
+						<div className="min-h-[13.5rem]">
+							<UserAvatar
+								name={item.title}
+								imageUrl={item.imageUrl}
+								size="xl"
+								shape="soft-square"
+								imageFit="contain"
+								imagePositionClass="object-center"
+								imagePaddingClass="p-0"
+								imageBackgroundClass="bg-white"
+								className="h-full w-full rounded-[1.2rem] text-5xl"
+							/>
+						</div>
+
+						{hasSecondaryImage ? (
+							<div className="flex items-end justify-end pt-11">
+								<div className="w-full rounded-2xl border border-slate-100 bg-white p-1.5 shadow-sm shadow-slate-950/5">
+									<UserAvatar
+										name={item.secondaryImageLabel ?? item.title}
+										imageUrl={item.secondaryImageUrl}
+										size="xl"
+										shape="soft-square"
+										imageFit="contain"
+										imagePaddingClass="p-0"
+										imageBackgroundClass="bg-white"
+										className="h-16 w-full rounded-xl text-sm"
+									/>
+								</div>
+							</div>
+						) : null}
 					</div>
 
 					{item.badges?.length ? (
@@ -161,20 +189,6 @@ function EntityCard({
 						</div>
 					) : null}
 
-					{item.secondaryImageUrl || item.secondaryImageLabel ? (
-						<div className="absolute bottom-3 right-3 rounded-2xl border border-white/80 bg-white/90 p-1.5 shadow-lg shadow-slate-950/10 backdrop-blur">
-							<UserAvatar
-								name={item.secondaryImageLabel ?? item.title}
-								imageUrl={item.secondaryImageUrl}
-								size="xl"
-								shape="soft-square"
-								imageFit="contain"
-								imagePaddingClass="p-0"
-								imageBackgroundClass="bg-white"
-								className="h-14 w-14 rounded-xl text-lg"
-							/>
-						</div>
-					) : null}
 				</div>
 
 				<div className="flex flex-1 flex-col px-1 pt-4">
