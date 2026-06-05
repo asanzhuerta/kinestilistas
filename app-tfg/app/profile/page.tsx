@@ -32,7 +32,6 @@ export default async function ProfilePage() {
 
 	return (
 		<main className="app-bg min-h-[100svh] w-full text-slate-800">
-			<div className="bg-overlay fixed inset-0 -z-10" />
 			<div className="lg:flex lg:min-h-[100svh]">
 				<RoleSidebar
 					role={role}

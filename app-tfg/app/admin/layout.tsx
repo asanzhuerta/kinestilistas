@@ -14,8 +14,6 @@ export default async function AdminLayout({
 
 	return (
 		<main className="app-bg app-bg-admin min-h-screen w-full text-slate-800">
-			<div className="bg-overlay fixed inset-0 -z-10" />
-
 			<PageHeaderProvider>
 				<div className="lg:flex">
 					<RoleSidebar
