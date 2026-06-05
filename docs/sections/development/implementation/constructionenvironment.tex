@@ -26,11 +26,12 @@ La aplicación expone un \texttt{manifest} web propio mediante \path{app/manifes
 
 \begin{itemize}
     \item definir nombre, descripción, iconos y colores de la aplicación instalable;
+    \item exponer accesos directos del manifiesto para panel, perfil, catálogo, pedidos y rutas, resueltos mediante rutas internas sensibles al rol;
     \item registrar un \textit{app shell} mínimo en \path{public/sw.js};
     \item intentar recuperar desde cache peticiones GET cuando la red falla.
 \end{itemize}
 
-No se ha construido todavía una experiencia \textit{offline-first} completa, pero la base PWA ya forma parte del código real del proyecto. De cara a la validación móvil, esta capa se beneficia de poder reutilizar una URL externa estable durante distintas sesiones de prueba. El panel \path{/admin/support} permite revisar desde administración el estado operativo de esta capa, junto con el control de navegador compatible y otras protecciones transversales.
+No se ha construido todavía una experiencia \textit{offline-first} completa, pero la base PWA ya forma parte del código real del proyecto. De cara a la validación móvil, esta capa se beneficia de poder reutilizar una URL externa estable durante distintas sesiones de prueba. Los accesos directos añadidos al manifiesto se apoyan en \path{app/shortcuts}, que redirige a las rutas correctas de administrador, comercial o cliente sin modificar la autorización existente. El panel \path{/admin/support} permite revisar desde administración el estado operativo de esta capa, junto con el control de navegador compatible y otras protecciones transversales.
 
 \subsection{Estados de carga y navegación percibida}
 

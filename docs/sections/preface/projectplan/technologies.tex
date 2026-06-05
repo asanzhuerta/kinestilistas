@@ -49,10 +49,13 @@ La aplicación incorpora una capa básica de \textbf{PWA}. En la implementación
 
 \begin{itemize}
     \item un manifiesto web generado desde \path{app/manifest.ts};
+    \item accesos directos instalables hacia panel, perfil, catálogo, pedidos y rutas mediante \path{/shortcuts/...};
     \item iconos específicos para instalación;
     \item registro de un \textit{service worker} propio;
     \item una estrategia sencilla de cache de \textit{app shell} y recuperación desde cache cuando la red falla.
 \end{itemize}
+
+Los accesos directos del manifiesto no sustituyen al control de autorización. Cada enlace se resuelve sobre rutas internas que redirigen al destino adecuado según el rol autenticado, de modo que la PWA instalada puede ofrecer accesos rápidos sin duplicar lógica de permisos ni exponer rutas privadas a usuarios no autenticados.
 
 No se trata todavía de una PWA avanzada con sincronización offline completa, pero si de una base coherente con el uso móvil previsto para la aplicación.
 
