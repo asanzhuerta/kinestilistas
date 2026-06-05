@@ -51,6 +51,8 @@ La aplicación aplica cache de datos de forma limitada sobre lecturas casi está
 
 La política se mantiene deliberadamente conservadora: no se cachean pedidos, rutas, promociones activas, sesiones, perfiles ni datos privados de operación diaria. Cuando administración crea o modifica productos, líneas, subcategorías, cartas de color, referencias cromáticas o recursos de apoyo, los servicios de escritura invalidan el tag correspondiente para evitar que las vistas instaladas o navegadas desde cliente y comercial conserven información obsoleta.
 
+Como consecuencia de esta capa, algunas entidades recuperadas desde la cache pueden llegar a la vista como objetos planos serializados. Por ello, los mapeadores de catálogo normalizan las fechas antes de enviarlas a tablas y fichas, evitando depender de métodos propios de \texttt{Date} cuando el dato procede de una respuesta cacheada.
+
 \subsection{Herramientas de trabajo}
 
 Durante el desarrollo del proyecto se han utilizado principalmente:

@@ -2,6 +2,7 @@ import H1Title from "@/app/components/H1Title";
 import CatalogAdminWorkspace from "@/app/components/catalog-admin/CatalogAdminWorkspace";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
 import { listSupportResources } from "@/lib/typeorm/services/catalog/support-resource";
+import { toIsoString } from "@/lib/utils/date-serialization";
 import { formatDateShort } from "@/lib/utils/user-utils";
 
 function mapSupportResourceToItem(
@@ -13,7 +14,7 @@ function mapSupportResourceToItem(
 		subtitle: supportResource.resource_url,
 		category: supportResource.resourceType?.name ?? "Tipo no disponible",
 		status: supportResource.product ? "Producto" : "Linea",
-		primaryDate: supportResource.created_at.toISOString(),
+		primaryDate: toIsoString(supportResource.created_at),
 		badges: [
 			{
 				label: supportResource.resourceType?.name ?? "Sin tipo",

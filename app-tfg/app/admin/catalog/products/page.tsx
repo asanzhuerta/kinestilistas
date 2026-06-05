@@ -7,6 +7,7 @@ import {
 } from "@/app/components/catalog/category-badge-palette";
 import type { EntityTableItem } from "@/app/components/entity-table/entity-table-types";
 import { listProducts } from "@/lib/typeorm/services/catalog/product";
+import { toIsoString } from "@/lib/utils/date-serialization";
 
 function mapProductToItem(
 	product: Awaited<ReturnType<typeof listProducts>>[number],
@@ -21,7 +22,7 @@ function mapProductToItem(
 		secondaryImageLabel: product.productLine?.name ?? null,
 		category: product.productCategory?.name ?? "Sin categoria",
 		status: product.status?.name ?? "Sin estado",
-		primaryDate: product.created_at.toISOString(),
+		primaryDate: toIsoString(product.created_at),
 		badges: [
 			{
 				label: product.productCategory?.name ?? "Sin categoria",

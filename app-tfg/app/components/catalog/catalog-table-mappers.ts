@@ -1,4 +1,5 @@
 import type { EntityTableBadge, EntityTableItem } from "@/app/components/entity-table/entity-table-types";
+import { toIsoString } from "@/lib/utils/date-serialization";
 import type {
 	listColorCharts,
 	listColorReferences,
@@ -66,7 +67,7 @@ export function mapCatalogProductsToEntityTableItems(
 		secondaryImageUrl: product.productLine?.image_url ?? null,
 		secondaryImageLabel: product.productLine?.name ?? null,
 		category: product.productCategory?.name ?? "Sin categoría",
-		primaryDate: product.created_at.toISOString(),
+		primaryDate: toIsoString(product.created_at),
 		badges: [
 			buildBadge(
 				product.productCategory?.name,
@@ -128,7 +129,7 @@ export function mapColorChartsToEntityTableItems(
 		subtitle: colorChart.description || "Carta cromatica lista para consulta",
 		imageUrl: colorChart.image_url,
 		category: colorChart.productLine?.productCategory?.name ?? "Sin categoria",
-		primaryDate: colorChart.created_at.toISOString(),
+		primaryDate: toIsoString(colorChart.created_at),
 		badges: [
 			buildBadge(
 				colorChart.productLine?.productCategory?.name,

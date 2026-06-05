@@ -3,6 +3,7 @@ import type {
 	listColorCharts,
 	listColorReferences,
 } from "@/lib/typeorm/services/catalog/color-chart";
+import { toIsoString } from "@/lib/utils/date-serialization";
 
 export type SerializedColorChartListItem = {
 	id: string;
@@ -192,8 +193,8 @@ export function serializeColorChartDetail(
 		name: colorChart.name,
 		description: colorChart.description,
 		image_url: colorChart.image_url,
-		created_at: colorChart.created_at.toISOString(),
-		updated_at: colorChart.updated_at.toISOString(),
+		created_at: toIsoString(colorChart.created_at),
+		updated_at: toIsoString(colorChart.updated_at),
 		productLine: colorChart.productLine
 			? {
 					id: colorChart.productLine.id,
