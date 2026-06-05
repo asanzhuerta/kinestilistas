@@ -13,10 +13,11 @@ La información principal del dominio se almacena en \texttt{PostgreSQL} mediant
     \item fichas técnicas del salón, servicios, plantillas, productos utilizados, sugerencias e imágenes finales referenciadas;
     \item segmentos de cliente, asignaciones comerciales de segmentación, promociones, formaciones, inscripciones, notificaciones internas y recordatorios;
     \item catálogos controlados de roles, estados y tipos operativos utilizados por los módulos ya implementados;
-    \item configuración global persistida para políticas de rate limiting.
+    \item configuración global persistida para políticas de rate limiting;
+    \item configuraciones del sistema, integraciones externas, operaciones de integración y propuestas de pedido a proveedor con sus líneas.
 \end{itemize}
 
-Este modelo relacional actúa como fuente de verdad del sistema. Las operaciones criticas de autenticación, gestión comercial, catálogo y pedidos se apoyan en esta capa.
+Este modelo relacional actúa como fuente de verdad del sistema. Las operaciones criticas de autenticación, gestión comercial, catálogo, pedidos, administración transversal y operación empresarial se apoyan en esta capa.
 
 \begin{figure}[H]
     \centering

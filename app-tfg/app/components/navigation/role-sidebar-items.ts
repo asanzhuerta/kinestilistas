@@ -142,6 +142,11 @@ export const roleSidebarSections: Record<
 				{ title: "Auditoria", href: "/admin/audit", icon: "reports" },
 				{ title: "Operacion M7", href: "/admin/operations", icon: "reports" },
 				{
+					title: "Operaciones empresa",
+					href: "/admin/enterprise-operations",
+					icon: "reports",
+				},
+				{
 					title: "Integraciones",
 					href: "/admin/integrations",
 					icon: "settings",

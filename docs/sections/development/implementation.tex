@@ -172,15 +172,18 @@ Aunque no constituyen un módulo de negocio independiente del mismo volumen que 
     \item configuración global de políticas de rate limiting persistida en base de datos, con diagnóstico agregado de políticas activas, personalizadas y desactivadas;
     \item panel de integraciones y soporte en \path{/admin/integrations}, con inventario operativo de Cloudinary, Nominatim, OSRM y QuickChart, mostrando proveedor, estado de configuración, uso funcional y degradación prevista;
     \item panel de soporte técnico en \path{/admin/support}, con inventario operativo de compatibilidad de navegador, PWA, \textit{service worker} y formularios seguros ante hidratación;
+    \item panel de operaciones empresariales en \path{/admin/enterprise-operations}, con configuraciones persistidas, integraciones externas, operaciones de intercambio y propuestas de pedido a proveedor;
     \item soporte PWA basico mediante manifiesto web, iconos y \textit{service worker};
     \item compatibilidad mínima de navegador con redirección a pantalla específica de no soporte.
 \end{itemize}
 
-El inventario de integraciones se calcula en \path{lib/integrations/operational-status.ts} y se expone también mediante \path{/api/admin/integrations/status}. En este primer incremento no almacena ejecuciones historicas ni sincronizaciones externas; su finalidad es reforzar la observabilidad administrativa de los servicios de soporte que ya sostienen los módulos implementados.
+El inventario de integraciones de soporte se calcula en \path{lib/integrations/operational-status.ts} y se expone también mediante \path{/api/admin/integrations/status}. Su finalidad es reforzar la observabilidad administrativa de los servicios de soporte que ya sostienen los módulos implementados.
+
+La operación empresarial persistente se centraliza en \path{lib/typeorm/services/admin/enterprise-operations.ts}. Este servicio lista configuraciones, integraciones externas, operaciones recientes y propuestas a proveedor; además permite registrar nuevas operaciones de integración y generar propuestas de reposición desde productos activos del catálogo. La vista \path{/admin/enterprise-operations} consume este servicio y los endpoints \path{/api/admin/enterprise-operations}, \path{/api/admin/enterprise-operations/operations} y \path{/api/admin/enterprise-operations/supplier-proposals}.
 
 El inventario de soporte técnico se calcula en \path{lib/support/operational-support.ts} y se expone mediante \path{/api/admin/support/status}. A diferencia de la configuración de rate limiting, no requiere migraciones ni tablas nuevas, ya que inspecciona activos y configuraciones existentes del propio proyecto: \path{proxy.ts}, \path{app/manifest.ts}, \path{public/sw.js}, iconos PWA y componentes transversales.
 
-La vista agregada de operación se calcula en \path{lib/admin/operational-overview.ts} y se expone mediante \path{/api/admin/operations/status}. Este servicio combina contadores de auditoría, estado de políticas de rate limiting y resúmenes de los inventarios de integración y soporte para ofrecer una lectura ejecutiva del estado de \texttt{M7}.
+La vista agregada de operación se calcula en \path{lib/admin/operational-overview.ts} y se expone mediante \path{/api/admin/operations/status}. Este servicio combina contadores de auditoría, estado de políticas de rate limiting, resúmenes de los inventarios de integración y soporte, y métricas del registro empresarial persistente para ofrecer una lectura ejecutiva del estado de \texttt{M7}.
 
 El informe operativo exportable se genera en \path{lib/admin/operational-report.ts} y se expone mediante \path{/api/admin/operations/report}. Su contenido transforma las secciones y métricas del resumen de operación en un fichero \texttt{CSV}, útil para conservar evidencias de revisión sin introducir una nueva entidad persistente.
 
@@ -211,6 +214,7 @@ La serie de migraciones actual queda organizada del siguiente modo:
     \item Migración \texttt{037}: plantillas reutilizables de servicio para \texttt{M5}, con cabecera de plantilla y productos predefinidos asociados.
     \item Migración \texttt{038}: soporte para tonalidades enlazadas a usos de producto del salón y galería de imagenes de resultado final por servicio.
     \item Migración \texttt{039}: base persistente de \texttt{M6}, con segmentos de cliente, asignaciones cliente-segmento, promociones, formaciones, inscripciones, notificaciones internas y recordatorios.
+    \item Migración \texttt{040}: ampliación persistente de \texttt{M7}, con configuraciones del sistema, integraciones externas, operaciones de integración, propuestas de pedido a proveedor y líneas de propuesta.
 \end{itemize}
 
 Esta estrategia permite reconstruir el esquema de forma controlada en cualquier entorno, auditar los cambios estructurales del sistema y extender el proyecto sin depender de modificaciones manuales sobre la base de datos.

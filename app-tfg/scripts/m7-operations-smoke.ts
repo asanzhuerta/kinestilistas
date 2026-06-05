@@ -13,8 +13,8 @@ async function main() {
 	const slugs = new Set(overview.sections.map((section) => section.slug));
 
 	assertCondition(
-		overview.sections.length === 4,
-		"M7 debe resumir cuatro bloques operativos",
+		overview.sections.length === 5,
+		"M7 debe resumir cinco bloques operativos",
 	);
 	assertCondition(
 		slugs.size === overview.sections.length,
@@ -26,6 +26,7 @@ async function main() {
 		"rate-limit-settings",
 		"integration-inventory",
 		"support-capabilities",
+		"enterprise-operations",
 	]) {
 		assertCondition(
 			slugs.has(expectedSlug),

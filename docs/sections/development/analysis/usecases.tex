@@ -4,7 +4,7 @@ Este enfoque es coherente con el modelado de casos de uso, en el que los actores
 
 \bigskip
 
-En la versión actual del proyecto, los diagramas asociados a \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4} deben interpretarse como módulos ya implementados y operativos. El caso de \texttt{M5} pasa a una situación intermedia: existe ya una implementación funcional de fichas del salón, alta, edición y borrado de servicios, ficha técnica, plantillas reutilizables, sugerencias derivadas y borradores técnicos editables por servicio, pero el diagrama sigue recogiendo además capacidades aún no construidas, como el envío real del correo a cliente final. En \texttt{M6} ya existe un núcleo interno de promociones, segmentación, formaciones, notificaciones, recordatorios y descuentos promocionales aplicados al pedido, aunque la mensajería externa sigue siendo planificación futura. El diagrama de \texttt{M8} conserva valor de análisis y planificación, mientras que \texttt{M7} ocupa otra posición intermedia al disponer ya de auditoría administrativa, configuración global de rate limiting, resumen operativo, integraciones de soporte y soporte técnico/PWA, aunque no de un subsistema amplio de integracion empresarial.
+En la versión actual del proyecto, los diagramas asociados a \texttt{M1}, \texttt{M2}, \texttt{M3} y \texttt{M4} deben interpretarse como módulos ya implementados y operativos. El caso de \texttt{M5} pasa a una situación intermedia: existe ya una implementación funcional de fichas del salón, alta, edición y borrado de servicios, ficha técnica, plantillas reutilizables, sugerencias derivadas y borradores técnicos editables por servicio, pero el diagrama sigue recogiendo además capacidades aún no construidas, como el envío real del correo a cliente final. En \texttt{M6} ya existe un núcleo interno de promociones, segmentación, formaciones, notificaciones, recordatorios y descuentos promocionales aplicados al pedido, aunque la mensajería externa sigue siendo planificación futura. El diagrama de \texttt{M8} conserva valor de análisis y planificación, mientras que \texttt{M7} dispone ya de auditoría administrativa, configuración global de rate limiting, resumen operativo, integraciones de soporte, soporte técnico/PWA y un primer subsistema persistente para integraciones empresariales, operaciones de intercambio y propuestas de pedido a proveedor.
 
 \newpage{\ }
 \subsection{Casos de Uso M1.}
@@ -81,7 +81,7 @@ En este módulo se han representado los casos de uso relacionados con promocione
 \newpage{\ }
 \subsection{Casos de Uso M7.}
 
-En este módulo se han representado los casos de uso relacionados con administración e integraciones. En la implementación real, la parte hoy desplegada de este bloque se concentra en auditoría, configuración global de rate limiting, resumen operativo transversal, inventario operativo de integraciones, soporte transversal a servicios externos y soporte técnico de compatibilidad/PWA.
+En este módulo se han representado los casos de uso relacionados con administración e integraciones. En la implementación real, la parte hoy desplegada de este bloque cubre auditoría, configuración global de rate limiting, resumen operativo transversal, inventario operativo de integraciones de soporte, soporte transversal a servicios externos, soporte técnico de compatibilidad/PWA, registro persistente de integraciones empresariales, operaciones de exportación o sincronización y generación de propuestas de pedido a proveedor.
 
 \begin{figure}[H]
     \centering

@@ -46,6 +46,11 @@ const navItems = [
 		href: "/admin/operations",
 	},
 	{
+		title: "Operaciones empresariales",
+		icon: <ReportsIcon className="h-6 w-6" />,
+		href: "/admin/enterprise-operations",
+	},
+	{
 		title: "Integraciones",
 		icon: <SettingsIcon className="h-6 w-6" />,
 		href: "/admin/integrations",

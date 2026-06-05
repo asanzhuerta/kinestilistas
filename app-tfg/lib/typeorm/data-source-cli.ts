@@ -52,6 +52,11 @@ import { TrainingEvent } from "./entities/TrainingEvent";
 import { TrainingEnrollment } from "./entities/TrainingEnrollment";
 import { AppNotification } from "./entities/AppNotification";
 import { AppReminder } from "./entities/AppReminder";
+import { SystemConfiguration } from "./entities/SystemConfiguration";
+import { ExternalIntegration } from "./entities/ExternalIntegration";
+import { IntegrationOperation } from "./entities/IntegrationOperation";
+import { SupplierOrderProposal } from "./entities/SupplierOrderProposal";
+import { SupplierOrderProposalLine } from "./entities/SupplierOrderProposalLine";
 
 const CliDataSource = new DataSource({
 	type: "postgres",
@@ -108,6 +113,11 @@ const CliDataSource = new DataSource({
 		TrainingEnrollment,
 		AppNotification,
 		AppReminder,
+		SystemConfiguration,
+		ExternalIntegration,
+		IntegrationOperation,
+		SupplierOrderProposal,
+		SupplierOrderProposalLine,
 	],
 	migrations: ["migrations/typeorm/*.ts"],
 });

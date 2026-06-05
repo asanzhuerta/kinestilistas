@@ -8,6 +8,7 @@ import {
 	listIntegrationStatusItems,
 	summarizeIntegrationStatusItems,
 } from "@/lib/integrations/operational-status";
+import { getEnterpriseOperationsSnapshot } from "@/lib/typeorm/services/admin/enterprise-operations";
 import {
 	listSupportCapabilityItems,
 	summarizeSupportCapabilityItems,
@@ -72,6 +73,7 @@ export async function getAdminOperationalOverview(
 		recentManagementLogs,
 		activeSessionsRaw,
 		rateLimitPolicies,
+		enterpriseOperations,
 	] = await Promise.all([
 		accessLogRepo.count({
 			where: {
@@ -96,6 +98,7 @@ export async function getAdminOperationalOverview(
 			.andWhere("log.revoked_at IS NULL")
 			.getRawOne<{ count: string }>(),
 		listRateLimitPolicySettings(),
+		getEnterpriseOperationsSnapshot(now),
 	]);
 
 	const activeSessions = Number(activeSessionsRaw?.count ?? 0);
@@ -239,6 +242,42 @@ export async function getAdminOperationalOverview(
 					{
 						label: "No disponibles",
 						value: String(supportSummary.missing),
+					},
+				],
+			},
+			lastCheckedAt,
+		),
+		buildSection(
+			{
+				slug: "enterprise-operations",
+				title: "Operaciones empresariales",
+				href: "/admin/enterprise-operations",
+				status:
+					enterpriseOperations.summary.failedOperations > 0
+						? "warning"
+						: enterpriseOperations.summary.integrations === 0
+							? "attention"
+							: "ready",
+				description:
+					"Registro persistente de configuracion, integraciones externas, operaciones de intercambio y propuestas de pedido a proveedor.",
+				metrics: [
+					{
+						label: "Configuraciones",
+						value: String(enterpriseOperations.summary.configurations),
+					},
+					{
+						label: "Integraciones",
+						value: String(enterpriseOperations.summary.integrations),
+					},
+					{
+						label: "Operaciones",
+						value: String(enterpriseOperations.summary.operations),
+						helper: `${enterpriseOperations.summary.successfulOperations} correctas / ${enterpriseOperations.summary.failedOperations} fallidas`,
+					},
+					{
+						label: "Propuestas abiertas",
+						value: String(enterpriseOperations.summary.openProposals),
+						helper: `${enterpriseOperations.summary.proposalUnits} uds. estimadas`,
 					},
 				],
 			},

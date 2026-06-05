@@ -28,8 +28,8 @@ async function main() {
 		"El informe operativo M7 no genera un nombre de fichero estable",
 	);
 	assertCondition(
-		report.summary.total === 4,
-		"El informe operativo M7 debe partir de cuatro bloques",
+		report.summary.total === 5,
+		"El informe operativo M7 debe partir de cinco bloques",
 	);
 	assertCondition(
 		report.rowCount >= report.summary.total * 3,
@@ -41,6 +41,7 @@ async function main() {
 		"rate-limit-settings",
 		"integration-inventory",
 		"support-capabilities",
+		"enterprise-operations",
 	]) {
 		assertCondition(
 			body.includes(expectedSlug),

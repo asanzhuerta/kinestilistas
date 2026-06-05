@@ -47,6 +47,12 @@ export default function AdminIntegrationsPage() {
 					>
 						Volver al panel
 					</Link>
+					<Link
+						href="/admin/enterprise-operations"
+						className="ml-0 mt-3 inline-flex w-fit rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:ml-3"
+					>
+						Registro empresarial
+					</Link>
 				</section>
 
 				<section className="grid gap-4 md:grid-cols-4">

@@ -851,17 +851,17 @@ Para cada integración externa el sistema debe registrar:
     \item Fecha de última actualización de la integración.
 \end{itemize}
 
-En el incremento actual de \texttt{M7}, la aplicación no persiste todavía un histórico de integraciones ni ejecuciones de sincronización. El inventario operativo visible por administración se calcula a partir de la configuración real de entorno y de los proveedores utilizados por los módulos ya construidos. La persistencia de estados históricos, ejecuciones y resultados queda reservada para una evolución posterior del módulo.
+En el incremento actual de \texttt{M7}, la aplicación persiste ya un registro básico de integraciones externas y operaciones de intercambio. Esta información se consulta desde \path{/admin/enterprise-operations} y permite diferenciar el inventario técnico calculado de los servicios de soporte respecto al registro empresarial de integraciones, estados, configuraciones y ejecuciones. La integración con Factusol mediante \texttt{n8n} queda registrada como punto preparado, aunque su automatización completa depende de credenciales y configuración real del cliente.
 
 De forma análoga, el inventario de soporte técnico incorporado en \path{/admin/support} no crea una entidad persistente propia. Su información se deriva de elementos ya existentes en el proyecto, como \path{proxy.ts}, \path{app/manifest.ts}, \path{public/sw.js}, los iconos PWA y componentes transversales de experiencia de usuario. Por tanto, actúa como una vista de observabilidad administrativa y no como una tabla adicional del modelo de datos.
 
-El resumen operativo de \path{/admin/operations} sigue el mismo criterio: agrega contadores procedentes de auditoría, configuración de rate limiting, inventario de integraciones e inventario de soporte técnico. No introduce nuevas entidades persistentes, sino que ordena información ya disponible para facilitar la revisión administrativa del módulo.
+El resumen operativo de \path{/admin/operations} agrega contadores procedentes de auditoría, configuración de rate limiting, inventario de integraciones de soporte, soporte técnico y operación empresarial persistente. Su finalidad es ordenar la información disponible para facilitar la revisión administrativa del módulo.
 
 La exportación \texttt{CSV} de auditoría desde \path{/admin/audit} tampoco introduce una entidad nueva. El fichero se genera bajo demanda a partir de \texttt{user\_access\_log} y \texttt{user\_management\_log}, aplicando una ventana temporal y un límite de registros para facilitar la revisión externa de accesos y acciones administrativas sin duplicar persistencia.
 
 El diagnóstico de rate limiting expuesto en \path{/admin/settings} y en \path{/api/admin/settings/rate-limits/status} reutiliza la configuración efectiva de políticas y sus valores por defecto. Por tanto, tampoco amplía el modelo de datos: resume la tabla de sobrescrituras persistidas y el catálogo estático de políticas definido en código.
 
-La exportación del informe operativo de \texttt{M7} desde \path{/admin/operations} sigue la misma aproximación. El fichero \texttt{CSV} se genera a partir del resumen agregado ya calculado para la vista de operación transversal, por lo que no registra nuevas filas ni introduce tablas adicionales.
+La exportación del informe operativo de \texttt{M7} desde \path{/admin/operations} genera un fichero \texttt{CSV} a partir del resumen agregado ya calculado para la vista de operación transversal. Este informe incluye también el bloque de operación empresarial, sin duplicar las filas persistidas en las tablas propias de integraciones, operaciones y propuestas a proveedor.
 
 \subsubsection*{Exportación o sincronización}
 
