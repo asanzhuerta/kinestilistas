@@ -45,7 +45,7 @@ export default function PromotionsOverview({
 				</h2>
 				<p className="mt-2 max-w-3xl text-sm text-slate-600">
 					Consulta las campanas activas segun tu rol y, en el caso de clientes,
-					segun la segmentacion comercial asignada por administracion.
+					segun el rango comercial asignado por administracion.
 				</p>
 			</section>
 

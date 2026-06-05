@@ -4,7 +4,7 @@ export default function AdminCommunicationsLoading() {
 	return (
 		<RouteLoadingState
 			title="Comunicaciones"
-			subtitle="Cargando segmentos, promociones, formaciones, notificaciones y recordatorios."
+			subtitle="Cargando rangos, promociones, formaciones, notificaciones y recordatorios."
 			variant="dashboard"
 		/>
 	);

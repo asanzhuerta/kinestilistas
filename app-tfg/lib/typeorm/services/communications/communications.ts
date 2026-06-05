@@ -50,22 +50,22 @@ const CONSTRAINT_ERRORS: Record<
 	{ message: string; code: string; status?: number }
 > = {
 	customer_segments_code_unique: {
-		message: "Ya existe un segmento con ese codigo",
+		message: "Ya existe un rango con ese codigo",
 		code: "DUPLICATE_CUSTOMER_SEGMENT_CODE",
 		status: 409,
 	},
 	UQ_customer_segments_code: {
-		message: "Ya existe un segmento con ese codigo",
+		message: "Ya existe un rango con ese codigo",
 		code: "DUPLICATE_CUSTOMER_SEGMENT_CODE",
 		status: 409,
 	},
 	client_customer_segments_client_segment_unique: {
-		message: "El cliente ya pertenece a ese segmento",
+		message: "El cliente ya pertenece a ese rango",
 		code: "DUPLICATE_CLIENT_SEGMENT_ASSIGNMENT",
 		status: 409,
 	},
 	UQ_client_customer_segments_client_segment: {
-		message: "El cliente ya pertenece a ese segmento",
+		message: "El cliente ya pertenece a ese rango",
 		code: "DUPLICATE_CLIENT_SEGMENT_ASSIGNMENT",
 		status: 409,
 	},
@@ -415,7 +415,7 @@ function assertPromotionTarget(input: {
 }) {
 	if (input.clientId && input.customerSegmentId) {
 		throw new CommunicationsServiceError(
-			"Una promocion no puede estar dirigida simultaneamente a un cliente y a un segmento",
+			"Una promocion no puede estar dirigida simultaneamente a un cliente y a un rango",
 			400,
 			"INVALID_PROMOTION_TARGET",
 		);
@@ -484,7 +484,7 @@ async function ensurePromotionRelations(
 			manager,
 			CustomerSegment,
 			input.customerSegmentId,
-			"Segmento no encontrado",
+			"Rango no encontrado",
 			"CUSTOMER_SEGMENT_NOT_FOUND",
 		);
 	}
@@ -668,7 +668,7 @@ export async function createCustomerSegment(
 	} catch (error) {
 		rethrowCommunicationsPersistenceError(
 			error,
-			"No se pudo crear el segmento",
+			"No se pudo crear el rango",
 			"CUSTOMER_SEGMENT_CREATE_FAILED",
 		);
 	}
@@ -690,7 +690,7 @@ export async function updateCustomerSegment(
 
 			if (!segment) {
 				throw new CommunicationsServiceError(
-					"Segmento no encontrado",
+					"Rango no encontrado",
 					404,
 					"CUSTOMER_SEGMENT_NOT_FOUND",
 				);
@@ -719,7 +719,7 @@ export async function updateCustomerSegment(
 	} catch (error) {
 		rethrowCommunicationsPersistenceError(
 			error,
-			"No se pudo actualizar el segmento",
+			"No se pudo actualizar el rango",
 			"CUSTOMER_SEGMENT_UPDATE_FAILED",
 		);
 	}
@@ -731,7 +731,7 @@ export async function deleteCustomerSegment(segmentId: string) {
 
 	if (!result.affected) {
 		throw new CommunicationsServiceError(
-			"Segmento no encontrado",
+			"Rango no encontrado",
 			404,
 			"CUSTOMER_SEGMENT_NOT_FOUND",
 		);
@@ -783,7 +783,7 @@ export async function assignClientToSegment(
 	}
 
 	if (!segmentId) {
-		throw new CommunicationsServiceError("El segmento es obligatorio");
+		throw new CommunicationsServiceError("El rango es obligatorio");
 	}
 
 	try {
@@ -799,7 +799,7 @@ export async function assignClientToSegment(
 				manager,
 				CustomerSegment,
 				segmentId,
-				"Segmento no encontrado",
+				"Rango no encontrado",
 				"CUSTOMER_SEGMENT_NOT_FOUND",
 			);
 
@@ -819,7 +819,7 @@ export async function assignClientToSegment(
 	} catch (error) {
 		rethrowCommunicationsPersistenceError(
 			error,
-			"No se pudo asignar el cliente al segmento",
+			"No se pudo asignar el cliente al rango",
 			"CLIENT_SEGMENT_ASSIGNMENT_FAILED",
 		);
 	}

@@ -29,7 +29,7 @@ const TIER_DETAILS: Record<
 		name: "Platino",
 		description: "Eres cliente Platino",
 		benefitSummary:
-			"Puedes acceder a las promociones de mayor prioridad cuando administracion las active para tu segmento.",
+			"Puedes acceder a las promociones de mayor prioridad cuando administracion las active para tu rango.",
 		nextStep:
 			"Manten tu actividad comercial para conservar el acceso a las ventajas premium del distribuidor.",
 	},

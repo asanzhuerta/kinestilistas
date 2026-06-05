@@ -28,7 +28,7 @@ type Props = {
 const tabs: Array<{ key: AdminTab; label: string }> = [
 	{ key: "promotions", label: "Promociones" },
 	{ key: "trainings", label: "Formaciones" },
-	{ key: "segments", label: "Segmentos" },
+	{ key: "segments", label: "Rangos" },
 	{ key: "assignments", label: "Asignaciones" },
 ];
 
@@ -137,6 +137,7 @@ export default function AdminCommunicationsWorkspace({
 }: Props) {
 	const router = useRouter();
 	const [activeTab, setActiveTab] = useState<AdminTab>("promotions");
+	const [openForm, setOpenForm] = useState<AdminTab | null>(null);
 	const [segments, setSegments] = useState(initialSegments);
 	const [assignments, setAssignments] = useState(initialAssignments);
 	const [promotions, setPromotions] = useState(initialPromotions);
@@ -204,6 +205,59 @@ export default function AdminCommunicationsWorkspace({
 		setEditingSegmentId(null);
 	}
 
+	function openCommunicationForm(tab: AdminTab) {
+		clearFeedback();
+		setActiveTab(tab);
+		setOpenForm(tab);
+
+		if (tab === "promotions") {
+			resetPromotionForm();
+		}
+
+		if (tab === "trainings") {
+			resetTrainingForm();
+		}
+
+		if (tab === "segments") {
+			resetSegmentForm();
+		}
+
+		if (tab === "assignments") {
+			setAssignmentForm(emptyAssignmentForm);
+		}
+	}
+
+	function closeCommunicationForm() {
+		if (openForm === "promotions") {
+			resetPromotionForm();
+		}
+
+		if (openForm === "trainings") {
+			resetTrainingForm();
+		}
+
+		if (openForm === "segments") {
+			resetSegmentForm();
+		}
+
+		if (openForm === "assignments") {
+			setAssignmentForm(emptyAssignmentForm);
+		}
+
+		setOpenForm(null);
+	}
+
+	function getFormDialogClass(tab: AdminTab) {
+		return [
+			"space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl",
+			"max-h-[calc(100svh-2rem)] w-[min(44rem,calc(100vw-2rem))] overflow-y-auto",
+			"[&_input]:min-w-0 [&_input]:w-full [&_select]:min-w-0 [&_select]:w-full [&_textarea]:min-w-0 [&_textarea]:w-full",
+			openForm === tab
+				? "fixed left-1/2 top-1/2 z-[90] -translate-x-1/2 -translate-y-1/2"
+				: "hidden",
+		].join(" ");
+	}
+
 	function buildPromotionPayload() {
 		return {
 			...promotionForm,
@@ -224,6 +278,7 @@ export default function AdminCommunicationsWorkspace({
 	function startEditingPromotion(promotion: PromotionView) {
 		clearFeedback();
 		setActiveTab("promotions");
+		setOpenForm("promotions");
 		setEditingPromotionId(promotion.id);
 		setPromotionForm({
 			title: promotion.title,
@@ -243,6 +298,7 @@ export default function AdminCommunicationsWorkspace({
 	function startEditingTraining(training: TrainingEventView) {
 		clearFeedback();
 		setActiveTab("trainings");
+		setOpenForm("trainings");
 		setEditingTrainingId(training.id);
 		setTrainingForm({
 			title: training.title,
@@ -259,6 +315,7 @@ export default function AdminCommunicationsWorkspace({
 	function startEditingSegment(segment: SegmentView) {
 		clearFeedback();
 		setActiveTab("segments");
+		setOpenForm("segments");
 		setEditingSegmentId(segment.id);
 		setSegmentForm({
 			code: segment.code,
@@ -288,23 +345,24 @@ export default function AdminCommunicationsWorkspace({
 					headers: { "content-type": "application/json" },
 					body: JSON.stringify(buildPromotionPayload()),
 					fallbackMessage: isEditing
-						? "No se pudo actualizar la promocion"
-						: "No se pudo crear la promocion",
+						? "No se pudo actualizar la promoción"
+						: "No se pudo crear la promoción",
 				},
 			);
 			resetPromotionForm();
+			setOpenForm(null);
 			refreshAfter(
 				isEditing
-					? "Promocion actualizada correctamente"
-					: "Promocion creada correctamente",
+					? "Promoción actualizada correctamente"
+					: "Promoción creada correctamente",
 			);
 		} catch (error) {
 			setError(
 				getErrorMessage(
 					error,
 					isEditing
-						? "No se pudo actualizar la promocion"
-						: "No se pudo crear la promocion",
+						? "No se pudo actualizar la promoción"
+						: "No se pudo crear la promoción",
 				),
 			);
 		} finally {
@@ -321,11 +379,11 @@ export default function AdminCommunicationsWorkspace({
 				method: "PATCH",
 				headers: { "content-type": "application/json" },
 				body: JSON.stringify({ status }),
-				fallbackMessage: "No se pudo actualizar la promocion",
+				fallbackMessage: "No se pudo actualizar la promoción",
 			});
-			refreshAfter("Promocion actualizada");
+			refreshAfter("Promoción actualizada");
 		} catch (error) {
-			setError(getErrorMessage(error, "No se pudo actualizar la promocion"));
+			setError(getErrorMessage(error, "No se pudo actualizar la promoción"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -335,7 +393,7 @@ export default function AdminCommunicationsWorkspace({
 		if (
 			!confirmDelete(
 				`promotion-delete-${id}`,
-				"Pulsa de nuevo en eliminar para confirmar la promocion.",
+				"Pulsa de nuevo en eliminar para confirmar la promoción.",
 			)
 		) {
 			return;
@@ -346,14 +404,14 @@ export default function AdminCommunicationsWorkspace({
 		try {
 			await requestJson(`/api/admin/communications/promotions/${id}`, {
 				method: "DELETE",
-				fallbackMessage: "No se pudo eliminar la promocion",
+				fallbackMessage: "No se pudo eliminar la promoción",
 			});
 			if (editingPromotionId === id) {
 				resetPromotionForm();
 			}
-			refreshAfter("Promocion eliminada");
+			refreshAfter("Promoción eliminada");
 		} catch (error) {
-			setError(getErrorMessage(error, "No se pudo eliminar la promocion"));
+			setError(getErrorMessage(error, "No se pudo eliminar la promoción"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -379,23 +437,24 @@ export default function AdminCommunicationsWorkspace({
 					headers: { "content-type": "application/json" },
 					body: JSON.stringify(buildTrainingPayload()),
 					fallbackMessage: isEditing
-						? "No se pudo actualizar la formacion"
-						: "No se pudo crear la formacion",
+						? "No se pudo actualizar la formación"
+						: "No se pudo crear la formación",
 				},
 			);
 			resetTrainingForm();
+			setOpenForm(null);
 			refreshAfter(
 				isEditing
-					? "Formacion actualizada correctamente"
-					: "Formacion creada correctamente",
+					? "Formación actualizada correctamente"
+					: "Formación creada correctamente",
 			);
 		} catch (error) {
 			setError(
 				getErrorMessage(
 					error,
 					isEditing
-						? "No se pudo actualizar la formacion"
-						: "No se pudo crear la formacion",
+						? "No se pudo actualizar la formación"
+						: "No se pudo crear la formación",
 				),
 			);
 		} finally {
@@ -412,11 +471,11 @@ export default function AdminCommunicationsWorkspace({
 				method: "PATCH",
 				headers: { "content-type": "application/json" },
 				body: JSON.stringify({ status }),
-				fallbackMessage: "No se pudo actualizar la formacion",
+				fallbackMessage: "No se pudo actualizar la formación",
 			});
-			refreshAfter("Formacion actualizada");
+			refreshAfter("Formación actualizada");
 		} catch (error) {
-			setError(getErrorMessage(error, "No se pudo actualizar la formacion"));
+			setError(getErrorMessage(error, "No se pudo actualizar la formación"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -426,7 +485,7 @@ export default function AdminCommunicationsWorkspace({
 		if (
 			!confirmDelete(
 				`training-delete-${id}`,
-				"Pulsa de nuevo en eliminar para confirmar la formacion.",
+				"Pulsa de nuevo en eliminar para confirmar la formación.",
 			)
 		) {
 			return;
@@ -437,14 +496,14 @@ export default function AdminCommunicationsWorkspace({
 		try {
 			await requestJson(`/api/admin/communications/trainings/${id}`, {
 				method: "DELETE",
-				fallbackMessage: "No se pudo eliminar la formacion",
+				fallbackMessage: "No se pudo eliminar la formación",
 			});
 			if (editingTrainingId === id) {
 				resetTrainingForm();
 			}
-			refreshAfter("Formacion eliminada");
+			refreshAfter("Formación eliminada");
 		} catch (error) {
-			setError(getErrorMessage(error, "No se pudo eliminar la formacion"));
+			setError(getErrorMessage(error, "No se pudo eliminar la formación"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -470,23 +529,24 @@ export default function AdminCommunicationsWorkspace({
 					headers: { "content-type": "application/json" },
 					body: JSON.stringify(segmentForm),
 					fallbackMessage: isEditing
-						? "No se pudo actualizar el segmento"
-						: "No se pudo crear el segmento",
+						? "No se pudo actualizar el rango"
+						: "No se pudo crear el rango",
 				},
 			);
 			resetSegmentForm();
+			setOpenForm(null);
 			refreshAfter(
 				isEditing
-					? "Segmento actualizado correctamente"
-					: "Segmento creado correctamente",
+					? "Rango actualizado correctamente"
+					: "Rango creado correctamente",
 			);
 		} catch (error) {
 			setError(
 				getErrorMessage(
 					error,
 					isEditing
-						? "No se pudo actualizar el segmento"
-						: "No se pudo crear el segmento",
+						? "No se pudo actualizar el rango"
+						: "No se pudo crear el rango",
 				),
 			);
 		} finally {
@@ -498,7 +558,7 @@ export default function AdminCommunicationsWorkspace({
 		if (
 			!confirmDelete(
 				`segment-${id}`,
-				"Pulsa de nuevo en eliminar para confirmar el segmento.",
+				"Pulsa de nuevo en eliminar para confirmar el rango.",
 			)
 		) {
 			return;
@@ -509,14 +569,14 @@ export default function AdminCommunicationsWorkspace({
 		try {
 			await requestJson(`/api/admin/communications/segments/${id}`, {
 				method: "DELETE",
-				fallbackMessage: "No se pudo eliminar el segmento",
+				fallbackMessage: "No se pudo eliminar el rango",
 			});
 			if (editingSegmentId === id) {
 				resetSegmentForm();
 			}
-			refreshAfter("Segmento eliminado");
+			refreshAfter("Rango eliminado");
 		} catch (error) {
-			setError(getErrorMessage(error, "No se pudo eliminar el segmento"));
+			setError(getErrorMessage(error, "No se pudo eliminar el rango"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -532,12 +592,13 @@ export default function AdminCommunicationsWorkspace({
 				method: "POST",
 				headers: { "content-type": "application/json" },
 				body: JSON.stringify(assignmentForm),
-				fallbackMessage: "No se pudo asignar el segmento",
+				fallbackMessage: "No se pudo asignar el rango",
 			});
 			setAssignmentForm(emptyAssignmentForm);
-			refreshAfter("Cliente asignado al segmento");
+			setOpenForm(null);
+			refreshAfter("Cliente asignado al rango");
 		} catch (error) {
-			setError(getErrorMessage(error, "No se pudo asignar el segmento"));
+			setError(getErrorMessage(error, "No se pudo asignar el rango"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -547,7 +608,7 @@ export default function AdminCommunicationsWorkspace({
 		if (
 			!confirmDelete(
 				`assignment-${id}`,
-				"Pulsa de nuevo en quitar para confirmar la asignacion.",
+				"Pulsa de nuevo en quitar para confirmar la asignación.",
 			)
 		) {
 			return;
@@ -558,11 +619,11 @@ export default function AdminCommunicationsWorkspace({
 		try {
 			await requestJson(`/api/admin/communications/client-segments/${id}`, {
 				method: "DELETE",
-				fallbackMessage: "No se pudo quitar la asignacion",
+				fallbackMessage: "No se pudo quitar la asignación",
 			});
-			refreshAfter("Asignacion eliminada");
+			refreshAfter("Asignación eliminada");
 		} catch (error) {
-			setError(getErrorMessage(error, "No se pudo quitar la asignacion"));
+			setError(getErrorMessage(error, "No se pudo quitar la asignación"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -577,43 +638,76 @@ export default function AdminCommunicationsWorkspace({
 	const segmentSubmitPending =
 		pendingAction === "create-segment" ||
 		pendingAction === `segment-save-${editingSegmentId}`;
+	const activePromotionsCount = promotions.filter(
+		(promotion) => promotion.status === "active",
+	).length;
+	const publishedTrainingsCount = trainings.filter(
+		(training) => training.status === "published",
+	).length;
+	const summaryByTab: Record<
+		AdminTab,
+		{
+			eyebrow: string;
+			title: string;
+			description: string;
+			actionLabel: string;
+		}
+	> = {
+		promotions: {
+			eyebrow: "Promociones",
+			title: `${activePromotionsCount} ${
+				activePromotionsCount === 1
+					? "promoción activa"
+					: "promociones activas"
+			}`,
+			description:
+				"Crea y mantiene descuentos globales, por rango, por cliente o por producto.",
+			actionLabel: "Crear nueva promoción",
+		},
+		trainings: {
+			eyebrow: "Formaciones",
+			title: `${publishedTrainingsCount} ${
+				publishedTrainingsCount === 1
+					? "formación publicada"
+					: "formaciones publicadas"
+			}`,
+			description:
+				"Gestiona convocatorias presenciales, online o mixtas para clientes profesionales.",
+			actionLabel: "Crear nueva formación",
+		},
+		segments: {
+			eyebrow: "Rangos",
+			title: `${segments.length} ${
+				segments.length === 1 ? "rango definido" : "rangos definidos"
+			}`,
+			description:
+				"Define Plata, Oro, Platino u otros rangos comerciales para segmentar ventajas.",
+			actionLabel: "Crear nuevo rango",
+		},
+		assignments: {
+			eyebrow: "Asignaciones",
+			title: `${assignments.length} ${
+				assignments.length === 1
+					? "cliente con rango"
+					: "clientes con rango"
+			}`,
+			description:
+				"Asocia clientes profesionales a un rango para que reciban las ventajas correctas.",
+			actionLabel: "Asignar rango",
+		},
+	};
+	const activeSummary = summaryByTab[activeTab];
 
 	return (
 		<div className="space-y-6">
-			<section className="grid gap-3 md:grid-cols-4">
-				<div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
-					<p className="text-2xl font-semibold text-slate-900">
-						{promotions.length}
-					</p>
-					<p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-						promociones
-					</p>
-				</div>
-				<div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
-					<p className="text-2xl font-semibold text-slate-900">
-						{trainings.length}
-					</p>
-					<p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-						formaciones
-					</p>
-				</div>
-				<div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
-					<p className="text-2xl font-semibold text-slate-900">
-						{segments.length}
-					</p>
-					<p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-						segmentos
-					</p>
-				</div>
-				<div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
-					<p className="text-2xl font-semibold text-slate-900">
-						{assignments.length}
-					</p>
-					<p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-						asignaciones
-					</p>
-				</div>
-			</section>
+			{openForm ? (
+				<button
+					type="button"
+					aria-label="Cerrar formulario"
+					onClick={closeCommunicationForm}
+					className="fixed inset-0 z-[80] bg-slate-950/35 backdrop-blur-sm"
+				/>
+			) : null}
 
 			<div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white/75 p-2">
 				{tabs.map((tab) => (
@@ -632,6 +726,27 @@ export default function AdminCommunicationsWorkspace({
 				))}
 			</div>
 
+			<section className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+				<div>
+					<p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+						{activeSummary.eyebrow}
+					</p>
+					<h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+						{activeSummary.title}
+					</h2>
+					<p className="mt-2 max-w-2xl text-sm text-slate-600">
+						{activeSummary.description}
+					</p>
+				</div>
+				<button
+					type="button"
+					onClick={() => openCommunicationForm(activeTab)}
+					className="w-full rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:w-auto"
+				>
+					{activeSummary.actionLabel}
+				</button>
+			</section>
+
 			{message ? (
 				<div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
 					{message}
@@ -645,23 +760,34 @@ export default function AdminCommunicationsWorkspace({
 			) : null}
 
 			{activeTab === "promotions" ? (
-				<section className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+				<section className="grid gap-5">
 					<form
 						onSubmit={handleSubmitPromotion}
-						className="space-y-4 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm"
+						role="dialog"
+						aria-modal={openForm === "promotions"}
+						className={getFormDialogClass("promotions")}
 					>
-						<div>
-							<h2 className="text-lg font-semibold text-slate-900">
-								{editingPromotionId ? "Editar promocion" : "Nueva promocion"}
-							</h2>
-							<p className="text-sm text-slate-500">
-								Define campanas globales, por segmento o por cliente.
-							</p>
+						<div className="flex items-start justify-between gap-3">
+							<div>
+								<h2 className="text-lg font-semibold text-slate-900">
+									{editingPromotionId ? "Editar promoción" : "Nueva promoción"}
+								</h2>
+								<p className="text-sm text-slate-500">
+									Define campañas globales, por rango o por cliente.
+								</p>
+							</div>
+							<button
+								type="button"
+								onClick={closeCommunicationForm}
+								className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+							>
+								Cerrar
+							</button>
 						</div>
 
 						<input
 							required
-							placeholder="Titulo"
+							placeholder="Título"
 							value={promotionForm.title}
 							onChange={(event) =>
 								setPromotionForm((current) => ({
@@ -673,7 +799,7 @@ export default function AdminCommunicationsWorkspace({
 						/>
 						<textarea
 							required
-							placeholder="Descripcion"
+							placeholder="Descripción"
 							value={promotionForm.description}
 							onChange={(event) =>
 								setPromotionForm((current) => ({
@@ -756,7 +882,7 @@ export default function AdminCommunicationsWorkspace({
 								}
 								className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
 							>
-								<option value="">Linea opcional</option>
+								<option value="">Línea opcional</option>
 								{productLines.map((productLine) => (
 									<option key={productLine.id} value={productLine.id}>
 										{productLine.name}
@@ -810,7 +936,7 @@ export default function AdminCommunicationsWorkspace({
 								}
 								className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
 							>
-								<option value="">Segmento opcional</option>
+								<option value="">Rango opcional</option>
 								{segments.map((segment) => (
 									<option key={segment.id} value={segment.id}>
 										{segment.name}
@@ -824,15 +950,15 @@ export default function AdminCommunicationsWorkspace({
 								disabled={promotionSubmitPending}
 								className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
 							>
-								{editingPromotionId ? "Guardar cambios" : "Crear promocion"}
+								{editingPromotionId ? "Guardar cambios" : "Crear promoción"}
 							</button>
 							{editingPromotionId ? (
 								<button
 									type="button"
-									onClick={resetPromotionForm}
+									onClick={closeCommunicationForm}
 									className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600"
 								>
-									Cancelar edicion
+									Cancelar edición
 								</button>
 							) : null}
 						</div>
@@ -872,7 +998,7 @@ export default function AdminCommunicationsWorkspace({
 											? ` - Producto: ${promotion.productName}`
 											: ""}
 										{promotion.productLineName
-											? ` - Linea: ${promotion.productLineName}`
+											? ` - Línea: ${promotion.productLineName}`
 											: ""}
 									</p>
 									<div className="mt-3 flex flex-wrap gap-2">
@@ -929,22 +1055,33 @@ export default function AdminCommunicationsWorkspace({
 			) : null}
 
 			{activeTab === "trainings" ? (
-				<section className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+				<section className="grid gap-5">
 					<form
 						onSubmit={handleSubmitTraining}
-						className="space-y-4 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm"
+						role="dialog"
+						aria-modal={openForm === "trainings"}
+						className={getFormDialogClass("trainings")}
 					>
-						<div>
-							<h2 className="text-lg font-semibold text-slate-900">
-								{editingTrainingId ? "Editar formacion" : "Nueva formacion"}
-							</h2>
-							<p className="text-sm text-slate-500">
-								Publica sesiones presenciales, online o mixtas.
-							</p>
+						<div className="flex items-start justify-between gap-3">
+							<div>
+								<h2 className="text-lg font-semibold text-slate-900">
+									{editingTrainingId ? "Editar formación" : "Nueva formación"}
+								</h2>
+								<p className="text-sm text-slate-500">
+									Publica sesiones presenciales, online o mixtas.
+								</p>
+							</div>
+							<button
+								type="button"
+								onClick={closeCommunicationForm}
+								className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+							>
+								Cerrar
+							</button>
 						</div>
 						<input
 							required
-							placeholder="Titulo"
+							placeholder="Título"
 							value={trainingForm.title}
 							onChange={(event) =>
 								setTrainingForm((current) => ({
@@ -956,7 +1093,7 @@ export default function AdminCommunicationsWorkspace({
 						/>
 						<textarea
 							required
-							placeholder="Descripcion"
+							placeholder="Descripción"
 							value={trainingForm.description}
 							onChange={(event) =>
 								setTrainingForm((current) => ({
@@ -980,7 +1117,7 @@ export default function AdminCommunicationsWorkspace({
 								className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
 							/>
 							<input
-								placeholder="Ubicacion o enlace"
+								placeholder="Ubicación o enlace"
 								value={trainingForm.location}
 								onChange={(event) =>
 									setTrainingForm((current) => ({
@@ -1050,15 +1187,15 @@ export default function AdminCommunicationsWorkspace({
 								disabled={trainingSubmitPending}
 								className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
 							>
-								{editingTrainingId ? "Guardar cambios" : "Crear formacion"}
+								{editingTrainingId ? "Guardar cambios" : "Crear formación"}
 							</button>
 							{editingTrainingId ? (
 								<button
 									type="button"
-									onClick={resetTrainingForm}
+									onClick={closeCommunicationForm}
 									className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600"
 								>
-									Cancelar edicion
+									Cancelar edición
 								</button>
 							) : null}
 						</div>
@@ -1151,22 +1288,33 @@ export default function AdminCommunicationsWorkspace({
 			) : null}
 
 			{activeTab === "segments" ? (
-				<section className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+				<section className="grid gap-5">
 					<form
 						onSubmit={handleSubmitSegment}
-						className="space-y-4 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm"
+						role="dialog"
+						aria-modal={openForm === "segments"}
+						className={getFormDialogClass("segments")}
 					>
-						<div>
-							<h2 className="text-lg font-semibold text-slate-900">
-								{editingSegmentId ? "Editar segmento" : "Nuevo segmento"}
-							</h2>
-							<p className="text-sm text-slate-500">
-								Crea grupos comerciales para dirigir promociones.
-							</p>
+						<div className="flex items-start justify-between gap-3">
+							<div>
+								<h2 className="text-lg font-semibold text-slate-900">
+									{editingSegmentId ? "Editar rango" : "Nuevo rango"}
+								</h2>
+								<p className="text-sm text-slate-500">
+									Crea rangos comerciales para dirigir promociones.
+								</p>
+							</div>
+							<button
+								type="button"
+								onClick={closeCommunicationForm}
+								className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+							>
+								Cerrar
+							</button>
 						</div>
 						<input
 							required
-							placeholder="Codigo interno"
+							placeholder="Código interno"
 							value={segmentForm.code}
 							onChange={(event) =>
 								setSegmentForm((current) => ({
@@ -1189,7 +1337,7 @@ export default function AdminCommunicationsWorkspace({
 							className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
 						/>
 						<textarea
-							placeholder="Descripcion"
+							placeholder="Descripción"
 							value={segmentForm.description}
 							onChange={(event) =>
 								setSegmentForm((current) => ({
@@ -1216,15 +1364,15 @@ export default function AdminCommunicationsWorkspace({
 								disabled={segmentSubmitPending}
 								className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
 							>
-								{editingSegmentId ? "Guardar cambios" : "Crear segmento"}
+								{editingSegmentId ? "Guardar cambios" : "Crear rango"}
 							</button>
 							{editingSegmentId ? (
 								<button
 									type="button"
-									onClick={resetSegmentForm}
+									onClick={closeCommunicationForm}
 									className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600"
 								>
-									Cancelar edicion
+									Cancelar edición
 								</button>
 							) : null}
 						</div>
@@ -1244,7 +1392,7 @@ export default function AdminCommunicationsWorkspace({
 										{segment.name}
 									</h3>
 									<p className="mt-2 text-sm text-slate-600">
-										{segment.description ?? "Sin descripcion"}
+										{segment.description ?? "Sin descripción"}
 									</p>
 									{segment.criteria ? (
 										<p className="mt-2 text-xs text-slate-500">
@@ -1274,7 +1422,7 @@ export default function AdminCommunicationsWorkspace({
 							))
 						) : (
 							<p className="rounded-2xl border border-dashed border-slate-200 bg-white/75 p-4 text-sm text-slate-500">
-								Sin segmentos registrados.
+								Sin rangos registrados.
 							</p>
 						)}
 					</div>
@@ -1282,18 +1430,29 @@ export default function AdminCommunicationsWorkspace({
 			) : null}
 
 			{activeTab === "assignments" ? (
-				<section className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+				<section className="grid gap-5">
 					<form
 						onSubmit={handleCreateAssignment}
-						className="space-y-4 rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm"
+						role="dialog"
+						aria-modal={openForm === "assignments"}
+						className={getFormDialogClass("assignments")}
 					>
-						<div>
-							<h2 className="text-lg font-semibold text-slate-900">
-								Asignar cliente a segmento
-							</h2>
-							<p className="text-sm text-slate-500">
-								La segmentacion controla que promociones ve cada salon.
-							</p>
+						<div className="flex items-start justify-between gap-3">
+							<div>
+								<h2 className="text-lg font-semibold text-slate-900">
+									Asignar cliente a rango
+								</h2>
+								<p className="text-sm text-slate-500">
+									El rango controla qué promociones ve cada salón.
+								</p>
+							</div>
+							<button
+								type="button"
+								onClick={closeCommunicationForm}
+								className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+							>
+								Cerrar
+							</button>
 						</div>
 						<select
 							required
@@ -1325,7 +1484,7 @@ export default function AdminCommunicationsWorkspace({
 							}
 							className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
 						>
-							<option value="">Selecciona segmento</option>
+							<option value="">Selecciona rango</option>
 							{segments.map((segment) => (
 								<option key={segment.id} value={segment.id}>
 									{segment.name}
@@ -1348,7 +1507,7 @@ export default function AdminCommunicationsWorkspace({
 							disabled={pendingAction === "create-assignment"}
 							className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
 						>
-							Asignar segmento
+							Asignar rango
 						</button>
 					</form>
 
@@ -1386,7 +1545,7 @@ export default function AdminCommunicationsWorkspace({
 									>
 										{confirmDeleteAction === `assignment-${assignment.id}`
 											? "Confirmar quitar"
-											: "Quitar asignacion"}
+											: "Quitar asignación"}
 									</button>
 								</article>
 							))
