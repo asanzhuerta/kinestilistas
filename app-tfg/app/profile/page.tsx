@@ -10,6 +10,18 @@ import { getClientTierOverview } from "@/lib/typeorm/services/clients/client-tie
 import { listPromotionsForUser } from "@/lib/typeorm/services/communications/communications";
 import { getUserById } from "@/lib/typeorm/services/users/user";
 
+function getProfileBackgroundClass(role: RoleSidebarRole) {
+	if (role === "admin") {
+		return "app-bg-admin";
+	}
+
+	if (role === "commercial") {
+		return "app-bg-commercial";
+	}
+
+	return "app-bg-client";
+}
+
 export default async function ProfilePage() {
 	const session = await requireUserSession();
 	const user = await getUserById(session.user.id);
@@ -29,9 +41,12 @@ export default async function ProfilePage() {
 					}),
 				])
 			: [null, []];
+	const profileBackgroundClass = getProfileBackgroundClass(role);
 
 	return (
-		<main className="app-bg min-h-[100svh] w-full text-slate-800">
+		<main
+			className={`app-bg ${profileBackgroundClass} min-h-[100svh] w-full text-slate-800`}
+		>
 			<div className="lg:flex lg:min-h-[100svh]">
 				<RoleSidebar
 					role={role}
