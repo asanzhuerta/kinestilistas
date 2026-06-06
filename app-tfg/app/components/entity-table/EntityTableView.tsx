@@ -138,13 +138,13 @@ function EntityCard({
 			>
 				<div className="relative overflow-hidden rounded-[1.45rem] border border-slate-100 bg-white shadow-inner shadow-slate-950/5">
 					<div
-						className={`grid min-h-[15rem] gap-2 p-3 ${
+						className={`grid h-[15rem] min-h-0 gap-2 overflow-hidden p-3 ${
 							hasSecondaryImage
 								? "grid-cols-[minmax(0,1fr)_4.75rem]"
 								: "grid-cols-1"
 						}`}
 					>
-						<div className="min-h-[13.5rem]">
+						<div className="h-full min-h-0 overflow-hidden">
 							<UserAvatar
 								name={item.title}
 								imageUrl={item.imageUrl}
@@ -156,12 +156,12 @@ function EntityCard({
 								imageBackgroundClass="bg-white"
 								imageIntrinsicPixels={640}
 								imageSizes="(max-width: 640px) 70vw, (max-width: 1280px) 28vw, 260px"
-								className="h-full w-full rounded-[1.2rem] text-5xl"
+								className="h-full max-h-full w-full rounded-[1.2rem] text-5xl"
 							/>
 						</div>
 
 						{hasSecondaryImage ? (
-							<div className="flex items-end justify-end pt-11">
+							<div className="flex h-full min-h-0 items-end justify-end overflow-hidden pt-11">
 								<div className="w-full rounded-2xl border border-slate-100 bg-white p-1.5 shadow-sm shadow-slate-950/5">
 									<UserAvatar
 										name={item.secondaryImageLabel ?? item.title}
