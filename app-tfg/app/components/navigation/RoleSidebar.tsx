@@ -201,19 +201,39 @@ export default function RoleSidebar({
 								: "gap-3 lg:w-full lg:justify-center lg:gap-0 lg:pr-0"
 						}`}
 					>
-						<div
-							aria-hidden="true"
-							className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg shadow-slate-950/10 ring-1 ring-slate-200"
+						<button
+							type="button"
+							className="group/logo relative flex h-12 w-12 shrink-0 items-center justify-center overflow-visible rounded-2xl bg-white shadow-lg shadow-slate-950/10 ring-1 ring-slate-200 transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-0.5 hover:bg-white focus:outline-none focus-visible:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2"
+							onClick={() => setIsExpanded((value) => !value)}
+							aria-label={isExpanded ? "Plegar menú" : "Desplegar menú"}
+							aria-expanded={isExpanded}
+							aria-controls="role-sidebar"
 						>
 							<Image
 								src="/icons/icon-192.png"
-								alt=""
+								alt="KIN"
 								width={44}
 								height={44}
-								className="h-11 w-11 object-contain object-center"
+								className={`relative z-10 h-11 w-11 object-contain object-center transition-[opacity,transform] duration-200 ease-out lg:group-hover/logo:opacity-70 lg:group-hover/logo:scale-95 ${
+									isExpanded
+										? "lg:group-hover/logo:translate-x-0"
+										: "lg:group-hover/logo:-translate-x-1"
+								}`}
 								sizes="44px"
 							/>
-						</div>
+							<span
+								aria-hidden="true"
+								className="pointer-events-none absolute -right-3 top-1/2 z-20 grid h-9 w-9 -translate-y-1/2 translate-x-1 scale-75 place-items-center rounded-full bg-slate-950 text-white opacity-0 shadow-xl shadow-slate-950/20 ring-1 ring-white/70 transition-[opacity,transform] duration-200 ease-out lg:group-hover/logo:translate-x-0 lg:group-hover/logo:scale-100 lg:group-hover/logo:opacity-100 lg:group-focus-visible/logo:translate-x-0 lg:group-focus-visible/logo:scale-100 lg:group-focus-visible/logo:opacity-100"
+							>
+								<span
+									className={`text-lg font-black leading-none transition-transform duration-200 ${
+										isExpanded ? "rotate-180" : ""
+									}`}
+								>
+									›
+								</span>
+							</span>
+						</button>
 						<div
 							className={`min-w-0 overflow-hidden transition-[max-width,opacity,transform] duration-300 ease-out ${
 								isExpanded
@@ -231,14 +251,6 @@ export default function RoleSidebar({
 					</div>
 
 					<div className="flex items-center gap-2">
-						<button
-							type="button"
-							className="absolute right-3 top-1/2 hidden h-9 w-9 -translate-y-1/2 scale-90 items-center justify-center rounded-full border border-slate-200 bg-white/75 p-0 text-xs font-bold text-slate-700 opacity-0 shadow-sm transition-[opacity,transform,background-color,color] duration-200 hover:bg-slate-950 hover:text-white focus-visible:scale-100 focus-visible:opacity-100 lg:inline-flex lg:group-hover:scale-100 lg:group-hover:opacity-100"
-							onClick={() => setIsExpanded((value) => !value)}
-							aria-label={isExpanded ? "Plegar menú" : "Desplegar menú"}
-						>
-							{isExpanded ? "<" : ">"}
-						</button>
 						<button
 							type="button"
 							className="rounded-full border border-slate-200 bg-white/75 px-3 py-2 text-xs font-bold text-slate-700 shadow-sm lg:hidden"
