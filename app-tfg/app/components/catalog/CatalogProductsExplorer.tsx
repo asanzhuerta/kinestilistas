@@ -35,11 +35,13 @@ export default function CatalogProductsExplorer({
 							key: "productLine",
 							label: "Línea comercial",
 							allLabel: "Todas",
+							dependsOn: ["category"],
 						},
 						{
 							key: "subcategory",
 							label: "Subcategoría",
 							allLabel: "Todas",
+							dependsOn: ["category", "productLine"],
 						},
 					],
 					persistenceKey: `catalog-products:${detailBasePath}`,
