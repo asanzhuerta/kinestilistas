@@ -28,6 +28,7 @@
 		"m7:operations-report-smoke": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/m7-operations-report-smoke.ts",
 		"m7:enterprise-operations-smoke": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/m7-enterprise-operations-smoke.ts",
 		"m7:closeout": "npm run m7:integrations-smoke && npm run m7:support-smoke && npm run m7:operations-smoke && npm run m7:audit-export-smoke && npm run m7:rate-limit-smoke && npm run m7:operations-report-smoke && npm run m7:enterprise-operations-smoke",
+		"catalog:upload-product-images": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/upload-product-images.ts",
 		"typeorm:cli": "node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
 		"typeorm:ds": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./lib/typeorm/data-source-cli.ts",
 		"migration:create": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json npm run typeorm:cli -- migration:create",
