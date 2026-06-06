@@ -43,7 +43,12 @@ const backgrounds: Record<BackgroundKey, BackgroundSpec> = {
 function getBackgroundForPath(pathname: string | null) {
 	const path = pathname ?? "/";
 
-	if (path === "/login" || path.startsWith("/login/")) {
+	if (
+		path === "/login" ||
+		path.startsWith("/login/") ||
+		path === "/register" ||
+		path.startsWith("/register/")
+	) {
 		return backgrounds.login;
 	}
 
