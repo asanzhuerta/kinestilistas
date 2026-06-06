@@ -74,17 +74,6 @@ export default async function AdminAuditPage() {
 					subtitle="Accesos, sesiones y acciones administrativas"
 				/>
 
-				<section className="glass-card rounded-3xl border border-white/30 bg-white/80 p-5 shadow-xl backdrop-blur md:p-6">
-					<p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-						M7 - Auditoría y trazabilidad
-					</p>
-					<p className="max-w-3xl text-sm text-slate-600">
-						Aquí puedes revisar los accesos recientes, las acciones
-						administrativas sobre usuarios y una referencia rápida de las
-						sesiones que siguen activas.
-					</p>
-				</section>
-
 				<section className="grid grid-cols-3 gap-2 md:gap-4">
 					<div className="glass-card rounded-2xl border border-white/30 bg-white/80 p-3 text-center shadow-lg backdrop-blur md:rounded-3xl md:p-5 md:text-left">
 						<p className="text-[0.65rem] leading-tight text-slate-500 md:text-sm">
