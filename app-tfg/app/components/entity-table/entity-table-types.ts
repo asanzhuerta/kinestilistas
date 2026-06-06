@@ -78,4 +78,5 @@ export type EntityTableConfig = {
 	initialStatusFilter?: string;
 	initialHasImageFilter?: string;
 	initialExtraFilterValues?: Record<string, string>;
+	persistenceKey?: string;
 };

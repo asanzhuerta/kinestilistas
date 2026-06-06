@@ -1,12 +1,100 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
 	EntitySortDirection,
 	EntitySortField,
 	EntityTableConfig,
 	EntityTableItem,
 } from "./entity-table-types";
+
+const ENTITY_TABLE_STORAGE_PREFIX = "kinestilistas:entity-table:";
+
+type PersistedEntityTableState = {
+	search?: unknown;
+	categoryFilter?: unknown;
+	statusFilter?: unknown;
+	hasImageFilter?: unknown;
+	hideInactiveItems?: unknown;
+	sortField?: unknown;
+	sortDirection?: unknown;
+	extraFilterValues?: unknown;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isEntitySortField(value: unknown): value is EntitySortField {
+	return (
+		value === "title" ||
+		value === "subtitle" ||
+		value === "category" ||
+		value === "status" ||
+		value === "primaryDate"
+	);
+}
+
+function isEntitySortDirection(value: unknown): value is EntitySortDirection {
+	return value === "asc" || value === "desc";
+}
+
+function readPersistedState(
+	persistenceKey: string | undefined,
+): PersistedEntityTableState | null {
+	if (!persistenceKey || typeof window === "undefined") {
+		return null;
+	}
+
+	try {
+		const raw = window.sessionStorage.getItem(
+			`${ENTITY_TABLE_STORAGE_PREFIX}${persistenceKey}`,
+		);
+
+		if (!raw) {
+			return null;
+		}
+
+		const parsed = JSON.parse(raw);
+		return isRecord(parsed) ? parsed : null;
+	} catch {
+		return null;
+	}
+}
+
+function persistState(
+	persistenceKey: string | undefined,
+	state: PersistedEntityTableState,
+) {
+	if (!persistenceKey || typeof window === "undefined") {
+		return;
+	}
+
+	try {
+		window.sessionStorage.setItem(
+			`${ENTITY_TABLE_STORAGE_PREFIX}${persistenceKey}`,
+			JSON.stringify(state),
+		);
+	} catch {
+		// Si el almacenamiento del navegador no esta disponible, la tabla sigue funcionando.
+	}
+}
+
+function getPersistedString(value: unknown, fallback: string) {
+	return typeof value === "string" ? value : fallback;
+}
+
+function getPersistedExtraFilterValues(value: unknown) {
+	if (!isRecord(value)) {
+		return {};
+	}
+
+	return Object.fromEntries(
+		Object.entries(value).filter(
+			(entry): entry is [string, string] => typeof entry[1] === "string",
+		),
+	);
+}
 
 function normalizeValue(value: unknown) {
 	return String(value ?? "")
@@ -127,6 +215,7 @@ export function useEntityTable(
 	items: EntityTableItem[],
 	config?: EntityTableConfig,
 ) {
+	const persistenceKey = config?.persistenceKey;
 	const [search, setSearch] = useState(config?.initialSearch ?? "");
 	const [categoryFilter, setCategoryFilter] = useState(
 		resolveInitialFilterValue(config?.initialCategoryFilter),
@@ -149,6 +238,64 @@ export function useEntityTable(
 	const [extraFilterValues, setExtraFilterValues] = useState<
 		Record<string, string>
 	>(() => buildExtraFilterInitialState(config, true));
+	const [hasLoadedPersistedState, setHasLoadedPersistedState] = useState(
+		!persistenceKey,
+	);
+	const restoredPersistenceKeyRef = useRef<string | undefined>(undefined);
+
+	useEffect(() => {
+		if (!persistenceKey || restoredPersistenceKeyRef.current === persistenceKey) {
+			return;
+		}
+
+		restoredPersistenceKeyRef.current = persistenceKey;
+
+		const restoreTimeout = window.setTimeout(() => {
+			const persistedState = readPersistedState(persistenceKey);
+
+			if (persistedState) {
+				setSearch(getPersistedString(persistedState.search, ""));
+				setCategoryFilter(
+					resolveInitialFilterValue(
+						getPersistedString(persistedState.categoryFilter, "todos"),
+					),
+				);
+				setStatusFilter(
+					resolveInitialFilterValue(
+						getPersistedString(persistedState.statusFilter, "todos"),
+					),
+				);
+				setHasImageFilter(
+					resolveInitialFilterValue(
+						getPersistedString(persistedState.hasImageFilter, "todos"),
+					),
+				);
+				setHideInactiveItems(
+					typeof persistedState.hideInactiveItems === "boolean"
+						? persistedState.hideInactiveItems
+						: (config?.defaultHideInactive ?? false),
+				);
+				setSortField(
+					isEntitySortField(persistedState.sortField)
+						? persistedState.sortField
+						: getDefaultSortField(config),
+				);
+				setSortDirection(
+					isEntitySortDirection(persistedState.sortDirection)
+						? persistedState.sortDirection
+						: getDefaultSortDirection(config),
+				);
+				setExtraFilterValues({
+					...buildExtraFilterInitialState(config, true),
+					...getPersistedExtraFilterValues(persistedState.extraFilterValues),
+				});
+			}
+
+			setHasLoadedPersistedState(true);
+		}, 0);
+
+		return () => window.clearTimeout(restoreTimeout);
+	}, [config, persistenceKey]);
 
 	const categories = useMemo(
 		() =>
@@ -293,6 +440,34 @@ export function useEntityTable(
 		config?.extraFilters,
 		config?.showImageFilter,
 		config?.showHideInactiveToggle,
+	]);
+
+	useEffect(() => {
+		if (!hasLoadedPersistedState) {
+			return;
+		}
+
+		persistState(persistenceKey, {
+			search,
+			categoryFilter: resolvedCategoryFilter,
+			statusFilter: resolvedStatusFilter,
+			hasImageFilter,
+			hideInactiveItems,
+			sortField,
+			sortDirection,
+			extraFilterValues: resolvedExtraFilterValues,
+		});
+	}, [
+		hasLoadedPersistedState,
+		persistenceKey,
+		search,
+		resolvedCategoryFilter,
+		resolvedStatusFilter,
+		hasImageFilter,
+		hideInactiveItems,
+		sortField,
+		sortDirection,
+		resolvedExtraFilterValues,
 	]);
 
 	function resetFilters() {

@@ -135,6 +135,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 							resolvedSearchParams.subcategory,
 						) ?? "",
 					},
+					persistenceKey: "admin-catalog-products",
 					extraFilters: [
 						{
 							key: "productLine",

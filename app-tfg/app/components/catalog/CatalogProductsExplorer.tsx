@@ -110,6 +110,7 @@ export default function CatalogProductsExplorer({
 							allLabel: "Todas",
 						},
 					],
+					persistenceKey: `catalog-products:${detailBasePath}`,
 					emptyMessage:
 						"No hay productos activos que coincidan con los filtros actuales.",
 				}}
