@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import sharp from "sharp";
 import { getDataSource } from "@/lib/typeorm/data-source";
 import { Product } from "@/lib/typeorm/entities/Product";
 import { uploadCatalogImage } from "@/lib/cloudinary";
@@ -13,6 +14,10 @@ const DEFAULT_SOURCE_DIR = path.resolve(
 );
 const DEFAULT_PROCESSED_DIR_NAME = "añadidos";
 const IMAGE_EXTENSIONS = new Set([".avif", ".jpeg", ".jpg", ".png", ".webp"]);
+const CLOUDINARY_MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const TARGET_UPLOAD_BYTES = Math.floor(CLOUDINARY_MAX_UPLOAD_BYTES * 0.9);
+const COMPRESSION_WIDTHS = [1800, 1400, 1100, 900];
+const COMPRESSION_QUALITIES = [86, 78, 70, 62, 54, 46];
 const FILE_NOISE_TOKENS = new Set([
 	"jpg",
 	"jpeg",
@@ -173,7 +178,7 @@ function normalizeText(value: string) {
 function tokenize(value: string) {
 	return normalizeText(value)
 		.split(" ")
-		.filter((token) => token.length > 0);
+		.filter((token) => token.length > 0 && token !== "and");
 }
 
 function getFileTokens(fileName: string) {
@@ -390,9 +395,93 @@ function getMimeType(filePath: string) {
 	throw new Error(`Extension no soportada: ${extension}`);
 }
 
+function encodeBufferAsDataUri(bytes: Buffer, mimeType: string) {
+	return `data:${mimeType};base64,${bytes.toString("base64")}`;
+}
+
 async function encodeFileAsDataUri(filePath: string) {
 	const bytes = await fs.readFile(filePath);
-	return `data:${getMimeType(filePath)};base64,${bytes.toString("base64")}`;
+	return encodeBufferAsDataUri(bytes, getMimeType(filePath));
+}
+
+function formatBytes(bytes: number) {
+	return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+async function compressImageForUpload(filePath: string) {
+	let bestBuffer: Buffer | null = null;
+	let bestDescription = "";
+
+	for (const width of COMPRESSION_WIDTHS) {
+		for (const quality of COMPRESSION_QUALITIES) {
+			const buffer = await sharp(filePath, { failOn: "none" })
+				.rotate()
+				.resize({
+					width,
+					height: width,
+					fit: "inside",
+					withoutEnlargement: true,
+				})
+				.webp({
+					quality,
+					effort: 6,
+				})
+				.toBuffer();
+
+			if (!bestBuffer || buffer.length < bestBuffer.length) {
+				bestBuffer = buffer;
+				bestDescription = `webp ${width}px q${quality}`;
+			}
+
+			if (buffer.length <= TARGET_UPLOAD_BYTES) {
+				return {
+					bytes: buffer,
+					mimeType: "image/webp",
+					description: `webp ${width}px q${quality}`,
+				};
+			}
+		}
+	}
+
+	if (!bestBuffer || bestBuffer.length > CLOUDINARY_MAX_UPLOAD_BYTES) {
+		throw new Error(
+			`No se pudo comprimir por debajo de ${formatBytes(
+				CLOUDINARY_MAX_UPLOAD_BYTES,
+			)}. Mejor intento: ${
+				bestBuffer ? formatBytes(bestBuffer.length) : "sin resultado"
+			}`,
+		);
+	}
+
+	return {
+		bytes: bestBuffer,
+		mimeType: "image/webp",
+		description: bestDescription,
+	};
+}
+
+async function prepareImageForUpload(filePath: string) {
+	const stat = await fs.stat(filePath);
+
+	if (stat.size <= TARGET_UPLOAD_BYTES) {
+		return {
+			dataUri: await encodeFileAsDataUri(filePath),
+			wasCompressed: false,
+			originalBytes: stat.size,
+			uploadBytes: stat.size,
+			description: "original",
+		};
+	}
+
+	const compressed = await compressImageForUpload(filePath);
+
+	return {
+		dataUri: encodeBufferAsDataUri(compressed.bytes, compressed.mimeType),
+		wasCompressed: true,
+		originalBytes: stat.size,
+		uploadBytes: compressed.bytes.length,
+		description: compressed.description,
+	};
 }
 
 async function pathExists(filePath: string) {
@@ -591,27 +680,47 @@ async function main() {
 				continue;
 			}
 
-			console.log(`[UPLOAD] ${image.name} -> ${formatProducts(productsToUpdate)}`);
-			const dataUri = await encodeFileAsDataUri(image.fullPath);
-			const uploadResult = await uploadCatalogImage(dataUri);
-			const secureUrl = uploadResult.secure_url;
+			try {
+				console.log(`[UPLOAD] ${image.name} -> ${formatProducts(productsToUpdate)}`);
+				const preparedImage = await prepareImageForUpload(image.fullPath);
 
-			await productRepository.update(
-				productsToUpdate.map((product) => product.id),
-				{ image_url: secureUrl },
-			);
+				if (preparedImage.wasCompressed) {
+					console.log(
+						`[COMPRESS] ${image.name}: ${formatBytes(
+							preparedImage.originalBytes,
+						)} -> ${formatBytes(preparedImage.uploadBytes)} (${
+							preparedImage.description
+						})`,
+					);
+				}
 
-			uploadedCount += productsToUpdate.length;
-			console.log(
-				`[OK] ${productsToUpdate.length} producto(s) actualizado(s): ${secureUrl}`,
-			);
+				const uploadResult = await uploadCatalogImage(preparedImage.dataUri);
+				const secureUrl = uploadResult.secure_url;
 
-			if (options.moveProcessed) {
-				const destinationPath = await getUniqueDestinationPath(
-					path.join(options.processedDir, image.name),
+				await productRepository.update(
+					productsToUpdate.map((product) => product.id),
+					{ image_url: secureUrl },
 				);
-				await fs.rename(image.fullPath, destinationPath);
-				console.log(`[MOVE] ${image.name} -> ${destinationPath}`);
+
+				uploadedCount += productsToUpdate.length;
+				console.log(
+					`[OK] ${productsToUpdate.length} producto(s) actualizado(s): ${secureUrl}`,
+				);
+
+				if (options.moveProcessed) {
+					const destinationPath = await getUniqueDestinationPath(
+						path.join(options.processedDir, image.name),
+					);
+					await fs.rename(image.fullPath, destinationPath);
+					console.log(`[MOVE] ${image.name} -> ${destinationPath}`);
+				}
+			} catch (error) {
+				errorCount += 1;
+				console.log(
+					`[ERROR] No se pudo procesar "${image.name}": ${
+						error instanceof Error ? error.message : String(error)
+					}`,
+				);
 			}
 		}
 
