@@ -228,56 +228,15 @@ export default function ColorChartsExplorer({
 		<div className="space-y-6">
 			<H1Title title={title} subtitle={subtitle} />
 
-			<section className="glass-card rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-					<div>
-						<p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-							M3 / Coloracion
-						</p>
-
-						<h2 className="text-3xl font-bold text-slate-900">
-							Explora lineas, cartas y tonos
-						</h2>
-
-						<p className="mt-2 max-w-3xl text-sm text-slate-600">
-							Navega primero por linea comercial, abre despues sus cartas de
-							color y consulta finalmente los tonos disponibles con la misma
-							logica visual del panel de administracion.
-						</p>
-
-						<div className="mt-4 flex flex-wrap gap-2">
-							<button
-								type="button"
-								onClick={() => setShowAllColors((current) => !current)}
-								className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
-							>
-								{showAllColors ? "Volver a la vista por cartas" : "Ver todos los tonos"}
-							</button>
-						</div>
-					</div>
-
-					<div className="flex flex-wrap gap-3 text-sm text-slate-600">
-						<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-							<span className="font-semibold text-slate-900">
-								{filteredChartGroups.length}
-							</span>{" "}
-							lineas
-						</div>
-						<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-							<span className="font-semibold text-slate-900">
-								{colorCharts.length}
-							</span>{" "}
-							cartas
-						</div>
-						<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-							<span className="font-semibold text-slate-900">
-								{colorReferences.length}
-							</span>{" "}
-							referencias
-						</div>
-					</div>
-				</div>
-			</section>
+			<div className="flex justify-end">
+				<button
+					type="button"
+					onClick={() => setShowAllColors((current) => !current)}
+					className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+				>
+					{showAllColors ? "Volver a la vista por cartas" : "Ver todos los tonos"}
+				</button>
+			</div>
 
 			<EntityTableFilters
 				search={showAllColors ? flatColorsTable.search : table.search}

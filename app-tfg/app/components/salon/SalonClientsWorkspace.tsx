@@ -93,25 +93,13 @@ export default function SalonClientsWorkspace({
 				subtitle="Gestiona clientes, historial tecnico, plantillas y seguimiento de servicios"
 			/>
 
-			<div className="mb-4 flex items-center justify-between gap-3">
+			<div className="mb-4 flex items-center gap-3">
 				<Link
 					href="/clients"
 					className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-white"
 				>
 					Volver al panel
 				</Link>
-				<span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-					M5
-				</span>
-			</div>
-
-			<div className="mb-6 rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm">
-				<p className="text-sm leading-6 text-slate-600">
-					Este primer bloque de M5 deja operativo el nucleo del salon:
-					registro de clientes propios, historial de servicios, plantillas
-					reutilizables, ficha tecnica y sugerencias basadas en el uso real de
-					producto.
-				</p>
 			</div>
 
 			<div className="mb-6 grid gap-6 xl:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">

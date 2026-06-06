@@ -51,11 +51,12 @@ export default function ClientTierBadgeCard({
 	compact = false,
 }: ClientTierBadgeCardProps) {
 	const styles = tierStyles[tier.code];
-	const hasTier = tier.code !== "none";
 
 	return (
 		<aside
-			className={`glass-card relative overflow-hidden rounded-3xl border p-5 shadow-xl ${styles.card}`}
+			className={`glass-card relative overflow-hidden rounded-3xl border shadow-xl ${styles.card} ${
+				compact ? "p-4" : "p-5"
+			}`}
 		>
 			<div
 				className={`absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${styles.orb} opacity-70 blur-sm`}
@@ -67,7 +68,11 @@ export default function ClientTierBadgeCard({
 					<p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
 						Rango comercial
 					</p>
-					<h2 className="mt-2 text-xl font-bold text-slate-950">
+					<h2
+						className={`mt-2 font-bold text-slate-950 ${
+							compact ? "text-lg" : "text-xl"
+						}`}
+					>
 						{tier.description}
 					</h2>
 				</div>
@@ -78,24 +83,38 @@ export default function ClientTierBadgeCard({
 				</span>
 			</div>
 
-			<p className="relative mt-4 text-sm leading-6 text-slate-700">
-				{tier.benefitSummary}
-			</p>
+			{compact ? null : (
+				<p className="relative mt-4 text-sm leading-6 text-slate-700">
+					{tier.benefitSummary}
+				</p>
+			)}
 
-			<div className="relative mt-4 grid gap-3 sm:grid-cols-2">
-				<div className="rounded-2xl border border-white/60 bg-white/65 px-4 py-3">
+			<div
+				className={`relative grid gap-2 sm:grid-cols-2 ${
+					compact ? "mt-3" : "mt-4 gap-3"
+				}`}
+			>
+				<div className="rounded-2xl border border-white/60 bg-white/65 px-3 py-2">
 					<p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
 						Promociones
 					</p>
-					<p className="mt-1 text-2xl font-bold text-slate-900">
+					<p
+						className={`mt-1 font-bold text-slate-900 ${
+							compact ? "text-xl" : "text-2xl"
+						}`}
+					>
 						{activePromotionsCount}
 					</p>
 				</div>
-				<div className="rounded-2xl border border-white/60 bg-white/65 px-4 py-3">
+				<div className="rounded-2xl border border-white/60 bg-white/65 px-3 py-2">
 					<p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
 						Rangos
 					</p>
-					<p className="mt-1 text-2xl font-bold text-slate-900">
+					<p
+						className={`mt-1 font-bold text-slate-900 ${
+							compact ? "text-xl" : "text-2xl"
+						}`}
+					>
 						{tier.assignedSegments.length}
 					</p>
 				</div>
@@ -114,11 +133,6 @@ export default function ClientTierBadgeCard({
 				>
 					Ver ventajas
 				</Link>
-				{hasTier ? (
-					<span className="rounded-full border border-white/60 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-600">
-						Asignado por administracion
-					</span>
-				) : null}
 			</div>
 		</aside>
 	);
