@@ -41,6 +41,21 @@ export default function ClientDeliveryEstimateCard() {
 		return null;
 	}
 
+	if (
+		estimate.status === "no_delivery_today" ||
+		estimate.status === "no_active_commercial"
+	) {
+		return (
+			<section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white/90 px-5 py-4 text-slate-800 shadow-sm">
+				<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+					Reparto de hoy
+				</p>
+				<h2 className="mt-2 text-lg font-semibold">No hay reparto pendiente</h2>
+				<p className="mt-1 text-sm text-slate-600">{estimate.message}</p>
+			</section>
+		);
+	}
+
 	return (
 		<section
 			className={`rounded-[28px] border p-5 shadow-sm ${getToneClasses(estimate.status)}`}

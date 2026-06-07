@@ -149,68 +149,72 @@ export default function ClientProfileFieldsSection({
 
 				<div
 					className={`${cardClass} ${
-						compact ? "2xl:col-span-2" : "md:col-span-2"
+						compact ? "2xl:col-span-4" : "md:col-span-2"
 					}`}
 				>
-					<p className={labelClass}>Estado de geolocalización</p>
-
 					<div
-						className={`mt-2 rounded-2xl px-4 py-3 text-sm ${
-							hasConfirmedLocation
-								? "border border-emerald-200 bg-emerald-50 text-emerald-800"
-								: "border border-amber-200 bg-amber-50 text-amber-800"
-						}`}
+						className={
+							compact
+								? "grid gap-3 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+								: "space-y-4"
+						}
 					>
-						{hasConfirmedLocation
-							? "Ubicación confirmada. Si cambias la dirección, vuelve a validarla en el mapa."
-							: "Dirección pendiente de confirmar en mapa. Puedes guardar sin hacerlo y el sistema intentará geocodificarla automáticamente."}
-					</div>
+						<div className="min-w-0">
+							<p className={labelClass}>Localización del salón</p>
 
-					<div className="mt-3 grid gap-3 md:grid-cols-2">
-						<div className="rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">
-							<span className="font-medium">Latitud:</span>{" "}
-							{formatCoordinate(formData.lat)}
+							<div
+								className={`mt-2 rounded-2xl px-4 py-3 text-sm ${
+									hasConfirmedLocation
+										? "border border-emerald-200 bg-emerald-50 text-emerald-800"
+										: "border border-amber-200 bg-amber-50 text-amber-800"
+								}`}
+							>
+								{hasConfirmedLocation
+									? "Ubicación confirmada. Si cambias la dirección, vuelve a validarla en el mapa."
+									: "Dirección pendiente de confirmar en mapa. Puedes guardar sin hacerlo y el sistema intentará geocodificarla automáticamente."}
+							</div>
+
+							<div className="mt-3 grid gap-3 md:grid-cols-2">
+								<div className="rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">
+									<span className="font-medium">Latitud:</span>{" "}
+									{formatCoordinate(formData.lat)}
+								</div>
+								<div className="rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">
+									<span className="font-medium">Longitud:</span>{" "}
+									{formatCoordinate(formData.lng)}
+								</div>
+							</div>
 						</div>
-						<div className="rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">
-							<span className="font-medium">Longitud:</span>{" "}
-							{formatCoordinate(formData.lng)}
+
+						<div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-3">
+							<div className={compact ? "mb-2" : "mb-3"}>
+								<h4 className="text-base font-semibold text-slate-900">
+									Confirmación en mapa
+								</h4>
+								<p className="mt-1 text-sm text-slate-600">
+									Busca la dirección y ajusta el marcador si hace falta.
+								</p>
+							</div>
+
+							{clientId && allowLocationEdit ? (
+								<ClientLocationPickerMap
+									key={mapResetKey}
+									clientId={clientId}
+									confirmedLat={formData.lat ? Number(formData.lat) : null}
+									confirmedLng={formData.lng ? Number(formData.lng) : null}
+									initialSearchQuery={initialSearchQuery}
+									onConfirmLocation={onConfirmLocation}
+									compact={compact}
+								/>
+							) : (
+								<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+									La ubicación solo puede confirmarse desde edición propia del
+									cliente o edición administrativa.
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
-
-				{clientId ? (
-					<div
-						className={`rounded-3xl border border-slate-200 bg-white p-3 ${
-							compact ? "2xl:col-span-2" : "md:col-span-2"
-						}`}
-					>
-						<div className="mb-3">
-							<h4 className="text-base font-semibold text-slate-900">
-								Confirmación en mapa
-							</h4>
-							<p className="mt-1 text-sm text-slate-600">
-								Busca la dirección y ajusta el marcador si hace falta.
-							</p>
-						</div>
-
-						{allowLocationEdit ? (
-							<ClientLocationPickerMap
-								key={mapResetKey}
-								clientId={clientId}
-								confirmedLat={formData.lat ? Number(formData.lat) : null}
-								confirmedLng={formData.lng ? Number(formData.lng) : null}
-								initialSearchQuery={initialSearchQuery}
-								onConfirmLocation={onConfirmLocation}
-								compact={compact}
-							/>
-						) : (
-							<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-								La ubicación solo puede confirmarse desde edición propia del
-								cliente o edición administrativa.
-							</div>
-						)}
-					</div>
-				) : null}
 
 				{isAdminEditMode ? (
 					<div

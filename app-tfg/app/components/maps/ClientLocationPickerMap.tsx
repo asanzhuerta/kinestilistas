@@ -152,140 +152,174 @@ export default function ClientLocationPickerMap({
 		);
 	}
 
-	return (
-		<div className={compact ? "space-y-3" : "space-y-4"}>
-			<div
-				className={
-					compact
-						? "rounded-2xl border border-slate-200 bg-white p-3"
-						: "rounded-3xl border border-slate-200 bg-white p-4"
-				}
+	const searchSection = (
+		<div
+			className={
+				compact
+					? "rounded-2xl border border-slate-200 bg-white p-3"
+					: "rounded-3xl border border-slate-200 bg-white p-4"
+			}
+		>
+			<label
+				htmlFor="client-location-search"
+				className="text-sm font-medium text-slate-700"
 			>
-				<label
-					htmlFor="client-location-search"
-					className="text-sm font-medium text-slate-700"
-				>
-					Buscar dirección
-				</label>
+				Buscar dirección
+			</label>
 
-				<div className="mt-2 flex flex-col gap-3 sm:flex-row">
-					<input
-						key={initialSearchQuery || "client-location-search-empty"}
-						id="client-location-search"
-						ref={searchInputRef}
-						type="search"
-						defaultValue={initialSearchQuery}
-						onKeyDown={handleSearchKeyDown}
-						placeholder="Calle, número, ciudad..."
+			<div className="mt-2 flex flex-col gap-3 sm:flex-row">
+				<input
+					key={initialSearchQuery || "client-location-search-empty"}
+					id="client-location-search"
+					ref={searchInputRef}
+					type="search"
+					defaultValue={initialSearchQuery}
+					onKeyDown={handleSearchKeyDown}
+					placeholder="Calle, número, ciudad..."
 					className={`min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 ${
 						compact ? "py-2" : "py-3"
 					}`}
-					/>
+				/>
 
-					<button
-						type="button"
-						onClick={() => void handleSearchAddress()}
-						disabled={searching}
-						className={`inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 ${
-							compact ? "py-2" : "py-3"
-						}`}
-					>
-						{searching ? "Buscando..." : "Buscar"}
-					</button>
-				</div>
-
-				{searchResultLabel ? (
-					<p className="mt-2 text-sm text-slate-600">
-						Resultado: {searchResultLabel}
-					</p>
-				) : null}
+				<button
+					type="button"
+					onClick={() => void handleSearchAddress()}
+					disabled={searching}
+					className={`inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 ${
+						compact ? "py-2" : "py-3"
+					}`}
+				>
+					{searching ? "Buscando..." : "Buscar"}
+				</button>
 			</div>
 
-			<div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
-				<MapContainer
-					center={[position.lat, position.lng]}
-					zoom={16}
-					scrollWheelZoom
-					style={{ height: compact ? "220px" : "420px", width: "100%" }}
+			{searchResultLabel ? (
+				<p className="mt-2 text-sm text-slate-600">
+					Resultado: {searchResultLabel}
+				</p>
+			) : null}
+		</div>
+	);
+
+	const mapSection = (
+		<div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
+			<MapContainer
+				center={[position.lat, position.lng]}
+				zoom={16}
+				scrollWheelZoom
+				style={{ height: compact ? "210px" : "420px", width: "100%" }}
+			>
+				<TileLayer
+					attribution="&copy; OpenStreetMap contributors"
+					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+				/>
+
+				<ClickHandler onPick={setPosition} />
+				<RecenterMap position={position} />
+
+				<Marker
+					position={[position.lat, position.lng]}
+					draggable
+					eventHandlers={{
+						dragend: (event) => {
+							const marker = event.target;
+							const latlng = marker.getLatLng();
+
+							setPosition({
+								lat: latlng.lat,
+								lng: latlng.lng,
+							});
+						},
+					}}
 				>
-					<TileLayer
-						attribution="&copy; OpenStreetMap contributors"
-						url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-					/>
+					<Popup>
+						Ubicación seleccionada
+						<br />
+						Lat: {position.lat.toFixed(6)}
+						<br />
+						Lng: {position.lng.toFixed(6)}
+					</Popup>
+				</Marker>
+			</MapContainer>
+		</div>
+	);
 
-					<ClickHandler onPick={setPosition} />
-					<RecenterMap position={position} />
+	const confirmationSection = (
+		<div
+			className={
+				compact
+					? "rounded-2xl border border-slate-200 bg-white p-3"
+					: "rounded-3xl border border-slate-200 bg-white p-4"
+			}
+		>
+			<p className={compact ? "text-xs text-slate-600" : "text-sm text-slate-600"}>
+				Haz clic en el mapa o arrastra el marcador hasta la ubicación exacta
+				del establecimiento.
+			</p>
 
-					<Marker
-						position={[position.lat, position.lng]}
-						draggable
-						eventHandlers={{
-							dragend: (event) => {
-								const marker = event.target;
-								const latlng = marker.getLatLng();
+			<div
+				className={
+					compact
+						? "mt-2 grid gap-2 md:grid-cols-2"
+						: "mt-3 grid gap-3 md:grid-cols-2"
+				}
+			>
+				<div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
+					<span className="font-medium text-slate-700">Latitud:</span>{" "}
+					<span className="text-slate-900">{position.lat.toFixed(6)}</span>
+				</div>
 
-								setPosition({
-									lat: latlng.lat,
-									lng: latlng.lng,
-								});
-							},
-						}}
-					>
-						<Popup>
-							Ubicación seleccionada
-							<br />
-							Lat: {position.lat.toFixed(6)}
-							<br />
-							Lng: {position.lng.toFixed(6)}
-						</Popup>
-					</Marker>
-				</MapContainer>
+				<div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
+					<span className="font-medium text-slate-700">Longitud:</span>{" "}
+					<span className="text-slate-900">{position.lng.toFixed(6)}</span>
+				</div>
 			</div>
 
 			<div
 				className={
 					compact
-						? "rounded-2xl border border-slate-200 bg-white p-3"
-						: "rounded-3xl border border-slate-200 bg-white p-4"
+						? "mt-3 flex flex-wrap items-center gap-2"
+						: "mt-4 flex flex-wrap items-center gap-3"
 				}
 			>
-				<p className={compact ? "text-xs text-slate-600" : "text-sm text-slate-600"}>
-					Haz clic en el mapa o arrastra el marcador hasta la ubicación exacta
-					del establecimiento.
-				</p>
+				<button
+					type="button"
+					onClick={handleConfirmLocation}
+					className={`inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 ${
+						compact ? "py-2" : "py-3"
+					}`}
+				>
+					Confirmar ubicación
+				</button>
 
-				<div className={compact ? "mt-2 grid gap-2 md:grid-cols-2" : "mt-3 grid gap-3 md:grid-cols-2"}>
-					<div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
-						<span className="font-medium text-slate-700">Latitud:</span>{" "}
-						<span className="text-slate-900">{position.lat.toFixed(6)}</span>
-					</div>
+				{feedback ? (
+					<p className="text-sm font-medium text-emerald-700">{feedback}</p>
+				) : null}
 
-					<div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
-						<span className="font-medium text-slate-700">Longitud:</span>{" "}
-						<span className="text-slate-900">{position.lng.toFixed(6)}</span>
-					</div>
-				</div>
-
-				<div className={compact ? "mt-3 flex flex-wrap items-center gap-2" : "mt-4 flex flex-wrap items-center gap-3"}>
-					<button
-						type="button"
-						onClick={handleConfirmLocation}
-						className={`inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 ${
-							compact ? "py-2" : "py-3"
-						}`}
-					>
-						Confirmar ubicación
-					</button>
-
-					{feedback ? (
-						<p className="text-sm font-medium text-emerald-700">{feedback}</p>
-					) : null}
-
-					{error ? (
-						<p className="text-sm font-medium text-red-600">{error}</p>
-					) : null}
-				</div>
+				{error ? (
+					<p className="text-sm font-medium text-red-600">{error}</p>
+				) : null}
 			</div>
+		</div>
+	);
+
+	if (compact) {
+		return (
+			<div className="grid gap-3 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+				<div className="space-y-3">
+					{searchSection}
+					{confirmationSection}
+				</div>
+				{mapSection}
+			</div>
+		);
+	}
+
+	return (
+		<div className="space-y-4">
+			{searchSection}
+			{mapSection}
+			{confirmationSection}
 		</div>
 	);
 }

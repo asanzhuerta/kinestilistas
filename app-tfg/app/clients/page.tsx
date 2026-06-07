@@ -13,7 +13,6 @@ import {
 	ColorIcon,
 	OrderIcon,
 	PricesIcon,
-	ProductsIcon,
 	PromotionsIcon,
 	SimulatorIcon,
 	TrainingIcon,
@@ -43,7 +42,6 @@ const navItems = [
 		href: "/clients/orders",
 	},
 	{ title: "Tarifas", icon: <PricesIcon className="h-6 w-6" />, disabled: true },
-	{ title: "Productos", icon: <ProductsIcon className="h-6 w-6" />, disabled: true },
 	{ title: "Simulador", icon: <SimulatorIcon className="h-6 w-6" />, disabled: true },
 	{
 		title: "Promociones",
@@ -71,20 +69,12 @@ export default async function ClientsHome() {
 
 	return (
 		<PageTransition>
+			<div className="mb-5 flex justify-end">
+				<AssistantCard compact />
+			</div>
+
 			<div className="mb-6">
 				<ClientDeliveryEstimateCard />
-			</div>
-
-			<div className="mb-6">
-				<AssistantCard />
-			</div>
-
-			<div className="mb-4 rounded-2xl border border-slate-200 bg-white/75 px-4 py-3 text-sm text-slate-600 shadow-sm">
-				En esta versión ya tienes operativos la previsión de reparto, el
-				catálogo de productos, la consulta de coloración, la gestión de
-				pedidos, las fichas técnicas del salón con plantillas y borradores
-				técnicos, promociones, formaciones, avisos internos y la gestión de tu
-				perfil. El resto de accesos se activaran en las siguientes iteraciones.
 			</div>
 
 			{unreadNotificationsCount > 0 ? (
