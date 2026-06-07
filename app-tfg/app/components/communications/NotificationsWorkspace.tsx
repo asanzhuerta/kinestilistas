@@ -104,7 +104,7 @@ export default function NotificationsWorkspace({
 				method: "PATCH",
 				fallbackMessage: "No se pudieron marcar los avisos",
 			});
-			setMessage("Avisos marcados como leidos");
+			setMessage("Avisos marcados como leídos");
 			router.refresh();
 		} catch (error) {
 			setError(getErrorMessage(error, "No se pudieron marcar los avisos"));
@@ -123,7 +123,7 @@ export default function NotificationsWorkspace({
 				method: "PATCH",
 				fallbackMessage: "No se pudo marcar el aviso",
 			});
-			setMessage("Aviso marcado como leido");
+			setMessage("Aviso marcado como leído");
 			router.refresh();
 		} catch (error) {
 			setError(getErrorMessage(error, "No se pudo marcar el aviso"));
@@ -190,10 +190,7 @@ export default function NotificationsWorkspace({
 			</div>
 
 			<section className="rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
-				<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-					M6 / Seguimiento
-				</p>
-				<h2 className="mt-2 text-2xl font-bold text-slate-900">
+				<h2 className="text-2xl font-bold text-slate-900">
 					Avisos y recordatorios
 				</h2>
 				<p className="mt-2 max-w-3xl text-sm text-slate-600">

@@ -20,6 +20,22 @@ function getErrorMessage(error: unknown, fallback: string) {
 	return error instanceof ApiClientError ? error.message : fallback;
 }
 
+function getStatusHelp(status: PushStatus) {
+	if (status === "not_configured") {
+		return "Falta la configuración del servidor para enviar push. Cuando estén definidas las claves VAPID, podrás activar este dispositivo.";
+	}
+
+	if (status === "unsupported") {
+		return "Este navegador o esta conexión no permite notificaciones push. Prueba con HTTPS, localhost o la PWA instalada.";
+	}
+
+	if (status === "denied") {
+		return "El permiso está bloqueado en este navegador. Cambia los permisos del sitio para poder volver a activarlo.";
+	}
+
+	return "";
+}
+
 function urlBase64ToUint8Array(base64String: string) {
 	const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
 	const base64 = `${base64String}${padding}`
@@ -181,6 +197,10 @@ export default function PushNotificationOptIn() {
 		enabled: "Activo",
 		denied: "Bloqueado",
 	};
+	const statusHelp = getStatusHelp(status);
+	const canEnablePush = status === "available";
+	const showEnablePushButton =
+		status === "checking" || status === "not_configured" || canEnablePush;
 
 	return (
 		<section className="rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm">
@@ -199,14 +219,14 @@ export default function PushNotificationOptIn() {
 			</div>
 
 			<div className="mt-4 flex flex-wrap gap-2">
-				{status === "available" ? (
+				{showEnablePushButton ? (
 					<button
 						type="button"
 						onClick={enablePush}
-						disabled={pending}
+						disabled={pending || !canEnablePush}
 						className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
 					>
-						Activar push
+						Activar notificaciones push
 					</button>
 				) : null}
 				{status === "enabled" ? (
@@ -216,7 +236,7 @@ export default function PushNotificationOptIn() {
 						disabled={pending}
 						className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-60"
 					>
-						Desactivar push
+						Desactivar notificaciones push
 					</button>
 				) : null}
 			</div>
@@ -225,10 +245,8 @@ export default function PushNotificationOptIn() {
 				<p className="mt-3 text-sm text-emerald-700">{message}</p>
 			) : null}
 			{error ? <p className="mt-3 text-sm text-rose-700">{error}</p> : null}
-			{status === "denied" ? (
-				<p className="mt-3 text-sm text-slate-500">
-					Permiso bloqueado en este navegador.
-				</p>
+			{statusHelp ? (
+				<p className="mt-3 text-sm leading-6 text-slate-500">{statusHelp}</p>
 			) : null}
 		</section>
 	);
