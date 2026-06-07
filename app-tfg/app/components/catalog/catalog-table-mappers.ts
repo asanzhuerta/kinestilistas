@@ -58,6 +58,9 @@ export function mapCatalogProductsToEntityTableItems(
 	const categoryBadgeClassMap = buildCategoryBadgeClassMap(
 		products.map((product) => product.productCategory?.name),
 	);
+	const subcategoryBadgeClassMap = buildCategoryBadgeClassMap(
+		products.map((product) => product.productSubcategory?.name),
+	);
 
 	return products.map((product) => ({
 		id: product.id,
@@ -66,6 +69,13 @@ export function mapCatalogProductsToEntityTableItems(
 		imageUrl: product.image_url,
 		secondaryImageUrl: product.productLine?.image_url ?? null,
 		secondaryImageLabel: product.productLine?.name ?? null,
+		secondaryBadge: buildBadge(
+			product.productSubcategory?.name,
+			getCategoryBadgeClass(
+				product.productSubcategory?.name,
+				subcategoryBadgeClassMap,
+			),
+		),
 		category: product.productCategory?.name ?? "Sin categoría",
 		primaryDate: toIsoString(product.created_at),
 		badges: [

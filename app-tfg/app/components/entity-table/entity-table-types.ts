@@ -48,6 +48,7 @@ export type EntityTableItem = {
 	imageUrl?: string | null;
 	secondaryImageUrl?: string | null;
 	secondaryImageLabel?: string | null;
+	secondaryBadge?: EntityTableBadge | null;
 	category?: string | null;
 	status?: string | null;
 	primaryDate?: string | null;

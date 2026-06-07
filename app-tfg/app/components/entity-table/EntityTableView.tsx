@@ -307,6 +307,14 @@ function EntityCard({
 										/>
 									</div>
 								) : null}
+
+								{item.secondaryBadge ? (
+									<span
+										className={`inline-flex max-w-full justify-center rounded-full px-3 py-1 text-center text-[11px] font-semibold leading-tight ${item.secondaryBadge.className ?? "bg-slate-100 text-slate-700"}`}
+									>
+										{item.secondaryBadge.label}
+									</span>
+								) : null}
 							</div>
 						</div>
 
@@ -351,7 +359,7 @@ function EntityCard({
 						</div>
 					</div>
 
-					<div className="hidden items-stretch gap-4 lg:grid lg:grid-cols-[7.25rem_minmax(0,1fr)_5rem] xl:grid-cols-[9rem_minmax(0,1fr)_6rem]">
+					<div className="hidden items-stretch gap-4 lg:grid lg:grid-cols-[7.25rem_minmax(0,1fr)_6.5rem] xl:grid-cols-[9rem_minmax(0,1fr)_7.5rem]">
 						<div className="h-full w-full self-stretch">
 							<UserAvatar
 								name={item.title}
@@ -437,6 +445,14 @@ function EntityCard({
 										className="h-full w-full rounded-xl text-2xl sm:rounded-2xl"
 									/>
 								</div>
+							) : null}
+
+							{item.secondaryBadge ? (
+								<span
+									className={`inline-flex max-w-full justify-center rounded-full px-3 py-1 text-center text-[11px] font-semibold leading-tight sm:text-xs ${item.secondaryBadge.className ?? "bg-slate-100 text-slate-700"}`}
+								>
+									{item.secondaryBadge.label}
+								</span>
 							) : null}
 						</div>
 					</div>

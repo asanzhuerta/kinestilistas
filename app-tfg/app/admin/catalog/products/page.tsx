@@ -12,6 +12,7 @@ import { toIsoString } from "@/lib/utils/date-serialization";
 function mapProductToItem(
 	product: Awaited<ReturnType<typeof listProducts>>[number],
 	categoryBadgeClassMap: Map<string, string>,
+	subcategoryBadgeClassMap: Map<string, string>,
 ): EntityTableItem {
 	return {
 		id: product.id,
@@ -20,6 +21,15 @@ function mapProductToItem(
 		imageUrl: product.image_url,
 		secondaryImageUrl: product.productLine?.image_url ?? null,
 		secondaryImageLabel: product.productLine?.name ?? null,
+		secondaryBadge: product.productSubcategory?.name
+			? {
+					label: product.productSubcategory.name,
+					className: getCategoryBadgeClass(
+						product.productSubcategory.name,
+						subcategoryBadgeClassMap,
+					),
+				}
+			: null,
 		category: product.productCategory?.name ?? "Sin categoría",
 		status: product.status?.name ?? "Sin estado",
 		primaryDate: toIsoString(product.created_at),
@@ -94,6 +104,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 	const categoryBadgeClassMap = buildCategoryBadgeClassMap(
 		products.map((product) => product.productCategory?.name),
 	);
+	const subcategoryBadgeClassMap = buildCategoryBadgeClassMap(
+		products.map((product) => product.productSubcategory?.name),
+	);
 
 	return (
 		<div className="space-y-6">
@@ -106,7 +119,11 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 				entityLabel="producto"
 				basePath="/admin/catalog/products"
 				items={products.map((product) =>
-					mapProductToItem(product, categoryBadgeClassMap),
+					mapProductToItem(
+						product,
+						categoryBadgeClassMap,
+						subcategoryBadgeClassMap,
+					),
 				)}
 				metrics={[
 					{ label: "productos", value: products.length },
