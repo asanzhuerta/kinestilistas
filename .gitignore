@@ -2,7 +2,15 @@
 /examples/
 /backups/
 app-tfg/TFG_STATUS_MASTER_PLAN.md
-/.codex-artifacts/
-/app-tfg/.codex-artifacts
-/.codex-remote-attachments/
+
+# Artefactos locales de Codex y sesiones de navegador/headless.
+.codex*/
+.codex-*/
+**/.codex*/
+**/.codex-*/
+**/codex-*.log
+**/codex-*.out.log
+**/codex-*.err.log
+
+# Logs locales de Next.js.
 /app-tfg/next-*.log

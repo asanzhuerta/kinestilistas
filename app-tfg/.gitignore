@@ -49,6 +49,9 @@ public/workbox-*.js
 # plantilla de ejemplo
 docs-example/
 
-# artefactos locales de Codex
-.codex-remote-attachments/
+# artefactos locales de Codex y sesiones de navegador/headless
+.codex*/
+.codex-*/
 codex-*.log
+codex-*.out.log
+codex-*.err.log
