@@ -53,6 +53,7 @@ function EntityCard({
 	const hasSecondaryImage = Boolean(
 		item.secondaryImageUrl || item.secondaryImageLabel,
 	);
+	const hasSecondaryPanel = hasSecondaryImage || Boolean(item.secondaryBadge);
 	const motionProps = shouldReduceMotion
 		? {
 				initial: false,
@@ -139,8 +140,8 @@ function EntityCard({
 				<div className="relative overflow-hidden rounded-[1.45rem] border border-slate-100 bg-white shadow-inner shadow-slate-950/5">
 					<div
 						className={`grid h-[15rem] min-h-0 gap-2 overflow-hidden p-3 ${
-							hasSecondaryImage
-								? "grid-cols-[minmax(0,1fr)_4.75rem]"
+							hasSecondaryPanel
+								? "grid-cols-[minmax(0,1fr)_5.75rem]"
 								: "grid-cols-1"
 						}`}
 					>
@@ -160,22 +161,33 @@ function EntityCard({
 							/>
 						</div>
 
-						{hasSecondaryImage ? (
-							<div className="flex h-full min-h-0 items-end justify-end overflow-hidden pt-11">
-								<div className="w-full rounded-2xl border border-slate-100 bg-white p-1.5 shadow-sm shadow-slate-950/5">
-									<UserAvatar
-										name={item.secondaryImageLabel ?? item.title}
-										imageUrl={item.secondaryImageUrl}
-										size="xl"
-										shape="soft-square"
-										imageFit="contain"
-										imagePaddingClass="p-0"
-										imageBackgroundClass="bg-white"
-										imageIntrinsicPixels={192}
-										imageSizes="96px"
-										className="h-16 w-full rounded-xl text-sm"
-									/>
-								</div>
+						{hasSecondaryPanel ? (
+							<div className="flex h-full min-h-0 flex-col items-end justify-end gap-2 overflow-hidden pt-11">
+								{hasSecondaryImage ? (
+									<div className="w-full rounded-2xl border border-slate-100 bg-white p-1.5 shadow-sm shadow-slate-950/5">
+										<UserAvatar
+											name={item.secondaryImageLabel ?? item.title}
+											imageUrl={item.secondaryImageUrl}
+											size="xl"
+											shape="soft-square"
+											imageFit="contain"
+											imagePaddingClass="p-0"
+											imageBackgroundClass="bg-white"
+											imageIntrinsicPixels={192}
+											imageSizes="96px"
+											className="h-16 w-full rounded-xl text-sm"
+										/>
+									</div>
+								) : null}
+
+								{item.secondaryBadge ? (
+									<span
+										className={`inline-flex max-w-full justify-center rounded-full px-2.5 py-1 text-center text-[10px] font-black uppercase leading-tight tracking-[0.08em] shadow-sm backdrop-blur-md ${item.secondaryBadge.className ?? "border border-slate-200 bg-white/90 text-slate-700"}`}
+										title={item.secondaryBadge.label}
+									>
+										{item.secondaryBadge.label}
+									</span>
+								) : null}
 							</div>
 						) : null}
 					</div>
