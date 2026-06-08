@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import PageTransition from "@/app/components/animations/PageTransition";
+import AdminNotificationSettingsForm from "@/app/components/admin/AdminNotificationSettingsForm";
 import SafeForm from "@/app/components/forms/SafeForm";
 import SubmitButton from "@/app/components/forms/SubmitButton";
 import H1Title from "@/app/components/H1Title";
@@ -201,12 +201,7 @@ export default function AdminRateLimitSettingsForm() {
 					subtitle="Ajusta los límites operativos de autenticación y API para toda la aplicación."
 				/>
 
-				<Link
-					href="/admin/configuration"
-					className="inline-flex w-fit rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white"
-				>
-					Volver a configuración
-				</Link>
+				<AdminNotificationSettingsForm />
 
 				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
 					<div className="space-y-3">

@@ -9,7 +9,12 @@ import {
 import { AppNotification } from "@/lib/typeorm/entities/AppNotification";
 import { CommercialVisit } from "@/lib/typeorm/entities/CommercialVisit";
 import { User } from "@/lib/typeorm/entities/User";
+import type { NotificationDeliveryChannel } from "@/lib/contracts/communications";
 import { deliverNotificationToExternalChannels } from "@/lib/typeorm/services/communications/notification-delivery";
+import {
+	getAutomaticNotificationDeliveryChannels,
+	hasExternalNotificationChannels,
+} from "@/lib/typeorm/services/communications/notification-settings";
 
 type VisitNotificationInput = {
 	recipientUserId: string;
@@ -19,6 +24,7 @@ type VisitNotificationInput = {
 	sourceType: string;
 	sourceId: string | null;
 	deliverExternal?: boolean;
+	deliveryChannels?: NotificationDeliveryChannel[];
 };
 
 function formatVisitDate(value: string) {
@@ -56,6 +62,22 @@ function getMadridTodayDate(date = new Date()) {
 	const day = parts.find((part) => part.type === "day")?.value ?? "01";
 
 	return `${year}-${month}-${day}`;
+}
+
+async function getVisitNotificationDeliveryOptions(
+	manager: EntityManager,
+	key:
+		| "commercial_visit_created"
+		| "commercial_visit_rescheduled"
+		| "commercial_visit_today"
+		| "commercial_visit_auto_postponed",
+) {
+	const channels = await getAutomaticNotificationDeliveryChannels(key, manager);
+
+	return {
+		deliverExternal: hasExternalNotificationChannels(channels),
+		deliveryChannels: channels,
+	};
 }
 
 async function createNotificationIfMissing(
@@ -99,7 +121,7 @@ async function createNotificationIfMissing(
 		if (recipient) {
 			await deliverNotificationToExternalChannels(manager, {
 				recipients: [recipient],
-				channels: ["email", "push"],
+				channels: input.deliveryChannels ?? ["email", "push"],
 				title: input.title,
 				body: input.body,
 				notificationType: input.notificationType,
@@ -125,7 +147,10 @@ export async function notifyClientVisitCreated(
 		notificationType: "visit_created",
 		sourceType: "commercial_visit_created",
 		sourceId: visit.id,
-		deliverExternal: true,
+		...(await getVisitNotificationDeliveryOptions(
+			manager,
+			"commercial_visit_created",
+		)),
 	});
 }
 
@@ -142,7 +167,10 @@ export async function notifyClientVisitRescheduled(
 		notificationType: `visit_rescheduled:${visit.scheduled_for_date}`,
 		sourceType: "commercial_visit_rescheduled",
 		sourceId: visit.id,
-		deliverExternal: true,
+		...(await getVisitNotificationDeliveryOptions(
+			manager,
+			"commercial_visit_rescheduled",
+		)),
 	});
 }
 
@@ -184,7 +212,10 @@ export async function notifyCommercialVisitsAutoPostponed(
 				? "commercial_visit_postponed"
 				: "commercial_visit_postponed_batch",
 		sourceId: count === 1 ? firstVisit.id : null,
-		deliverExternal: false,
+		...(await getVisitNotificationDeliveryOptions(
+			manager,
+			"commercial_visit_auto_postponed",
+		)),
 	});
 }
 
@@ -230,7 +261,10 @@ export async function syncTodayVisitNotificationsForUser(userId: string) {
 				notificationType: `visit_today:${today}`,
 				sourceType: "commercial_visit_today",
 				sourceId: visit.id,
-				deliverExternal: false,
+				...(await getVisitNotificationDeliveryOptions(
+					manager,
+					"commercial_visit_today",
+				)),
 			});
 		}
 	});
