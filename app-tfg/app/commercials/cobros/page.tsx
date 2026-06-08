@@ -34,14 +34,11 @@ export default async function CommercialPaymentsPage() {
 
 				<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 					<div className="flex flex-col gap-2">
-						<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-							M4
-						</p>
 						<h2 className="text-2xl font-semibold text-slate-900">
 							Seguimiento comercial de cobros
 						</h2>
 						<p className="text-sm text-slate-600">
-							Aqui solo aparecen pedidos que ya constan como entregados, para
+							Aquí solo aparecen pedidos que ya constan como entregados, para
 							que el ciclo de pedido, reparto y cobro quede completo.
 						</p>
 					</div>

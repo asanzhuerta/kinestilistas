@@ -13,7 +13,6 @@ import {
 	ClientsIcon,
 	VisitsIcon,
 	RouteIcon,
-	ActivityIcon,
 	ChatIcon,
 	PaymentsIcon,
 	PromotionsIcon,
@@ -29,12 +28,10 @@ type DashboardSectionItem = {
 
 const sections: Array<{
 	title: string;
-	module: string;
 	items: DashboardSectionItem[];
 }> = [
 	{
 		title: "Gestión comercial",
-		module: "M2",
 		items: [
 			{
 				title: "Clientes",
@@ -51,16 +48,10 @@ const sections: Array<{
 				icon: <RouteIcon className="h-6 w-6" />,
 				href: "/commercials/routes",
 			},
-			{
-				title: "Actividad",
-				icon: <ActivityIcon className="h-6 w-6" />,
-				href: "/commercials/activity",
-			},
 		],
 	},
 	{
 		title: "Catálogo y operativa comercial",
-		module: "M3 / M4",
 		items: [
 			{
 				title: "Catálogo",
@@ -91,7 +82,6 @@ const sections: Array<{
 	},
 	{
 		title: "Comunicación y seguimiento",
-		module: "M6 / M7",
 		items: [
 			{
 				title: "Promociones",
@@ -126,7 +116,7 @@ export default async function CommercialsHome() {
 
 	return (
 		<PageTransition>
-			<RouteMapCard />
+			<RouteMapCard compact />
 
 			<div className="space-y-6">
 				{unreadNotificationsCount > 0 ? (
@@ -143,9 +133,6 @@ export default async function CommercialsHome() {
 						className="rounded-3xl border border-white/20 bg-white/10 p-4 backdrop-blur-md"
 					>
 						<div className="mb-4 px-1">
-							<p className="text-xs font-medium uppercase tracking-[0.25em] text-black/50">
-								{section.module}
-							</p>
 							<h2 className="text-lg font-semibold text-black/80">
 								{section.title}
 							</h2>

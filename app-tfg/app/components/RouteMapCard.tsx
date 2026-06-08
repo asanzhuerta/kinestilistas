@@ -24,6 +24,7 @@ type RouteMapCardProps = {
 	title?: string;
 	subtitle?: string;
 	className?: string;
+	compact?: boolean;
 };
 
 type BrowserLocationState =
@@ -71,7 +72,7 @@ function buildCommittedTimeDescription(
 		parts.push(`${formatMinutes(waitingMinutes)} de espera`);
 	}
 
-	return parts.join(" · ");
+	return parts.join(" / ");
 }
 
 function getRoutePreviewCoordinates(browserLocation: BrowserLocationState) {
@@ -89,6 +90,7 @@ export default function RouteMapCard({
 	title = "Ruta diaria",
 	subtitle = "Vista previa de la ruta calculada con tus visitas planificadas para hoy",
 	className = "",
+	compact = false,
 }: RouteMapCardProps) {
 	const [browserLocation, setBrowserLocation] = useState<BrowserLocationState>({
 		status: "loading",
@@ -118,7 +120,7 @@ export default function RouteMapCard({
 				setBrowserLocation({
 					status: "unavailable",
 					message:
-						"No se pudo obtener tu ubicacion actual. Se intentara usar el punto de salida guardado.",
+						"No se pudo obtener tu ubicación actual. Se intentará usar el punto de salida guardado.",
 				});
 			},
 			{
@@ -162,13 +164,12 @@ export default function RouteMapCard({
 
 	return (
 		<div
-			className={`rounded-3xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}
+			className={`rounded-3xl border border-slate-200 bg-white shadow-sm ${
+				compact ? "p-4 lg:p-5" : "p-5"
+			} ${className}`}
 		>
 			<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<p className="text-sm font-medium uppercase tracking-wide text-slate-500">
-						M2 · Rutas comerciales
-					</p>
 					<h2 className="text-lg font-semibold text-slate-900">{title}</h2>
 					<p className="mt-1 text-sm text-slate-600">{subtitle}</p>
 				</div>
@@ -185,7 +186,7 @@ export default function RouteMapCard({
 
 			{browserLocation.status === "loading" ? (
 				<div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-					Intentando obtener tu ubicacion actual para iniciar la ruta...
+					Intentando obtener tu ubicación actual para iniciar la ruta...
 				</div>
 			) : null}
 
@@ -208,41 +209,50 @@ export default function RouteMapCard({
 			) : null}
 
 			{!shouldShowLoading && !error && preview ? (
-				<div className="space-y-4">
-					<div className="flex flex-wrap gap-3 text-sm text-slate-600">
-						<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
-							<span className="font-semibold text-slate-900">
-								{preview.totalAssignedClients}
-							</span>{" "}
-							clientes con visita hoy
-						</div>
+				<div
+					className={
+						compact
+							? "grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] xl:items-stretch"
+							: "space-y-4"
+					}
+				>
+					<div className="space-y-4">
+						<div className="flex flex-wrap gap-3 text-sm text-slate-600">
+							<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
+								<span className="font-semibold text-slate-900">
+									{preview.totalAssignedClients}
+								</span>{" "}
+								clientes con visita hoy
+							</div>
 
-						<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
-							<span className="font-semibold text-slate-900">
-								{preview.mappedClients}
-							</span>{" "}
-							con coordenadas
-						</div>
+							<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
+								<span className="font-semibold text-slate-900">
+									{preview.mappedClients}
+								</span>{" "}
+								con coordenadas
+							</div>
 
-						<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
-							<span className="font-semibold text-slate-900">
-								{preview.skippedClients}
-							</span>{" "}
-							sin geolocalizar
+							<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
+								<span className="font-semibold text-slate-900">
+									{preview.skippedClients}
+								</span>{" "}
+								sin geolocalizar
+							</div>
+
+							{timingSummary ? (
+								<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
+									<span className="font-semibold text-slate-900">
+										{timingSummary.plannedVisitsCount}
+									</span>{" "}
+									visitas planificadas
+								</div>
+							) : null}
 						</div>
 
 						{timingSummary ? (
-							<div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
-								<span className="font-semibold text-slate-900">
-									{timingSummary.plannedVisitsCount}
-								</span>{" "}
-								visitas planificadas
-							</div>
-						) : null}
-					</div>
-
-					{timingSummary ? (
-						<div className="grid gap-3 md:grid-cols-3">
+							<div
+								className={compact ? "grid gap-3" : "grid gap-3 md:grid-cols-3"}
+							>
 							<div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
 								<p className="text-xs font-medium uppercase tracking-wide text-slate-500">
 									Jornada base
@@ -254,7 +264,7 @@ export default function RouteMapCard({
 								</p>
 								<p className="mt-1 text-sm text-slate-600">
 									{hasValidWorkdayRange
-										? `${formatMinutes(timingSummary.totalWorkdayMinutes)} totales · ahora ${timingSummary.currentTimeLabel}`
+										? `${formatMinutes(timingSummary.totalWorkdayMinutes)} totales / ahora ${timingSummary.currentTimeLabel}`
 										: hasWorkdayConfig
 											? "El fin de jornada debe ser posterior al inicio."
 											: "Configura tu horario habitual en Ajustes."}
@@ -269,7 +279,7 @@ export default function RouteMapCard({
 									{formatMinutes(timingSummary.totalCommittedRouteMinutes)}
 								</p>
 								<p className="mt-1 text-sm text-slate-600">
-									{timingSummary.deliveryVisitsCount} reparto ·{" "}
+									{timingSummary.deliveryVisitsCount} reparto /{" "}
 									{timingSummary.routineVisitsCount} rutinarias
 								</p>
 								<p className="mt-1 text-sm text-slate-500">
@@ -294,7 +304,7 @@ export default function RouteMapCard({
 											: "text-slate-500"
 									}`}
 								>
-									Margen del dia
+									Margen del día
 								</p>
 								<p
 									className={`mt-2 text-lg font-semibold ${
@@ -330,7 +340,7 @@ export default function RouteMapCard({
 
 					{timingSummary && !hasWorkdayConfig ? (
 						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-							Aún no has definido tu jornada base. Configurala en{" "}
+							Aún no has definido tu jornada base. Configúrala en{" "}
 							<Link
 								href="/commercials/settings"
 								className="font-semibold underline underline-offset-2"
@@ -338,8 +348,8 @@ export default function RouteMapCard({
 								Ajustes
 							</Link>{" "}
 							para que el sistema calcule el tiempo máximo disponible en ruta.
-						</div>
-					) : null}
+							</div>
+						) : null}
 
 					{timingSummary && hasWorkdayConfig && !hasValidWorkdayRange ? (
 						<div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -369,14 +379,14 @@ export default function RouteMapCard({
 
 					{preview.usingCurrentLocation ? (
 						<div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-							La ruta se ha generado usando tu ubicacion actual como punto de
+							La ruta se ha generado usando tu ubicación actual como punto de
 							inicio.
 						</div>
 					) : null}
 
 					{!preview.usingCurrentLocation && preview.usingSavedStartFallback ? (
 						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-							No se pudo usar tu ubicacion actual. Se ha utilizado el punto de
+							No se pudo usar tu ubicación actual. Se ha utilizado el punto de
 							salida guardado en tu perfil como fallback.
 						</div>
 					) : null}
@@ -402,14 +412,28 @@ export default function RouteMapCard({
 							la ruta todavía.
 						</div>
 					) : null}
+						</div>
 
-					{hasEnoughPointsForMap ? (
-						<LeafletRouteMap
-							startPoint={startPoint}
-							waypoints={waypoints}
-							endPoint={endPoint}
-						/>
-					) : null}
+					<div
+						className={
+							compact
+								? "min-h-[22rem] sm:min-h-[24rem] xl:h-full xl:min-h-[18rem]"
+								: ""
+						}
+					>
+						{hasEnoughPointsForMap ? (
+							<LeafletRouteMap
+								startPoint={startPoint}
+								waypoints={waypoints}
+								endPoint={endPoint}
+								heightClassName={
+									compact
+										? "h-[22rem] sm:h-[24rem] xl:h-full"
+										: undefined
+								}
+							/>
+						) : null}
+					</div>
 				</div>
 			) : null}
 		</div>

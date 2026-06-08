@@ -5,7 +5,7 @@ export default function CommercialRoutesPage() {
 	return (
 		<div className="space-y-6">
 			<H1Title
-				title="Ruta del dia"
+				title="Ruta del día"
 				subtitle="Consulta el recorrido previsto, los tiempos estimados y el margen operativo restante."
 			/>
 

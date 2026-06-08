@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
 import EntityTable from "@/app/components/entity-table/EntityTable";
 import { useCommercialClients } from "@/app/hooks/api/useCommercialClients";
@@ -12,7 +13,6 @@ export default function CommercialClientsList() {
 		loading,
 		error,
 	} = useCommercialClients();
-	const clientsCount = clientsData?.length ?? 0;
 
 	const tableItems = useMemo(
 		() => mapCommercialClientsToEntityTableItems(clientsData ?? []),
@@ -22,34 +22,10 @@ export default function CommercialClientsList() {
 	return (
 		<PageTransition>
 			<div className="space-y-6">
-				<section className="glass-card rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
-					<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-						<div>
-							<p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-								M2 · Gestión comercial
-							</p>
-
-							<h2 className="text-3xl font-bold text-slate-900">
-								Mis clientes
-							</h2>
-
-							<p className="mt-2 max-w-3xl text-sm text-slate-600">
-								Aqui tienes la cartera activa asignada a tu perfil comercial.
-								Puedes filtrar, buscar y abrir la ficha de cada cliente
-								profesional.
-							</p>
-						</div>
-
-						<div className="flex flex-wrap gap-3 text-sm text-slate-600">
-							<div className="rounded-full border border-slate-200 bg-white px-4 py-2">
-								<span className="font-semibold text-slate-900">
-									{clientsCount}
-								</span>{" "}
-								clientes asignados
-							</div>
-						</div>
-					</div>
-				</section>
+				<H1Title
+					title="Mis clientes"
+					subtitle="Aquí tienes la cartera activa asignada a tu perfil comercial. Puedes filtrar, buscar y abrir la ficha de cada cliente profesional."
+				/>
 
 				{loading ? (
 					<section className="glass-card rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">

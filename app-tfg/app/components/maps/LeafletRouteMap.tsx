@@ -56,6 +56,33 @@ function FitBounds({ points }: { points: RoutePoint[] }) {
 	return null;
 }
 
+function ResizeMapOnLayoutChange() {
+	const map = useMap();
+
+	useEffect(() => {
+		const container = map.getContainer();
+		const invalidateSize = () => {
+			map.invalidateSize({ animate: false });
+		};
+		const initialTimer = window.setTimeout(invalidateSize, 0);
+		const settledTimer = window.setTimeout(invalidateSize, 250);
+		let resizeObserver: ResizeObserver | null = null;
+
+		if (typeof ResizeObserver !== "undefined") {
+			resizeObserver = new ResizeObserver(invalidateSize);
+			resizeObserver.observe(container);
+		}
+
+		return () => {
+			window.clearTimeout(initialTimer);
+			window.clearTimeout(settledTimer);
+			resizeObserver?.disconnect();
+		};
+	}, [map]);
+
+	return null;
+}
+
 function buildMarkerIcon(options: {
 	label: string;
 	subLabel?: string | null;
@@ -211,7 +238,7 @@ export default function LeafletRouteMap({
 	const fallbackCenter: LatLngExpression = [36.5297, -6.2926];
 
 	return (
-		<div className="space-y-3">
+		<div className="h-full space-y-3">
 			{routeError ? (
 				<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
 					{routeError}
@@ -233,6 +260,8 @@ export default function LeafletRouteMap({
 						attribution="&copy; OpenStreetMap contributors"
 						url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 					/>
+
+					<ResizeMapOnLayoutChange />
 
 					{points.length > 0 ? <FitBounds points={points} /> : null}
 
@@ -263,7 +292,7 @@ export default function LeafletRouteMap({
 							<Popup>
 								<div className="space-y-1 text-sm">
 									<p className="font-semibold text-slate-900">
-										#{point.sequence ?? "-"} · {point.label}
+										#{point.sequence ?? "-"} / {point.label}
 									</p>
 									{point.estimatedArrivalTime ? (
 										<p className="text-slate-700">
