@@ -1,7 +1,6 @@
 export type RoleSidebarRole = "admin" | "commercial" | "client";
 
 export type RoleSidebarIcon =
-	| "activity"
 	| "catalog"
 	| "chat"
 	| "clients"
@@ -129,11 +128,6 @@ export const roleSidebarSections: Record<
 				{ title: "Clientes", href: "/commercials/clients", icon: "clients" },
 				{ title: "Rutas", href: "/commercials/routes", icon: "route" },
 				{ title: "Visitas", href: "/commercials/visits", icon: "visits" },
-				{
-					title: "Actividad",
-					href: "/commercials/activity",
-					icon: "activity",
-				},
 			],
 		},
 		{

@@ -7,7 +7,6 @@ import { signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import type { ComponentType, CSSProperties } from "react";
 import {
-	ActivityIcon,
 	CatalogIcon,
 	ChatIcon,
 	ClientsIcon,
@@ -51,7 +50,6 @@ const iconMap: Record<
 	RoleSidebarIcon,
 	ComponentType<{ className?: string }>
 > = {
-	activity: ActivityIcon,
 	catalog: CatalogIcon,
 	chat: ChatIcon,
 	clients: ClientsIcon,

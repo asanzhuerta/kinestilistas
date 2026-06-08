@@ -397,28 +397,28 @@ export function RouteIcon({ className = "w-6 h-6" }: { className?: string }) {
 			className={className}
 		>
 			<path
-				d="M9 19a2 2 0 100-4 2 2 0 000 4z"
+				d="M3.5 6.5l5-2 7 2 5-2v14l-5 2-7-2-5 2v-14z"
 				strokeLinecap="round"
 				strokeLinejoin="round"
-				strokeWidth="1"
+				strokeWidth="1.4"
 			/>
 			<path
-				d="M18 9a2 2 0 100-4 2 2 0 000 4z"
+				d="M8.5 4.5v14M15.5 6.5v14"
 				strokeLinecap="round"
 				strokeLinejoin="round"
-				strokeWidth="1"
+				strokeWidth="1.4"
 			/>
 			<path
-				d="M11 17c2.5 0 2-4 4.5-4S18 11 18 9"
+				d="M12 10.25a2.25 2.25 0 114.5 0c0 1.55-2.25 4.15-2.25 4.15S12 11.8 12 10.25z"
 				strokeLinecap="round"
 				strokeLinejoin="round"
-				strokeWidth="1"
+				strokeWidth="1.4"
 			/>
 			<path
-				d="M7 19H5a2 2 0 01-2-2v-2"
+				d="M14.25 10.25h.01"
 				strokeLinecap="round"
 				strokeLinejoin="round"
-				strokeWidth="1"
+				strokeWidth="1.8"
 			/>
 		</svg>
 	);
