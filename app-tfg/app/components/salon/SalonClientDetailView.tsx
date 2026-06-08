@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
@@ -909,13 +908,7 @@ export default function SalonClientDetailView({
 				subtitle="Consulta la ficha técnica, el historial y las sugerencias del salón"
 			/>
 
-			<div className="mb-4 flex items-center justify-between gap-3">
-				<Link
-					href="/clients/salon-clients"
-					className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-white"
-				>
-					Volver a fichas técnicas
-				</Link>
+			<div className="mb-4 flex justify-end">
 				<span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
 					{detail.salonClient.service_count} servicios
 				</span>

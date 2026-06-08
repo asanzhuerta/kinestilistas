@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import H1Title from "@/app/components/H1Title";
@@ -35,7 +34,6 @@ function getEnrollmentStatus(training: TrainingEventView) {
 export default function TrainingEventsWorkspace({
 	title,
 	subtitle,
-	backHref,
 	initialTrainings,
 }: Props) {
 	const router = useRouter();
@@ -91,15 +89,6 @@ export default function TrainingEventsWorkspace({
 	return (
 		<div className="space-y-6">
 			<H1Title title={title} subtitle={subtitle} />
-
-			<div className="flex justify-start">
-				<Link
-					href={backHref}
-					className="rounded-xl border border-slate-200 bg-white/75 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-white"
-				>
-					Volver
-				</Link>
-			</div>
 
 			<section className="rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
 				<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">

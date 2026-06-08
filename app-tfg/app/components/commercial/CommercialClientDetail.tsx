@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo } from "react";
 import PageTransition from "@/app/components/animations/PageTransition";
 import UserAvatar from "@/app/components/users/UserAvatar";
@@ -86,15 +85,6 @@ export default function CommercialClientDetail({ clientId }: Props) {
 	return (
 		<PageTransition>
 			<div className="space-y-6">
-				<div className="flex flex-wrap items-center gap-3">
-					<Link
-						href="/commercials/clients"
-						className="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-					>
-						← Volver a clientes
-					</Link>
-				</div>
-
 				{loading ? (
 					<section className="glass-card rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
 						<div className="space-y-3">
@@ -125,10 +115,6 @@ export default function CommercialClientDetail({ clientId }: Props) {
 								/>
 
 								<div className="min-w-0 flex-1">
-									<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-										M2 · Cliente asignado
-									</p>
-
 									<h1 className="mt-2 text-3xl font-bold text-slate-900">
 										{client.name}
 									</h1>

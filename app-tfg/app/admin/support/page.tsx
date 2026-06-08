@@ -1,4 +1,3 @@
-import Link from "next/link";
 import PageTransition from "@/app/components/animations/PageTransition";
 import type { SupportCapabilityStatusCode } from "@/lib/contracts/support-status";
 import {
@@ -40,12 +39,6 @@ export default function AdminSupportPage() {
 						aplicación usable en navegadores modernos, dispositivos móviles y
 						escenarios de conectividad irregular.
 					</p>
-					<Link
-						href="/admin/configuration"
-						className="mt-4 inline-flex w-fit rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white"
-					>
-						Volver a configuración
-					</Link>
 				</section>
 
 				<section className="grid gap-4 md:grid-cols-4">

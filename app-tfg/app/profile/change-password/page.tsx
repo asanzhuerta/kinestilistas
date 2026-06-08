@@ -15,7 +15,11 @@ export default async function ChangePasswordPage() {
 
 	return (
 		<>
-			<HeaderTitle title="Cambiar contraseña" />
+			<HeaderTitle
+				title="Cambiar contraseña"
+				showBackButton
+				backFallbackHref="/profile"
+			/>
 
 			<div className="mx-auto mt-6 w-full max-w-2xl">
 				<SafeForm

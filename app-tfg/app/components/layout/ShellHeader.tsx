@@ -1,21 +1,35 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import BackButton from "@/app/components/basics/BackButton";
 import { usePageHeaderContext } from "./PageHeaderContext";
 
 type ShellHeaderProps = {
 	className?: string;
 };
 
+const ROLE_LANDING_PATHS = new Set(["/admin", "/clients", "/commercials"]);
+
 export default function ShellHeader({ className = "" }: ShellHeaderProps) {
+	const pathname = usePathname();
 	const context = usePageHeaderContext();
 	const pageHeader = context?.pageHeader ?? null;
 	const hasPageHeader =
 		Boolean(pageHeader?.title?.trim()) || Boolean(pageHeader?.subtitle?.trim());
+	const shouldShowBackButton = Boolean(
+		pathname && !ROLE_LANDING_PATHS.has(pathname),
+	);
 
 	return (
 		<header
 			className={`glass-header mb-4 rounded-2xl px-6 py-4 ${className}`.trim()}
 		>
+			{shouldShowBackButton ? (
+				<div className="mb-3 flex justify-start">
+					<BackButton />
+				</div>
+			) : null}
+
 			<div
 				className={
 					hasPageHeader

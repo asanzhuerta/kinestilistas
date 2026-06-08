@@ -39,12 +39,6 @@ export default async function AdminOperationsPage() {
 					</p>
 					<div className="mt-4 flex flex-wrap gap-3">
 						<Link
-							href="/admin"
-							className="inline-flex w-fit rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white"
-						>
-							Volver al panel
-						</Link>
-						<Link
 							href="/api/admin/operations/report"
 							className="inline-flex w-fit rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
 						>

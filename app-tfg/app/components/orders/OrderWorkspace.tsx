@@ -155,7 +155,6 @@ export default function OrderWorkspace({
 	mode,
 	title,
 	subtitle,
-	backHref,
 	apiPath,
 	detailBasePath,
 	productOptions,
@@ -594,14 +593,7 @@ export default function OrderWorkspace({
 			<div className="space-y-6">
 				<H1Title title={title} subtitle={subtitle} />
 
-				<div className="flex flex-wrap items-center justify-between gap-3">
-					<Link
-						href={backHref}
-						className="inline-flex rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-white"
-					>
-						Volver
-					</Link>
-
+				<div className="flex justify-end">
 					<p className="max-w-2xl text-sm text-slate-600">
 						{mode === "client"
 							? "Prepara un pedido en curso, guárdalo como borrador si lo necesitas y confirma el pedido cuando esté listo. En coloración podrás trabajar con la referencia exacta."

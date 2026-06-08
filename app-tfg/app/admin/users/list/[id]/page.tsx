@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import BackButton from "@/app/components/basics/BackButton";
 import PageTransition from "@/app/components/animations/PageTransition";
 import UserProfileCard from "@/app/components/users/UserProfileCard";
 import { getUserById } from "@/lib/typeorm/services/users/user";
@@ -30,9 +29,6 @@ export default async function UsuarioDetallePage({ params }: Props) {
 	return (
 		<PageTransition>
 			<div className="space-y-4">
-				{/* BOTÓN DE NAVEGACIÓN ATRÁS */}
-				<BackButton />
-
 				{/* TARJETA DE PERFIL EN MODO VISUALIZACIÓN */}
 				<UserProfileCard
 					mode="view"

@@ -208,12 +208,6 @@ export default function AdminEnterpriseOperationsWorkspace({
 						</div>
 						<div className="flex flex-wrap gap-3">
 							<Link
-								href="/admin/operations"
-								className="inline-flex rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white"
-							>
-								Volver a operaciones
-							</Link>
-							<Link
 								href="/admin/integrations"
 								className="inline-flex rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
 							>

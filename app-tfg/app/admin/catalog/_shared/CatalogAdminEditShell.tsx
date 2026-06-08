@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
@@ -14,21 +13,12 @@ type Props = {
 export default function CatalogAdminEditShell({
 	title,
 	subtitle,
-	backHref,
-	backLabel,
 	children,
 }: Props) {
 	return (
 		<PageTransition>
 			<div className="space-y-6">
-				<div className="flex flex-wrap items-center justify-between gap-3">
-					<Link
-						href={backHref}
-						className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
-					>
-						Volver a {backLabel}
-					</Link>
-
+				<div className="flex justify-end">
 					<span className="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-sky-700">
 						Modo edición
 					</span>

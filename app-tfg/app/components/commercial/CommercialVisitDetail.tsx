@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import DataTable from "@/app/components/DataTable";
 import H1Title from "@/app/components/H1Title";
@@ -505,12 +504,6 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 							) : null}
 						</div>
 
-						<Link
-							href="/commercials/visits"
-							className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-						>
-							← Volver a visitas
-						</Link>
 					</div>
 				</div>
 

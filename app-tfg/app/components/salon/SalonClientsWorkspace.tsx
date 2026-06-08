@@ -93,15 +93,6 @@ export default function SalonClientsWorkspace({
 				subtitle="Gestiona clientes, historial técnico, plantillas y seguimiento de servicios"
 			/>
 
-			<div className="mb-4 flex items-center gap-3">
-				<Link
-					href="/clients"
-					className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-white"
-				>
-					Volver al panel
-				</Link>
-			</div>
-
 			<div className="mb-6 grid gap-6 xl:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
 				<section className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm">
 					<h2 className="text-lg font-semibold text-slate-900">

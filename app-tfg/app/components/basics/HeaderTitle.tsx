@@ -1,18 +1,25 @@
 "use client";
 
 import Image from "next/image";
+import BackButton from "@/app/components/basics/BackButton";
 import { usePageHeaderRegistration } from "@/app/components/layout/PageHeaderContext";
 
 type HeaderTitleProps = {
 	title: string;
 	subtitle?: string;
 	noGlass?: boolean;
+	showBackButton?: boolean;
+	backLabel?: string;
+	backFallbackHref?: string;
 };
 
 export default function HeaderTitle({
 	title,
 	subtitle = "Alta Peluquería & Estética",
 	noGlass = false,
+	showBackButton = false,
+	backLabel = "Volver",
+	backFallbackHref,
 }: HeaderTitleProps) {
 	const isRegisteredInShellHeader = usePageHeaderRegistration({ title, subtitle });
 
@@ -26,6 +33,12 @@ export default function HeaderTitle({
 				noGlass ? "bg-white/80" : "glass-header"
 			}`}
 		>
+			{showBackButton ? (
+				<div className="mb-3 flex justify-start">
+					<BackButton label={backLabel} fallbackHref={backFallbackHref} />
+				</div>
+			) : null}
+
 			<h1 className="text-1xl text-center uppercase tracking-widest text-black sm:text-3xl">
 				{title}
 			</h1>

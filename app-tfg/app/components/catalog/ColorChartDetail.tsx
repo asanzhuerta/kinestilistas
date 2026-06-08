@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import H1Title from "@/app/components/H1Title";
 import { formatDateTime } from "@/lib/utils/user-utils";
@@ -25,7 +24,6 @@ function normalizeText(value: string | null | undefined) {
 export default function ColorChartDetail({
 	title,
 	subtitle,
-	backHref,
 	colorChart,
 }: Props) {
 	const [search, setSearch] = useState("");
@@ -52,14 +50,7 @@ export default function ColorChartDetail({
 		<div className="space-y-6">
 			<H1Title title={title} subtitle={subtitle} />
 
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<Link
-					href={backHref}
-					className="inline-flex rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-white"
-				>
-					Volver a coloración
-				</Link>
-
+			<div className="flex justify-end">
 				<div className="text-sm text-slate-600">
 					Actualizado el{" "}
 					<span className="font-medium text-slate-900">

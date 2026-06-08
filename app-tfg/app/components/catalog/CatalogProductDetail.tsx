@@ -151,7 +151,6 @@ function SupportResourcesPanel({
 export default function CatalogProductDetail({
 	title,
 	subtitle,
-	backHref,
 	colorationBasePath,
 	showPrice = true,
 	product,
@@ -166,14 +165,7 @@ export default function CatalogProductDetail({
 		<div className="space-y-6">
 			<H1Title title={title} subtitle={subtitle} />
 
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<Link
-					href={backHref}
-					className="inline-flex rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-white"
-				>
-					Volver al catálogo
-				</Link>
-
+			<div className="flex justify-end">
 				<div className="text-sm text-slate-600">
 					Actualizado el{" "}
 					<span className="font-medium text-slate-900">

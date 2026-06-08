@@ -177,17 +177,8 @@ export default function NotificationsWorkspace({
 	}
 
 	return (
-		<div className="space-y-6">
-			<H1Title title={title} subtitle={subtitle} />
-
-			<div className="flex justify-start">
-				<Link
-					href={backHref}
-					className="rounded-xl border border-slate-200 bg-white/75 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-white"
-				>
-					Volver
-				</Link>
-			</div>
+			<div className="space-y-6">
+				<H1Title title={title} subtitle={subtitle} />
 
 			<section className="rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
 				<h2 className="text-2xl font-bold text-slate-900">
