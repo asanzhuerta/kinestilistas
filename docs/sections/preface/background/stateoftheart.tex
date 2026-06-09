@@ -1,29 +1,103 @@
+El estado del arte se ha elaborado tomando como referencia las herramientas que ya forman parte del entorno del distribuidor y, además, soluciones comerciales existentes que abordan alguna de las necesidades detectadas en la Sección~\ref{sec:context}. El objetivo no es localizar una aplicación idéntica al sistema propuesto, sino comparar alternativas reales que cubren parcialmente ámbitos como la gestión de clientes, la venta B2B, la preventa en ruta, el software de salón, las aplicaciones web progresivas y la planificación de rutas.
+
 \subsection{Tecnologías conocidas por el distribuidor}
 
-Durante el proceso de captación de requisitos descrito en la Sección~\ref{sec:RequirementsCaptureMethodology}, se ha identificado que el distribuidor tiene experiencia previa con herramientas de gestión empresarial como Microsoft Excel, Microsoft Access y Google Sheets. Estas herramientas se utilizan principalmente para la gestión de pedidos, el seguimiento de inventarios y la elaboración de informes comerciales.
+Durante el proceso de captación de requisitos descrito en la Sección~\ref{sec:RequirementsCaptureMethodology}, se ha identificado que el distribuidor tiene experiencia previa con herramientas de gestión empresarial como Microsoft Excel, Microsoft Access y Google Sheets. Estas herramientas se utilizan principalmente para la gestión de pedidos, el seguimiento de inventarios, la elaboración de informes comerciales y el mantenimiento de listados operativos.
 
-Si bien estas soluciones permiten gestionar información de forma flexible, presentan importantes limitaciones desde el punto de vista de los sistemas de información. En particular, no existe integración entre las distintas herramientas utilizadas, lo que provoca redundancias en la gestión de datos, inconsistencias en la información y dificultades para disponer de datos actualizados en tiempo real. Además, estas herramientas no incorporan mecanismos estructurados de control de acceso, trazabilidad de operaciones o gestión de usuarios, lo que limita su capacidad para soportar un sistema de gestión comercial completo.
+También se ha identificado el uso de software de facturación y gestión administrativa, especialmente TeamSystem Factusol, que permite cubrir procesos propios de facturación, cobros y documentación comercial. En este mismo ecosistema existe TeamSystem Preventa, una solución orientada a la autoventa y preventa en movilidad que permite crear presupuestos, pedidos, albaranes y facturas en ruta, gestionar cobros y transferir información hacia TeamSystem Delsol o TeamSystem Factusol \citep{sdelsol-preventa}.
+
+Estas herramientas resultan útiles porque ya son conocidas por el negocio y resuelven tareas concretas. Sin embargo, desde el punto de vista de los sistemas de información presentan limitaciones importantes: la información queda repartida entre varias fuentes, no existe una experiencia única para clientes, comerciales y administradores, y la trazabilidad depende en gran medida de procedimientos manuales o de sincronizaciones externas. Por tanto, aunque el sistema propuesto debe poder convivir con este entorno, su finalidad no es reproducir una hoja de cálculo ni sustituir por completo a un ERP, sino centralizar la operativa comercial específica del distribuidor.
 
 \subsection{Aplicaciones existentes de la empresa central}
 
-La empresa central dispone de una aplicación móvil oficial denominada \textit{KIN Cosmetics}, disponible para dispositivos móviles, que actúa principalmente como un catálogo digital de productos y como repositorio de contenidos formativos para profesionales del sector \cite{kintrends}. A través de esta aplicación es posible consultar las distintas líneas de producto, acceder a información técnica y visualizar material formativo relacionado con técnicas de peluquería.
+La empresa central dispone de una aplicación móvil oficial denominada \textit{KIN Cosmetics}, disponible para dispositivos móviles, que actúa principalmente como un catálogo digital de productos y como repositorio de contenidos formativos para profesionales del sector \citep{kintrends}. A través de esta aplicación es posible consultar las distintas líneas de producto, acceder a información técnica y visualizar material formativo relacionado con técnicas de peluquería.
 
-No obstante, esta aplicación no ofrece funcionalidades orientadas a la gestión operativa del distribuidor, tales como la gestión de pedidos, el control de entregas o la integración con sistemas administrativos, lo que limita su utilidad en el contexto de la actividad comercial diaria.
+No obstante, esta aplicación no ofrece funcionalidades orientadas a la gestión operativa del distribuidor, tales como la planificación de visitas comerciales, la gestión de pedidos propios, el seguimiento de entregas, la segmentación de clientes o la integración con procesos administrativos. Su aportación principal se sitúa en la consulta de producto y en la formación técnica, no en la gestión diaria de la red comercial.
 
-Por otro lado, la página web oficial de la empresa permite consultar el catálogo de productos e incluye información detallada sobre sus características \cite{kincosmetics_web}. En este caso, sí se contempla la posibilidad de realizar pedidos, aunque el proceso no se encuentra integrado dentro de un sistema propio, sino que se basa en la redirección a plataformas externas de comercio electrónico.
+Por otro lado, la página web oficial de la empresa permite consultar el catálogo de productos e incluye información detallada sobre sus características \citep{kincosmetics_web}. En algunos casos se contempla la posibilidad de realizar pedidos, aunque el proceso no se encuentra integrado dentro de un sistema propio del distribuidor, sino que se basa en la redirección a plataformas externas de comercio electrónico. Por ejemplo, el producto \textit{KINESSENCES Nourish Intense Mask} puede visualizarse en la web oficial \citep{kincosmetics_producto}, desde donde se facilita el acceso a su compra a través de plataformas como Amazon \citep{amazon_producto}.
 
-Por ejemplo, el producto \textit{KINESSENCES Nourish Intense Mask} puede visualizarse en la web oficial \cite{kincosmetics_producto}, desde donde se facilita el acceso a su compra a través de plataformas como Amazon \cite{amazon_producto}. Este enfoque permite la adquisición de productos, pero no proporciona herramientas específicas para la gestión comercial del distribuidor ni para el seguimiento de la relación con los clientes.
+Este enfoque facilita la adquisición puntual de productos, pero no proporciona herramientas específicas para gestionar la relación continuada entre distribuidor, comerciales y peluquerías clientes. Tampoco permite modelar el ciclo operativo completo del negocio: visita, asesoramiento, pedido, reparto, cobro, comunicación y seguimiento técnico del salón.
 
-\subsection{Aplicaciones de gestión en el sector: Booksy}
+\subsection{Soluciones alternativas existentes en el mercado}
 
-Adicionalmente, el distribuidor identificó el uso de la plataforma ``Booksy'', una aplicación orientada a la gestión de reservas y citas en el ámbito de la belleza y el bienestar \cite{booksy}. Esta herramienta permite a los profesionales gestionar su agenda, organizar la información de clientes y facilitar la reserva de servicios a través de internet.
+Además de las herramientas ya conocidas por el distribuidor, existen soluciones comerciales consolidadas que cubren partes del problema. A continuación se analizan por familias funcionales, atendiendo a su utilidad potencial y a sus limitaciones respecto al contexto concreto del proyecto.
 
-Aunque este tipo de aplicaciones introduce funcionalidades digitales relevantes, como la gestión estructurada de clientes o la automatización de procesos de reserva, no cubre las necesidades específicas del distribuidor analizado. En particular, no contempla aspectos clave como la gestión de pedidos a proveedores, el control logístico de entregas o la integración con sistemas de facturación.
+\subsubsection{CRM generalistas}
+
+Las plataformas CRM generalistas, como HubSpot CRM y Zoho CRM, están orientadas a centralizar datos de clientes, gestionar oportunidades comerciales, organizar tareas de seguimiento y automatizar parte del embudo de ventas. HubSpot presenta su CRM como una plataforma para unificar datos de clientes, contactos, operaciones, tareas y paneles de informes \citep{hubspot-crm}. Zoho CRM, por su parte, destaca la automatización de actividades a lo largo del embudo comercial, la definición de procesos mediante flujos guiados y la personalización de módulos y diseños \citep{zoho-crm-features}.
+
+Estas soluciones aportan una base sólida para la gestión de relaciones comerciales y pueden resultar adecuadas para equipos de ventas de propósito general. Sin embargo, no están diseñadas específicamente para la distribución de productos capilares a peluquerías. Requieren configuración o desarrollo adicional para cubrir catálogo técnico, pedidos B2B recurrentes, rutas de reparto, control operativo de entregas, fichas técnicas del salón y sincronización con herramientas administrativas ya usadas por el distribuidor.
+
+\subsubsection{ERP ligero, facturación y preventa}
+
+Las soluciones ERP o de gestión empresarial, como Odoo o el ecosistema TeamSystem Delsol, se aproximan más a la dimensión administrativa del problema. Odoo Sales permite trabajar con presupuestos, pedidos de venta, facturación, portal de cliente, tarifas, descuentos, productos e integración con módulos como inventario, contabilidad y comercio electrónico \citep{odoo-sales-features}. TeamSystem Preventa, por su parte, resulta especialmente relevante porque está orientado a comerciales en ruta y contempla documentos de venta, catálogo de imágenes, consulta de stock, cobros, visitas y conexión con Factusol \citep{sdelsol-preventa}.
+
+Estas herramientas cubren procesos empresariales de forma más completa que una hoja de cálculo. No obstante, su adopción implica adaptar el negocio a un producto existente y, en algunos casos, configurar flujos que exceden el alcance real del distribuidor. Además, el proyecto desarrollado no pretende convertirse en un ERP generalista ni sustituir la facturación oficial, sino proporcionar una capa operativa propia para usuarios internos y clientes profesionales, dejando la integración completa con Factusol como una evolución posterior.
+
+\subsubsection{Plataformas de pedidos B2B}
+
+Las plataformas de comercio B2B permiten digitalizar la relación de compra entre empresas. Shopify B2B, por ejemplo, permite definir catálogos y precios distintos según empresa o ubicación, limitar productos disponibles y aplicar reglas de cantidad o precios por volumen \citep{shopify-b2b-catalogs}. Pepperi se orienta específicamente a marcas y distribuidores, combinando comercio electrónico B2B, toma de pedidos móvil para representantes, promociones, ejecución comercial, analítica operativa y capacidades de \textit{Direct Store Delivery} \citep{pepperi-platform}.
+
+Este tipo de soluciones se acerca mucho a la problemática del pedido profesional y de la venta multicanal. Sus puntos fuertes son el catálogo, la personalización de precios y la toma de pedidos por comerciales o compradores. Sin embargo, suelen estar pensadas para organizaciones con procesos de venta B2B más estandarizados y no resuelven por sí solas la gestión técnica del salón, las necesidades concretas de formación y comunicación del distribuidor, ni la integración gradual con el sistema administrativo ya existente. Además, plataformas de este tipo pueden introducir costes de licencia, dependencia de proveedor y complejidad de implantación superiores a los asumibles en el contexto del TFG.
+
+\subsubsection{Software de salón y reservas}
+
+Dentro del sector de la belleza existen aplicaciones orientadas a la gestión de salones, como Booksy o Fresha. Booksy incorpora funciones de calendario, cobros, marketing por texto y correo, etiquetas de clientes, gestión de personal, informes e inventario en algunos planes \citep{booksy}. Fresha ofrece planificación de citas, pagos, gestión de clientes, recordatorios automatizados, formularios, punto de venta y funcionalidades de marketing para negocios de belleza y bienestar \citep{fresha-features}.
+
+Estas aplicaciones son relevantes porque se dirigen al mismo entorno profesional de peluquerías y salones. Sin embargo, su usuario principal es el propio salón, no el distribuidor de productos. Su núcleo funcional se centra en reservas, agenda, caja y relación entre salón y cliente final. Por ello, no cubren de forma natural la gestión de rutas comerciales del distribuidor, el pedido de producto profesional entre empresas, el reparto físico, la relación comercial con múltiples peluquerías o la coordinación con sistemas de facturación externos.
+
+\subsubsection{Aplicaciones web progresivas comerciales}
+
+Las aplicaciones web progresivas no constituyen por sí mismas una solución de negocio, sino una forma de entregar aplicaciones web con capacidades cercanas a las aplicaciones nativas. Según la documentación de \textit{web.dev}, una PWA puede ser instalable, ejecutarse en una ventana independiente, funcionar sobre una única base de código y ofrecer ciertas capacidades sin conexión cuando el navegador y la plataforma lo permiten \citep{webdev-pwa}. En el ámbito del comercio electrónico existen herramientas como Adobe Commerce PWA Studio, orientadas a desarrollar escaparates PWA sobre Adobe Commerce o Magento Open Source \citep{adobe-pwa-studio}.
+
+Este enfoque resulta adecuado para el proyecto porque los usuarios necesitan acceder desde móvil durante visitas comerciales, reparto o consulta en el salón, sin imponer la instalación desde tiendas de aplicaciones. Sin embargo, una PWA comercial o un escaparate de comercio electrónico no aporta automáticamente el modelo de datos, los roles, la trazabilidad, la planificación de rutas o los flujos operativos específicos. La PWA es, por tanto, una decisión tecnológica de entrega, pero debe combinarse con un diseño funcional propio.
+
+\subsubsection{Sistemas de gestión de rutas y última milla}
+
+Por último, existen herramientas especializadas en planificación de rutas y entregas, como Onfleet, OptimoRoute, Routific o Route4Me. Onfleet contempla optimización de rutas teniendo en cuenta ubicaciones de entrega, ventanas horarias, horarios de conductores, capacidades de vehículos, tiempos de servicio, tráfico histórico y restricciones de carretera \citep{onfleet-route-optimization}. OptimoRoute se orienta a planificar y optimizar rutas para múltiples conductores y paradas, considerando restricciones como ventanas temporales, horarios, capacidades y límites de vehículos \citep{optimoroute-features}.
+
+Estas soluciones son potentes para empresas cuya dificultad principal es la optimización logística. En el caso del distribuidor analizado, la ruta es una parte importante del proceso, pero no el único núcleo del sistema. La aplicación desarrollada necesita vincular rutas con clientes, visitas, pedidos, entregas, comunicación, catálogo y administración. Una herramienta de última milla podría complementar el sistema en una fase avanzada, pero no sustituye a una plataforma integrada de gestión comercial.
+
+\subsection{Comparativa de alternativas}
+
+La Tabla~\ref{tab:comparativa-alternativas-mercado} resume los aspectos positivos y las principales limitaciones de las familias de soluciones analizadas respecto a las necesidades del distribuidor.
+
+{\small
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{>{\RaggedRight\arraybackslash}p{0.20\textwidth}>{\RaggedRight\arraybackslash}p{0.34\textwidth}>{\RaggedRight\arraybackslash}p{0.34\textwidth}}
+\caption{Comparativa de alternativas existentes en el mercado}
+\label{tab:comparativa-alternativas-mercado}\\
+\hline
+\textbf{Alternativa} & \textbf{Aspectos positivos} & \textbf{Limitaciones respecto al proyecto} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Alternativa} & \textbf{Aspectos positivos} & \textbf{Limitaciones respecto al proyecto} \\
+\hline
+\endhead
+Hojas de cálculo y bases de datos locales & Flexibles, conocidas por el distribuidor, bajo coste inicial y útiles para listados, cálculos y registros sencillos. & Información fragmentada, duplicidad de datos, ausencia de roles, baja trazabilidad y dificultad para ofrecer acceso estructurado a comerciales y clientes. \\
+\hline
+KIN Cosmetics y web oficial de la marca & Catálogo oficial, contenido técnico, material formativo y referencia directa de producto. & Orientación corporativa y de consulta; no cubre pedidos propios del distribuidor, rutas, cobros, visitas, comunicación segmentada ni administración local. \\
+\hline
+CRM generalistas: HubSpot, Zoho & Buena gestión de contactos, oportunidades, tareas, automatización comercial, informes y seguimiento de relaciones. & No modelan de serie catálogo capilar técnico, pedidos B2B con entrega local, fichas técnicas de salón ni integración específica con Factusol. \\
+\hline
+ERP y preventa: Odoo, Factusol, TeamSystem Preventa & Cubren presupuestos, pedidos, facturas, inventario, cobros, tarifas y trabajo comercial en movilidad. & Mayor complejidad de implantación; el foco está en gestión empresarial general o documentación comercial, no en una PWA específica para distribuidor, comerciales y peluquerías. \\
+\hline
+Pedidos B2B: Shopify B2B, Pepperi & Digitalizan catálogos, precios por cliente, pedidos profesionales, promociones y venta multicanal. & Pueden resultar sobredimensionadas o dependientes de proveedor; no resuelven por sí solas la operativa técnica del salón, rutas locales y adaptación al proceso actual. \\
+\hline
+Software de salón: Booksy, Fresha & Muy adecuados para agenda, reservas, clientes del salón, recordatorios, pagos, marketing y punto de venta. & Su usuario objetivo es el salón frente a su cliente final, no el distribuidor frente a peluquerías; no cubren reparto, preventa, pedidos a proveedor ni control administrativo del distribuidor. \\
+\hline
+PWA comerciales y escaparates PWA & Permiten acceso móvil, instalación desde navegador, una única base de código y experiencias cercanas a una app nativa. & Son una forma de entrega tecnológica, no una solución funcional completa; requieren diseñar el dominio, roles, datos y procesos propios. \\
+\hline
+Rutas y última milla: Onfleet, OptimoRoute, Routific, Route4Me & Optimizan rutas con ventanas horarias, capacidades, seguimiento, despacho y restricciones logísticas. & Cubren la capa logística, pero no integran catálogo, pedidos, clientes profesionales, comunicación, fichas técnicas ni administración del distribuidor. \\
+\hline
+\end{longtable}
+}
 
 \subsection{Limitaciones de las soluciones existentes}
 
-El análisis de las herramientas disponibles pone de manifiesto que, si bien existen soluciones parciales que cubren determinados aspectos de la actividad (gestión de datos, catálogo de productos o gestión de clientes), ninguna de ellas ofrece una solución integrada que permita abordar de forma conjunta la gestión comercial, logística y administrativa del distribuidor.
+El análisis anterior muestra que existen alternativas reales y maduras, pero su cobertura es parcial respecto al problema abordado. Las herramientas de oficina resuelven registros simples, las aplicaciones de la marca central ofrecen catálogo y formación, los CRM generalistas organizan la relación comercial, los ERP y soluciones de preventa cubren documentación administrativa, las plataformas B2B facilitan pedidos entre empresas, el software de salón gestiona reservas y clientes finales, y los sistemas de rutas optimizan la última milla.
 
-Asimismo, estas herramientas no incorporan de manera generalizada funcionalidades clave desde el punto de vista de los sistemas de información, como la gestión de usuarios con distintos roles, la trazabilidad de las operaciones o la centralización estructurada de los datos.
+La principal limitación es que ninguna de estas alternativas integra, dentro de una única experiencia adaptada al distribuidor, los procesos de gestión de usuarios, clientes profesionales, catálogo técnico, pedidos, visitas comerciales, reparto, notificaciones, promociones, formaciones, trazabilidad administrativa y soporte a PWA. Adoptar una herramienta generalista exigiría adaptar el proceso del distribuidor al producto elegido o desarrollar integraciones adicionales, mientras que usar varias herramientas a la vez mantendría la fragmentación de información descrita en la Sección~\ref{sec:context}.
 
-Estas limitaciones justifican la necesidad de una solución específica que permita integrar las distintas dimensiones de la actividad del distribuidor en una única plataforma, proporcionando una base sólida para la gestión de la información y la evolución futura del sistema.
+Por este motivo, el sistema propuesto se justifica como una solución específica y acotada al dominio del distribuidor. Su valor no reside en competir con un ERP completo, un CRM comercial o una plataforma logística especializada, sino en integrar las funciones necesarias para el caso real en una aplicación web progresiva con roles diferenciados, modelo de datos centralizado y trazabilidad suficiente para evolucionar posteriormente hacia integraciones más avanzadas.

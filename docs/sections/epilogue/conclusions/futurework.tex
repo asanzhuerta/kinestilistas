@@ -54,10 +54,9 @@ En particular, la aplicación ya dispone de una base operativa sólida en los m�
     \item Incorporación de mecanismos de exportación o sincronización con herramientas empresariales externas, siempre que se definan de forma concreta y no generica.
     \item Mejora de la observabilidad técnica, el seguimiento de errores y el control operativo del sistema.
 \end{itemize}
+\textcolor{red}{Automatización de albaranes y facturación con Factusol}
 
-\subsection*{Automatización de albaranes y facturación con Factusol}
-
-\textcolor{red}{Una línea de evolución especialmente relevante consiste en conectar el flujo de pedidos y reparto de la aplicación con TeamSystem Factusol mediante una capa de automatización externa.} La aplicación ya dispone de un primer registro persistente de integraciones, operaciones y propuestas a proveedor dentro de \texttt{M7}; \textcolor{red}{el siguiente salto consistiría en conectar esa base con un flujo real de automatización. Esta integración permitiría convertir pedidos confirmados o entregados en documentos comerciales, sincronizar clientes y artículos, generar albaranes, marcar documentos como facturados y devolver a la aplicación estados administrativos de facturación o cobro.}
+Una línea de evolución especialmente relevante consiste en conectar el flujo de pedidos y reparto de la aplicación con TeamSystem Factusol mediante una capa de automatización externa. La aplicación ya dispone de un primer registro persistente de integraciones, operaciones y propuestas a proveedor dentro de \texttt{M7}; \textcolor{red}{el siguiente salto consistiría en conectar esa base con un flujo real de automatización. Esta integración permitiría convertir pedidos confirmados o entregados en documentos comerciales, sincronizar clientes y artículos, generar albaranes, marcar documentos como facturados y devolver a la aplicación estados administrativos de facturación o cobro.}
 
 La opción técnicamente más limpia sería utilizar \texttt{n8n} como orquestador de procesos. Sus nodos de \textit{webhook} permiten iniciar flujos desde llamadas HTTP entrantes, mientras que el nodo \textit{HTTP Request} permite consumir servicios REST de terceros \citep{n8n-webhook,n8n-http-request}. En este escenario, la aplicación podría publicar un evento cuando un pedido pasase a estado entregado; \texttt{n8n} validaría el pedido, transformaría las líneas al formato esperado por Factusol y llamaría a la API correspondiente.
 
@@ -72,4 +71,4 @@ Si el cliente trabaja exclusivamente con Factusol local, la integración sería 
     \item Incorporación progresiva de pruebas automatizadas de integración y de interfaz para reducir regresiones manuales.
     \item Reorganización interna adicional del código por \textit{feature}, especialmente en las áreas comercial, catálogo y pedidos.
     \item Profundización de la capa PWA, ampliando la experiencia offline más allá del \textit{app shell} actual.
-\end{itemize}
+\end{itemize}}
