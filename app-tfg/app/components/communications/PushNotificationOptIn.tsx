@@ -16,6 +16,10 @@ type PushStatus =
 	| "enabled"
 	| "denied";
 
+type PushNotificationOptInProps = {
+	variant?: "card" | "inline";
+};
+
 function getErrorMessage(error: unknown, fallback: string) {
 	return error instanceof ApiClientError ? error.message : fallback;
 }
@@ -62,7 +66,9 @@ function isPushSupported() {
 	);
 }
 
-export default function PushNotificationOptIn() {
+export default function PushNotificationOptIn({
+	variant = "card",
+}: PushNotificationOptInProps) {
 	const [status, setStatus] = useState<PushStatus>("checking");
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState("");
@@ -201,6 +207,49 @@ export default function PushNotificationOptIn() {
 	const canEnablePush = status === "available";
 	const showEnablePushButton =
 		status === "checking" || status === "not_configured" || canEnablePush;
+
+	if (variant === "inline") {
+		return (
+			<div className="flex flex-wrap items-center gap-2">
+				<span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+					{status === "enabled"
+						? "Notificaciónes activas"
+						: `Push ${statusLabel[status]}`}
+				</span>
+				{showEnablePushButton ? (
+					<button
+						type="button"
+						onClick={enablePush}
+						disabled={pending || !canEnablePush}
+						className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+					>
+						Activar push
+					</button>
+				) : null}
+				{status === "enabled" ? (
+					<button
+						type="button"
+						onClick={disablePush}
+						disabled={pending}
+						className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+					>
+						¿Desea desactivarlas?
+					</button>
+				) : null}
+				{message ? (
+					<span className="text-xs font-medium text-emerald-700">
+						{message}
+					</span>
+				) : null}
+				{error ? (
+					<span className="text-xs font-medium text-rose-700">{error}</span>
+				) : null}
+				{statusHelp ? (
+					<span className="max-w-md text-xs text-slate-500">{statusHelp}</span>
+				) : null}
+			</div>
+		);
+	}
 
 	return (
 		<section className="rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm">

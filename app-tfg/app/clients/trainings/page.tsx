@@ -13,6 +13,7 @@ export default async function ClientTrainingsPage() {
 			subtitle="Sesiones disponibles para tu salón"
 			backHref="/clients"
 			initialTrainings={trainings.map(serializeTrainingEvent)}
+			showIntro={false}
 		/>
 	);
 }

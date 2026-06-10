@@ -6,6 +6,7 @@ type Props = {
 	subtitle: string;
 	backHref: string;
 	promotions: PromotionView[];
+	showIntro?: boolean;
 };
 
 function formatDate(value: string) {
@@ -20,11 +21,13 @@ export default function PromotionsOverview({
 	title,
 	subtitle,
 	promotions,
+	showIntro = true,
 }: Props) {
 	return (
 		<div className="space-y-6">
 			<H1Title title={title} subtitle={subtitle} />
 
+			{showIntro ? (
 			<section className="rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
 				<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
 					M6 / Comunicación comercial
@@ -37,6 +40,7 @@ export default function PromotionsOverview({
 					según el rango comercial asignado por administración.
 				</p>
 			</section>
+			) : null}
 
 			{promotions.length ? (
 				<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

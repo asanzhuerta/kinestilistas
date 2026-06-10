@@ -3,10 +3,8 @@ import { requireClientSession } from "@/lib/auth/require-session";
 import SalonClientDetailView from "@/app/components/salon/SalonClientDetailView";
 import {
 	getSalonClientDetailForClientUser,
-	listSalonProductOptions,
 	SalonTechnicalServiceError,
 } from "@/lib/typeorm/services/salon/salon-client";
-import { listSalonServiceTemplatesForClientUser } from "@/lib/typeorm/services/salon/salon-service-template";
 
 type PageProps = {
 	params: Promise<{
@@ -14,20 +12,14 @@ type PageProps = {
 	}>;
 };
 
-export default async function ClientSalonClientDetailPage({
+export default async function ClientSalonClientHistoryPage({
 	params,
 }: PageProps) {
 	const [session, { id }] = await Promise.all([requireClientSession(), params]);
 	let detail;
-	let productOptions;
-	let templates;
 
 	try {
-		[detail, productOptions, templates] = await Promise.all([
-			getSalonClientDetailForClientUser(session.user.id, id),
-			listSalonProductOptions(),
-			listSalonServiceTemplatesForClientUser(session.user.id),
-		]);
+		detail = await getSalonClientDetailForClientUser(session.user.id, id);
 	} catch (error) {
 		if (error instanceof SalonTechnicalServiceError && error.status === 404) {
 			notFound();
@@ -39,10 +31,15 @@ export default async function ClientSalonClientDetailPage({
 	return (
 		<SalonClientDetailView
 			initialDetail={detail}
-			initialTemplates={templates}
-			productOptions={productOptions}
-			showHistory={false}
-			historyHref={`/clients/salon-clients/${id}/history`}
+			initialTemplates={[]}
+			productOptions={[]}
+			showOverviewPanels={false}
+			showServiceForm={false}
+			showHistory
+			backHref={`/clients/salon-clients/${id}`}
+			backLabel="Volver a la ficha"
+			title={`Historial técnico - ${detail.salonClient.name}`}
+			subtitle="Consulta, filtra y corrige los servicios técnicos registrados."
 		/>
 	);
 }

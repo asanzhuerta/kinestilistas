@@ -11,6 +11,7 @@ type Props = {
 	subtitle: string;
 	backHref: string;
 	initialTrainings: TrainingEventView[];
+	showIntro?: boolean;
 };
 
 function formatDateTime(value: string) {
@@ -35,6 +36,7 @@ export default function TrainingEventsWorkspace({
 	title,
 	subtitle,
 	initialTrainings,
+	showIntro = true,
 }: Props) {
 	const router = useRouter();
 	const [trainings, setTrainings] = useState(initialTrainings);
@@ -90,6 +92,7 @@ export default function TrainingEventsWorkspace({
 		<div className="space-y-6">
 			<H1Title title={title} subtitle={subtitle} />
 
+			{showIntro ? (
 			<section className="rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
 				<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
 					M6 / Formación
@@ -102,6 +105,7 @@ export default function TrainingEventsWorkspace({
 					asistir. La capacidad se valida en servidor.
 				</p>
 			</section>
+			) : null}
 
 			{message ? (
 				<div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">

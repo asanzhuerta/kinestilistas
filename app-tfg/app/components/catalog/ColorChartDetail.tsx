@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import H1Title from "@/app/components/H1Title";
+import { useSessionStorageState } from "@/app/hooks/useSessionStorageState";
 import { formatDateTime } from "@/lib/utils/user-utils";
 import type { SerializedColorChartDetail } from "./coloration-serializers";
 
@@ -26,7 +27,10 @@ export default function ColorChartDetail({
 	subtitle,
 	colorChart,
 }: Props) {
-	const [search, setSearch] = useState("");
+	const [search, setSearch] = useSessionStorageState(
+		`color-chart-detail:${colorChart.id}:search`,
+		"",
+	);
 
 	const filteredReferences = useMemo(() => {
 		const searchTerm = normalizeText(search);

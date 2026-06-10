@@ -16,6 +16,7 @@ export default async function ClientPromotionsPage() {
 			subtitle="Campañas activas para tu salón"
 			backHref="/clients"
 			promotions={promotions.map(serializePromotion)}
+			showIntro={false}
 		/>
 	);
 }

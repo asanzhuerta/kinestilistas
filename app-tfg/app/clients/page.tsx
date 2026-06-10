@@ -3,6 +3,7 @@ import PageTransition from "../components/animations/PageTransition";
 import ClientDeliveryEstimateCard from "../components/clients/ClientDeliveryEstimateCard";
 import { requireClientSession } from "@/lib/auth/require-session";
 import { listNotificationsForUser } from "@/lib/typeorm/services/communications/communications";
+import Link from "next/link";
 import {
 	AgendaIcon,
 	AppointmentIcon,
@@ -68,17 +69,33 @@ export default async function ClientsHome() {
 
 	return (
 		<PageTransition>
+			{unreadNotificationsCount > 0 ? (
+				<section className="my-5 rounded-3xl border border-amber-200 bg-amber-50/95 px-4 py-4 text-amber-900 shadow-sm">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div>
+							<p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+								Notificaciones y avisos
+							</p>
+							<p className="mt-1 text-sm text-amber-900">
+								Tienes {unreadNotificationsCount} aviso
+								{unreadNotificationsCount === 1 ? "" : "s"} pendiente
+								{unreadNotificationsCount === 1 ? "" : "s"} de lectura.
+							</p>
+						</div>
+
+						<Link
+							href="/clients/notifications"
+							className="inline-flex items-center justify-center rounded-2xl bg-amber-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-800"
+						>
+							Ver avisos
+						</Link>
+					</div>
+				</section>
+			) : null}
+
 			<div className="mb-6">
 				<ClientDeliveryEstimateCard />
 			</div>
-
-			{unreadNotificationsCount > 0 ? (
-				<div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm">
-					Tienes {unreadNotificationsCount} aviso
-					{unreadNotificationsCount === 1 ? "" : "s"} pendiente
-					{unreadNotificationsCount === 1 ? "" : "s"} de lectura.
-				</div>
-			) : null}
 
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 				{navItems.map((item) => (
