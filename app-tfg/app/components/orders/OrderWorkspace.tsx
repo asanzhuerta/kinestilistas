@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import PageTransition from "@/app/components/animations/PageTransition";
@@ -13,6 +14,7 @@ import { ROLE_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { formatDateTime } from "@/lib/utils/user-utils";
 import {
 	formatOrderCents,
+	formatOrderPercentage,
 	getOrderDiscountSummary,
 	getOrderPackageCount,
 	getOrderPaymentStatusClasses,
@@ -43,6 +45,7 @@ type WorkspaceProps = {
 	initialDraftOrder?: OrderSummary | null;
 	clientOptions?: OrderClientOption[];
 	initialSelectedClientId?: string | null;
+	initialCreatePanelOpen?: boolean;
 	showOrderForm?: boolean;
 	showHistory?: boolean;
 	historyHref?: string;
@@ -59,6 +62,35 @@ function formatCurrency(amount: string) {
 		style: "currency",
 		currency: "EUR",
 	});
+}
+
+function parseMoneyToCents(amount: string | null | undefined) {
+	const parsed = Number(amount);
+
+	if (!Number.isFinite(parsed) || parsed < 0) {
+		return 0;
+	}
+
+	return Math.round(parsed * 100);
+}
+
+function parseDiscountPercentage(value: string | number | null | undefined) {
+	const parsed = Number(value);
+
+	if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 100) {
+		return 0;
+	}
+
+	return parsed;
+}
+
+function applyDiscountToCents(amountCents: number, discountPercentage: number) {
+	const basisPoints = Math.round(discountPercentage * 100);
+
+	return Math.max(
+		0,
+		Math.round((amountCents * (10_000 - basisPoints)) / 10_000),
+	);
 }
 
 function getOrderStatusClasses(statusCode: string) {
@@ -117,6 +149,48 @@ function buildSelectionValue(
 		: normalizedProductId;
 }
 
+function findSelectedProductOption(
+	line: EditableLine,
+	productOptions: OrderProductOption[],
+) {
+	const selectionValue = buildSelectionValue(
+		line.productId,
+		line.colorReferenceId,
+	);
+
+	return productOptions.find((option) => option.id === selectionValue) ?? null;
+}
+
+function buildLinePreview(
+	line: EditableLine,
+	productOption: OrderProductOption | null,
+) {
+	if (!productOption) {
+		return null;
+	}
+
+	const quantity = Math.max(1, Number(line.quantity) || 1);
+	const unitPriceCents = parseMoneyToCents(productOption.basePrice);
+	const subtotalCents = unitPriceCents * quantity;
+	const discountPercentage = parseDiscountPercentage(
+		productOption.discountPercentage,
+	);
+	const totalCents =
+		discountPercentage > 0
+			? applyDiscountToCents(subtotalCents, discountPercentage)
+			: subtotalCents;
+
+	return {
+		quantity,
+		unitPriceCents,
+		subtotalCents,
+		discountPercentage,
+		discountCents: Math.max(0, subtotalCents - totalCents),
+		totalCents,
+		hasDiscount: discountPercentage > 0 && subtotalCents > totalCents,
+	};
+}
+
 function mapOrderToEditableLines(order: OrderSummary | null | undefined) {
 	const mappedLines =
 		order?.lines.map((line, index) => ({
@@ -167,6 +241,7 @@ export default function OrderWorkspace({
 	initialDraftOrder = null,
 	clientOptions = [],
 	initialSelectedClientId,
+	initialCreatePanelOpen = false,
 	showOrderForm = true,
 	showHistory = true,
 	historyHref,
@@ -177,6 +252,8 @@ export default function OrderWorkspace({
 	const [lines, setLines] = useState<EditableLine[]>(
 		mapOrderToEditableLines(initialDraftOrder),
 	);
+	const [currentProductOptions, setCurrentProductOptions] =
+		useState(productOptions);
 	const [selectedClientId, setSelectedClientId] = useState(
 		initialCommercialClientId,
 	);
@@ -185,6 +262,7 @@ export default function OrderWorkspace({
 	const [savingDraft, setSavingDraft] = useState(false);
 	const [clearingDraft, setClearingDraft] = useState(false);
 	const [loadingDraft, setLoadingDraft] = useState(false);
+	const [loadingProductOptions, setLoadingProductOptions] = useState(false);
 	const workspaceHistoryFilterKey = `order-workspace-history:${mode}:${detailBasePath}`;
 	const [historyClientFilter, setHistoryClientFilter] = useSessionStorageState(
 		`${workspaceHistoryFilterKey}:client`,
@@ -202,7 +280,7 @@ export default function OrderWorkspace({
 	);
 	const [isHistoryFiltersOpen, setIsHistoryFiltersOpen] = useState(false);
 	const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(
-		mode !== "commercial",
+		mode !== "commercial" || initialCreatePanelOpen,
 	);
 	const [feedback, setFeedback] = useState<{
 		type: "success" | "error";
@@ -313,6 +391,10 @@ export default function OrderWorkspace({
 	}
 
 	useEffect(() => {
+		setCurrentProductOptions(productOptions);
+	}, [productOptions]);
+
+	useEffect(() => {
 		if (mode !== "client" || !showOrderForm) {
 			return;
 		}
@@ -370,6 +452,75 @@ export default function OrderWorkspace({
 			isCancelled = true;
 		};
 	}, [apiPath, mode, showOrderForm]);
+
+	useEffect(() => {
+		if (mode !== "commercial") {
+			return;
+		}
+
+		if (!selectedClientId) {
+			setCurrentProductOptions(productOptions);
+			return;
+		}
+
+		let isCancelled = false;
+
+		async function loadProductOptions() {
+			setLoadingProductOptions(true);
+
+			try {
+				const response = await fetch(
+					`${apiPath}/product-options?clientId=${encodeURIComponent(
+						selectedClientId,
+					)}`,
+					{
+						method: "GET",
+						cache: "no-store",
+					},
+				);
+				const data = (await response.json().catch(() => null)) as
+					| OrderProductOption[]
+					| { error?: string }
+					| null;
+
+				if (isCancelled) {
+					return;
+				}
+
+				if (!response.ok || !Array.isArray(data)) {
+					setFeedback({
+						type: "error",
+						message:
+							(data && "error" in data && data.error) ||
+							"No se han podido cargar las promociones de este cliente.",
+					});
+					return;
+				}
+
+				setCurrentProductOptions(data);
+			} catch (error) {
+				console.error("[orders][product-options][load] error:", error);
+
+				if (!isCancelled) {
+					setFeedback({
+						type: "error",
+						message:
+							"Ha ocurrido un error inesperado al cargar las promociones del cliente.",
+					});
+				}
+			} finally {
+				if (!isCancelled) {
+					setLoadingProductOptions(false);
+				}
+			}
+		}
+
+		loadProductOptions();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [apiPath, mode, productOptions, selectedClientId]);
 
 	useEffect(() => {
 		if (mode !== "commercial") {
@@ -447,7 +598,9 @@ export default function OrderWorkspace({
 	}
 
 	function updateSelectedOption(localId: string, optionId: string) {
-		const selectedOption = productOptions.find((option) => option.id === optionId);
+		const selectedOption = currentProductOptions.find(
+			(option) => option.id === optionId,
+		);
 
 		updateLine(localId, {
 			productId: selectedOption?.productId ?? "",
@@ -815,73 +968,147 @@ export default function OrderWorkspace({
 								</div>
 							) : null}
 
+							{loadingProductOptions ? (
+								<div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+									Actualizando promociones del cliente...
+								</div>
+							) : null}
+
 							<div className="space-y-3">
-								{lines.map((line, index) => (
-									<div
-										key={line.localId}
-										className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-[minmax(0,1fr)_120px_auto]"
-									>
-										<div>
-											<label
-												htmlFor={`order-product-${line.localId}`}
-												className="mb-2 block text-sm font-medium text-slate-700"
-											>
-												{orderLineLabel} {index + 1}
-											</label>
-											<select
-												id={`order-product-${line.localId}`}
-												value={buildSelectionValue(
-													line.productId,
-													line.colorReferenceId,
+								{lines.map((line, index) => {
+									const selectedProductOption = findSelectedProductOption(
+										line,
+										currentProductOptions,
+									);
+									const linePreview = buildLinePreview(
+										line,
+										selectedProductOption,
+									);
+
+									return (
+										<div
+											key={line.localId}
+											className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-[84px_minmax(0,1fr)_140px_auto]"
+										>
+											<div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+												{selectedProductOption?.imageUrl ? (
+													<Image
+														src={selectedProductOption.imageUrl}
+														alt={selectedProductOption.name}
+														fill
+														className="object-contain p-2"
+														sizes="80px"
+													/>
+												) : (
+													<div className="flex h-full items-center justify-center px-2 text-center text-[11px] font-medium text-slate-400">
+														Sin imagen
+													</div>
 												)}
-												onChange={(event) =>
-													updateSelectedOption(line.localId, event.target.value)
-												}
-												className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-											>
-												<option value="">Selecciona una referencia</option>
-												{productOptions.map((product) => (
-													<option key={product.id} value={product.id}>
-														{buildProductLabel(product)}
-													</option>
-												))}
-											</select>
-										</div>
+											</div>
 
-										<div>
-											<label
-												htmlFor={`order-quantity-${line.localId}`}
-												className="mb-2 block text-sm font-medium text-slate-700"
-											>
-												Cantidad
-											</label>
-											<input
-												id={`order-quantity-${line.localId}`}
-												type="number"
-												min={1}
-												step={1}
-												value={line.quantity}
-												onChange={(event) =>
-													updateLine(line.localId, {
-														quantity: Number(event.target.value),
-													})
-												}
-												className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-											/>
-										</div>
+											<div>
+												<label
+													htmlFor={`order-product-${line.localId}`}
+													className="mb-2 block text-sm font-medium text-slate-700"
+												>
+													{orderLineLabel} {index + 1}
+												</label>
+												<select
+													id={`order-product-${line.localId}`}
+													value={buildSelectionValue(
+														line.productId,
+														line.colorReferenceId,
+													)}
+													onChange={(event) =>
+														updateSelectedOption(
+															line.localId,
+															event.target.value,
+														)
+													}
+													className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+												>
+													<option value="">Selecciona una referencia</option>
+													{currentProductOptions.map((product) => (
+														<option key={product.id} value={product.id}>
+															{buildProductLabel(product)}
+														</option>
+													))}
+												</select>
 
-										<div className="flex items-end">
-											<button
-												type="button"
-												onClick={() => removeLine(line.localId)}
-												disabled={lines.length === 1}
-												className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
-											>
-												Quitar
-											</button>
+												{linePreview ? (
+													<div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+														<span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700">
+															Unidad{" "}
+															{formatOrderCents(linePreview.unitPriceCents)}
+														</span>
+														{linePreview.hasDiscount ? (
+															<>
+																<span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
+																	Promo -
+																	{formatOrderPercentage(
+																		linePreview.discountPercentage,
+																	)}
+																	%
+																</span>
+																<span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
+																	Ahorro{" "}
+																	{formatOrderCents(linePreview.discountCents)}
+																</span>
+																<span className="rounded-full bg-slate-900 px-3 py-1 font-semibold text-white">
+																	Final{" "}
+																	{formatOrderCents(linePreview.totalCents)}
+																</span>
+															</>
+														) : (
+															<span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700">
+																Total{" "}
+																{formatOrderCents(linePreview.totalCents)}
+															</span>
+														)}
+														{selectedProductOption?.discountTitle ? (
+															<span className="min-w-0 truncate rounded-full bg-sky-50 px-3 py-1 font-semibold text-sky-700">
+																{selectedProductOption.discountTitle}
+															</span>
+														) : null}
+													</div>
+												) : null}
+											</div>
+
+											<div>
+												<label
+													htmlFor={`order-quantity-${line.localId}`}
+													className="mb-2 block text-sm font-medium text-slate-700"
+												>
+													Cantidad
+												</label>
+												<input
+													id={`order-quantity-${line.localId}`}
+													type="number"
+													min={1}
+													step={1}
+													value={line.quantity}
+													onChange={(event) =>
+														updateLine(line.localId, {
+															quantity: Number(event.target.value),
+														})
+													}
+													className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+												/>
+											</div>
+
+											<div className="flex items-end">
+												<button
+													type="button"
+													onClick={() => removeLine(line.localId)}
+													disabled={lines.length === 1}
+													className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+												>
+													Quitar
+												</button>
+											</div>
 										</div>
-									</div>
-								))}
+									);
+								})}
 							</div>
 
 							<div className="flex flex-wrap gap-3">

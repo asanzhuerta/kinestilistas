@@ -25,6 +25,11 @@ export type OrderProductOption = {
 	isColorReference: boolean;
 	productCategoryName: string | null;
 	productLineName: string | null;
+	imageUrl: string | null;
+	basePrice: string;
+	discountPercentage: string;
+	discountTitle: string | null;
+	discountBenefit: string | null;
 	format: string | null;
 	packing: number | null;
 };

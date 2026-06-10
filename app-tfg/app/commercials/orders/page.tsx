@@ -4,17 +4,33 @@ import { listClientsByCommercialId } from "@/lib/typeorm/services/commercial/cli
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
 import {
 	getDraftOrderForCommercialUser,
-	listOrderProductOptions,
+	listOrderProductOptionsForCommercialUser,
 	listOrdersForCommercialUser,
 } from "@/lib/typeorm/services/orders/order";
 
-export default async function CommercialOrdersPage() {
+type CommercialOrdersPageProps = {
+	searchParams?: Promise<{
+		clientId?: string;
+	}>;
+};
+
+export default async function CommercialOrdersPage({
+	searchParams,
+}: CommercialOrdersPageProps) {
 	const session = await requireCommercialSession();
 	const commercial = await requireCommercialByUserId(session.user.id);
 	const clients = await listClientsByCommercialId(commercial.id);
-	const initialSelectedClientId = clients[0]?.id ?? null;
+	const resolvedSearchParams = await searchParams;
+	const requestedClientId = String(resolvedSearchParams?.clientId ?? "").trim();
+	const requestedClient = clients.find(
+		(client) => client.id === requestedClientId,
+	);
+	const initialSelectedClientId =
+		requestedClient?.id ?? clients[0]?.id ?? null;
 	const [productOptions, orders, initialDraftOrder] = await Promise.all([
-		listOrderProductOptions(),
+		listOrderProductOptionsForCommercialUser(session.user.id, {
+			clientId: initialSelectedClientId,
+		}),
 		listOrdersForCommercialUser(session.user.id),
 		getDraftOrderForCommercialUser(session.user.id, {
 			clientId: initialSelectedClientId,
@@ -33,6 +49,7 @@ export default async function CommercialOrdersPage() {
 			initialOrders={orders}
 			initialDraftOrder={initialDraftOrder}
 			initialSelectedClientId={initialSelectedClientId}
+			initialCreatePanelOpen={Boolean(requestedClient)}
 			clientOptions={clients.map((client) => ({
 				id: client.id,
 				name: client.name,

@@ -23,9 +23,9 @@ export async function GET(_: Request, context: RouteContext) {
 	try {
 		const { id } = await context.params;
 
-		await requireCommercialByUserId(user.id);
+		const commercial = await requireCommercialByUserId(user.id);
 
-		const allowed = await canCommercialAccessClient(user.id, id);
+		const allowed = await canCommercialAccessClient(commercial.id, id);
 
 		if (!allowed) {
 			return forbiddenError("Cliente no asignado a este comercial");

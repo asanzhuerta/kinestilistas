@@ -68,6 +68,10 @@ type ListOrdersForCommercialUserInput = {
 	statusId?: number | string | null;
 };
 
+type ListOrderProductOptionsInput = {
+	clientId?: string | null;
+};
+
 type ListOrdersForAdminInput = {
 	clientId?: string | null;
 	paymentStatusId?: number | string | null;
@@ -1372,7 +1376,9 @@ export class OrderServiceError extends Error {
 	}
 }
 
-export async function listOrderProductOptions(): Promise<OrderProductOption[]> {
+export async function listOrderProductOptions(
+	input: ListOrderProductOptionsInput = {},
+): Promise<OrderProductOption[]> {
 	const [products, orderableColorReferences] = await Promise.all([
 		listProducts({
 			statusId: PRODUCT_STATUS_IDS.ACTIVE,
@@ -1381,6 +1387,12 @@ export async function listOrderProductOptions(): Promise<OrderProductOption[]> {
 			orderableOnly: true,
 		}),
 	]);
+	const clientId = String(input.clientId ?? "").trim();
+	const activePromotionDiscounts = clientId
+		? await getDataSource().then((ds) =>
+				listActivePromotionDiscountsForClient(ds.manager, clientId),
+			)
+		: [];
 
 	const colorReferencesByProductId = orderableColorReferences.reduce<
 		Map<string, Awaited<ReturnType<typeof listColorReferences>>>
@@ -1415,6 +1427,11 @@ export async function listOrderProductOptions(): Promise<OrderProductOption[]> {
 
 		if (linkedColorReferences.length > 0) {
 			for (const colorReference of linkedColorReferences) {
+				const promotionDiscount = findBestPromotionDiscountForProduct(
+					activePromotionDiscounts,
+					product,
+				);
+
 				options.push({
 					id: `${product.id}::${colorReference.id}`,
 					productId: product.id,
@@ -1428,6 +1445,18 @@ export async function listOrderProductOptions(): Promise<OrderProductOption[]> {
 					isColorReference: true,
 					productCategoryName: product.productCategory?.name ?? null,
 					productLineName: product.productLine?.name ?? null,
+					imageUrl:
+						colorReference.image_url ??
+						colorReference.thumb_image_url ??
+						product.image_url ??
+						product.productLine?.image_url ??
+						null,
+					basePrice: product.base_price,
+					discountPercentage: formatDiscountPercentage(
+						promotionDiscount?.discountPercentage ?? 0,
+					),
+					discountTitle: promotionDiscount?.title ?? null,
+					discountBenefit: promotionDiscount?.benefit ?? null,
 					format: product.format ?? null,
 					packing: product.packing ?? null,
 				});
@@ -1439,6 +1468,11 @@ export async function listOrderProductOptions(): Promise<OrderProductOption[]> {
 		if (isSyntheticProductReference(product.reference)) {
 			continue;
 		}
+
+		const promotionDiscount = findBestPromotionDiscountForProduct(
+			activePromotionDiscounts,
+			product,
+		);
 
 		options.push({
 			id: product.id,
@@ -1452,6 +1486,13 @@ export async function listOrderProductOptions(): Promise<OrderProductOption[]> {
 			isColorReference: false,
 			productCategoryName: product.productCategory?.name ?? null,
 			productLineName: product.productLine?.name ?? null,
+			imageUrl: product.image_url ?? product.productLine?.image_url ?? null,
+			basePrice: product.base_price,
+			discountPercentage: formatDiscountPercentage(
+				promotionDiscount?.discountPercentage ?? 0,
+			),
+			discountTitle: promotionDiscount?.title ?? null,
+			discountBenefit: promotionDiscount?.benefit ?? null,
 			format: product.format ?? null,
 			packing: product.packing ?? null,
 		});
@@ -1490,6 +1531,49 @@ export async function listOrderProductOptions(): Promise<OrderProductOption[]> {
 			sensitivity: "base",
 		});
 	});
+}
+
+export async function listOrderProductOptionsForClientUser(userId: string) {
+	const client = await getClientByUserId(userId);
+
+	if (!client) {
+		throw new OrderServiceError(
+			"No existe ficha de cliente para este usuario",
+			404,
+			"ORDER_CLIENT_PROFILE_NOT_FOUND",
+		);
+	}
+
+	return listOrderProductOptions({ clientId: client.id });
+}
+
+export async function listOrderProductOptionsForCommercialUser(
+	userId: string,
+	input: {
+		clientId?: string | null;
+	} = {},
+) {
+	const clientId = String(input.clientId ?? "").trim();
+
+	if (!clientId) {
+		return listOrderProductOptions();
+	}
+
+	const commercial = await requireCommercialByUserId(userId);
+	const canAccessClient = await canCommercialAccessClient(
+		commercial.id,
+		clientId,
+	);
+
+	if (!canAccessClient) {
+		throw new OrderServiceError(
+			"El cliente indicado no esta asignado a este comercial",
+			403,
+			"ORDER_CLIENT_NOT_ASSIGNED",
+		);
+	}
+
+	return listOrderProductOptions({ clientId });
 }
 
 export async function listOrdersByClientId(

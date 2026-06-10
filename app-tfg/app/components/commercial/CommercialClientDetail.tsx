@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import PageTransition from "@/app/components/animations/PageTransition";
 import UserAvatar from "@/app/components/users/UserAvatar";
@@ -144,6 +145,15 @@ export default function CommercialClientDetail({ clientId }: Props) {
 												{activeAssignment.commercial.territory}
 											</span>
 										) : null}
+									</div>
+
+									<div className="mt-5 flex flex-wrap gap-3">
+										<Link
+											href={`/commercials/orders?clientId=${client.id}`}
+											className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+										>
+											Crear pedido
+										</Link>
 									</div>
 								</div>
 							</div>

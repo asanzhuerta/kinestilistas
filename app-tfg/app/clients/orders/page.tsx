@@ -2,14 +2,14 @@ import { requireClientSession } from "@/lib/auth/require-session";
 import OrderWorkspace from "@/app/components/orders/OrderWorkspace";
 import {
 	getDraftOrderForClientUser,
-	listOrderProductOptions,
+	listOrderProductOptionsForClientUser,
 	listOrdersForClientUser,
 } from "@/lib/typeorm/services/orders/order";
 
 export default async function ClientOrdersPage() {
 	const session = await requireClientSession();
 	const [productOptions, orders, draftOrder] = await Promise.all([
-		listOrderProductOptions(),
+		listOrderProductOptionsForClientUser(session.user.id),
 		listOrdersForClientUser(session.user.id),
 		getDraftOrderForClientUser(session.user.id),
 	]);
