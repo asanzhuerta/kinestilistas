@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
 	badRequestError,
 	jsonFromError,
+	logApiError,
 	readJsonBody,
 	requireRoleUser,
 	unauthorizedError,
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json(draftOrder, { status: 200 });
 	} catch (error) {
-		console.error("[commercial/orders/draft/items][POST] error:", error);
+		logApiError("[commercial/orders/draft/items][POST]", error);
 		return jsonFromError(error, "Error al añadir la línea al pedido en curso");
 	}
 }

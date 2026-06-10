@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
 	jsonFromError,
+	logApiError,
 	readJsonBody,
 	requireRoleUser,
 	unauthorizedError,
@@ -24,7 +25,7 @@ export async function GET() {
 		const draftOrder = await getDraftOrderForClientUser(user.id);
 		return NextResponse.json(draftOrder, { status: 200 });
 	} catch (error) {
-		console.error("[clients/orders/draft][GET] error:", error);
+		logApiError("[clients/orders/draft][GET]", error);
 		return jsonFromError(error, "Error al obtener el pedido en curso");
 	}
 }
@@ -45,7 +46,7 @@ export async function PUT(request: Request) {
 
 		return NextResponse.json(draftOrder, { status: 200 });
 	} catch (error) {
-		console.error("[clients/orders/draft][PUT] error:", error);
+		logApiError("[clients/orders/draft][PUT]", error);
 		return jsonFromError(error, "Error al guardar el pedido en curso");
 	}
 }
@@ -61,7 +62,7 @@ export async function DELETE() {
 		await clearDraftForClientUser(user.id);
 		return NextResponse.json({ ok: true }, { status: 200 });
 	} catch (error) {
-		console.error("[clients/orders/draft][DELETE] error:", error);
+		logApiError("[clients/orders/draft][DELETE]", error);
 		return jsonFromError(error, "Error al vaciar el pedido en curso");
 	}
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
 	getRequestSearchParams,
 	jsonFromError,
+	logApiError,
 	requireRoleUser,
 	unauthorizedError,
 } from "@/lib/api/server";
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
 
 		return NextResponse.json(productOptions, { status: 200 });
 	} catch (error) {
-		console.error("[commercial/orders/product-options][GET] error:", error);
+		logApiError("[commercial/orders/product-options][GET]", error);
 		return jsonFromError(error, "Error al obtener las referencias de pedido");
 	}
 }

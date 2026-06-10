@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
 	jsonFromError,
+	logApiError,
 	readJsonBody,
 	requireRoleUser,
 	unauthorizedError,
@@ -23,7 +24,7 @@ export async function GET() {
 		const orders = await listOrdersForClientUser(user.id);
 		return NextResponse.json(orders, { status: 200 });
 	} catch (error) {
-		console.error("[clients/orders][GET] error:", error);
+		logApiError("[clients/orders][GET]", error);
 		return jsonFromError(error, "Error al obtener los pedidos del cliente");
 	}
 }
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json(order, { status: 201 });
 	} catch (error) {
-		console.error("[clients/orders][POST] error:", error);
+		logApiError("[clients/orders][POST]", error);
 		return jsonFromError(error, "Error al crear el pedido");
 	}
 }

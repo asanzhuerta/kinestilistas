@@ -120,3 +120,14 @@ export function jsonFromError(error: unknown, fallbackMessage: string) {
 
 	return jsonError(fallbackMessage, 500);
 }
+
+export function logApiError(context: string, error: unknown) {
+	if (isApiErrorLike(error) && error.status < 500) {
+		console.warn(
+			`${context} controlled ${error.code ?? "API_ERROR"} (${error.status}): ${error.message}`,
+		);
+		return;
+	}
+
+	console.error(`${context} unexpected error:`, error);
+}

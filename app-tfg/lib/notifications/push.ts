@@ -15,7 +15,8 @@ type PushDeliveryResult =
 	| { status: "expired" }
 	| { status: "failed"; reason: string };
 
-let configured = false;
+const DEFAULT_PUSH_TTL_SECONDS = 2_419_200;
+const PUSH_CONTENT_ENCODING = "aes128gcm";
 
 export function getVapidPublicKey() {
 	return process.env.VAPID_PUBLIC_KEY?.trim() || null;
@@ -40,23 +41,24 @@ export function isPushDeliveryConfigured() {
 	return Boolean(getVapidConfig());
 }
 
-function ensureWebPushConfigured() {
-	const config = getVapidConfig();
+function buildPushDeliveryError(
+	response: Response,
+	body: string,
+	endpoint: string,
+) {
+	const error = new Error("Received unexpected response code") as Error & {
+		body: string;
+		endpoint: string;
+		headers: Record<string, string>;
+		statusCode: number;
+	};
 
-	if (!config) {
-		return false;
-	}
+	error.statusCode = response.status;
+	error.headers = Object.fromEntries(response.headers.entries());
+	error.body = body;
+	error.endpoint = endpoint;
 
-	if (!configured) {
-		webpush.setVapidDetails(
-			config.subject,
-			config.publicKey,
-			config.privateKey,
-		);
-		configured = true;
-	}
-
-	return true;
+	return error;
 }
 
 function toWebPushSubscription(
@@ -71,18 +73,60 @@ function toWebPushSubscription(
 	};
 }
 
+async function sendPushNotificationRequest(
+	subscription: PushSubscription,
+	payload: string,
+	config: NonNullable<ReturnType<typeof getVapidConfig>>,
+) {
+	const endpointUrl = new URL(subscription.endpoint);
+	const encrypted = webpush.encrypt(
+		subscription.keys.p256dh,
+		subscription.keys.auth,
+		payload,
+		PUSH_CONTENT_ENCODING,
+	);
+	const vapidHeaders = webpush.getVapidHeaders(
+		endpointUrl.origin,
+		config.subject,
+		config.publicKey,
+		config.privateKey,
+		PUSH_CONTENT_ENCODING,
+	);
+	const headers = new Headers({
+		Authorization: vapidHeaders.Authorization,
+		"Content-Encoding": PUSH_CONTENT_ENCODING,
+		"Content-Type": "application/octet-stream",
+		TTL: String(DEFAULT_PUSH_TTL_SECONDS),
+		Urgency: "normal",
+	});
+
+	const response = await fetch(endpointUrl, {
+		method: "POST",
+		headers,
+		body: new Uint8Array(encrypted.cipherText),
+	});
+	const responseBody = await response.text();
+
+	if (!response.ok) {
+		throw buildPushDeliveryError(response, responseBody, subscription.endpoint);
+	}
+}
+
 export async function sendPushNotification(
 	subscription: Pick<UserPushSubscription, "endpoint" | "p256dh" | "auth">,
 	payload: PushNotificationPayload,
 ): Promise<PushDeliveryResult> {
-	if (!ensureWebPushConfigured()) {
+	const config = getVapidConfig();
+
+	if (!config) {
 		return { status: "skipped", reason: "not_configured" };
 	}
 
 	try {
-		await webpush.sendNotification(
+		await sendPushNotificationRequest(
 			toWebPushSubscription(subscription),
 			JSON.stringify(payload),
+			config,
 		);
 
 		return { status: "sent" };

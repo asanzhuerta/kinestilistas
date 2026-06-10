@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
 	jsonFromError,
+	logApiError,
 	requireRoleUser,
 	unauthorizedError,
 } from "@/lib/api/server";
@@ -17,7 +18,7 @@ export async function GET() {
 		const productOptions = await listOrderProductOptionsForClientUser(user.id);
 		return NextResponse.json(productOptions, { status: 200 });
 	} catch (error) {
-		console.error("[clients/orders/product-options][GET] error:", error);
+		logApiError("[clients/orders/product-options][GET]", error);
 		return jsonFromError(error, "Error al obtener las referencias de pedido");
 	}
 }

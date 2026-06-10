@@ -6,6 +6,7 @@ import {
 } from "@/lib/contracts/order";
 import {
 	jsonFromError,
+	logApiError,
 	readJsonBody,
 	requireRoleUser,
 	unauthorizedError,
@@ -27,7 +28,7 @@ export async function GET(_: Request, context: RouteContext) {
 		const detail = await getOrderDetailForCommercialUser(user.id, id);
 		return NextResponse.json(detail, { status: 200 });
 	} catch (error) {
-		console.error("[commercial/orders/[id]][GET] error:", error);
+		logApiError("[commercial/orders/[id]][GET]", error);
 		return jsonFromError(error, "Error al obtener el detalle del pedido");
 	}
 }
@@ -53,7 +54,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 		return NextResponse.json(detail, { status: 200 });
 	} catch (error) {
-		console.error("[commercial/orders/[id]][PATCH] error:", error);
+		logApiError("[commercial/orders/[id]][PATCH]", error);
 		return jsonFromError(error, "Error al actualizar el estado del pedido");
 	}
 }

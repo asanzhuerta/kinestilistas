@@ -3,6 +3,7 @@ import {
 	badRequestError,
 	getRequestSearchParams,
 	jsonFromError,
+	logApiError,
 	readJsonBody,
 	requireRoleUser,
 	unauthorizedError,
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
 
 		return NextResponse.json(orders, { status: 200 });
 	} catch (error) {
-		console.error("[commercial/orders][GET] error:", error);
+		logApiError("[commercial/orders][GET]", error);
 		return jsonFromError(error, "Error al obtener los pedidos del comercial");
 	}
 }
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json(order, { status: 201 });
 	} catch (error) {
-		console.error("[commercial/orders][POST] error:", error);
+		logApiError("[commercial/orders][POST]", error);
 		return jsonFromError(error, "Error al crear el pedido");
 	}
 }

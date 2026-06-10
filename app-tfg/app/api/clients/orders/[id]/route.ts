@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
 	jsonFromError,
+	logApiError,
 	requireRoleUser,
 	unauthorizedError,
 } from "@/lib/api/server";
@@ -19,7 +20,7 @@ export async function GET(_: Request, context: RouteContext) {
 		const detail = await getOrderDetailForClientUser(user.id, id);
 		return NextResponse.json(detail, { status: 200 });
 	} catch (error) {
-		console.error("[clients/orders/[id]][GET] error:", error);
+		logApiError("[clients/orders/[id]][GET]", error);
 		return jsonFromError(error, "Error al obtener el detalle del pedido");
 	}
 }

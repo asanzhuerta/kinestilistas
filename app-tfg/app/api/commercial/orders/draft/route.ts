@@ -3,6 +3,7 @@ import {
 	badRequestError,
 	getRequestSearchParams,
 	jsonFromError,
+	logApiError,
 	readJsonBody,
 	requireRoleUser,
 	unauthorizedError,
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
 
 		return NextResponse.json(draftOrder, { status: 200 });
 	} catch (error) {
-		console.error("[commercial/orders/draft][GET] error:", error);
+		logApiError("[commercial/orders/draft][GET]", error);
 		return jsonFromError(error, "Error al obtener el pedido en curso");
 	}
 }
@@ -61,7 +62,7 @@ export async function PUT(request: Request) {
 
 		return NextResponse.json(draftOrder, { status: 200 });
 	} catch (error) {
-		console.error("[commercial/orders/draft][PUT] error:", error);
+		logApiError("[commercial/orders/draft][PUT]", error);
 		return jsonFromError(error, "Error al guardar el pedido en curso");
 	}
 }
@@ -87,7 +88,7 @@ export async function DELETE(request: Request) {
 		await clearDraftForCommercialUser(user.id, { clientId });
 		return NextResponse.json({ ok: true }, { status: 200 });
 	} catch (error) {
-		console.error("[commercial/orders/draft][DELETE] error:", error);
+		logApiError("[commercial/orders/draft][DELETE]", error);
 		return jsonFromError(error, "Error al vaciar el pedido en curso");
 	}
 }

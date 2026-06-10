@@ -1,5 +1,10 @@
 import type { RouteContext } from "@/lib/contracts/api";
-import { jsonFromError, requireRoleUser, unauthorizedError } from "@/lib/api/server";
+import {
+	jsonFromError,
+	logApiError,
+	requireRoleUser,
+	unauthorizedError,
+} from "@/lib/api/server";
 import { buildOrderQrPdf } from "@/lib/orders/qr-pdf";
 import { getOrderDetailForCommercialUser } from "@/lib/typeorm/services/orders/order";
 
@@ -27,7 +32,7 @@ export async function GET(_: Request, context: RouteContext) {
 			},
 		});
 	} catch (error) {
-		console.error("[commercial/orders/[id]/qr-pdf][GET] error:", error);
+		logApiError("[commercial/orders/[id]/qr-pdf][GET]", error);
 		return jsonFromError(error, "Error al generar el PDF del QR");
 	}
 }
