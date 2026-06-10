@@ -12,7 +12,7 @@ type Props = {
 
 export default function CommercialClientInfoSection({ title, items }: Props) {
 	return (
-		<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
+		<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 			<h2 className="text-xl font-bold text-slate-900">{title}</h2>
 
 			<div className="mt-5 grid gap-4 md:grid-cols-2">

@@ -11,6 +11,7 @@
     "start:clean": "rimraf .next && next build --webpack && next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "m1-m3:closeout": "cross-env CLIENT_DEBUG=false TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/m1-m3-closeout-smoke.ts",
     "m4:closeout": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/m4-closeout-smoke.ts",
     "m4:ui-check": "node ./scripts/m4-ui-headless-check.mjs",
     "m5:technical-email-smoke": "cross-env TS_NODE_PROJECT=./tsconfig.typeorm.json node -r ./scripts/load-env.cjs -r ts-node/register -r tsconfig-paths/register ./scripts/m5-technical-email-smoke.ts",

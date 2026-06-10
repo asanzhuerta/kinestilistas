@@ -1,7 +1,7 @@
 # Pedidos cliente
 
-Historial, detalle y borradores de pedido para cliente.
+Borrador, detalle e historial separado de pedidos para cliente.
 
 ## Función
 
-Permitir revisar pedidos y trabajar con el flujo de compra desde el salón.
+Permitir trabajar con el pedido en curso desde el salón y consultar el historial desde la ruta dedicada.

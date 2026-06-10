@@ -68,6 +68,7 @@ export type CommercialVisit = {
 
 export type CommercialVisitDeliveryOrder = {
 	id: string;
+	delivery_visit_id: string | null;
 	status_id: number;
 	status_name: string;
 	total_amount: string;
@@ -80,6 +81,7 @@ export type CommercialVisitDeliveryOrder = {
 export type CommercialVisitDetail = CommercialVisit & {
 	linkedOrders: CommercialVisitDeliveryOrder[];
 	availableOrdersForDelivery: CommercialVisitDeliveryOrder[];
+	completedElsewhereOrders: CommercialVisitDeliveryOrder[];
 };
 
 export type CreateCommercialVisitBody = {
@@ -98,5 +100,6 @@ export type UpdateCommercialVisitBody = {
 	notes?: string | null;
 	result?: string | null;
 	deliveredOrderQrs?: string[];
+	scannedOrderQr?: string;
 	orderIds?: string[];
 };

@@ -290,7 +290,7 @@ export default function AdminCommunicationsWorkspace({
 			"max-h-[calc(100svh-2rem)] w-[min(44rem,calc(100vw-2rem))] overflow-y-auto",
 			"[&_input]:min-w-0 [&_input]:w-full [&_select]:min-w-0 [&_select]:w-full [&_textarea]:min-w-0 [&_textarea]:w-full",
 			openForm === tab
-				? "fixed left-1/2 top-1/2 z-[90] -translate-x-1/2 -translate-y-1/2"
+				? "app-modal-dialog-centered z-[90]"
 				: "hidden",
 		].join(" ");
 	}
@@ -744,7 +744,7 @@ export default function AdminCommunicationsWorkspace({
 					type="button"
 					aria-label="Cerrar formulario"
 					onClick={closeCommunicationForm}
-					className="fixed inset-0 z-[80] bg-slate-950/35 backdrop-blur-sm"
+					className="app-modal-overlay z-[80]"
 				/>
 			) : null}
 

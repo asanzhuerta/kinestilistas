@@ -90,20 +90,8 @@ export default function CommercialSettingsForm() {
 					subtitle="Define la jornada base y los tiempos operativos que usara el módulo 2."
 				/>
 
-				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-					<div className="max-w-3xl space-y-3">
-						<h2 className="text-xl font-semibold text-slate-900">
-							Planificación diaria
-						</h2>
-						<p className="text-sm text-slate-600">
-							Esta configuración servira como base para calcular el tiempo
-							disponible en ruta según tu jornada habitual.
-						</p>
-					</div>
-				</section>
-
 				{loading ? (
-					<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
+					<section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 						<p className="text-sm text-slate-600">
 							Cargando configuración comercial...
 						</p>
@@ -111,7 +99,13 @@ export default function CommercialSettingsForm() {
 				) : null}
 
 				{!loading ? (
-					<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
+					<section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+						<div className="mb-5">
+							<h2 className="text-xl font-semibold text-slate-900">
+								Planificación diaria
+							</h2>
+						</div>
+
 						<SafeForm
 							onSubmit={handleSubmit}
 							className="grid gap-4 md:grid-cols-2"

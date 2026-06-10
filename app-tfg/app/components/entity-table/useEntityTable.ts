@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import type {
 	EntitySortDirection,
 	EntitySortField,
@@ -215,7 +216,11 @@ export function useEntityTable(
 	items: EntityTableItem[],
 	config?: EntityTableConfig,
 ) {
-	const persistenceKey = config?.persistenceKey;
+	const pathname = usePathname();
+	const autoPersistenceId = useId().replace(/:/g, "");
+	const persistenceKey =
+		config?.persistenceKey ??
+		`route:${pathname ?? "unknown"}:entity-table:${autoPersistenceId}`;
 	const [search, setSearch] = useState(config?.initialSearch ?? "");
 	const [categoryFilter, setCategoryFilter] = useState(
 		resolveInitialFilterValue(config?.initialCategoryFilter),

@@ -95,17 +95,17 @@ Que decir:
 
 Ruta:
 
-- `/commercials/cobros`
+- `/commercials/orders/2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`
 
 Que ensenar:
 
-- El pedido `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2` debe aparecer como `delivered` y pendiente de cobro.
-- Registra el cobro en directo si quieres cerrar la demo con una accion visible.
+- El pedido `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2` debe aparecer como entregado y con seguimiento de cobro visible.
+- Registra o actualiza el cobro en directo si quieres cerrar la demo con una accion visible.
 
 Que decir:
 
 - "Una vez entregado, el pedido pasa al flujo mínimo de cobro."
-- "Desde esta pantalla el comercial puede registrar método, fecha y notas."
+- "El cobro queda integrado en el propio detalle del pedido para no duplicar pantallas comerciales."
 
 ### 4. Admin - trazabilidad global
 
@@ -132,8 +132,8 @@ Que decir:
 2. Mostrar el pedido `delivered` y el pedido `cancelled`.
 3. Cambiar a `commercial` y abrir `/commercials/visits`.
 4. Mostrar la visita `planned` con pedido vinculado.
-5. Ir a `/commercials/cobros`.
-6. Registrar el cobro del pedido `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2` si quieres terminar con un cambio de estado en vivo.
+5. Ir al detalle del pedido en `/commercials/orders/2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
+6. Registrar el cobro del pedido si quieres terminar con un cambio de estado en vivo.
 7. Cambiar a `admin` y abrir `/admin/orders/2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
 8. Confirmar que el estado final del pedido y del cobro queda reflejado globalmente.
 

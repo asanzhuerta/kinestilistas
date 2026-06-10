@@ -100,15 +100,9 @@ export const roleSidebarSections: Record<
 					icon: "chat",
 				},
 				{ title: "Auditoría", href: "/admin/audit", icon: "reports" },
-				{ title: "Operación M7", href: "/admin/operations", icon: "reports" },
-				{
-					title: "Operaciones empresa",
-					href: "/admin/enterprise-operations",
-					icon: "reports",
-				},
 				{
 					title: "Configuración",
-					href: "/admin/configuration",
+					href: "/admin/settings",
 					icon: "settings",
 				},
 			],
@@ -140,7 +134,6 @@ export const roleSidebarSections: Record<
 					icon: "color",
 				},
 				{ title: "Pedidos", href: "/commercials/orders", icon: "orders" },
-				{ title: "Cobros", href: "/commercials/cobros", icon: "payments" },
 			],
 		},
 		{

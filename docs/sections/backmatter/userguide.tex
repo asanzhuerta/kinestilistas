@@ -2,7 +2,7 @@ Las instrucciones de uso del software se detallan a continuación. Este manual s
 
 \section{Introducción}
 
-KinEstilistas es una aplicación web para coordinar la relación entre un distribuidor de producto capilar profesional, su equipo comercial y sus clientes salón. En la versión actual el sistema cubre de forma efectiva la gestión de acceso y usuarios del módulo \texttt{M1}, la operativa comercial y de clientes del módulo \texttt{M2}, el catálogo del módulo \texttt{M3}, el flujo de pedidos, reparto y cobro mínimo del módulo \texttt{M4}, el seguimiento técnico interno del salón del módulo \texttt{M5}, las comunicaciones internas y multicanal, promociones, formaciones y descuentos del módulo \texttt{M6}, y la administración transversal de auditoría, rate limiting, integraciones de soporte, compatibilidad técnica y operación del módulo \texttt{M7}.
+KinEstilistas es una aplicación web para coordinar la relación entre un distribuidor de producto capilar profesional, su equipo comercial y sus clientes salón. En la versión actual el sistema cubre de forma efectiva la gestión de acceso y usuarios del módulo \texttt{M1}, la operativa comercial y de clientes del módulo \texttt{M2}, el catálogo del módulo \texttt{M3}, el flujo de pedidos, reparto y cobro mínimo del módulo \texttt{M4}, el seguimiento técnico interno del salón del módulo \texttt{M5}, las comunicaciones internas y multicanal, promociones, formaciones y descuentos del módulo \texttt{M6}, y la administración transversal de auditoría, avisos configurables y base técnica de integraciones del módulo \texttt{M7}.
 
 La aplicación diferencia tres perfiles de uso:
 
@@ -48,7 +48,7 @@ El panel de administración concentra actualmente cinco áreas principales:
     \item \textbf{Gestión de clientes}: consulta de clientes y asignaciones entre clientes y comerciales.
     \item \textbf{Gestión de catálogo}: administración de categorías, líneas, subcategorías, productos, recursos de apoyo, cartas de color y referencias cromáticas.
     \item \textbf{Gestión global de pedidos}: consulta del historial global y detalle completo de cada pedido.
-    \item \textbf{Auditoría y configuración}: consulta de accesos y acciones administrativas, revisión del resumen operativo de \texttt{M7}, integraciones de soporte, operación empresarial, soporte técnico/PWA, canales SMTP/Web Push y ajuste de políticas globales de rate limiting.
+    \item \textbf{Auditoría y configuración}: consulta de accesos y acciones administrativas, exportación \texttt{CSV} de trazabilidad y configuración de canales de avisos automáticos.
 \end{itemize}
 
 Las operaciones más habituales para este rol son:
@@ -61,13 +61,8 @@ Las operaciones más habituales para este rol son:
     \item asignar o reasignar clientes a un comercial;
     \item mantener la estructura del catálogo y sus productos asociados;
     \item administrar cartas de color y referencias visuales por línea comercial;
-    \item revisar el resumen operativo transversal de \texttt{M7} en \texttt{/admin/operations} y exportar su informe \texttt{CSV};
-    \item consultar \texttt{/admin/enterprise-operations} para revisar configuraciones, integraciones empresariales, operaciones de intercambio y propuestas de pedido a proveedor;
     \item consultar la vista de auditoría en \texttt{/admin/audit}, incluyendo accesos recientes, acciones administrativas, resumen de sesiones activas y exportación \texttt{CSV} de registros de trazabilidad;
-    \item revisar el inventario de integraciones de soporte en \texttt{/admin/integrations}, incluyendo proveedor, estado, configuración y mecanismo de degradación;
-    \item revisar el soporte técnico transversal en \texttt{/admin/support}, incluyendo navegador mínimo, PWA, \textit{service worker}, evidencias y degradación prevista;
-    \item acceder desde el menú de configuración agrupado a operación, integraciones, soporte y ajustes transversales;
-    \item ajustar límites globales de peticiones para login y API desde \texttt{/admin/settings}, revisando antes el diagnóstico de políticas activas, personalizadas y desactivadas;
+    \item configurar desde \texttt{/admin/settings} los canales adicionales de avisos automáticos;
     \item revisar el estado completo de un pedido y su trazabilidad de reparto y cobro.
 \end{enumerate}
 
@@ -91,7 +86,7 @@ Los flujos disponibles son:
     \item preparar borradores de pedido y confirmarlos para clientes asignados;
     \item consultar el listado de pedidos del área comercial;
     \item gestionar visitas de reparto, vincular pedidos confirmados y completar la entrega con validación QR;
-    \item registrar el cobro mínimo de pedidos ya entregados desde \texttt{/commercials/cobros}.
+    \item registrar el cobro mínimo de pedidos ya entregados desde el detalle del pedido comercial.
 \end{enumerate}
 
 En el detalle de una visita de reparto, la confirmación de entrega se apoya en un flujo específico de QR. El comercial puede abrir el escaner, utilizar la cámara del dispositivo para capturar el código del paquete o introducir el valor manualmente si la lectura automática falla. Solo cuando el sistema dispone de todos los QR requeridos para los pedidos vinculados habilita la confirmación final de la entrega.

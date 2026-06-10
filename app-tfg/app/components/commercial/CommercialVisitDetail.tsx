@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import DataTable from "@/app/components/DataTable";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
 import SafeForm from "@/app/components/forms/SafeForm";
 import SubmitButton from "@/app/components/forms/SubmitButton";
 import QrCameraScanner from "@/app/components/qr/QrCameraScanner";
 import { useCommercialVisit } from "@/app/hooks/api/useCommercialVisit";
-import { formatDateTime } from "@/lib/utils/user-utils";
-import { formatTimeLabel } from "@/lib/utils/time";
+import {
+	COMMERCIAL_VISIT_STATUS_IDS,
+	COMMERCIAL_VISIT_TYPE_IDS,
+	ORDER_STATUS_IDS,
+} from "@/lib/typeorm/constants/catalog-ids";
 import {
 	extractOrderIdFromQrValue,
 	normalizeOrderQrValues,
 } from "@/lib/orders/qr";
+import { formatTimeLabel } from "@/lib/utils/time";
+import { formatDateTime } from "@/lib/utils/user-utils";
 import {
 	formatOrderCurrency,
 	getOrderStatusClassesById,
@@ -25,23 +30,11 @@ import {
 	getVisitStatusClasses,
 	getVisitStatusLabel,
 	getVisitTypeLabel,
+	type CommercialVisitDeliveryOrder,
 } from "./commercial-visit-types";
 
 type Props = {
 	visitId: string;
-};
-
-type InfoRow = {
-	id: string;
-	label: string;
-	value: string;
-};
-
-type InfoColumn = {
-	key: string;
-	header: string;
-	className?: string;
-	render: (item: InfoRow) => ReactNode;
 };
 
 type VisitFormState = {
@@ -52,20 +45,6 @@ type VisitFormState = {
 	result: string;
 };
 
-const infoColumns: InfoColumn[] = [
-	{
-		key: "label",
-		header: "Campo",
-		className: "w-1/3",
-		render: (item) => item.label,
-	},
-	{
-		key: "value",
-		header: "Valor",
-		render: (item) => item.value,
-	},
-];
-
 const DEFAULT_VISIT_FORM_STATE: VisitFormState = {
 	scheduledForDate: "",
 	visitTypeId: "",
@@ -74,45 +53,61 @@ const DEFAULT_VISIT_FORM_STATE: VisitFormState = {
 	result: "",
 };
 
-function CollapsibleSection({
-	title,
-	description,
-	defaultOpen = false,
-	children,
+function DetailRow({
+	label,
+	value,
 }: {
-	title: string;
-	description?: string;
-	defaultOpen?: boolean;
-	children: ReactNode;
+	label: string;
+	value: string | null | undefined;
 }) {
-	const [isOpen, setIsOpen] = useState(defaultOpen);
-
 	return (
-		<section className="glass-card rounded-3xl border border-white/30 bg-white/75 shadow-xl backdrop-blur">
-			<button
-				type="button"
-				onClick={() => setIsOpen((currentValue) => !currentValue)}
-				aria-expanded={isOpen}
-				className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6"
-			>
-				<div>
-					<h2 className="text-base font-semibold text-slate-900 sm:text-lg">
-						{title}
-					</h2>
-					{description ? (
-						<p className="mt-1 text-sm text-slate-600">{description}</p>
-					) : null}
-				</div>
+		<div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+			<p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+				{label}
+			</p>
+			<p className="mt-1 text-sm font-medium text-slate-900">{value || "-"}</p>
+		</div>
+	);
+}
 
-				<span className="text-2xl leading-none text-slate-400">
-					{isOpen ? "−" : "+"}
+function OrderMiniCard({
+	order,
+	message,
+}: {
+	order: CommercialVisitDeliveryOrder;
+	message?: string;
+}) {
+	return (
+		<article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+			<div className="flex flex-wrap items-center gap-2">
+				<span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+					Pedido {order.id.slice(0, 8)}
 				</span>
-			</button>
+				<span
+					className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusClassesById(
+						order.status_id,
+					)}`}
+				>
+					{order.status_name}
+				</span>
+			</div>
 
-			{isOpen ? (
-				<div className="border-t border-slate-200/70 p-5 sm:p-6">{children}</div>
+			{message ? (
+				<p className="mt-3 rounded-2xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
+					{message}
+				</p>
 			) : null}
-		</section>
+
+			<div className="mt-3 grid gap-2 sm:grid-cols-3">
+				<DetailRow label="Importe" value={formatOrderCurrency(order.total_amount)} />
+				<DetailRow label="Bultos" value={String(order.line_count)} />
+				<DetailRow label="Actualizado" value={formatDateTime(order.updated_at)} />
+			</div>
+
+			{order.notes ? (
+				<p className="mt-3 text-sm leading-6 text-slate-600">{order.notes}</p>
+			) : null}
+		</article>
 	);
 }
 
@@ -124,12 +119,15 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 		save,
 	} = useCommercialVisit(visitId);
 	const [saving, setSaving] = useState(false);
+	const [savingQr, setSavingQr] = useState(false);
+	const [savingRoutineCompletion, setSavingRoutineCompletion] = useState(false);
 	const [success, setSuccess] = useState("");
 	const [submissionError, setSubmissionError] = useState("");
-	const [deliveredOrderQrInput, setDeliveredOrderQrInput] = useState("");
 	const [qrScanFeedback, setQrScanFeedback] = useState("");
 	const [scannerOpen, setScannerOpen] = useState(false);
+	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+	const [deliveredOrderQrInput, setDeliveredOrderQrInput] = useState("");
 	const [formState, setFormState] = useState<VisitFormState>(
 		DEFAULT_VISIT_FORM_STATE,
 	);
@@ -151,25 +149,45 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 		setQrScanFeedback("");
 	}, [visit]);
 
-	const canEditPlanning = useMemo(
-		() => visit?.status_id === 1 || visit?.status_id === 4,
-		[visit],
+	const isPostponed =
+		visit?.status_id === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED;
+	const isPlanned = visit?.status_id === COMMERCIAL_VISIT_STATUS_IDS.PLANNED;
+	const isDeliveryVisit =
+		visit?.visit_type_id === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY;
+	const isRoutineVisit =
+		visit?.visit_type_id === COMMERCIAL_VISIT_TYPE_IDS.ROUTINE;
+	const hasLinkedOrders = Boolean(visit?.linkedOrders.length);
+	const hasCompletedElsewhereOrders = Boolean(
+		visit?.completedElsewhereOrders.length,
 	);
+	const hasPendingLinkedOrders = Boolean(
+		visit?.linkedOrders.some(
+			(order) => order.status_id === ORDER_STATUS_IDS.CONFIRMED,
+		),
+	);
+	const canScanQr =
+		Boolean(visit) &&
+		isDeliveryVisit &&
+		isPlanned &&
+		hasLinkedOrders &&
+		hasPendingLinkedOrders &&
+		!isPostponed;
+	const canCompleteRoutineVisit =
+		Boolean(visit) && isRoutineVisit && isPlanned && !isPostponed;
+	const canEditManually = Boolean(visit) && !isPostponed;
 
-	const isDeliveryVisit = formState.visitTypeId === "1";
-	const deliveryOrdersLocked = !canEditPlanning;
-	const isActiveDeliveryVisit =
-		isDeliveryVisit && visit?.status_id !== 2 && visit?.status_id !== 3;
+	const deliveryOrdersForEdit = useMemo(() => {
+		if (!visit) {
+			return [] as CommercialVisitDeliveryOrder[];
+		}
 
-	const deliveryOrdersForDisplay = useMemo(() => {
-		const availableDeliveryOrders = visit?.availableOrdersForDelivery ?? [];
-		const ordersById = new Map<string, (typeof availableDeliveryOrders)[number]>();
+		const ordersById = new Map<string, CommercialVisitDeliveryOrder>();
 
-		for (const order of visit?.linkedOrders ?? []) {
+		for (const order of visit.linkedOrders) {
 			ordersById.set(order.id, order);
 		}
 
-		for (const order of availableDeliveryOrders) {
+		for (const order of visit.availableOrdersForDelivery) {
 			ordersById.set(order.id, order);
 		}
 
@@ -187,115 +205,16 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 		[deliveredOrderQrInput, selectedOrderIds],
 	);
 
-	const canConfirmDelivery =
-		isActiveDeliveryVisit &&
-		selectedOrderIds.length > 0 &&
-		scannedDeliveredOrderIds.length === selectedOrderIds.length &&
-		Boolean(formState.result.trim());
-
-	const visitRows = useMemo(() => {
-		if (!visit) {
-			return [];
-		}
-
-		return [
-			{
-				id: "status",
-				label: "Estado",
-				value: getVisitStatusLabel(visit.status_id),
-			},
-			{
-				id: "visitType",
-				label: "Tipo",
-				value: getVisitTypeLabel(visit.visit_type_id),
-			},
-			{
-				id: "scheduledForDate",
-				label: "Dia planificado",
-				value: formatVisitDate(visit.scheduled_for_date),
-			},
-			{
-				id: "notes",
-				label: "Notas",
-				value: visit.notes || "-",
-			},
-			{
-				id: "result",
-				label: "Resultado",
-				value: visit.result || "-",
-			},
-		];
-	}, [visit]);
-
-	const clientRows = useMemo(() => {
-		if (!visit) {
-			return [];
-		}
-
-		return [
-			{
-				id: "clientName",
-				label: "Cliente",
-				value: visit.client?.name ?? "-",
-			},
-			{
-				id: "contactName",
-				label: "Contacto",
-				value: visit.client?.contact_name || "-",
-			},
-			{
-				id: "email",
-				label: "Correo",
-				value: visit.client?.user?.email || "-",
-			},
-			{
-				id: "location",
-				label: "Ubicacion",
-				value:
-					[visit.client?.city, visit.client?.province]
-						.filter(Boolean)
-						.join(" · ") || "-",
-			},
-			{
-				id: "visitWindow",
-				label: "Horario de visitas",
-				value:
-					visit.client?.visit_window_start_time &&
-					visit.client?.visit_window_end_time
-						? `${formatTimeLabel(visit.client.visit_window_start_time)} - ${formatTimeLabel(visit.client.visit_window_end_time)}`
-						: "-",
-			},
-		];
-	}, [visit]);
-
-	const commercialRows = useMemo(() => {
-		if (!visit) {
-			return [];
-		}
-
-		return [
-			{
-				id: "commercialName",
-				label: "Comercial",
-				value: visit.commercial?.user?.name ?? "-",
-			},
-			{
-				id: "commercialEmail",
-				label: "Correo",
-				value: visit.commercial?.user?.email ?? "-",
-			},
-			{
-				id: "employeeCode",
-				label: "Código interno",
-				value: visit.commercial?.employee_code ?? "-",
-			},
-			{
-				id: "territory",
-				label: "Territorio",
-				value: visit.commercial?.territory ?? "-",
-			},
-		];
-	}, [visit]);
+	const locationLabel = visit
+		? [visit.client?.city, visit.client?.province].filter(Boolean).join(" - ")
+		: "";
+	const visitWindowLabel =
+		visit?.client?.visit_window_start_time &&
+		visit?.client?.visit_window_end_time
+			? `${formatTimeLabel(
+					visit.client.visit_window_start_time,
+				)} - ${formatTimeLabel(visit.client.visit_window_end_time)}`
+			: "-";
 
 	function toggleOrderSelection(orderId: string) {
 		setSelectedOrderIds((currentOrderIds) =>
@@ -305,145 +224,151 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 		);
 	}
 
-	function buildDeliveredOrderQrs() {
-		return deliveredOrderQrInput
-			.split(/\r?\n/)
-			.map((value) => value.trim())
-			.filter(Boolean);
+	function openEditModal() {
+		if (!visit || isPostponed) {
+			return;
+		}
+
+		setSubmissionError("");
+		setSuccess("");
+		setIsEditModalOpen(true);
 	}
 
-	function handleDetectedQr(rawValue: string) {
-		const normalizedRawValue = String(rawValue ?? "").trim();
-		const orderId = extractOrderIdFromQrValue(normalizedRawValue);
+	async function handleDetectedQr(rawValue: string) {
+		if (!visit) {
+			return {
+				accepted: false,
+				message: "No se ha cargado la visita todavia.",
+			};
+		}
+
+		if (isPostponed) {
+			return {
+				accepted: false,
+				message:
+					"Esta visita esta aplazada y no se puede modificar. Crea una nueva visita.",
+			};
+		}
+
+		const orderId = extractOrderIdFromQrValue(rawValue);
 
 		if (!orderId) {
 			return {
 				accepted: false,
-				message:
-					"El QR escaneado no tiene un formato reconocido para pedidos.",
+				message: "El QR escaneado no tiene un formato reconocido para pedidos.",
 			};
 		}
 
-		if (selectedOrderIds.length > 0 && !selectedOrderIds.includes(orderId)) {
+		const linkedOrder = visit.linkedOrders.find((order) => order.id === orderId);
+
+		if (!linkedOrder) {
 			return {
 				accepted: false,
 				message:
-					"El QR escaneado no pertenece a ninguno de los pedidos vinculados a este reparto.",
+					"El QR escaneado no pertenece a ningun pedido vinculado a esta visita.",
 			};
 		}
 
-		const currentValues = buildDeliveredOrderQrs();
-		const currentOrderIds = normalizeOrderQrValues(currentValues);
-
-		if (currentOrderIds.includes(orderId)) {
+		if (linkedOrder.status_id === ORDER_STATUS_IDS.DELIVERED) {
 			return {
 				accepted: false,
-				message: "Ese paquete ya estaba escaneado.",
+				message:
+					linkedOrder.delivery_visit_id === visit.id
+						? "Este pedido ya estaba completado."
+						: "Este pedido ya se ha completado en otra visita.",
 			};
 		}
 
-		const nextValues = [...currentValues, normalizedRawValue];
-		const nextRecognizedCount = normalizeOrderQrValues(nextValues).filter((value) =>
-			selectedOrderIds.includes(value),
-		).length;
-		const expectedCount = selectedOrderIds.length;
+		try {
+			setSavingQr(true);
+			setSubmissionError("");
+			setSuccess("");
 
-		setDeliveredOrderQrInput(nextValues.join("\n"));
-		setQrScanFeedback(
-			expectedCount > 0 && nextRecognizedCount >= expectedCount
-				? "Todos los paquetes vinculados al reparto ya han sido escaneados."
-				: `QR anadido correctamente (${nextRecognizedCount}/${expectedCount}).`,
-		);
+			await save({
+				scannedOrderQr: rawValue,
+				result: formState.result || "Entrega confirmada mediante QR.",
+			});
 
-		return {
-			accepted: true,
-			message:
-				expectedCount > 0 && nextRecognizedCount >= expectedCount
-					? "Todos los paquetes vinculados al reparto ya han sido escaneados."
-					: `QR anadido correctamente (${nextRecognizedCount}/${expectedCount}).`,
-			stop: expectedCount > 0 && nextRecognizedCount >= expectedCount,
-		};
+			setQrScanFeedback("Pedido completado correctamente mediante QR.");
+			setSuccess("Pedido completado correctamente mediante QR.");
+
+			return {
+				accepted: true,
+				message: "Pedido completado correctamente mediante QR.",
+				stop: true,
+			};
+		} catch (err) {
+			const message =
+				err instanceof Error
+					? err.message
+					: "No se pudo completar el pedido escaneado.";
+			setSubmissionError(message);
+
+			return {
+				accepted: false,
+				message,
+			};
+		} finally {
+			setSavingQr(false);
+		}
 	}
 
-	async function handleConfirmDelivery() {
-		if (!isActiveDeliveryVisit) {
-			return;
-		}
-
-		if (selectedOrderIds.length === 0) {
-			setSubmissionError(
-				"Un reparto activo debe tener al menos un pedido confirmado vinculado antes de poder confirmarse.",
-			);
-			return;
-		}
-
-		if (!formState.result.trim()) {
-			setSubmissionError(
-				"Antes de confirmar la entrega debes indicar un resultado de la visita.",
-			);
-			return;
-		}
-
-		if (scannedDeliveredOrderIds.length !== selectedOrderIds.length) {
-			setSubmissionError(
-				"Debes escanear el QR de todos los pedidos vinculados antes de confirmar la entrega.",
-			);
+	async function handleCompleteRoutineVisit() {
+		if (!visit || !canCompleteRoutineVisit) {
 			return;
 		}
 
 		try {
-			setSaving(true);
-			setSuccess("");
+			setSavingRoutineCompletion(true);
 			setSubmissionError("");
+			setSuccess("");
 
-			const visitData = await save({
-				deliveredOrderQrs: buildDeliveredOrderQrs(),
-				scheduledForDate: formState.scheduledForDate,
-				visitTypeId: Number(formState.visitTypeId),
-				statusId: 2,
-				notes: formState.notes,
-				result: formState.result,
-				orderIds: selectedOrderIds,
+			await save({
+				statusId: COMMERCIAL_VISIT_STATUS_IDS.COMPLETED,
+				result: formState.result || "Visita rutinaria completada.",
 			});
 
-			if (visitData) {
-				setSuccess("Entrega confirmada correctamente.");
-				setScannerOpen(false);
-			}
+			setSuccess("Visita rutinaria completada correctamente.");
 		} catch (err) {
-			console.error("[CommercialVisitDetail][confirm-delivery] error:", err);
 			setSubmissionError(
 				err instanceof Error
 					? err.message
-					: "No se pudo confirmar la entrega.",
+					: "No se pudo completar la visita rutinaria.",
 			);
 		} finally {
-			setSaving(false);
+			setSavingRoutineCompletion(false);
 		}
 	}
 
 	async function handleSubmit(event: React.FormEvent) {
 		event.preventDefault();
 
-		if (
-			isDeliveryVisit &&
-			formState.statusId !== "3" &&
-			selectedOrderIds.length === 0
-		) {
+		if (!visit || isPostponed) {
 			setSubmissionError(
-				"Un reparto activo debe tener al menos un pedido confirmado vinculado. Selecciona un pedido o cancela la visita.",
+				"Esta visita esta aplazada y no se puede modificar. Crea una nueva visita.",
 			);
 			return;
 		}
 
 		if (
-			isDeliveryVisit &&
-			visit?.status_id !== 2 &&
-			formState.statusId === "2" &&
-			buildDeliveredOrderQrs().length === 0
+			formState.visitTypeId === String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) &&
+			formState.statusId !== String(COMMERCIAL_VISIT_STATUS_IDS.CANCELLED) &&
+			selectedOrderIds.length === 0
 		) {
 			setSubmissionError(
-				"Antes de completar el reparto debes escanear o pegar el QR de todos los paquetes entregados.",
+				"Un reparto activo debe tener al menos un pedido confirmado vinculado.",
+			);
+			return;
+		}
+
+		if (
+			formState.visitTypeId === String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) &&
+			visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.COMPLETED &&
+			formState.statusId === String(COMMERCIAL_VISIT_STATUS_IDS.COMPLETED) &&
+			scannedDeliveredOrderIds.length !== selectedOrderIds.length
+		) {
+			setSubmissionError(
+				"Para completar un reparto manualmente debes aportar el QR de todos los pedidos vinculados.",
 			);
 			return;
 		}
@@ -453,25 +378,35 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			setSuccess("");
 			setSubmissionError("");
 
-			const visitData = await save({
-				deliveredOrderQrs: isDeliveryVisit ? buildDeliveredOrderQrs() : [],
-				scheduledForDate: formState.scheduledForDate,
-				visitTypeId: Number(formState.visitTypeId),
+			await save({
+				...(isPlanned
+					? {
+							scheduledForDate: formState.scheduledForDate,
+							visitTypeId: Number(formState.visitTypeId),
+							orderIds:
+								formState.visitTypeId ===
+								String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY)
+									? selectedOrderIds
+									: [],
+						}
+					: {}),
+				deliveredOrderQrs:
+					formState.visitTypeId === String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY)
+						? deliveredOrderQrInput
+								.split(/\r?\n/)
+								.map((value) => value.trim())
+								.filter(Boolean)
+						: [],
 				statusId: Number(formState.statusId),
 				notes: formState.notes,
 				result: formState.result,
-				orderIds: isDeliveryVisit ? selectedOrderIds : [],
 			});
 
-			if (visitData) {
-				setSuccess("Visita actualizada correctamente.");
-			}
+			setSuccess("Visita actualizada correctamente.");
+			setIsEditModalOpen(false);
 		} catch (err) {
-			console.error("[CommercialVisitDetail][PATCH] error:", err);
 			setSubmissionError(
-				err instanceof Error
-					? err.message
-					: "No se pudo actualizar la visita.",
+				err instanceof Error ? err.message : "No se pudo actualizar la visita.",
 			);
 		} finally {
 			setSaving(false);
@@ -480,411 +415,470 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 
 	return (
 		<PageTransition>
-			<div className="space-y-4">
-				<div className="glass-card rounded-3xl border border-white/30 bg-white/75 p-5 shadow-xl backdrop-blur sm:p-6">
-					<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-						<div className="min-w-0">
-							<H1Title
-								title="Detalle de visita"
-								subtitle="Consulta la visita y abre solo los bloques que necesites."
-							/>
-							{visit ? (
-								<div className="mt-4 flex flex-wrap items-center gap-3">
-									<span
-										className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${getVisitStatusClasses(
-											visit.status_id,
-										)}`}
-									>
-										{getVisitStatusLabel(visit.status_id)}
-									</span>
-									<span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-										{getVisitTypeLabel(visit.visit_type_id)}
-									</span>
-								</div>
-							) : null}
-						</div>
+			<div className="space-y-5">
+				<H1Title
+					title="Detalle de visita"
+					subtitle="Gestiona la visita, sus pedidos y los datos del cliente."
+				/>
 
-					</div>
+				<div className="flex justify-start">
+					<Link
+						href="/commercials/visits"
+						className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+					>
+						Volver
+					</Link>
 				</div>
 
 				{success ? (
-					<section className="glass-card rounded-3xl border border-emerald-200 bg-emerald-50/90 p-4 text-sm font-medium text-emerald-700 shadow-sm">
+					<div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
 						{success}
-					</section>
+					</div>
 				) : null}
 
 				{submissionError ? (
-					<section className="glass-card rounded-3xl border border-red-200 bg-red-50/90 p-4 text-sm font-medium text-red-700 shadow-sm">
+					<div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
 						{submissionError}
-					</section>
+					</div>
 				) : null}
 
 				{loading ? (
-					<section className="glass-card rounded-3xl border border-white/30 bg-white/70 p-6 shadow-xl backdrop-blur">
+					<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 						<p className="text-sm text-slate-600">Cargando visita...</p>
 					</section>
 				) : null}
 
 				{!loading && error ? (
-					<section className="glass-card rounded-3xl border border-red-200 bg-red-50/80 p-6 shadow-xl backdrop-blur">
-						<h2 className="text-lg font-semibold text-red-700">
-							{visit
-								? "No se pudieron guardar los cambios"
-								: "No se pudo cargar la visita"}
+					<section className="rounded-3xl border border-rose-200 bg-rose-50 p-6 shadow-sm">
+						<h2 className="text-lg font-semibold text-rose-700">
+							No se pudo cargar la visita
 						</h2>
-						<p className="mt-2 text-sm text-red-600">{error}</p>
+						<p className="mt-2 text-sm text-rose-600">{error}</p>
 					</section>
 				) : null}
 
 				{!loading && !error && visit ? (
 					<>
-						<CollapsibleSection
-							title="Información de la visita"
-							description="Fecha, tipo, estado, notas y resultado."
-						>
-							<DataTable<InfoRow>
-								data={visitRows}
-								columns={infoColumns}
-								getRowKey={(item: InfoRow) => item.id}
-								emptyMessage="No hay datos de la visita."
-							/>
-						</CollapsibleSection>
-
-
-						{isDeliveryVisit ? (
-							<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-								<div className="flex flex-col gap-2">
-									<h2 className="text-lg font-semibold text-slate-900">
-										Pedidos vinculados al reparto
-									</h2>
-									<p className="text-sm text-slate-600">
-										Selecciona los pedidos confirmados que se entregaran en esta
-										visita. Al completar el reparto, esos pedidos pasaran
-										automáticamente a estado entregado.
+						<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+							<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+								<div className="min-w-0">
+									<div className="flex flex-wrap items-center gap-2">
+										<span
+											className={`rounded-full px-3 py-1 text-sm font-semibold ${getVisitStatusClasses(
+												visit.status_id,
+											)}`}
+										>
+											{getVisitStatusLabel(visit.status_id)}
+										</span>
+										<span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
+											{getVisitTypeLabel(visit.visit_type_id)}
+										</span>
+										<span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
+											{formatVisitDate(visit.scheduled_for_date)}
+										</span>
+									</div>
+									<p className="mt-3 text-sm leading-6 text-slate-600">
+										{isPostponed
+											? "Esta visita esta aplazada y queda bloqueada. Para continuar con el cliente o el reparto, crea una visita nueva."
+											: "Gestiona la visita desde las acciones principales o abre la edicion manual si necesitas corregir datos."}
 									</p>
 								</div>
 
-								{deliveryOrdersForDisplay.length === 0 ? (
-									<div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-600">
-										No hay pedidos confirmados disponibles para este cliente en
-										este momento.
-									</div>
-								) : (
-									<div className="mt-5 space-y-3">
-										{deliveryOrdersForDisplay.map((order) => {
-											const isSelected = selectedOrderIds.includes(order.id);
+								<div className="flex flex-wrap gap-3">
+									{isDeliveryVisit ? (
+										<button
+											type="button"
+											onClick={() => setScannerOpen(true)}
+											disabled={!canScanQr || savingQr}
+											className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											{savingQr ? "Completando..." : "Escanear QR"}
+										</button>
+									) : null}
+									{isRoutineVisit ? (
+										<button
+											type="button"
+											onClick={handleCompleteRoutineVisit}
+											disabled={
+												!canCompleteRoutineVisit || savingRoutineCompletion
+											}
+											className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											{savingRoutineCompletion
+												? "Completando..."
+												: "TERMINAR visita"}
+										</button>
+									) : null}
+									<button
+										type="button"
+										onClick={openEditModal}
+										disabled={!canEditManually}
+										className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+									>
+										Editar manualmente
+									</button>
+								</div>
+							</div>
+							{qrScanFeedback ? (
+								<p className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+									{qrScanFeedback}
+								</p>
+							) : null}
+						</section>
 
-											return (
-												<label
-													key={order.id}
-													className={`flex cursor-pointer flex-col gap-3 rounded-2xl border px-4 py-4 transition ${
-														isSelected
-															? "border-sky-300 bg-sky-50"
-															: "border-slate-200 bg-white"
-													} ${
-														deliveryOrdersLocked
-															? "cursor-not-allowed opacity-80"
-															: "hover:border-slate-300"
-													}`}
-												>
-													<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+						<div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
+							<aside className="space-y-4">
+								<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+									<h2 className="text-base font-semibold text-slate-900">
+										Informacion de la visita
+									</h2>
+									<div className="mt-4 grid gap-3">
+										<DetailRow
+											label="Fecha"
+											value={formatVisitDate(visit.scheduled_for_date)}
+										/>
+										<DetailRow
+											label="Tipo"
+											value={getVisitTypeLabel(visit.visit_type_id)}
+										/>
+										<DetailRow
+											label="Estado"
+											value={getVisitStatusLabel(visit.status_id)}
+										/>
+										<DetailRow label="Notas" value={visit.notes || "-"} />
+										<DetailRow label="Resultado" value={visit.result || "-"} />
+									</div>
+								</section>
+
+								{isPostponed ? (
+									<section className="rounded-3xl border border-orange-200 bg-orange-50 p-5 shadow-sm">
+										<h2 className="text-base font-semibold text-orange-800">
+											Visita bloqueada
+										</h2>
+										<p className="mt-2 text-sm leading-6 text-orange-700">
+											Las visitas aplazadas no se reprograman ni se editan. La
+											operativa correcta es crear una visita nueva.
+										</p>
+									</section>
+								) : null}
+							</aside>
+
+							<main className="space-y-5">
+								<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+									<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+										<div>
+											<h2 className="text-xl font-semibold text-slate-900">
+												{visit.client?.name ?? "Cliente"}
+											</h2>
+											<p className="mt-1 text-sm text-slate-500">
+												{visit.client?.contact_name || "Sin contacto principal"}
+											</p>
+										</div>
+										<Link
+											href={`/commercials/clients/${visit.client_id}`}
+											className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+										>
+											Ver cliente
+										</Link>
+									</div>
+
+									<div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+										<DetailRow
+											label="Telefono"
+											value={visit.client?.user?.phone || "-"}
+										/>
+										<DetailRow
+											label="Correo"
+											value={visit.client?.user?.email || "-"}
+										/>
+										<DetailRow
+											label="Ubicacion"
+											value={locationLabel || "-"}
+										/>
+										<DetailRow label="Franja" value={visitWindowLabel} />
+									</div>
+								</section>
+
+								{hasLinkedOrders || hasCompletedElsewhereOrders ? (
+									<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+										<h2 className="text-lg font-semibold text-slate-900">
+											Pedidos del reparto
+										</h2>
+										<div className="mt-4 grid gap-3 xl:grid-cols-2">
+											{visit.linkedOrders.map((order) => (
+												<OrderMiniCard key={order.id} order={order} />
+											))}
+
+											{visit.completedElsewhereOrders.map((order) => (
+												<OrderMiniCard
+													key={`elsewhere-${order.id}`}
+													order={order}
+													message="Este pedido ya se ha completado en otra visita."
+												/>
+											))}
+										</div>
+									</section>
+								) : null}
+							</main>
+						</div>
+					</>
+				) : null}
+			</div>
+
+			{visit && isEditModalOpen ? (
+				<div className="app-modal-overlay z-[90] px-4 py-6">
+					<div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl">
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+							<div>
+								<h2 className="text-xl font-semibold text-slate-900">
+									Editar visita manualmente
+								</h2>
+								<p className="mt-1 text-sm text-slate-500">
+									Modifica fecha, tipo, estado, notas, resultado y pedidos
+									vinculados si hace falta.
+								</p>
+							</div>
+							<button
+								type="button"
+								onClick={() => setIsEditModalOpen(false)}
+								className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+							>
+								Cerrar
+							</button>
+						</div>
+
+						<SafeForm onSubmit={handleSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
+							<div>
+								<label
+									htmlFor="visit-scheduled-for-date"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
+									Dia de la visita
+								</label>
+								<input
+									id="visit-scheduled-for-date"
+									type="date"
+									value={formState.scheduledForDate}
+									onChange={(event) =>
+										setFormState((currentState) => ({
+											...currentState,
+											scheduledForDate: event.target.value,
+										}))
+									}
+									disabled={!isPlanned}
+									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+								/>
+							</div>
+
+							<div>
+								<label
+									htmlFor="visit-type-id"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
+									Tipo de visita
+								</label>
+								<select
+									id="visit-type-id"
+									value={formState.visitTypeId}
+									onChange={(event) => {
+										const nextVisitTypeId = event.target.value;
+										setFormState((currentState) => ({
+											...currentState,
+											visitTypeId: nextVisitTypeId,
+										}));
+
+										if (
+											nextVisitTypeId !==
+											String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY)
+										) {
+											setSelectedOrderIds([]);
+										}
+									}}
+									disabled={!isPlanned}
+									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+								>
+									{COMMERCIAL_VISIT_TYPE_OPTIONS.map((visitType) => (
+										<option key={visitType.id} value={String(visitType.id)}>
+											{visitType.label}
+										</option>
+									))}
+								</select>
+							</div>
+
+							<div>
+								<label
+									htmlFor="visit-status-id"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
+									Estado
+								</label>
+								<select
+									id="visit-status-id"
+									value={formState.statusId}
+									onChange={(event) =>
+										setFormState((currentState) => ({
+											...currentState,
+											statusId: event.target.value,
+										}))
+									}
+									disabled={!isPlanned}
+									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+								>
+									{COMMERCIAL_VISIT_STATUS_OPTIONS.map((status) => (
+										<option key={status.id} value={String(status.id)}>
+											{status.label}
+										</option>
+									))}
+								</select>
+							</div>
+
+							<div>
+								<label
+									htmlFor="visit-notes"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
+									Notas
+								</label>
+								<textarea
+									id="visit-notes"
+									value={formState.notes}
+									onChange={(event) =>
+										setFormState((currentState) => ({
+											...currentState,
+											notes: event.target.value,
+										}))
+									}
+									rows={4}
+									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+								/>
+							</div>
+
+							<div className="md:col-span-2">
+								<label
+									htmlFor="visit-result"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
+									Resultado
+								</label>
+								<textarea
+									id="visit-result"
+									value={formState.result}
+									onChange={(event) =>
+										setFormState((currentState) => ({
+											...currentState,
+											result: event.target.value,
+										}))
+									}
+									rows={4}
+									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+									placeholder="Conclusiones, acuerdos o siguientes pasos..."
+								/>
+							</div>
+
+							{formState.visitTypeId ===
+							String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) ? (
+								<div className="md:col-span-2 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+									<h3 className="text-sm font-semibold text-slate-900">
+										Pedidos vinculados
+									</h3>
+									{deliveryOrdersForEdit.length === 0 ? (
+										<p className="mt-3 text-sm text-slate-500">
+											No hay pedidos disponibles para vincular.
+										</p>
+									) : (
+										<div className="mt-3 grid gap-2 md:grid-cols-2">
+											{deliveryOrdersForEdit.map((order) => {
+												const isSelected = selectedOrderIds.includes(order.id);
+												const isDelivered =
+													order.status_id === ORDER_STATUS_IDS.DELIVERED;
+
+												return (
+													<label
+														key={order.id}
+														className={`rounded-2xl border px-3 py-3 text-sm transition ${
+															isSelected
+																? "border-sky-300 bg-sky-50"
+																: "border-slate-200 bg-white"
+														} ${
+															!isPlanned || isDelivered
+																? "cursor-not-allowed opacity-70"
+																: "cursor-pointer hover:border-slate-300"
+														}`}
+													>
 														<div className="flex items-start gap-3">
 															<input
 																type="checkbox"
 																checked={isSelected}
 																onChange={() => toggleOrderSelection(order.id)}
-																disabled={deliveryOrdersLocked}
-																className="mt-1 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
+																disabled={!isPlanned || isDelivered}
+																className="mt-1 h-4 w-4 rounded border-slate-300"
 															/>
-
 															<div>
-																<div className="flex flex-wrap items-center gap-2">
-																	<span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
-																		Pedido {order.id.slice(0, 8)}
-																	</span>
-																	<span
-																		className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusClassesById(
-																			order.status_id,
-																		)}`}
-																	>
-																		{order.status_name}
-																	</span>
-																</div>
-
-																<p className="mt-2 text-sm text-slate-600">
-																	Registrado el{" "}
-																	<span className="font-medium text-slate-900">
-																		{formatDateTime(order.created_at)}
-																	</span>
+																<p className="font-semibold text-slate-900">
+																	Pedido {order.id.slice(0, 8)}
 																</p>
-
-																{order.notes ? (
-																	<p className="mt-2 text-sm leading-6 text-slate-600">
-																		{order.notes}
-																	</p>
-																) : null}
-															</div>
-														</div>
-
-														<div className="grid gap-2 sm:min-w-[180px]">
-															<div className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
-																<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-																	Importe
-																</p>
-																<p className="mt-1 text-sm font-semibold text-slate-900">
+																<p className="mt-1 text-slate-500">
+																	{order.status_name} -{" "}
 																	{formatOrderCurrency(order.total_amount)}
 																</p>
 															</div>
-															<div className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
-																<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-																	Líneas
-																</p>
-																<p className="mt-1 text-sm font-semibold text-slate-900">
-																	{order.line_count}
-																</p>
-															</div>
 														</div>
-													</div>
-												</label>
-											);
-										})}
-									</div>
-								)}
-							</section>
-						) : null}
-
-						<CollapsibleSection
-							title="Acciones de la visita"
-							description="Reprograma, actualiza, escanea QR o confirma la entrega cuando lo necesites."
-						>
-							<SafeForm onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
-								<div>
-									<label
-										htmlFor="visit-scheduled-for-date"
-										className="mb-2 block text-sm font-medium text-slate-700"
-									>
-										Dia de la visita
-									</label>
-									<input
-										id="visit-scheduled-for-date"
-										type="date"
-										value={formState.scheduledForDate}
-										onChange={(event) =>
-											setFormState((currentState) => ({
-												...currentState,
-												scheduledForDate: event.target.value,
-											}))
-										}
-										disabled={!canEditPlanning}
-										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
-									/>
+													</label>
+												);
+											})}
+										</div>
+									)}
 								</div>
+							) : null}
 
-								<div>
-									<label
-										htmlFor="visit-type-id"
-										className="mb-2 block text-sm font-medium text-slate-700"
-									>
-										Tipo de visita
-									</label>
-									<select
-										id="visit-type-id"
-										value={formState.visitTypeId}
-										onChange={(event) => {
-											const nextVisitTypeId = event.target.value;
-											setFormState((currentState) => ({
-												...currentState,
-												visitTypeId: nextVisitTypeId,
-											}));
-
-											if (nextVisitTypeId !== "1") {
-												setSelectedOrderIds([]);
-											}
-										}}
-										disabled={!canEditPlanning}
-										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
-									>
-										{COMMERCIAL_VISIT_TYPE_OPTIONS.map((visitType) => (
-											<option key={visitType.id} value={String(visitType.id)}>
-												{visitType.label}
-											</option>
-										))}
-									</select>
-								</div>
-
-								<div>
-									<label
-										htmlFor="visit-status-id"
-										className="mb-2 block text-sm font-medium text-slate-700"
-									>
-										Estado
-									</label>
-									<select
-										id="visit-status-id"
-										value={formState.statusId}
-										onChange={(event) =>
-											setFormState((currentState) => ({
-												...currentState,
-												statusId: event.target.value,
-											}))
-										}
-										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-									>
-										{COMMERCIAL_VISIT_STATUS_OPTIONS.map((status) => (
-											<option key={status.id} value={String(status.id)}>
-												{status.label}
-											</option>
-										))}
-									</select>
-								</div>
-
-								<div>
-									<label
-										htmlFor="visit-notes"
-										className="mb-2 block text-sm font-medium text-slate-700"
-									>
-										Notas
-									</label>
-									<textarea
-										id="visit-notes"
-										value={formState.notes}
-										onChange={(event) =>
-											setFormState((currentState) => ({
-												...currentState,
-												notes: event.target.value,
-											}))
-										}
-										rows={4}
-										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-									/>
-								</div>
-
+							{formState.visitTypeId ===
+								String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) &&
+							formState.statusId ===
+								String(COMMERCIAL_VISIT_STATUS_IDS.COMPLETED) ? (
 								<div className="md:col-span-2">
 									<label
-										htmlFor="visit-result"
+										htmlFor="visit-delivered-order-qrs"
 										className="mb-2 block text-sm font-medium text-slate-700"
 									>
-										Resultado
+										QR para completar manualmente
 									</label>
 									<textarea
-										id="visit-result"
-										value={formState.result}
+										id="visit-delivered-order-qrs"
+										value={deliveredOrderQrInput}
 										onChange={(event) =>
-											setFormState((currentState) => ({
-												...currentState,
-												result: event.target.value,
-											}))
+											setDeliveredOrderQrInput(event.target.value)
 										}
-										rows={4}
-										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-										placeholder="Conclusiones de la visita, acuerdos alcanzados, próximos pasos..."
+										rows={3}
+										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+										placeholder="Un QR por bulto"
 									/>
+									<p className="mt-2 text-sm text-slate-500">
+										QR reconocidos: {scannedDeliveredOrderIds.length}/
+										{selectedOrderIds.length}
+									</p>
 								</div>
+							) : null}
 
-								{isActiveDeliveryVisit ? (
-									<div className="md:col-span-2">
-										<label
-											htmlFor="visit-delivered-order-qrs"
-											className="mb-2 block text-sm font-medium text-slate-700"
-										>
-											QR de paquetes entregados
-										</label>
-										<textarea
-											id="visit-delivered-order-qrs"
-											value={deliveredOrderQrInput}
-											onChange={(event) => {
-												setDeliveredOrderQrInput(event.target.value);
-												setQrScanFeedback("");
-											}}
-											rows={4}
-											className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-											placeholder="Escanea o pega un QR por línea antes de completar el reparto"
-										/>
-										<p className="mt-2 text-sm text-slate-600">
-											Debes aportar un QR por cada pedido vinculado al reparto.
-											También puedes pegar el valor completo del código si el
-											lector lo envia como texto.
-										</p>
-										<p className="mt-2 text-sm font-medium text-slate-700">
-											QR reconocidos: {scannedDeliveredOrderIds.length}/
-											{selectedOrderIds.length}
-										</p>
-										<div className="mt-4 flex flex-wrap gap-3">
-											<button
-												type="button"
-												onClick={() => setScannerOpen(true)}
-												disabled={selectedOrderIds.length === 0}
-												className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-											>
-												Escanear QR
-											</button>
-											<button
-												type="button"
-												onClick={() => void handleConfirmDelivery()}
-												disabled={!canConfirmDelivery || saving}
-												className="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
-											>
-												{saving ? "Confirmando entrega..." : "Confirmar entrega"}
-											</button>
-										</div>
-										<p className="mt-2 text-sm text-slate-600">
-											El boton grande de confirmar entrega valida los QR
-											escaneados y completa el reparto sin depender del selector
-											de estado.
-										</p>
-										{qrScanFeedback ? (
-											<p className="mt-2 text-sm text-emerald-700">
-												{qrScanFeedback}
-											</p>
-										) : null}
-									</div>
-								) : null}
-
-								<div className="md:col-span-2 flex flex-wrap items-center gap-3">
-									<SubmitButton
-										isSubmitting={saving}
-										submittingText="Guardando..."
-										className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-									>
-										Guardar cambios
-									</SubmitButton>
-
-									{success ? (
-										<p className="text-sm font-medium text-emerald-700">
-											{success}
-										</p>
-									) : null}
-								</div>
-							</SafeForm>
-						</CollapsibleSection>
-
-						<CollapsibleSection
-							title="Datos del cliente"
-							description="Contacto, ubicacion y franja de visita."
-						>
-							<DataTable<InfoRow>
-								data={clientRows}
-								columns={infoColumns}
-								getRowKey={(item: InfoRow) => item.id}
-								emptyMessage="No hay datos del cliente."
-							/>
-						</CollapsibleSection>
-
-						<CollapsibleSection
-							title="Datos del comercial"
-							description="Usuario, código interno y territorio."
-						>
-							<DataTable<InfoRow>
-								data={commercialRows}
-								columns={infoColumns}
-								getRowKey={(item: InfoRow) => item.id}
-								emptyMessage="No hay datos del comercial."
-							/>
-						</CollapsibleSection>
-
-					</>
-				) : null}
-			</div>
+							<div className="md:col-span-2 flex flex-wrap items-center gap-3">
+								<SubmitButton
+									isSubmitting={saving}
+									submittingText="Guardando..."
+									className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+								>
+									Guardar cambios
+								</SubmitButton>
+								<button
+									type="button"
+									onClick={() => setIsEditModalOpen(false)}
+									className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+								>
+									Cancelar
+								</button>
+							</div>
+						</SafeForm>
+					</div>
+				</div>
+			) : null}
 
 			<QrCameraScanner
 				isOpen={scannerOpen}

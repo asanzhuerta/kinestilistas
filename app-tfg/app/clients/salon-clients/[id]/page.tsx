@@ -41,6 +41,8 @@ export default async function ClientSalonClientDetailPage({
 			initialDetail={detail}
 			initialTemplates={templates}
 			productOptions={productOptions}
+			showHistory={false}
+			historyHref={`/clients/salon-clients/${id}/history`}
 		/>
 	);
 }

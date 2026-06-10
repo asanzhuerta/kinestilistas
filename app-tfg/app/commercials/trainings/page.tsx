@@ -13,6 +13,7 @@ export default async function CommercialTrainingsPage() {
 			subtitle="Sesiones publicadas para el equipo comercial"
 			backHref="/commercials"
 			initialTrainings={trainings.map(serializeTrainingEvent)}
+			showIntro={false}
 		/>
 	);
 }

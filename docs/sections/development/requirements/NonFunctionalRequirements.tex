@@ -1,145 +1,70 @@
-Los requisitos no funcionales describen las propiedades de calidad y restricciones que debe cumplir el sistema, más allá de las funcionalidades que proporciona. Estos requisitos incluyen aspectos como rendimiento, seguridad, usabilidad, mantenibilidad o compatibilidad.
+Los requisitos no funcionales describen las propiedades de calidad y restricciones que debe cumplir el sistema más allá de las funcionalidades que proporciona. Para su clasificación se ha tomado como referencia el modelo de calidad definido en el estándar ISO/IEC 25010 \cite{iso25010}.
 
-Para la clasificación de los requisitos no funcionales se ha tomado como referencia el modelo de calidad definido en el estandar ISO/IEC 25010 \cite{iso25010}.
+La \autoref{tab:non-functional-requirements-executive} resume los requisitos no funcionales en formato ejecutivo, agrupados por característica de calidad para facilitar su lectura y trazabilidad.
 
-% ------------------------------------------------------------------------------
-\subsection{RNF1. Usabilidad}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RNF-U-01 Facilidad de uso}
-\vspace{-1em}
-
-El sistema debe proporcionar una interfaz intuitiva que permita a los usuarios realizar las tareas principales con un número reducido de interacciones.
-
-\vspace{-0.75em}
-\subsubsection{RNF-U-02 Adaptabilidad de la interfaz}
-\vspace{-1em}
-
-La interfaz del sistema debe adaptarse correctamente a distintos tamanos de pantalla, incluyendo dispositivos móviles, tabletas y ordenadores, manteniendo una experiencia de usuario consistente.
-
-\vspace{-0.75em}
-\subsubsection{RNF-U-03 Claridad de la información}
-\vspace{-1em}
-
-El sistema debe presentar la información de forma clara y estructurada, facilitando la comprensión de los datos mostrados por parte de los usuarios.
-
-\vspace{-0.75em}
-\subsubsection{RNF-U-04 Accesibilidad básica}
-\vspace{-1em}
-
-El sistema debe mantener unos criterios mínimos de accesibilidad en las pantallas principales, incluyendo etiquetas asociadas a formularios, nombres accesibles en controles de navegación, contraste suficiente, tamaños de texto legibles y estructura semántica revisable mediante herramientas de auditoría como WAVE.
-
-% ------------------------------------------------------------------------------
-\subsection{RNF2. Eficiencia de rendimiento}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RNF-P-01 Tiempo de respuesta}
-\vspace{-1em}
-
-El sistema debe responder a las solicitudes de los usuarios en un tiempo razonable bajo condiciones normales de uso, priorizando especialmente login, consulta de catálogo, lectura de clientes y operaciones sobre pedidos.
-
-\vspace{-0.75em}
-\subsubsection{RNF-P-02 Optimizacion de recursos}
-\vspace{-1em}
-
-El sistema debe optimizar la carga de recursos para garantizar un funcionamiento fluido incluso en dispositivos móviles con capacidad limitada.
-
-% ------------------------------------------------------------------------------
-\subsection{RNF3. Compatibilidad}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RNF-C-01 Compatibilidad con navegadores}
-\vspace{-1em}
-
-El sistema debe ser compatible con navegadores web modernos y, cuando no se cumpla el soporte mínimo definido, debe informar de ello mediante una ruta específica de navegador no soportado.
-
-\vspace{-0.75em}
-\subsubsection{RNF-C-02 Compatibilidad con sistemas operativos móviles}
-\vspace{-1em}
-
-El sistema debe ser utilizable desde los sistemas operativos móviles más habituales, manteniendo una experiencia razonable en Android e iOS a través del navegador.
-
-\vspace{-0.75em}
-\subsubsection{RNF-C-03 Integración con servicios externos}
-\vspace{-1em}
-
-El sistema debe permitir integrarse con servicios externos de soporte necesarios para su funcionamiento, tales como almacenamiento de imágenes, geocodificación, cálculo de rutas, representación de QR, SMTP transaccional y Web Push.
-
-% ------------------------------------------------------------------------------
-\subsection{RNF4. Fiabilidad}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RNF-F-01 Disponibilidad del sistema}
-\vspace{-1em}
-
-El sistema debe estar disponible para los usuarios la mayor parte del tiempo, minimizando interrupciones en el servicio.
-
-\vspace{-0.75em}
-\subsubsection{RNF-F-02 Integridad de los datos}
-\vspace{-1em}
-
-El sistema debe garantizar la correcta conservacion de los datos almacenados, evitando perdidas o inconsistencias en la información.
-
-% ------------------------------------------------------------------------------
-\subsection{RNF5. Seguridad}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RNF-S-01 Control de acceso}
-\vspace{-1em}
-
-El sistema debe garantizar que únicamente los usuarios autorizados puedan acceder a las funcionalidades correspondientes a su rol.
-
-\vspace{-0.75em}
-\subsubsection{RNF-S-02 Protección de datos}
-\vspace{-1em}
-
-El sistema debe proteger los datos almacenados mediante autenticación, autorización, trazabilidad de accesos y validación de operaciones sensibles.
-
-\vspace{-0.75em}
-\subsubsection{RNF-S-03 Limitacion de abuso}
-\vspace{-1em}
-
-El sistema debe incorporar mecanismos de rate limiting y validación de sesión para reducir el impacto de accesos abusivos o repetitivos sobre login y API.
-
-% ------------------------------------------------------------------------------
-\subsection{RNF6. Mantenibilidad}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RNF-M-01 Modularidad del sistema}
-\vspace{-1em}
-
-El sistema debe estar organizado en módulos y capas técnicas que faciliten su mantenimiento, evolución y ampliacion.
-
-\vspace{-0.75em}
-\subsubsection{RNF-M-02 Facilidad de actualización}
-\vspace{-1em}
-
-El sistema debe permitir actualizar o modificar funcionalidades sin afectar innecesariamente al funcionamiento global de la aplicación.
-
-% ------------------------------------------------------------------------------
-\subsection{RNF7. Portabilidad}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RNF-PO-01 Acceso multiplataforma}
-\vspace{-1em}
-
-El sistema debe poder ejecutarse en distintos dispositivos mediante un navegador web sin necesidad de instalaciones nativas específicas.
-
-\vspace{-0.75em}
-\subsubsection{RNF-PO-02 Instalación como aplicación web}
-\vspace{-1em}
-
-El sistema debe permitir su instalación como aplicación web en dispositivos compatibles mediante manifiesto web e iconos de instalación, y debe poder aprovechar esa instalación para recibir notificaciones Web Push cuando el navegador lo soporte.
-
-\vspace{-0.75em}
-\subsubsection{RNF-PO-03 Soporte básico fuera de red}
-\vspace{-1em}
-
-El sistema debe ofrecer una capa mínima de soporte cuando la conectividad falle puntualmente, apoyándose en el \textit{service worker} y en la cache del \textit{app shell} disponible.
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.14}
+\newcommand{\RNFCategoryHeader}[1]{%
+\hline\hline
+\multicolumn{3}{|>{\RaggedRight\arraybackslash}p{0.91\linewidth}|}{\textbf{#1}}\\
+\hline\hline
+}
+\begin{longtable}{|>{\RaggedRight\arraybackslash}p{0.18\linewidth}|>{\RaggedRight\arraybackslash}p{0.15\linewidth}|>{\RaggedRight\arraybackslash}p{0.58\linewidth}|}
+\caption{Catálogo ejecutivo de requisitos no funcionales agrupado por características de calidad}
+\label{tab:non-functional-requirements-executive}\\
+\hline
+\textbf{Característica} & \textbf{ID} & \textbf{Requisito no funcional sintetizado} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Característica} & \textbf{ID} & \textbf{Requisito no funcional sintetizado} \\
+\hline
+\endhead
+\RNFCategoryHeader{RNF1. Usabilidad}
+Usabilidad & \texttt{RNF-U-01} & Proporcionar una interfaz intuitiva que permita realizar las tareas principales con un número reducido de interacciones. \\
+\hline
+Usabilidad & \texttt{RNF-U-02} & Adaptar la interfaz a móviles, tabletas y ordenadores, manteniendo una experiencia de usuario consistente. \\
+\hline
+Usabilidad & \texttt{RNF-U-03} & Presentar la información de forma clara y estructurada para facilitar la comprensión de datos operativos, comerciales y administrativos. \\
+\hline
+Usabilidad & \texttt{RNF-U-04} & Mantener criterios básicos de accesibilidad: etiquetas en formularios, nombres accesibles, contraste suficiente, texto legible y estructura revisable mediante WAVE. \\
+\hline
+\RNFCategoryHeader{RNF2. Eficiencia de rendimiento}
+Rendimiento & \texttt{RNF-P-01} & Responder en tiempos razonables bajo uso normal, priorizando login, catálogo, clientes y operaciones sobre pedidos. \\
+\hline
+Rendimiento & \texttt{RNF-P-02} & Optimizar la carga de recursos para permitir un funcionamiento fluido también en dispositivos móviles con capacidad limitada. \\
+\hline
+\RNFCategoryHeader{RNF3. Compatibilidad}
+Compatibilidad & \texttt{RNF-C-01} & Ser compatible con navegadores web modernos e informar mediante una ruta específica cuando el navegador no cumpla el soporte mínimo. \\
+\hline
+Compatibilidad & \texttt{RNF-C-02} & Ser utilizable desde los sistemas operativos móviles más habituales, especialmente Android e iOS mediante navegador. \\
+\hline
+Compatibilidad & \texttt{RNF-C-03} & Integrarse con servicios externos necesarios: almacenamiento de imágenes, geocodificación, rutas, QR, SMTP transaccional y Web Push. \\
+\hline
+\RNFCategoryHeader{RNF4. Fiabilidad}
+Fiabilidad & \texttt{RNF-F-01} & Mantener disponibilidad suficiente para los usuarios y minimizar interrupciones del servicio durante la operación ordinaria. \\
+\hline
+Fiabilidad & \texttt{RNF-F-02} & Garantizar la conservación correcta de los datos almacenados, evitando pérdidas o inconsistencias de información. \\
+\hline
+\RNFCategoryHeader{RNF5. Seguridad}
+Seguridad & \texttt{RNF-S-01} & Restringir el acceso a funcionalidades según el rol autorizado de cada usuario autenticado. \\
+\hline
+Seguridad & \texttt{RNF-S-02} & Proteger los datos mediante autenticación, autorización, trazabilidad de accesos y validación de operaciones sensibles. \\
+\hline
+Seguridad & \texttt{RNF-S-03} & Incorporar rate limiting y validación de sesión para reducir accesos abusivos o repetitivos sobre login y API. \\
+\hline
+\RNFCategoryHeader{RNF6. Mantenibilidad}
+Mantenibilidad & \texttt{RNF-M-01} & Organizar el sistema en módulos y capas técnicas que faciliten su mantenimiento, evolución y ampliación. \\
+\hline
+Mantenibilidad & \texttt{RNF-M-02} & Permitir actualizar o modificar funcionalidades sin afectar innecesariamente al funcionamiento global de la aplicación. \\
+\hline
+\RNFCategoryHeader{RNF7. Portabilidad}
+Portabilidad & \texttt{RNF-PO-01} & Ejecutar la aplicación en distintos dispositivos mediante navegador web, sin requerir instalaciones nativas específicas. \\
+\hline
+Portabilidad & \texttt{RNF-PO-02} & Permitir instalación como aplicación web mediante manifiesto e iconos, y habilitar notificaciones Web Push cuando el navegador lo soporte. \\
+\hline
+Portabilidad & \texttt{RNF-PO-03} & Ofrecer soporte mínimo ante fallos puntuales de conectividad mediante \textit{service worker} y caché del \textit{app shell}. \\
+\hline
+\end{longtable}
+}

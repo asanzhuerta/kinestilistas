@@ -10,6 +10,7 @@ import { IntegrationOperation } from "@/lib/typeorm/entities/IntegrationOperatio
 import { SupplierOrderProposal } from "@/lib/typeorm/entities/SupplierOrderProposal";
 import { ExternalIntegration } from "@/lib/typeorm/entities/ExternalIntegration";
 import type { ExternalIntegrationStatus } from "@/lib/typeorm/entities/ExternalIntegration";
+import { FACTUSOL_N8N_INTEGRATION_NAME } from "@/lib/integrations/factusol-n8n";
 
 function assertCondition(condition: unknown, message: string): asserts condition {
 	if (!condition) {
@@ -57,7 +58,7 @@ async function main() {
 			new Date("2026-06-05T00:00:00.000Z"),
 		);
 		const integration = initialSnapshot.integrations.find(
-			(item) => item.name === "Factusol mediante n8n",
+			(item) => item.name === FACTUSOL_N8N_INTEGRATION_NAME,
 		);
 
 		assertCondition(
@@ -96,7 +97,7 @@ async function main() {
 		createdOperationId = operation.id;
 
 		assertCondition(
-			operation.integrationName === "Factusol mediante n8n",
+			operation.integrationName === FACTUSOL_N8N_INTEGRATION_NAME,
 			"La operación debe quedar asociada a la integración empresarial",
 		);
 		assertCondition(

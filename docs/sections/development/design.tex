@@ -15,7 +15,7 @@ Los principales puntos de configuración son los siguientes:
     \item \textbf{Autenticación}: \texttt{AUTH\_SECRET} protege la generación y validación de sesión, mientras que la lógica de roles se controla desde las entidades persistidas y el middleware de acceso.
     \item \textbf{Almacenamiento multimedia}: las variables de \texttt{Cloudinary} activan la subida de imágenes de perfil, catálogo y resultados visuales de servicios.
     \item \textbf{Servicios geográficos}: los endpoints de \texttt{Nominatim} y \texttt{OSRM} permiten ajustar geocodificación y cálculo de rutas sin modificar la lógica de negocio.
-    \item \textbf{Políticas operativas}: el rate limiting se configura desde administración y se persiste en base de datos, lo que permite ajustar límites sin redesplegar la aplicación.
+    \item \textbf{Políticas operativas}: el rate limiting se aplica desde la capa técnica y puede persistir sobrescrituras, pero no se expone como ajuste ordinario del administrador de negocio. Su modificación queda reservada a mantenimiento técnico o despliegue.
     \item \textbf{Capa PWA}: el manifiesto web, iconos y \textit{service worker} proporcionan una instalación básica y una experiencia más cercana a aplicación móvil.
 \end{itemize}
 
@@ -42,4 +42,4 @@ Los criterios principales aplicados son:
     \item \textbf{Reutilización visual}: botones, formularios, tablas, insignias de estado, tarjetas y componentes de mapa mantienen patrones comunes entre módulos para facilitar el aprendizaje.
 \end{itemize}
 
-En la Sección~\ref{sec:uiModel} se presenta el modelo de navegación y en las Figuras~\ref{fig:ui-real-access-roles}, \ref{fig:ui-real-commercial}, \ref{fig:ui-real-client-modules}, \ref{fig:ui-real-m6-role-summary} y \ref{fig:ui-real-m6-user-flows} se recogen capturas reales de la interfaz. Estas capturas actúan como evidencia visual del diseño finalmente implementado y sustituyen a prototipos aislados, ya que el proyecto ha evoluciónado de forma incremental hasta una aplicación funcional.
+En la Sección~\ref{sec:uiModel} se presenta el modelo de navegación y una propuesta de mockups pendientes para cerrar la documentación visual. Durante el desarrollo se han usado capturas reales para validar pantallas, pero no se incluyen aquí como mockups porque pertenecen mejor al ámbito de pruebas o evidencias de ejecución.

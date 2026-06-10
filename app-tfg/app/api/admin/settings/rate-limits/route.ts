@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
 	jsonFromError,
+	notFoundError,
 	readJsonBody,
 	requireRoleUser,
 	unauthorizedError,
@@ -11,7 +12,15 @@ import {
 	updateRateLimitPolicySettings,
 } from "@/lib/typeorm/services/security/rate-limit-policy";
 
+function isTechnicalRateLimitSettingsEnabled() {
+	return process.env.ADMIN_RATE_LIMIT_SETTINGS_ENABLED === "true";
+}
+
 export async function GET() {
+	if (!isTechnicalRateLimitSettingsEnabled()) {
+		return notFoundError("Configuración técnica no disponible");
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {
@@ -31,6 +40,10 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+	if (!isTechnicalRateLimitSettingsEnabled()) {
+		return notFoundError("Configuración técnica no disponible");
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

@@ -24,12 +24,6 @@ export default function ShellHeader({ className = "" }: ShellHeaderProps) {
 		<header
 			className={`glass-header mb-4 rounded-2xl px-6 py-4 ${className}`.trim()}
 		>
-			{shouldShowBackButton ? (
-				<div className="mb-3 hidden justify-start sm:flex">
-					<BackButton />
-				</div>
-			) : null}
-
 			<div
 				className={
 					hasPageHeader
@@ -64,6 +58,11 @@ export default function ShellHeader({ className = "" }: ShellHeaderProps) {
 							<p className="text-[0.68rem] uppercase tracking-[0.16em] text-black/75 sm:text-xs lg:mt-2 lg:text-[13px] lg:tracking-[0.18em] xl:text-[15px]">
 								{pageHeader.subtitle}
 							</p>
+						) : null}
+						{shouldShowBackButton ? (
+							<div className="mt-4 hidden justify-center sm:flex lg:justify-start">
+								<BackButton />
+							</div>
 						) : null}
 					</div>
 				) : null}

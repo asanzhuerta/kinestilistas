@@ -29,7 +29,8 @@ export type EntityTableCardVariant =
 	| "headline"
 	| "media"
 	| "catalog-product"
-	| "color-reference";
+	| "color-reference"
+	| "compact-visit";
 
 export type EntitySortField =
 	| "title"

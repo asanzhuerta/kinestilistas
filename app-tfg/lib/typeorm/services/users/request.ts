@@ -44,10 +44,12 @@ export async function approveUserRequest(
 			throw new Error("Solicitud no encontrada");
 		}
 
-		const [pendingStatus, approvedStatus] = await Promise.all([
-			requestStatusRepo.findOne({ where: { code: "pending" } }),
-			requestStatusRepo.findOne({ where: { code: "approved" } }),
-		]);
+		const pendingStatus = await requestStatusRepo.findOne({
+			where: { code: "pending" },
+		});
+		const approvedStatus = await requestStatusRepo.findOne({
+			where: { code: "approved" },
+		});
 
 		if (!pendingStatus || !approvedStatus) {
 			throw new Error("No se pudieron resolver los estados de solicitud");

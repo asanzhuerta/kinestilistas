@@ -393,7 +393,10 @@ function mapOrderToSummary(order: Order): OrderSummary {
 			order.deliveryVisit?.scheduled_for_date ?? null,
 		delivery_visit_status_id: order.deliveryVisit?.status_id ?? null,
 		delivery_visit_status_name: order.deliveryVisit?.status?.name ?? null,
-		line_count: sortedLines.length,
+		line_count: sortedLines.reduce(
+			(total, line) => total + Number(line.quantity ?? 0),
+			0,
+		),
 		lines: sortedLines.map(buildOrderSummaryLine),
 	};
 }
@@ -1205,21 +1208,55 @@ async function loadDraftOrderSummary(
 	createdByUserId: string,
 ) {
 	const ds = await getDataSource();
-	const repo = ds.getRepository(Order);
-	const draftOrder = await createOrdersBaseQuery(repo)
-		.where("order.client_id = :clientId", { clientId })
-		.andWhere("order.created_by_user_id = :createdByUserId", {
-			createdByUserId,
-		})
-		.andWhere("order.status_id = :statusId", {
-			statusId: ORDER_STATUS_IDS.DRAFT,
-		})
-		.orderBy("order.updated_at", "DESC")
-		.addOrderBy("lines.order_reference_snapshot", "ASC")
-		.addOrderBy("product.name", "ASC")
-		.getOne();
+	const refreshedDraftId = await ds.transaction(async (manager) => {
+		const repo = manager.getRepository(Order);
+		const draftOrder = await createOrdersBaseQuery(repo)
+			.where("order.client_id = :clientId", { clientId })
+			.andWhere("order.created_by_user_id = :createdByUserId", {
+				createdByUserId,
+			})
+			.andWhere("order.status_id = :statusId", {
+				statusId: ORDER_STATUS_IDS.DRAFT,
+			})
+			.orderBy("order.updated_at", "DESC")
+			.addOrderBy("lines.order_reference_snapshot", "ASC")
+			.addOrderBy("product.name", "ASC")
+			.getOne();
 
-	return draftOrder ? mapOrderToSummary(draftOrder) : null;
+		if (!draftOrder) {
+			return null;
+		}
+
+		const currentLines = normalizeRequestedOrderLines(
+			draftOrder.lines.map((line) => ({
+				productId: line.product_id,
+				colorReferenceId: line.color_reference_id,
+				quantity: line.quantity,
+			})),
+			{ allowEmpty: true },
+		);
+
+		if (currentLines.length === 0) {
+			await manager.getRepository(Order).delete({ id: draftOrder.id });
+			return null;
+		}
+
+		return persistOrderRecord(manager, {
+			existingOrderId: draftOrder.id,
+			clientId,
+			createdByUserId,
+			statusId: ORDER_STATUS_IDS.DRAFT,
+			notes: draftOrder.notes,
+			lines: currentLines,
+		});
+	});
+
+	if (!refreshedDraftId) {
+		return null;
+	}
+
+	const refreshedDraft = await getOrderById(refreshedDraftId);
+	return refreshedDraft ? mapOrderToSummary(refreshedDraft) : null;
 }
 
 async function saveDraftRecord(input: SaveDraftInput) {
@@ -1573,7 +1610,12 @@ export async function listOrdersForCommercialUser(
 			.andWhere("order.status_id = :confirmedStatusId", {
 				confirmedStatusId: ORDER_STATUS_IDS.CONFIRMED,
 			})
-			.andWhere("order.delivery_visit_id IS NULL");
+			.andWhere(
+				"(order.delivery_visit_id IS NULL OR deliveryVisit.status_id = :postponedVisitStatusId)",
+				{
+					postponedVisitStatusId: COMMERCIAL_VISIT_STATUS_IDS.POSTPONED,
+				},
+			);
 	}
 
 	const orders = await query.getMany();

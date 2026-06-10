@@ -197,8 +197,8 @@ export default function AdminRateLimitSettingsForm() {
 		<PageTransition>
 			<div className="space-y-6">
 				<H1Title
-					title="Rate limiting global"
-					subtitle="Ajusta los límites operativos de autenticación y API para toda la aplicación."
+					title="Ajustes globales"
+					subtitle="Configura notificaciones administrativas y límites operativos de autenticación y API."
 				/>
 
 				<AdminNotificationSettingsForm />

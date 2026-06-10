@@ -9,13 +9,11 @@ import {
 	CatalogIcon,
 	ColorIcon,
 	OrderIcon,
-	ProductsIcon,
 	TrainingIcon,
 	ClientsIcon,
 	VisitsIcon,
 	RouteIcon,
 	ChatIcon,
-	PaymentsIcon,
 	PromotionsIcon,
 	ReportsIcon,
 } from "../components/IconsSVGs";
@@ -65,19 +63,9 @@ const sections: Array<{
 				href: "/commercials/coloration",
 			},
 			{
-				title: "Productos",
-				icon: <ProductsIcon className="h-6 w-6" />,
-				disabled: true,
-			},
-			{
 				title: "Pedidos",
 				icon: <OrderIcon className="h-6 w-6" />,
 				href: "/commercials/orders",
-			},
-			{
-				title: "Cobros",
-				icon: <PaymentsIcon className="h-6 w-6" />,
-				href: "/commercials/cobros",
 			},
 		],
 	},
@@ -117,33 +105,33 @@ export default async function CommercialsHome() {
 
 	return (
 		<PageTransition>
-			<section className="my-5 rounded-3xl border border-amber-200 bg-amber-50/95 px-4 py-4 text-amber-900 shadow-sm">
-				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-					<div>
-						<p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
-							Notificaciones y avisos
-						</p>
-						<p className="mt-1 text-sm text-amber-900">
-							{unreadNotificationsCount > 0
-								? `Tienes ${unreadNotificationsCount} aviso${
-										unreadNotificationsCount === 1 ? "" : "s"
-									} pendiente${
-										unreadNotificationsCount === 1 ? "" : "s"
-									} de lectura.`
-								: "No tienes avisos pendientes de lectura."}
-						</p>
+			{unreadNotificationsCount > 0 ? (
+				<section className="my-5 rounded-3xl border border-amber-200 bg-amber-50/95 px-4 py-4 text-amber-900 shadow-sm">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div>
+							<p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+								Notificaciones y avisos
+							</p>
+							<p className="mt-1 text-sm text-amber-900">
+								Tienes {unreadNotificationsCount} aviso
+								{unreadNotificationsCount === 1 ? "" : "s"} pendiente
+								{unreadNotificationsCount === 1 ? "" : "s"} de lectura.
+							</p>
+						</div>
+
+						<Link
+							href="/commercials/notifications"
+							className="inline-flex items-center justify-center rounded-2xl bg-amber-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-800"
+						>
+							Ver avisos
+						</Link>
 					</div>
+				</section>
+			) : null}
 
-					<Link
-						href="/commercials/notifications"
-						className="inline-flex items-center justify-center rounded-2xl bg-amber-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-800"
-					>
-						Ver avisos
-					</Link>
-				</div>
-			</section>
-
-			<RouteMapCard compact />
+			<div className="mb-6">
+				<RouteMapCard compact />
+			</div>
 
 			<div className="space-y-6">
 				{sections.map((section) => (

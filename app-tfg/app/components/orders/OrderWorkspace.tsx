@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import PageTransition from "@/app/components/animations/PageTransition";
 import H1Title from "@/app/components/H1Title";
+import { useSessionStorageState } from "@/app/hooks/useSessionStorageState";
 import type {
 	OrderProductOption,
 	OrderSummary,
@@ -13,6 +14,7 @@ import { formatDateTime } from "@/lib/utils/user-utils";
 import {
 	formatOrderCents,
 	getOrderDiscountSummary,
+	getOrderPackageCount,
 	getOrderPaymentStatusClasses,
 } from "./order-ui";
 
@@ -41,6 +43,9 @@ type WorkspaceProps = {
 	initialDraftOrder?: OrderSummary | null;
 	clientOptions?: OrderClientOption[];
 	initialSelectedClientId?: string | null;
+	showOrderForm?: boolean;
+	showHistory?: boolean;
+	historyHref?: string;
 };
 
 function formatCurrency(amount: string) {
@@ -162,13 +167,13 @@ export default function OrderWorkspace({
 	initialDraftOrder = null,
 	clientOptions = [],
 	initialSelectedClientId,
+	showOrderForm = true,
+	showHistory = true,
+	historyHref,
 }: WorkspaceProps) {
 	const initialCommercialClientId =
 		initialSelectedClientId ?? clientOptions[0]?.id ?? "";
 	const [orders, setOrders] = useState(initialOrders);
-	const [draftOrder, setDraftOrder] = useState<OrderSummary | null>(
-		initialDraftOrder,
-	);
 	const [lines, setLines] = useState<EditableLine[]>(
 		mapOrderToEditableLines(initialDraftOrder),
 	);
@@ -180,11 +185,22 @@ export default function OrderWorkspace({
 	const [savingDraft, setSavingDraft] = useState(false);
 	const [clearingDraft, setClearingDraft] = useState(false);
 	const [loadingDraft, setLoadingDraft] = useState(false);
-	const [productSearch, setProductSearch] = useState("");
-	const [historyClientFilter, setHistoryClientFilter] = useState("all");
-	const [historyPaymentFilter, setHistoryPaymentFilter] = useState("all");
-	const [historySearch, setHistorySearch] = useState("");
-	const [historyStatusFilter, setHistoryStatusFilter] = useState("all");
+	const workspaceHistoryFilterKey = `order-workspace-history:${mode}:${detailBasePath}`;
+	const [historyClientFilter, setHistoryClientFilter] = useSessionStorageState(
+		`${workspaceHistoryFilterKey}:client`,
+		"all",
+	);
+	const [historyPaymentFilter, setHistoryPaymentFilter] =
+		useSessionStorageState(`${workspaceHistoryFilterKey}:payment`, "all");
+	const [historySearch, setHistorySearch] = useSessionStorageState(
+		`${workspaceHistoryFilterKey}:search`,
+		"",
+	);
+	const [historyStatusFilter, setHistoryStatusFilter] = useSessionStorageState(
+		`${workspaceHistoryFilterKey}:status`,
+		"all",
+	);
+	const [isHistoryFiltersOpen, setIsHistoryFiltersOpen] = useState(false);
 	const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(
 		mode !== "commercial",
 	);
@@ -245,6 +261,11 @@ export default function OrderWorkspace({
 		mode,
 		orders,
 	]);
+	const hasHistoryFilters =
+		historySearch.trim().length > 0 ||
+		historyStatusFilter !== "all" ||
+		historyPaymentFilter !== "all" ||
+		(mode === "commercial" && historyClientFilter !== "all");
 	const summaryCounts = useMemo(() => {
 		const blockedClients = new Set(
 			clientOptions
@@ -275,26 +296,80 @@ export default function OrderWorkspace({
 			).length,
 		};
 	}, [clientOptions, orders]);
-	const draftDiscountSummary = useMemo(
-		() => getOrderDiscountSummary(draftOrder),
-		[draftOrder],
-	);
-
-	const filteredProductOptions = useMemo(
-		() =>
-			productOptions.filter((product) =>
-				buildProductLabel(product)
-					.toLowerCase()
-					.includes(productSearch.trim().toLowerCase()),
-			),
-		[productOptions, productSearch],
-	);
+	const orderLineLabel = mode === "client" ? "Producto" : "Bulto";
+	const addLineLabel =
+		mode === "client" ? "Añadir nuevo producto" : "Añadir bulto";
 
 	function syncDraftState(nextDraftOrder: OrderSummary | null) {
-		setDraftOrder(nextDraftOrder);
 		setNotes(nextDraftOrder?.notes ?? "");
 		setLines(mapOrderToEditableLines(nextDraftOrder));
 	}
+
+	function resetHistoryFilters() {
+		setHistorySearch("");
+		setHistoryClientFilter("all");
+		setHistoryStatusFilter("all");
+		setHistoryPaymentFilter("all");
+	}
+
+	useEffect(() => {
+		if (mode !== "client" || !showOrderForm) {
+			return;
+		}
+
+		let isCancelled = false;
+
+		async function loadDraft() {
+			setLoadingDraft(true);
+
+			try {
+				const response = await fetch(`${apiPath}/draft`, {
+					method: "GET",
+					cache: "no-store",
+				});
+				const data = (await response.json().catch(() => null)) as
+					| OrderSummary
+					| { error?: string }
+					| null;
+
+				if (isCancelled) {
+					return;
+				}
+
+				if (!response.ok) {
+					setFeedback({
+						type: "error",
+						message:
+							(data && "error" in data && data.error) ||
+							"No se ha podido cargar el pedido en curso.",
+					});
+					return;
+				}
+
+				syncDraftState(data && "id" in data ? data : null);
+			} catch (error) {
+				console.error("[orders][client-draft][load] error:", error);
+
+				if (!isCancelled) {
+					setFeedback({
+						type: "error",
+						message:
+							"Ha ocurrido un error inesperado al cargar el pedido en curso.",
+					});
+				}
+			} finally {
+				if (!isCancelled) {
+					setLoadingDraft(false);
+				}
+			}
+		}
+
+		loadDraft();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [apiPath, mode, showOrderForm]);
 
 	useEffect(() => {
 		if (mode !== "commercial") {
@@ -593,15 +668,41 @@ export default function OrderWorkspace({
 			<div className="space-y-6">
 				<H1Title title={title} subtitle={subtitle} />
 
-				<div className="flex justify-end">
-					<p className="max-w-2xl text-sm text-slate-600">
-						{mode === "client"
-							? "Prepara un pedido en curso, guárdalo como borrador si lo necesitas y confirma el pedido cuando esté listo. En coloración podrás trabajar con la referencia exacta."
-							: "Trabaja con pedidos en curso por cliente asignado, guarda borradores y registra el pedido final cuando cierres la selección de referencias y cantidades."}
-					</p>
-				</div>
+				{mode === "commercial" ? (
+					<section className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+						<div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+							<div className="flex flex-wrap items-center gap-2 text-xs text-slate-700 sm:text-sm">
+								<span className="font-semibold uppercase tracking-[0.18em] text-slate-500">
+									Resumen
+								</span>
+								<span className="rounded-full bg-sky-50 px-3 py-2 font-semibold text-sky-800">
+									Abiertos {summaryCounts.openOrders}
+								</span>
+								<span className="rounded-full bg-amber-50 px-3 py-2 font-semibold text-amber-800">
+									Pendientes de cobro {summaryCounts.deliveredPendingPayment}
+								</span>
+								<span className="rounded-full bg-emerald-50 px-3 py-2 font-semibold text-emerald-800">
+									Cobrados {summaryCounts.paidOrders}
+								</span>
+								<span className="rounded-full bg-rose-50 px-3 py-2 font-semibold text-rose-800">
+									Clientes bloqueados {summaryCounts.blockedClients}
+								</span>
+							</div>
+							<button
+								type="button"
+								onClick={() =>
+									setIsCreatePanelOpen((currentValue) => !currentValue)
+								}
+								disabled={clientOptions.length === 0}
+								className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+							>
+								{isCreatePanelOpen ? "Cerrar alta de pedido" : "Nuevo pedido"}
+							</button>
+						</div>
+					</section>
+				) : null}
 
-				{feedback ? (
+				{mode === "commercial" && feedback ? (
 					<div
 						className={`rounded-2xl border px-4 py-3 text-sm shadow-sm ${
 							feedback.type === "success"
@@ -613,73 +714,35 @@ export default function OrderWorkspace({
 					</div>
 				) : null}
 
-				{mode === "commercial" ? (
-					<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-						<div className="flex flex-col gap-2">
-							<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-								Resumen global
-							</p>
-							<h2 className="text-2xl font-semibold text-slate-900">
-								Todos los pedidos del comercial
-							</h2>
-							<p className="text-sm text-slate-600">
-								Aqui puedes revisar primero todo lo pendiente, filtrar por
-								cliente o estado y abrir la creación de nuevos pedidos solo
-								cuando lo necesites.
-							</p>
-						</div>
-
-						<div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-							<div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
-								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
-									Pedidos abiertos
-								</p>
-								<p className="mt-2 text-2xl font-semibold text-sky-900">
-									{summaryCounts.openOrders}
-								</p>
-							</div>
-							<div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">
-									Pendientes de cobro
-								</p>
-								<p className="mt-2 text-2xl font-semibold text-amber-900">
-									{summaryCounts.deliveredPendingPayment}
-								</p>
-							</div>
-							<div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-									Cobrados
-								</p>
-								<p className="mt-2 text-2xl font-semibold text-emerald-900">
-									{summaryCounts.paidOrders}
-								</p>
-							</div>
-							<div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
-								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-700">
-									Clientes bloqueados
-								</p>
-								<p className="mt-2 text-2xl font-semibold text-rose-900">
-									{summaryCounts.blockedClients}
-								</p>
-							</div>
-						</div>
-					</section>
-				) : null}
-
-				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
+				{showOrderForm && (mode !== "commercial" || isCreatePanelOpen) ? (
+					<section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<div className="flex flex-col gap-2">
-							<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+							<h2 className="text-3xl font-semibold uppercase text-slate-900">
 								Pedido en curso
-							</p>
-							<h2 className="text-2xl font-semibold text-slate-900">
-								{draftOrder
-									? "Editar borrador actual"
-									: "Preparar nuevo pedido"}
 							</h2>
+							<p className="text-sm font-medium text-slate-500">(borrador)</p>
+							<p
+								className={
+									mode === "client"
+										? "hidden"
+										: "max-w-2xl text-sm leading-6 text-slate-600"
+								}
+							>
+								{mode === "client"
+									? "Prepara un pedido en curso, guárdalo como borrador si lo necesitas y confirma el pedido cuando esté listo. En coloración podrás trabajar con la referencia exacta."
+									: "Trabaja con pedidos en curso por cliente asignado, guarda borradores y registra el pedido final cuando cierres la selección de referencias y cantidades."}
+							</p>
 						</div>
 
-						{mode === "commercial" ? (
+						{historyHref ? (
+							<Link
+								href={historyHref}
+								className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+							>
+								Ver historial de pedidos
+							</Link>
+						) : mode === "commercial" ? (
 							<button
 								type="button"
 								onClick={() => setIsCreatePanelOpen((currentValue) => !currentValue)}
@@ -689,6 +752,18 @@ export default function OrderWorkspace({
 							</button>
 						) : null}
 					</div>
+
+					{feedback && mode !== "commercial" ? (
+						<div
+							className={`mt-5 rounded-2xl border px-4 py-3 text-sm shadow-sm ${
+								feedback.type === "success"
+									? "border-emerald-200 bg-emerald-50 text-emerald-700"
+									: "border-rose-200 bg-rose-50 text-rose-700"
+							}`}
+						>
+							{feedback.message}
+						</div>
+					) : null}
 
 					{mode === "commercial" && clientOptions.length === 0 ? (
 						<div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-5 py-6 text-sm text-slate-600">
@@ -734,71 +809,11 @@ export default function OrderWorkspace({
 								</div>
 							) : null}
 
-							{draftOrder ? (
-								<div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-600">
-									<div className="flex flex-wrap items-center gap-2">
-										<span
-											className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusClasses(
-												draftOrder.status_code,
-											)}`}
-										>
-											{draftOrder.status_name}
-										</span>
-										<span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-											{draftOrder.line_count} líneas guardadas
-										</span>
-									</div>
-									<p className="mt-2">
-										Última actualización:{" "}
-										<span className="font-medium text-slate-900">
-											{formatDateTime(draftOrder.updated_at)}
-										</span>
-									</p>
-									{draftDiscountSummary.hasDiscounts ? (
-										<div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
-											<p className="font-semibold">
-												Promoción aplicable detectada
-											</p>
-											<p className="mt-1">
-												Se han descontado{" "}
-												<span className="font-semibold">
-													{formatOrderCents(
-														draftDiscountSummary.totalDiscountCents,
-													)}
-												</span>{" "}
-												en {draftDiscountSummary.discountedLineCount}{" "}
-												{draftDiscountSummary.discountedLineCount === 1
-													? "línea"
-													: "líneas"}{" "}
-												del borrador.
-											</p>
-										</div>
-									) : null}
-								</div>
-							) : null}
-
 							{loadingDraft ? (
 								<div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-600">
 									Cargando pedido en curso...
 								</div>
 							) : null}
-
-							<div>
-								<label
-									htmlFor="order-product-search"
-									className="mb-2 block text-sm font-medium text-slate-700"
-								>
-									Buscar referencias
-								</label>
-								<input
-									id="order-product-search"
-									type="text"
-									value={productSearch}
-									onChange={(event) => setProductSearch(event.target.value)}
-									placeholder="Referencia exacta, tono, nombre, categoría o línea"
-									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-								/>
-							</div>
 
 							<div className="space-y-3">
 								{lines.map((line, index) => (
@@ -811,7 +826,7 @@ export default function OrderWorkspace({
 												htmlFor={`order-product-${line.localId}`}
 												className="mb-2 block text-sm font-medium text-slate-700"
 											>
-												Referencia {index + 1}
+												{orderLineLabel} {index + 1}
 											</label>
 											<select
 												id={`order-product-${line.localId}`}
@@ -825,7 +840,7 @@ export default function OrderWorkspace({
 												className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 											>
 												<option value="">Selecciona una referencia</option>
-												{filteredProductOptions.map((product) => (
+												{productOptions.map((product) => (
 													<option key={product.id} value={product.id}>
 														{buildProductLabel(product)}
 													</option>
@@ -875,7 +890,7 @@ export default function OrderWorkspace({
 									onClick={addLine}
 									className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
 								>
-									Añadir línea
+									{addLineLabel}
 								</button>
 							</div>
 
@@ -928,124 +943,174 @@ export default function OrderWorkspace({
 							</div>
 						</form>
 					)}
-				</section>
+					</section>
+				) : null}
 
-				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-					<div className="flex flex-col gap-2">
-						<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-							Historial
-						</p>
-						<h2 className="text-2xl font-semibold text-slate-900">
-							Pedidos registrados
-						</h2>
-						<p className="text-sm text-slate-600">
-							{mode === "commercial"
-								? "El listado arranca mostrando el conjunto completo de pedidos del comercial. Usa los filtros para revisar clientes concretos o estados operativos."
-								: "Consulta aqui todos tus pedidos ya registrados."}
-						</p>
-					</div>
+				{showHistory ? (
+					<section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+							<div className="space-y-1">
+								<p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+									Historial
+								</p>
+								<h2 className="text-2xl font-semibold text-slate-900">
+									Pedidos registrados
+								</h2>
+								<p className="text-sm text-slate-600">
+									Mostrando{" "}
+									<span className="font-semibold text-slate-900">
+										{visibleOrders.length}
+									</span>{" "}
+									de{" "}
+									<span className="font-semibold text-slate-900">
+										{orders.length}
+									</span>{" "}
+									pedidos
+								</p>
+							</div>
 
-					<div
-						className={`mt-5 grid gap-3 ${
-							mode === "commercial"
-								? "lg:grid-cols-[minmax(0,1.2fr)_220px_220px_220px]"
-								: "lg:grid-cols-[minmax(0,1fr)]"
-						}`}
-					>
-						<div>
-							<label
-								htmlFor="orders-history-search"
-								className="mb-2 block text-sm font-medium text-slate-700"
+							<button
+								type="button"
+								onClick={() =>
+									setIsHistoryFiltersOpen((currentValue) => !currentValue)
+								}
+								className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
 							>
-								Buscar
-							</label>
-							<input
-								id="orders-history-search"
-								type="text"
-								value={historySearch}
-								onChange={(event) => setHistorySearch(event.target.value)}
-								placeholder="Pedido, cliente, creador o referencia"
-								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-							/>
+								{isHistoryFiltersOpen ? "Ocultar filtros" : "Mostrar filtros"}
+							</button>
 						</div>
 
-						{mode === "commercial" ? (
-							<div>
-								<label
-									htmlFor="orders-history-client-filter"
-									className="mb-2 block text-sm font-medium text-slate-700"
-								>
-									Cliente
-								</label>
-								<select
-									id="orders-history-client-filter"
-									value={historyClientFilter}
-									onChange={(event) => setHistoryClientFilter(event.target.value)}
-									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-								>
-									<option value="all">Todos los clientes</option>
-									{clientOptions.map((client) => (
-										<option key={client.id} value={client.id}>
-											{client.name}
-										</option>
-									))}
-								</select>
+						{isHistoryFiltersOpen ? (
+							<div
+								className={`mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 ${
+									mode === "commercial"
+										? "lg:grid-cols-[minmax(0,1.2fr)_220px_220px_220px]"
+										: "lg:grid-cols-[minmax(0,1fr)_220px_220px]"
+								}`}
+							>
+								<div>
+									<label
+										htmlFor="orders-history-search"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
+										Buscar
+									</label>
+									<input
+										id="orders-history-search"
+										type="text"
+										value={historySearch}
+										onChange={(event) => setHistorySearch(event.target.value)}
+										placeholder="Pedido, cliente, creador o referencia"
+										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+									/>
+								</div>
+
+								{mode === "commercial" ? (
+									<div>
+										<label
+											htmlFor="orders-history-client-filter"
+											className="mb-2 block text-sm font-medium text-slate-700"
+										>
+											Cliente
+										</label>
+										<select
+											id="orders-history-client-filter"
+											value={historyClientFilter}
+											onChange={(event) =>
+												setHistoryClientFilter(event.target.value)
+											}
+											className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+										>
+											<option value="all">Todos los clientes</option>
+											{clientOptions.map((client) => (
+												<option key={client.id} value={client.id}>
+													{client.name}
+												</option>
+											))}
+										</select>
+									</div>
+								) : null}
+
+								<div>
+									<label
+										htmlFor="orders-history-status-filter"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
+										Estado
+									</label>
+									<select
+										id="orders-history-status-filter"
+										value={historyStatusFilter}
+										onChange={(event) =>
+											setHistoryStatusFilter(event.target.value)
+										}
+										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+									>
+										<option value="all">Todos</option>
+										<option value="created">Creado</option>
+										<option value="confirmed">Confirmado</option>
+										<option value="delivered">Entregado</option>
+										<option value="cancelled">Cancelado</option>
+									</select>
+								</div>
+
+								<div>
+									<label
+										htmlFor="orders-history-payment-filter"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
+										Cobro
+									</label>
+									<select
+										id="orders-history-payment-filter"
+										value={historyPaymentFilter}
+										onChange={(event) =>
+											setHistoryPaymentFilter(event.target.value)
+										}
+										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+									>
+										<option value="all">Todos</option>
+										<option value="pending">Pendiente</option>
+										<option value="paid">Cobrado</option>
+									</select>
+								</div>
+
+								{hasHistoryFilters ? (
+									<button
+										type="button"
+										onClick={resetHistoryFilters}
+										className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:col-start-1"
+									>
+										Limpiar filtros
+									</button>
+								) : null}
 							</div>
 						) : null}
-
-						<div>
-							<label
-								htmlFor="orders-history-status-filter"
-								className="mb-2 block text-sm font-medium text-slate-700"
-							>
-								Estado
-							</label>
-							<select
-								id="orders-history-status-filter"
-								value={historyStatusFilter}
-								onChange={(event) => setHistoryStatusFilter(event.target.value)}
-								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-							>
-								<option value="all">Todos</option>
-								<option value="created">Creado</option>
-								<option value="confirmed">Confirmado</option>
-								<option value="delivered">Entregado</option>
-								<option value="cancelled">Cancelado</option>
-							</select>
-						</div>
-
-						<div>
-							<label
-								htmlFor="orders-history-payment-filter"
-								className="mb-2 block text-sm font-medium text-slate-700"
-							>
-								Cobro
-							</label>
-							<select
-								id="orders-history-payment-filter"
-								value={historyPaymentFilter}
-								onChange={(event) => setHistoryPaymentFilter(event.target.value)}
-								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-							>
-								<option value="all">Todos</option>
-								<option value="pending">Pendiente</option>
-								<option value="paid">Cobrado</option>
-							</select>
-						</div>
-					</div>
 
 					{visibleOrders.length === 0 ? (
 						<div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white/70 px-5 py-6 text-sm text-slate-600">
 							Aún no hay pedidos registrados en este contexto.
 						</div>
 					) : (
-						<div className="mt-5 space-y-4">
+						<div
+							className={
+								mode === "commercial"
+									? "mt-5 grid gap-4 lg:grid-cols-2 2xl:grid-cols-3"
+									: "mt-5 space-y-4"
+							}
+						>
 							{visibleOrders.map((order) => (
 								<article
 									key={order.id}
 									className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
 								>
-									<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+									<div
+										className={
+											mode === "commercial"
+												? "flex h-full flex-col gap-4"
+												: "flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"
+										}
+									>
 										<div className="space-y-2">
 											<div className="flex flex-wrap items-center gap-2">
 												<span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
@@ -1098,7 +1163,13 @@ export default function OrderWorkspace({
 											) : null}
 										</div>
 
-										<div className="grid gap-3 sm:grid-cols-2 lg:w-[320px]">
+										<div
+											className={
+												mode === "commercial"
+													? "mt-auto grid gap-3 sm:grid-cols-2"
+													: "grid gap-3 sm:grid-cols-2 lg:w-[320px]"
+											}
+										>
 											<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
 												<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
 													Importe total
@@ -1118,10 +1189,10 @@ export default function OrderWorkspace({
 											</div>
 											<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
 												<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-													Líneas
+													Bultos
 												</p>
 												<p className="mt-2 text-lg font-semibold text-slate-900">
-													{order.line_count}
+													{getOrderPackageCount(order)}
 												</p>
 											</div>
 											<Link
@@ -1133,7 +1204,13 @@ export default function OrderWorkspace({
 										</div>
 									</div>
 
-									<div className="mt-4 grid gap-3 lg:grid-cols-2">
+									<div
+										className={
+											mode === "commercial"
+												? "hidden"
+												: "mt-4 grid gap-3 lg:grid-cols-2"
+										}
+									>
 										{order.lines.map((line) => (
 											<div
 												key={line.id}
@@ -1170,7 +1247,8 @@ export default function OrderWorkspace({
 							))}
 						</div>
 					)}
-				</section>
+					</section>
+				) : null}
 			</div>
 		</PageTransition>
 	);

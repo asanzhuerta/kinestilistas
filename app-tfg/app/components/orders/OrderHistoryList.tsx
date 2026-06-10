@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useSessionStorageState } from "@/app/hooks/useSessionStorageState";
 import type { OrderSummary } from "@/lib/contracts/order";
 import { ROLE_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { formatDateTime } from "@/lib/utils/user-utils";
@@ -12,6 +13,7 @@ import {
 	getOrderDiscountSummary,
 	getOrderLineDiscountCents,
 	getOrderLineSubtotalCents,
+	getOrderPackageCount,
 	getOrderPaymentStatusClasses,
 	getOrderStatusClasses,
 	hasOrderLineDiscount,
@@ -113,10 +115,24 @@ export default function OrderHistoryList({
 	detailBasePath,
 	emptyMessage,
 }: Props) {
-	const [search, setSearch] = useState("");
-	const [statusFilter, setStatusFilter] = useState("all");
-	const [paymentFilter, setPaymentFilter] = useState("all");
-	const [clientFilter, setClientFilter] = useState("all");
+	const filterStorageKey = `order-history:${mode}:${detailBasePath}`;
+	const [search, setSearch] = useSessionStorageState(
+		`${filterStorageKey}:search`,
+		"",
+	);
+	const [statusFilter, setStatusFilter] = useSessionStorageState(
+		`${filterStorageKey}:status`,
+		"all",
+	);
+	const [paymentFilter, setPaymentFilter] = useSessionStorageState(
+		`${filterStorageKey}:payment`,
+		"all",
+	);
+	const [clientFilter, setClientFilter] = useSessionStorageState(
+		`${filterStorageKey}:client`,
+		"all",
+	);
+	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 	const normalizedSearch = normalizeSearchValue(search);
 	const statusOptions = useMemo(
 		() => buildFilterOptions(orders, "status_code", "status_name"),
@@ -182,101 +198,8 @@ export default function OrderHistoryList({
 	return (
 		<div className="mt-5 space-y-4">
 			<section className="rounded-3xl border border-slate-200 bg-slate-50/70 p-4">
-				<div
-					className={`grid gap-3 ${
-						mode === "client"
-							? "lg:grid-cols-[minmax(0,1fr)_220px_220px]"
-							: "lg:grid-cols-[minmax(0,1fr)_220px_220px_240px]"
-					}`}
-				>
-					<div>
-						<label
-							htmlFor="order-history-search"
-							className="mb-2 block text-sm font-medium text-slate-700"
-						>
-							Buscar
-						</label>
-						<input
-							id="order-history-search"
-							type="search"
-							value={search}
-							onChange={(event) => setSearch(event.target.value)}
-							placeholder="Pedido, cliente, creador, producto, referencia o tono"
-							className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor="order-history-status"
-							className="mb-2 block text-sm font-medium text-slate-700"
-						>
-							Estado
-						</label>
-						<select
-							id="order-history-status"
-							value={statusFilter}
-							onChange={(event) => setStatusFilter(event.target.value)}
-							className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-						>
-							<option value="all">Todos</option>
-							{statusOptions.map(([code, name]) => (
-								<option key={code} value={code}>
-									{name}
-								</option>
-							))}
-						</select>
-					</div>
-
-					<div>
-						<label
-							htmlFor="order-history-payment"
-							className="mb-2 block text-sm font-medium text-slate-700"
-						>
-							Cobro
-						</label>
-						<select
-							id="order-history-payment"
-							value={paymentFilter}
-							onChange={(event) => setPaymentFilter(event.target.value)}
-							className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-						>
-							<option value="all">Todos</option>
-							{paymentOptions.map(([code, name]) => (
-								<option key={code} value={code}>
-									{name}
-								</option>
-							))}
-						</select>
-					</div>
-
-					{mode !== "client" ? (
-						<div>
-							<label
-								htmlFor="order-history-client"
-								className="mb-2 block text-sm font-medium text-slate-700"
-							>
-								Cliente
-							</label>
-							<select
-								id="order-history-client"
-								value={clientFilter}
-								onChange={(event) => setClientFilter(event.target.value)}
-								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-							>
-								<option value="all">Todos los clientes</option>
-								{clientOptions.map(([id, name]) => (
-									<option key={id} value={id}>
-										{name}
-									</option>
-								))}
-							</select>
-						</div>
-					) : null}
-				</div>
-
-				<div className="mt-3 flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
-					<p>
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<p className="text-sm text-slate-600">
 						Mostrando{" "}
 						<span className="font-semibold text-slate-900">
 							{filteredOrders.length}
@@ -285,18 +208,121 @@ export default function OrderHistoryList({
 						<span className="font-semibold text-slate-900">
 							{orders.length}
 						</span>{" "}
-						pedidos.
+						pedidos
 					</p>
-					{hasActiveFilters ? (
-						<button
-							type="button"
-							onClick={resetFilters}
-							className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
-						>
-							Limpiar filtros
-						</button>
-					) : null}
+					<button
+						type="button"
+						onClick={() => setIsFiltersOpen((currentValue) => !currentValue)}
+						className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
+					>
+						{isFiltersOpen ? "Ocultar filtros" : "Mostrar filtros"}
+					</button>
 				</div>
+
+				{isFiltersOpen ? (
+					<div
+						className={`mt-4 grid gap-3 ${
+							mode === "client"
+								? "lg:grid-cols-[minmax(0,1fr)_220px_220px]"
+								: "lg:grid-cols-[minmax(0,1fr)_220px_220px_240px]"
+						}`}
+					>
+						<div>
+							<label
+								htmlFor="order-history-search"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
+								Buscar
+							</label>
+							<input
+								id="order-history-search"
+								type="search"
+								value={search}
+								onChange={(event) => setSearch(event.target.value)}
+								placeholder="Pedido, cliente, creador, producto, referencia o tono"
+								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+							/>
+						</div>
+
+						<div>
+							<label
+								htmlFor="order-history-status"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
+								Estado
+							</label>
+							<select
+								id="order-history-status"
+								value={statusFilter}
+								onChange={(event) => setStatusFilter(event.target.value)}
+								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+							>
+								<option value="all">Todos</option>
+								{statusOptions.map(([code, name]) => (
+									<option key={code} value={code}>
+										{name}
+									</option>
+								))}
+							</select>
+						</div>
+
+						<div>
+							<label
+								htmlFor="order-history-payment"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
+								Cobro
+							</label>
+							<select
+								id="order-history-payment"
+								value={paymentFilter}
+								onChange={(event) => setPaymentFilter(event.target.value)}
+								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+							>
+								<option value="all">Todos</option>
+								{paymentOptions.map(([code, name]) => (
+									<option key={code} value={code}>
+										{name}
+									</option>
+								))}
+							</select>
+						</div>
+
+						{mode !== "client" ? (
+							<div>
+								<label
+									htmlFor="order-history-client"
+									className="mb-2 block text-sm font-medium text-slate-700"
+								>
+									Cliente
+								</label>
+								<select
+									id="order-history-client"
+									value={clientFilter}
+									onChange={(event) => setClientFilter(event.target.value)}
+									className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+								>
+									<option value="all">Todos los clientes</option>
+									{clientOptions.map(([id, name]) => (
+										<option key={id} value={id}>
+											{name}
+										</option>
+									))}
+								</select>
+							</div>
+						) : null}
+
+						{hasActiveFilters ? (
+							<button
+								type="button"
+								onClick={resetFilters}
+								className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:col-start-1"
+							>
+								Limpiar filtros
+							</button>
+						) : null}
+					</div>
+				) : null}
 			</section>
 
 			{filteredOrders.length === 0 ? (
@@ -380,10 +406,10 @@ export default function OrderHistoryList({
 							</div>
 							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
 								<p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-									Líneas
+									Bultos
 								</p>
 								<p className="mt-2 text-lg font-semibold text-slate-900">
-									{order.line_count}
+									{getOrderPackageCount(order)}
 								</p>
 							</div>
 							<Link

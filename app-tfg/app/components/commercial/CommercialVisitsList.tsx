@@ -8,9 +8,11 @@ import PageTransition from "@/app/components/animations/PageTransition";
 import EntityTableView from "@/app/components/entity-table/EntityTableView";
 import SafeForm from "@/app/components/forms/SafeForm";
 import SubmitButton from "@/app/components/forms/SubmitButton";
+import { useSessionStorageState } from "@/app/hooks/useSessionStorageState";
 import { requestJson } from "@/lib/api/client";
 import type { CommercialRoutePreviewResponse } from "@/lib/contracts/commercial-route";
 import type { OrderSummary } from "@/lib/contracts/order";
+import { getOrderPackageCount } from "@/app/components/orders/order-ui";
 import { getTodayDateInMadrid } from "@/lib/utils/time";
 import type { CommercialClient } from "./commercial-client-types";
 import type { CommercialVisit } from "./commercial-visit-types";
@@ -130,6 +132,7 @@ export default function CommercialVisitsList() {
 	const [formSuccess, setFormSuccess] = useState("");
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 	const [isMounted, setIsMounted] = useState(false);
+	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
 	const [clientId, setClientId] = useState("");
 	const [scheduledForDate, setScheduledForDate] = useState(todayDate);
@@ -137,11 +140,26 @@ export default function CommercialVisitsList() {
 	const [notes, setNotes] = useState("");
 	const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
 
-	const [filterClientId, setFilterClientId] = useState("");
-	const [filterStatusId, setFilterStatusId] = useState("");
-	const [filterVisitTypeId, setFilterVisitTypeId] = useState("");
-	const [filterDateFrom, setFilterDateFrom] = useState(todayDate);
-	const [filterDateTo, setFilterDateTo] = useState(todayDate);
+	const [filterClientId, setFilterClientId] = useSessionStorageState(
+		"commercial-visits:filter-client-id",
+		"",
+	);
+	const [filterStatusId, setFilterStatusId] = useSessionStorageState(
+		"commercial-visits:filter-status-id",
+		"",
+	);
+	const [filterVisitTypeId, setFilterVisitTypeId] = useSessionStorageState(
+		"commercial-visits:filter-visit-type-id",
+		"",
+	);
+	const [filterDateFrom, setFilterDateFrom] = useSessionStorageState(
+		"commercial-visits:filter-date-from",
+		todayDate,
+	);
+	const [filterDateTo, setFilterDateTo] = useSessionStorageState(
+		"commercial-visits:filter-date-to",
+		todayDate,
+	);
 
 	const isTodayOnly =
 		filterDateFrom === todayDate && filterDateTo === todayDate && Boolean(todayDate);
@@ -223,13 +241,10 @@ export default function CommercialVisitsList() {
 	const stats = useMemo(() => {
 		const planned = visits.filter((visit) => visit.status_id === 1).length;
 		const completed = visits.filter((visit) => visit.status_id === 2).length;
-		const cancelled = visits.filter((visit) => visit.status_id === 3).length;
 
 		return {
-			total: visits.length,
 			planned,
 			completed,
-			cancelled,
 			pendingDeliveryOrders: pendingDeliveryOrders.length,
 		};
 	}, [pendingDeliveryOrders.length, visits]);
@@ -573,75 +588,74 @@ export default function CommercialVisitsList() {
 					</div>
 				) : null}
 
-				<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
-					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-						<div className="rounded-2xl border border-slate-200 bg-white p-4">
-							<p className="text-sm text-slate-500">Visitas mostradas</p>
-							<p className="mt-1 text-2xl font-semibold text-slate-900">
-								{stats.total}
+				<section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div>
+							<h2 className="text-sm font-semibold text-slate-800">
+								Resumen de visitas
+							</h2>
+							<p className="text-xs text-slate-500">
+								Estado operativo de las visitas filtradas.
 							</p>
 						</div>
 
-						<div className="rounded-2xl border border-slate-200 bg-white p-4">
-							<p className="text-sm text-slate-500">
-								Clientes asignados disponibles
-							</p>
-							<p className="mt-1 text-2xl font-semibold text-slate-900">
-								{clients.length}
-							</p>
-						</div>
+						<div className="grid gap-2 sm:grid-cols-3">
+							<div className="rounded-xl bg-amber-50 px-3 py-2">
+								<p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+									Planificadas
+								</p>
+								<p className="text-lg font-semibold text-amber-700">
+									{stats.planned}
+								</p>
+							</div>
 
-						<div className="rounded-2xl border border-slate-200 bg-white p-4">
-							<p className="text-sm text-slate-500">Planificadas</p>
-							<p className="mt-1 text-2xl font-semibold text-amber-700">
-								{stats.planned}
-							</p>
-						</div>
+							<div className="rounded-xl bg-emerald-50 px-3 py-2">
+								<p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">
+									Completadas
+								</p>
+								<p className="text-lg font-semibold text-emerald-700">
+									{stats.completed}
+								</p>
+							</div>
 
-						<div className="rounded-2xl border border-slate-200 bg-white p-4">
-							<p className="text-sm text-slate-500">Completadas</p>
-							<p className="mt-1 text-2xl font-semibold text-emerald-700">
-								{stats.completed}
-							</p>
-						</div>
-
-						<div className="rounded-2xl border border-slate-200 bg-white p-4">
-							<p className="text-sm text-slate-500">
-								Pedidos pendientes de reparto
-							</p>
-							<p className="mt-1 text-2xl font-semibold text-sky-700">
-								{stats.pendingDeliveryOrders}
-							</p>
+							<div className="rounded-xl bg-sky-50 px-3 py-2">
+								<p className="text-[11px] font-semibold uppercase tracking-wide text-sky-700">
+									Pedidos pendientes de reparto
+								</p>
+								<p className="text-lg font-semibold text-sky-700">
+									{stats.pendingDeliveryOrders}
+								</p>
+							</div>
 						</div>
 					</div>
 				</section>
 
-				<section className="rounded-2xl border border-sky-100 bg-sky-50/70 p-5 shadow-sm">
-					<div className="flex flex-wrap items-center justify-between gap-3">
-						<div>
-							<h2 className="text-base font-semibold text-slate-800">
-								Pedidos confirmados sin reparto asignado
-							</h2>
-							<p className="text-sm text-slate-600">
-								Usa esta bandeja para convertir pedidos pendientes en repartos
-								planificados sin tener que buscarlos cliente por cliente.
-							</p>
+				{pendingDeliveryOrdersByClient.length > 0 ? (
+					<section className="rounded-2xl border border-sky-100 bg-sky-50/70 p-5 shadow-sm">
+						<div className="flex flex-wrap items-center justify-between gap-3">
+							<div>
+								<h2 className="text-base font-semibold text-slate-800">
+									Pedidos confirmados sin reparto asignado
+								</h2>
+								<p className="text-sm text-slate-600">
+									Usa esta bandeja para convertir pedidos pendientes en repartos
+									planificados sin tener que buscarlos cliente por cliente.
+								</p>
+							</div>
+
+							<button
+								type="button"
+								onClick={() =>
+									openCreateModal({
+										visitTypeId: DELIVERY_VISIT_TYPE_ID,
+									})
+								}
+								className="rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
+							>
+								Crear reparto manual
+							</button>
 						</div>
 
-						<button
-							type="button"
-							onClick={() =>
-								openCreateModal({
-									visitTypeId: DELIVERY_VISIT_TYPE_ID,
-								})
-							}
-							className="rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
-						>
-							Crear reparto manual
-						</button>
-					</div>
-
-					{pendingDeliveryOrdersByClient.length > 0 ? (
 						<div className="mt-4 grid gap-4 xl:grid-cols-2">
 							{pendingDeliveryOrdersByClient.map((group) => (
 								<article
@@ -688,8 +702,8 @@ export default function CommercialVisitsList() {
 															}).format(new Date(order.created_at))}
 														</p>
 														<p className="text-xs text-slate-500">
-															{order.line_count} línea
-															{order.line_count === 1 ? "" : "s"} ·{" "}
+															{getOrderPackageCount(order)} bulto
+															{getOrderPackageCount(order) === 1 ? "" : "s"} ·{" "}
 															{formatOrderCurrency(order.total_amount)}
 														</p>
 													</div>
@@ -728,12 +742,8 @@ export default function CommercialVisitsList() {
 								</article>
 							))}
 						</div>
-					) : (
-						<div className="mt-4 rounded-2xl border border-dashed border-sky-200 bg-white/80 px-4 py-4 text-sm text-slate-600">
-							No hay pedidos confirmados pendientes de reparto ahora mismo.
-						</div>
-					)}
-				</section>
+					</section>
+				) : null}
 
 				<section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-md md:p-5">
 					<div className="flex flex-wrap items-center justify-between gap-3">
@@ -749,10 +759,10 @@ export default function CommercialVisitsList() {
 						<div className="flex flex-wrap gap-2">
 							<button
 								type="button"
-								onClick={handleClearFilters}
+								onClick={() => setIsFiltersOpen((currentValue) => !currentValue)}
 								className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-gray-50"
 							>
-								Limpiar filtros
+								{isFiltersOpen ? "Ocultar filtros" : "Mostrar filtros"}
 							</button>
 							<button
 								type="button"
@@ -764,105 +774,119 @@ export default function CommercialVisitsList() {
 						</div>
 					</div>
 
-					<div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-						<div>
-							<label
-								htmlFor="visits-filter-client"
-								className="mb-1 block text-sm font-semibold text-slate-700"
-							>
-								Cliente
-							</label>
-							<select
-								id="visits-filter-client"
-								value={filterClientId}
-								onChange={(event) => setFilterClientId(event.target.value)}
-								className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
-							>
-								<option value="">Todos los clientes</option>
-								{clients.map((client) => (
-									<option key={client.id} value={client.id}>
-										{client.name}
-									</option>
-								))}
-							</select>
-						</div>
+					{isFiltersOpen ? (
+						<>
+							<div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+								<div>
+									<label
+										htmlFor="visits-filter-client"
+										className="mb-1 block text-sm font-semibold text-slate-700"
+									>
+										Cliente
+									</label>
+									<select
+										id="visits-filter-client"
+										value={filterClientId}
+										onChange={(event) => setFilterClientId(event.target.value)}
+										className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
+									>
+										<option value="">Todos los clientes</option>
+										{clients.map((client) => (
+											<option key={client.id} value={client.id}>
+												{client.name}
+											</option>
+										))}
+									</select>
+								</div>
 
-						<div>
-							<label
-								htmlFor="visits-filter-status"
-								className="mb-1 block text-sm font-semibold text-slate-700"
-							>
-								Estado
-							</label>
-							<select
-								id="visits-filter-status"
-								value={filterStatusId}
-								onChange={(event) => setFilterStatusId(event.target.value)}
-								className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
-							>
-								<option value="">Todos los estados</option>
-								{COMMERCIAL_VISIT_STATUS_OPTIONS.map((status) => (
-									<option key={status.id} value={String(status.id)}>
-										{status.label}
-									</option>
-								))}
-							</select>
-						</div>
+								<div>
+									<label
+										htmlFor="visits-filter-status"
+										className="mb-1 block text-sm font-semibold text-slate-700"
+									>
+										Estado
+									</label>
+									<select
+										id="visits-filter-status"
+										value={filterStatusId}
+										onChange={(event) => setFilterStatusId(event.target.value)}
+										className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
+									>
+										<option value="">Todos los estados</option>
+										{COMMERCIAL_VISIT_STATUS_OPTIONS.map((status) => (
+											<option key={status.id} value={String(status.id)}>
+												{status.label}
+											</option>
+										))}
+									</select>
+								</div>
 
-						<div>
-							<label
-								htmlFor="visits-filter-type"
-								className="mb-1 block text-sm font-semibold text-slate-700"
-							>
-								Tipo
-							</label>
-							<select
-								id="visits-filter-type"
-								value={filterVisitTypeId}
-								onChange={(event) => setFilterVisitTypeId(event.target.value)}
-								className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
-							>
-								<option value="">Todos los tipos</option>
-								{COMMERCIAL_VISIT_TYPE_OPTIONS.map((visitType) => (
-									<option key={visitType.id} value={String(visitType.id)}>
-										{visitType.label}
-									</option>
-								))}
-							</select>
-						</div>
+								<div>
+									<label
+										htmlFor="visits-filter-type"
+										className="mb-1 block text-sm font-semibold text-slate-700"
+									>
+										Tipo
+									</label>
+									<select
+										id="visits-filter-type"
+										value={filterVisitTypeId}
+										onChange={(event) => setFilterVisitTypeId(event.target.value)}
+										className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
+									>
+										<option value="">Todos los tipos</option>
+										{COMMERCIAL_VISIT_TYPE_OPTIONS.map((visitType) => (
+											<option key={visitType.id} value={String(visitType.id)}>
+												{visitType.label}
+											</option>
+										))}
+									</select>
+								</div>
 
-						<div>
-							<label
-								htmlFor="visits-filter-date-from"
-								className="mb-1 block text-sm font-semibold text-slate-700"
-							>
-								Desde
-							</label>
-							<input
-								id="visits-filter-date-from"
-								type="date"
-								value={filterDateFrom}
-								onChange={(event) => setFilterDateFrom(event.target.value)}
-								className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
-							/>
-						</div>
+								<div>
+									<label
+										htmlFor="visits-filter-date-from"
+										className="mb-1 block text-sm font-semibold text-slate-700"
+									>
+										Desde
+									</label>
+									<input
+										id="visits-filter-date-from"
+										type="date"
+										value={filterDateFrom}
+										onChange={(event) => setFilterDateFrom(event.target.value)}
+										className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
+									/>
+								</div>
 
-						<div>
-							<label
-								htmlFor="visits-filter-date-to"
-								className="mb-1 block text-sm font-semibold text-slate-700"
-							>
-								Hasta
-							</label>
-							<input
-								id="visits-filter-date-to"
-								type="date"
-								value={filterDateTo}
-								onChange={(event) => setFilterDateTo(event.target.value)}
-								className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
-							/>
-						</div>
-					</div>
+								<div>
+									<label
+										htmlFor="visits-filter-date-to"
+										className="mb-1 block text-sm font-semibold text-slate-700"
+									>
+										Hasta
+									</label>
+									<input
+										id="visits-filter-date-to"
+										type="date"
+										value={filterDateTo}
+										onChange={(event) => setFilterDateTo(event.target.value)}
+										className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-slate-800 outline-none transition focus:border-slate-500"
+									/>
+								</div>
+							</div>
+
+							<div className="mt-4 flex flex-wrap items-center gap-3">
+								<button
+									type="button"
+									onClick={handleClearFilters}
+									className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-gray-50"
+								>
+									Limpiar filtros
+								</button>
+							</div>
+						</>
+					) : null}
 
 					<div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500">
 						<span>
@@ -900,6 +924,11 @@ export default function CommercialVisitsList() {
 						<EntityTableView
 							items={tableItems}
 							emptyMessage="No hay visitas que coincidan con los filtros actuales."
+							config={{
+								cardVariant: "compact-visit",
+								gridClassName:
+									"grid grid-cols-1 gap-3 p-3 lg:grid-cols-3 2xl:grid-cols-6",
+							}}
 						/>
 					) : null}
 				</div>
@@ -907,7 +936,7 @@ export default function CommercialVisitsList() {
 
 			{isMounted && isCreateModalOpen
 				? createPortal(
-						<div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/45 p-4">
+						<div className="app-modal-overlay z-[120] p-4">
 							<div className="w-full max-w-2xl rounded-[28px] border border-white/30 bg-white p-6 shadow-2xl">
 								<div className="mb-5 flex items-start justify-between gap-4">
 									<div>
@@ -1059,8 +1088,8 @@ export default function CommercialVisitsList() {
 																	</div>
 
 																	<p className="mt-1 text-xs text-slate-500">
-																		{order.line_count} línea
-																		{order.line_count === 1 ? "" : "s"} · Estado{" "}
+																		{getOrderPackageCount(order)} bulto
+																		{getOrderPackageCount(order) === 1 ? "" : "s"} · Estado{" "}
 																		{order.status_name}
 																	</p>
 

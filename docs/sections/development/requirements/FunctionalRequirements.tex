@@ -1,548 +1,117 @@
-A continuación se detallan los requisitos funcionales identificados para el sistema.  Los requisitos funcionales describen los servicios que el sistema debe proporcionar  y el comportamiento esperado ante determinadas situaciones de uso  \cite[Chap.~4.1.1, pp.~85--87]{sommerville}.
-
-La identificación de los requisitos funcionales se ha realizado mediante identificadores únicos que permiten su referencia y trazabilidad a lo largo del documento. Esta práctica sigue las recomendaciones del estándar ISO/IEC/IEEE 29148 para la ingeniería de requisitos, que establece que cada requisito debe contar con un identificador único que facilite su seguimiento y gestión dentro de la específicación \cite{ieee29148}.
-
-
-% ------------------------------------------------------------------------------
-\subsection{RF-M1}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RF-M1-01 Registro y alta de usuarios}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir el alta de nuevos usuarios profesionales (peluquerías) mediante un proceso controlado.
-    \item El registro podrá realizarse mediante solicitud del propio usuario o mediante la creación directa de la cuenta por parte del distribuidor administrador.
-    \item Toda nueva cuenta deberá quedar en estado pendiente hasta que sea revisada y autorizada por un usuario con permisos de administración.
-    \item El sistema debe permitir al administrador aprobar, denegar, activar o desactivar cuentas de usuario, quedando estas acciones registradas en un historial de gestión de usuarios.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M1-02 Autenticación y control de acceso}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir a los usuarios autenticarse mediante credenciales de acceso.
-    \item El sistema debe validar las credenciales introducidas de forma segura antes de conceder acceso al sistema.
-    \item El sistema debe permitir el acceso únicamente a usuarios que se encuentren activos y autorizados.
-    \item El sistema debe impedir el acceso a cuentas no autorizadas, denegadas o desactivadas.
-    \item El sistema debe limitar temporalmente los intentos de autenticación abusivos y diferenciar esta situación de un error simple de credenciales.
-    \item El sistema debe registrar los intentos de acceso, tanto exitosos como fallidos, con el fin de garantizar la trazabilidad y seguridad del sistema.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M1-03 Gestión de roles y permisos}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe soportar distintos roles de usuario que determinen el acceso a las funcionalidades del sistema.
-    \item Al menos deberán contemplarse los siguientes roles:
-          \begin{itemize}
-              \item Distribuidor Administrador.
-              \item Comercial o Agente.
-              \item Cliente profesional (peluquería).
-          \end{itemize}
-    \item El sistema debe restringir el acceso a las funcionalidades en función del rol del usuario autenticado.
-    \item El sistema debe mostrar una navegación lateral desplegable con las opciones disponibles para cada rol, tanto en escritorio como en dispositivos móviles.
-    \item El sistema debe permitir asignar y modificar el rol de un usuario por parte del administrador.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M1-04 Condiciones de autorización y control administrativo}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir que la activación o mantenimiento del acceso de un cliente profesional pueda depender de criterios comerciales definidos por el distribuidor.
-    \item Entre dichos criterios podrán contemplarse condiciones como la existencia de actividad comercial reciente, el cumplimiento de consumo mínimo o la validación mediante visita comercial.
-    \item El sistema debe permitir registrar y consultar el estado de las cuentas de usuario.
-    \item El sistema debe mantener un registro de las acciones administrativas relacionadas con la gestión de usuarios.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M1-05 Gestión de sesiones}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir la creación de sesiones de usuario tras un proceso de autenticación válido.
-    \item El sistema debe permitir la finalización de sesiones activas por parte del usuario o del sistema.
-    \item El sistema debe garantizar que las sesiones revocadas o expiradas no puedan ser reutilizadas.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M1-06 Gestión de perfil de usuario}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir a los usuarios consultar y modificar su información personal.
-    \item El sistema debe permitir la actualización de datos como nombre, teléfono, empresa o imagen de perfil.
-    \item El sistema debe reflejar la imagen de perfil del usuario autenticado en los elementos principales de navegación.
-    \item El sistema debe permitir la modificación de credenciales de acceso, garantizando el cumplimiento de las políticas de seguridad definidas.
-\end{itemize}
-
-% ------------------------------------------------------------------------------
-\subsection{RF-M2}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RF-M2-01 Gestión de clientes profesionales y asignaciones comerciales}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir registrar y gestionar la información básica de los clientes profesionales.
-    \item El sistema debe permitir consultar y actualizar los datos asociados a cada cliente, tales como identificación, localización, geolocalización confirmada o franja horaria permitida para visitas.
-    \item El sistema debe permitir asignar, desasignar y reasignar clientes a usuarios comerciales manteniendo trazabilidad sobre dichas acciones.
-    \item El sistema debe permitir visualizar la información comercial relevante de cada cliente desde una ficha unificada.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M2-02 Consulta operativa del cliente}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir consultar la ficha operativa de cada cliente profesional con la información necesaria para su seguimiento comercial.
-    \item Dicha consulta debe incluir, al menos, datos de contacto, localización, observaciones, asignación comercial activa y contexto de planificación necesario para la jornada.
-    \item El sistema debe facilitar la consulta rápida de esta información tanto al comercial durante sus visitas como al cliente profesional cuando exista una previsión de reparto para su establecimiento.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M2-03 Gestión de visitas comerciales}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir planificar y registrar visitas comerciales a los clientes profesionales por fecha, tipo de visita y comercial responsable.
-    \item El sistema debe permitir asociar dichas visitas únicamente a clientes que se encuentren asignados al comercial correspondiente.
-    \item El sistema debe permitir registrar observaciones, resultados y cambios de estado asociados a cada visita realizada.
-    \item El sistema debe considerar la hora exacta de la visita como una información dinámica derivada de la planificación diaria, en lugar de como un dato fijo almacenado en la propia visita.
-    \item Si la franja horaria permitida para visitar a un cliente ya se ha superado, el sistema debe poder aplazar la visita para su posterior replanificación.
-    \item El sistema debe avisar al cliente profesional cuando se cree una nueva visita o cuando una visita previamente aplazada se reubique en una nueva fecha.
-    \item El sistema debe avisar al comercial cuando una o varias visitas queden aplazadas automáticamente por haber superado la fecha prevista o la ventana horaria permitida del cliente, facilitando su posterior reubicación.
-    \item El sistema debe generar un recordatorio interno para el cliente cuando tenga una visita planificada para el día actual, evitando duplicados para la misma visita y fecha.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M2-04 Planificación y previsualización de rutas comerciales}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir organizar y consultar las rutas de visitas de los agentes comerciales a partir de las visitas planificadas para una jornada.
-    \item El sistema debe facilitar la visualización de los clientes asignados a una jornada o recorrido determinado, mostrando su orden previsto dentro de la ruta.
-    \item El sistema debe permitir consultar la información de contacto y localización de los clientes incluidos en cada ruta comercial.
-    \item El sistema debe permitir calcular y mostrar tiempos aproximados de desplazamiento, espera y llegada a cada punto de la ruta.
-    \item El sistema debe permitir calcular el margen operativo restante de la jornada en función de la hora actual y de la configuración de trabajo del comercial.
-    \item El sistema debe permitir seleccionar la ubicación de un cliente en particular para generar indicaciones de navegación desde la ubicación actual del agente comercial.
-    \item Además, el sistema deberá estar integrado con un servicio externo de navegación para facilitar la localización de los clientes durante las visitas comerciales.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M2-05 Configuración operativa y seguimiento diario del comercial}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir a cada comercial definir su configuración operativa de trabajo, incluyendo inicio y fin de jornada, duración prevista de visitas, puntos de salida y llegada y criterio de regreso al origen.
-    \item El sistema debe utilizar dicha configuración para calcular automáticamente el tiempo disponible de trabajo y la viabilidad temporal de la ruta del día.
-    \item El sistema debe permitir consultar un resumen operativo diario con el número de visitas previstas, el tiempo comprometido, el margen restante y las incidencias de planificación detectadas.
-    \item El sistema debe permitir que el cliente profesional consulte su hora aproximada de reparto cuando exista una visita de entrega planificada para la jornada.
-\end{itemize}
-
-
-% ------------------------------------------------------------------------------
-\subsection{RF-M3}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RF-M3-01 Consulta del catálogo de productos}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir consultar un catálogo digital de productos profesionales.
-    \item El catálogo debe mostrar información relevante de cada producto, como nombre, referencia, descripción, categoría, línea comercial, subcategoría, imagen asociada, formato, packing y precio base cuando el rol y el contexto lo permitan.
-    \item El sistema debe permitir navegar por el catálogo de forma estructurada según la organización comercial de los productos.
-    \item El sistema debe permitir acceder a información técnica asociada a los productos, como modos de aplicación o características técnicas.
-    \item El sistema debe permitir consultar recursos de apoyo relacionados con los productos o con su línea comercial, como catálogos comerciales, fichas técnicas o material formativo.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M3-02 Clasificación y búsqueda de productos}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir clasificar los productos en categorías, líneas comerciales y subcategorías jerárquicas.
-    \item El sistema debe permitir localizar productos mediante mecanismos de búsqueda o filtrado basados en dicha clasificación.
-    \item El sistema debe permitir localizar referencias cromáticas dentro de las cartas de color mediante código, nombre o navegación estructurada.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M3-03 Visualización de cartas de color}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir consultar cartas de color asociadas a las líneas de coloración disponibles.
-    \item El sistema debe permitir visualizar las referencias de color organizadas según su nomenclatura comercial y su orden de presentacion.
-    \item El sistema debe facilitar la localización rápida de tonos o referencias concretas dentro de cada carta de color.
-    \item El sistema debe permitir, cuando proceda, asociar referencias de color a productos pedibles del catálogo.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M3-04 Gestión del catálogo por parte del administrador}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir al distribuidor administrador gestionar categorías, líneas comerciales, subcategorías, productos, recursos de apoyo, cartas de color y referencias cromáticas.
-    \item El administrador debe poder añadir, modificar o desactivar productos dentro del sistema.
-    \item El sistema debe permitir actualizar la información asociada a los productos, incluyendo imágenes, descripciónes, datos técnicos y materiales de apoyo.
-    \item El sistema debe permitir subir y reemplazar imágenes de catálogo en almacenamiento externo controlado.
-    \item El sistema debe permitir definir si una referencia de color es pedible y, en su caso, vincularla al producto correspondiente.
-\end{itemize}
-
-% ------------------------------------------------------------------------------
-\subsection{RF-M4}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RF-M4-01 Gestión de pedidos}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir la creación y gestión de pedidos de productos por parte de clientes profesionales o agentes comerciales autorizados.
-    \item El sistema debe permitir crear, recuperar y seguir editando borradores de pedido antes de su confirmación.
-    \item El sistema debe permitir seleccionar productos del catálogo, cantidades y, cuando proceda, referencias cromáticas asociadas a cada línea.
-    \item El sistema debe calcular y persistir el importe total del pedido a partir de sus líneas.
-    \item El sistema debe permitir consultar el estado y el historial de pedidos asociados a cada cliente.
-    \item El sistema debe impedir que un mismo cliente acumule más de dos pedidos abiertos pendientes de cobro.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M4-02 Gestión de entregas y reparto}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir vincular pedidos confirmados a visitas comerciales de tipo reparto del cliente correcto.
-    \item El sistema debe mostrar al comercial una bandeja de pedidos confirmados pendientes de reparto.
-    \item El sistema no debe permitir crear ni completar un reparto sin pedidos confirmados vinculados.
-    \item El sistema debe exigir la aportacion de un QR por cada pedido vinculado antes de completar un reparto.
-    \item Si la validación QR es correcta, el cierre del reparto debe marcar los pedidos vinculados como \texttt{delivered}.
-    \item Si una visita de reparto se aplaza o se cancela, el sistema debe mantener los pedidos en un estado coherente y sin enlaces huerfanos.
-    \item El cliente solo debe visualizar una ETA cuando exista una visita de reparto real y valida asociada a su pedido.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M4-03 Registro mínimo de cobros}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir registrar el cobro asociado a un pedido entregado.
-    \item El sistema debe permitir distinguir, al menos, entre pedidos con cobro \texttt{pending} y pedidos con cobro \texttt{paid}.
-    \item El sistema debe permitir registrar método de cobro, fecha y notas asociadas al cambio de estado de cobro.
-    \item El sistema debe permitir revertir un pedido a \texttt{pending} cuando la regla de negocio vigente lo permita y la consistencia del flujo se mantenga.
-    \item \textcolor{red}{El sistema no cubre en esta iteración pagos parciales, facturación ni conciliación avanzada.}
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M4-04 Consulta y trazabilidad operativa}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir al cliente consultar el historial y el detalle de sus propios pedidos.
-    \item El sistema debe permitir al comercial consultar pedidos, repartos y cobros de los clientes que tiene asignados.
-    \item El sistema debe permitir al administrador consultar el historial global de pedidos y abrir su detalle completo.
-    \item El detalle de un pedido debe mostrar, cuando aplique, su estado, su estado de cobro, sus líneas, el QR del paquete y la visita de reparto vinculada.
-\end{itemize}
-% ------------------------------------------------------------------------------
-\subsection{RF-M5}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RF-M5-01 Gestión de fichas de clientes del salón}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir registrar y gestionar fichas de clientes del salón.
-    \item Cada ficha de cliente debe permitir almacenar información básica necesaria para su identificación dentro del salón.
-    \item El sistema debe permitir consultar y actualizar la información registrada de cada cliente.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M5-02 Registro de servicios realizados}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir registrar los servicios o tratamientos realizados a los clientes del salón.
-    \item Cada servicio registrado debe poder asociarse a un cliente determinado.
-    \item El sistema debe permitir registrar información adicional relacionada con el servicio, como fecha de realización o tipo de tratamiento aplicado.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M5-03 Registro de información técnica de tratamientos}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir almacenar información técnica asociada a los servicios realizados.
-    \item Esta información podrá incluir datos como fórmulas de coloración utilizadas, productos aplicados o combinaciones de productos empleadas durante el tratamiento.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M5-04 Consulta del historial técnico del cliente}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir consultar el historial de servicios realizados a cada cliente del salón.
-    \item El historial debe mostrar la información técnica asociada a cada tratamiento previamente registrado.
-    \item El sistema debe facilitar la consulta de trabajos técnicos previos para apoyar la toma de decisiones en tratamientos futuros.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M5-05 Seguimiento del uso de productos}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir registrar los productos utilizados en los servicios realizados en el salón.
-    \item Cuando el producto utilizado corresponda a coloración, el sistema debe permitir asociar la tonalidad o referencia cromática concreta utilizada.
-    \item El sistema debe permitir consultar el uso de productos en los distintos servicios registrados.
-    \item Esta información podrá utilizarse para analizar el uso de productos de la marca en los tratamientos realizados por las peluquerías.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M5-06 Sugerencia de productos basada en tratamientos previos}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir mostrar sugerencias de productos o referencias relacionadas con los tratamientos previamente registrados para un cliente del salón.
-    \item Estas sugerencias deberán generarse a partir del historial técnico almacenado, teniendo en cuenta los productos utilizados y los servicios realizados con anterioridad.
-    \item El sistema debe presentar dichas sugerencias como apoyo a la consulta profesional, sin sustituir el criterio técnico del usuario.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M5-07 Plantillas reutilizables e imágenes del resultado final}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir guardar plantillas reutilizables de servicios técnicos para acelerar el registro de tratamientos frecuentes.
-    \item Las plantillas deben poder incluir información técnica base y productos predefinidos asociados al tratamiento.
-    \item El sistema debe permitir adjuntar una o varias imágenes del resultado final de un servicio, de forma que el historial técnico conserve evidencia visual del trabajo realizado.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M5-08 Contacto por correo a partir de la ficha técnica del cliente}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir generar un borrador de correo electrónico dirigido al cliente del salón a partir de la información registrada en un servicio técnico.
-    \item El borrador generado podrá incluir información relevante sobre el tratamiento realizado, productos utilizados, observaciones técnicas y recomendaciones basadas en el historial del cliente.
-    \item El sistema debe permitir personalizar el asunto y el contenido antes de su uso, permitiendo al profesional adaptar el mensaje a las necesidades específicas de cada cliente.
-    \item \textcolor{red}{En el alcance actual, el sistema debe facilitar la copia del borrador o su apertura mediante el cliente de correo configurado en el dispositivo, sin requerir todavía integración directa con un proveedor externo de envío.}
-\end{itemize}
-
-% ------------------------------------------------------------------------------
-\subsection{RF-M6}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RF-M6-01 Gestión de promociones comerciales}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir al distribuidor administrador crear y gestionar promociones comerciales dirigidas a los clientes profesionales.
-    \item El sistema debe permitir asociar dichas promociones a productos, líneas de producto, clientes específicos o periodos de tiempo determinados.
-    \item El sistema debe permitir definir condiciones promocionales tales como descuentos, ventajas comerciales u ofertas especiales aplicables durante un periodo determinado.
-    \item El sistema debe permitir editar, activar, archivar o eliminar promociones desde el panel administrativo cuando sea necesario.
-    \item El sistema debe permitir mostrar las promociones activas a los usuarios autorizados dentro de la aplicación.
-    \item El sistema debe permitir diferenciar promociones en borrador, activas o archivadas para controlar su visibilidad.
-    \item El sistema debe permitir aplicar automáticamente al borrador y al pedido final los descuentos porcentuales de promociones activas cuando coincidan con el cliente, segmento, producto o línea de producto correspondiente.
-    \item El sistema debe mostrar en el pedido un aviso de promoción aplicada y conservar el porcentaje de descuento y el importe final de cada línea como trazabilidad económica.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M6-02 Categorías de clientes y promociones}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir clasificar a los clientes en diferentes categorías dependiendo del uso que hagan de la aplicación, por ejemplo, clientes \textit{Platino}, \textit{Oro} o \textit{Plata}.
-    \item El sistema debe permitir asociar promociones comerciales a determinadas categorías de clientes, de forma que solo los clientes incluidos en dichas categorías puedan acceder a las promociones asociadas.
-    \item El sistema debe permitir gestionar manualmente la asignación de clientes a las distintas categorías por parte del administrador.
-    \item El sistema debe asignar el rango \textit{Plata} como categoría comercial base a los clientes profesionales que no tengan otra categoría superior asignada.
-    \item El cliente debe poder visualizar su rango comercial actual en su perfil, junto con las promociones activas disponibles para su segmento.
-    \item \textcolor{red}{La asignación automática en función de criterios comerciales o de uso queda contemplada como evolución futura del módulo.}
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M6-03 Envío de notificaciones y recordatorios}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir generar y enviar notificaciones o avisos a los usuarios del sistema relacionados con eventos relevantes de la aplicación.
-    \item Entre estos eventos podrán incluirse promociones activas, pedidos realizados, cambios en el estado de los pedidos o visitas comerciales programadas.
-    \item Las notificaciones asociadas a promociones deberán respetar el alcance definido para la promoción: global, por cliente concreto o por categoría de cliente.
-    \item El sistema debe permitir programar recordatorios asociados a determinadas acciones o eventos del sistema, por ejemplo, recordatorios de visitas comerciales o fechas de entrega de pedidos.
-    \item Las notificaciones deberán mostrarse dentro de la aplicación y permitir marcar su estado de lectura.
-    \item El sistema debe mostrar un indicador de avisos pendientes en los paneles de inicio de los roles que reciben comunicaciones internas.
-    \item El sistema debe permitir crear recordatorios personales con fecha programada y estado de seguimiento.
-    \item El sistema debe permitir que el administrador seleccione canales de entrega para promociones y formaciones, manteniendo siempre el canal interno y pudiendo añadir correo electrónico y Web Push cuando estén configurados.
-    \item El sistema debe permitir a clientes y comerciales activar o desactivar suscripciones Web Push desde la pantalla de avisos, siempre que el navegador y la PWA lo permitan.
-    \item El sistema debe degradar de forma controlada cuando el correo SMTP, las claves VAPID o la suscripción push del usuario no estén disponibles, conservando al menos la notificación interna.
-    \item \textcolor{red}{La integración con \textit{WhatsApp} u otros canales de mensajería no implementados queda fuera del alcance actual.}
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M6-04 Gestión de formaciones}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir al distribuidor administrador crear, editar, publicar, cancelar, completar o eliminar actividades formativas dirigidas a los clientes profesionales.
-    \item El sistema debe permitir mostrar un calendario o listado de formaciones disponibles para los usuarios autorizados.
-    \item El sistema debe permitir consultar la información asociada a cada formación, incluyendo fecha, ubicación, descripción o contenido de la actividad.
-    \item El sistema debe permitir actualizar o desactivar las formaciones publicadas cuando sea necesario.
-    \item El sistema debe permitir a los usuarios interesados inscribirse en las formaciones disponibles, registrando su participación para facilitar la organización de las actividades formativas.
-    \item El sistema debe permitir limitar la inscripción mediante una capacidad máxima opcional.
-    \item Estas inscripciones pueden estar sujetas a criterios de autorización definidos por el distribuidor, como la categoría del cliente, criterios comerciales o la disponibilidad de plazas.
-\end{itemize}
-
-%------------------------------------------------------------------------------
-\subsection{RF-M7}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{RF-M7-01 Panel de administración del sistema}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe proporcionar un panel de administración accesible únicamente por usuarios con rol de distribuidor administrador.
-    \item El panel de administración debe permitir gestionar los elementos principales del sistema, tales como usuarios, clientes, catálogo de productos, promociones, pedidos globales, auditoría y configuraciones generales o transversales.
-    \item El sistema debe permitir consultar un resumen operativo de las capacidades transversales de \texttt{M7}, agregando auditoría, rate limiting, integraciones y soporte técnico.
-    \item El sistema debe permitir exportar dicho resumen operativo en formato \texttt{CSV} como evidencia de revisión y mantenimiento del módulo.
-    \item El sistema debe agrupar las opciones administrativas de configuración en un mismo bloque de navegación, evitando que integraciones, soporte, operación y ajustes transversales queden dispersos.
-    \item El sistema debe permitir realizar tareas de mantenimiento y actualización de la información almacenada en la plataforma.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M7-02 Consulta de información operativa}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir consultar información operativa relevante para el distribuidor relacionada con la actividad comercial.
-    \item \textcolor{red}{El sistema debe permitir visualizar información agregada sobre pedidos, ventas, cobros y actividad comercial.}
-    \item El sistema debe permitir generar resúmenes o informes que faciliten el seguimiento del negocio y la toma de decisiones.
-    \item En la versión implementada, esta consulta operativa se materializa mediante un resumen transversal de auditoría, rate limiting, integraciones, soporte técnico y operación empresarial.
-    \item \textcolor{red}{La agregación completa de ventas, cobros y actividad comercial avanzada queda como alcance objetivo para siguientes incrementos, apoyada en los registros comerciales ya existentes.}
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M7-03 Integración con sistemas externos}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir la integración con herramientas o servicios externos utilizados en la actividad del distribuidor.
-    \item \textcolor{red}{Entre dichas integraciones podrán contemplarse servicios de mensajería, sistemas de gestión empresarial o flujos de automatización externos como \texttt{n8n}.}
-    \item El sistema debe permitir exportar o intercambiar información con dichos sistemas cuando sea necesario.
-    \item En la versión implementada, el sistema ya utiliza servicios externos de soporte para almacenamiento de imágenes, geocodificación, cálculo de rutas y representación del QR operativo de pedido.
-    \item En la versión implementada, el sistema registra también los canales SMTP transaccional y Web Push PWA como integraciones externas de mensajería utilizadas por las notificaciones multicanal de \texttt{M6}.
-    \item El administrador debe poder consultar un inventario operativo de integraciones, incluyendo proveedor, estado, configuración relevante, uso dentro de la aplicación y mecanismo de degradación previsto.
-    \item El sistema debe degradar de forma controlada cuando una de estas integraciones no pueda responder o no esté disponible temporalmente.
-    \item \textcolor{red}{La conexión directa con proveedores externos de mensajería no implementados, automatización empresarial o ERP real queda como evolución posterior sobre el inventario y las entidades persistidas.}
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M7-04 Integración con sistemas de gestión comercial}
-\vspace{-1em}
-
-\begin{itemize}
-    \item \textcolor{red}{El sistema debe permitir la exportación o sincronización de información comercial con herramientas externas de gestión utilizadas por el distribuidor, como sistemas de facturación o contabilidad.}
-    \item \textcolor{red}{El sistema debe facilitar el intercambio de información relacionada con pedidos, clientes o cobros con dichos sistemas externos.}
-    \item \textcolor{red}{El sistema debe permitir generar información estructurada que pueda ser utilizada posteriormente en sistemas de gestión empresarial.}
-    \item El administrador debe poder consultar un registro persistente de integraciones externas empresariales, diferenciando tipo, estado, configuración y operaciones asociadas.
-    \item El sistema debe permitir registrar operaciones de exportación, importación, sincronización, webhook o registro manual asociadas a una integración externa.
-    \item \textcolor{red}{La sincronización completa con Factusol mediante \texttt{n8n}, incluyendo credenciales reales, albaranes definitivos, facturación y conciliación de cobros, queda como alcance aspiracional documentado para siguientes incrementos.}
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M7-05 Automatización de pedidos a proveedor}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir facilitar el proceso de realización de pedidos del distribuidor a la empresa proveedora de productos.
-    \item \textcolor{red}{El sistema debe permitir generar pedidos de reposición a partir de la información registrada en el sistema, como pedidos realizados por clientes o históricos de ventas.}
-    \item \textcolor{red}{El sistema debe permitir generar automáticamente propuestas de pedido basadas en el consumo previo o en los productos más demandados.}
-    \item En la versión implementada, el sistema permite generar propuestas de pedido a proveedor a partir de productos activos del catálogo, conservando líneas, cantidades, importes y motivo de reposición.
-    \item \textcolor{red}{El sistema debe permitir exportar o generar dichos pedidos en un formato adecuado para su envío a la empresa proveedora.}
-    \item \textcolor{red}{La propuesta automática basada en rotación real, mínimos de stock, histórico completo de ventas o integración directa con el proveedor queda pendiente de automatización completa.}
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M7-06 Auditoría y trazabilidad administrativa}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir consultar información de auditoría relevante para el distribuidor relacionada con accesos y acciones administrativas.
-    \item El sistema debe permitir visualizar registros de acceso, resultados de autenticación y cambios de estado o rol realizados sobre usuarios.
-    \item El sistema debe permitir exportar los registros recientes de accesos y acciones administrativas en formato \texttt{CSV} para revisión externa o conservación de evidencias.
-    \item El sistema debe permitir utilizar dicha información como apoyo al seguimiento operativo y de seguridad del sistema.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M7-07 Configuración global de rate limiting}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe permitir al administrador consultar las políticas globales de rate limiting activas.
-    \item El sistema debe permitir habilitar o deshabilitar políticas concretas y ajustar su número máximo de peticiones y su ventana temporal.
-    \item El sistema debe permitir consultar un diagnóstico agregado de las políticas de rate limiting, diferenciando políticas activas, personalizadas, desactivadas y valores por defecto.
-    \item El sistema debe aplicar estas políticas de forma coherente sobre login y API sin exigir cambios manuales en el código para cada ajuste operativo.
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{RF-M7-08 Servicios transversales de compatibilidad y soporte}
-\vspace{-1em}
-
-\begin{itemize}
-    \item El sistema debe detectar navegadores por debajo del soporte mínimo definido y redirigir a una página informativa.
-    \item El sistema debe exponer un manifiesto web e iconos de instalación para facilitar su uso como aplicación instalable en dispositivos compatibles.
-    \item El sistema debe registrar una capa básica de \textit{service worker} para mejorar la experiencia de uso cuando la conectividad falle de forma puntual.
-    \item El \textit{service worker} debe poder recibir eventos Web Push y abrir la ruta de avisos correspondiente cuando el usuario pulse la notificación del sistema.
-    \item El administrador debe poder consultar un inventario operativo de soporte técnico, incluyendo navegador mínimo, PWA, \textit{service worker}, evidencias de configuración y comportamiento de degradación.
-\end{itemize}
-
-% ------------------------------------------------------------------------------
-\subsection{\textcolor{red}{RF-M8}}
-% ------------------------------------------------------------------------------
-
-\vspace{-0.75em}
-\subsubsection{\textcolor{red}{RF-M8-01 Asistente inteligente de recomendación de tratamientos}}
-\vspace{-1em}
-
-\begin{itemize}
-    \item \textcolor{red}{El sistema podrá incorporar en futuras versiones un asistente inteligente capaz de recomendar tratamientos capilares en función de determinadas características del cabello del cliente.}
-    \item \textcolor{red}{El asistente deberá permitir introducir diferentes parámetros técnicos, tales como tipo de cabello, estado del cabello o tratamientos previos.}
-    \item \textcolor{red}{A partir de esta información, el sistema podrá sugerir productos o combinaciones de tratamientos disponibles en el catálogo.}
-    \item \textcolor{red}{Estas recomendaciones estarán basadas en una presentación ya existente de la marca, pero el sistema podrá aprender de las elecciones realizadas por los profesionales para mejorar sus sugerencias a lo largo del tiempo.}
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{\textcolor{red}{RF-M8-02 Simulador de estilos y coloración}}
-\vspace{-1em}
-
-\begin{itemize}
-    \item \textcolor{red}{El sistema podrá incorporar un simulador visual que permita previsualizar posibles cambios de estilo o coloración capilar.}
-    \item \textcolor{red}{El simulador deberá permitir utilizar imágenes del cliente o modelos de referencia para mostrar posibles resultados.}
-    \item \textcolor{red}{Esta funcionalidad estará orientada a facilitar la comunicación entre el profesional y el cliente final durante el proceso de asesoramiento.}
-\end{itemize}
-
-\vspace{-0.75em}
-\subsubsection{\textcolor{red}{RF-M8-03 Reconocimiento de productos mediante la cámara del dispositivo}}
-\vspace{-1em}
-
-\begin{itemize}
-    \item \textcolor{red}{El sistema podrá incorporar una funcionalidad de reconocimiento de productos mediante la cámara del dispositivo móvil.}
-    \item \textcolor{red}{Esta funcionalidad permitirá identificar productos del catálogo a partir de su imagen o código de barras, facilitando su consulta o inclusión en pedidos.}
-    \item \textcolor{red}{Esta funcionalidad estará disponible tanto para clientes como para el administrador a la hora de hacer un pedido al proveedor.}
-\end{itemize}
-
-
-\vspace{-0.75em}
-\subsubsection{\textcolor{red}{RF-M8-04 Reserva online para clientes finales}}
-\vspace{-1em}
-
-\begin{itemize}
-    \item \textcolor{red}{El sistema podrá incorporar un sistema de reserva online destinado a los clientes finales de las peluquerías.}
-    \item \textcolor{red}{Este sistema permitiría solicitar citas directamente desde una interfaz web o aplicación vinculada a la peluquería.}
-    \item \textcolor{red}{Las reservas generadas se integrarían automáticamente con la agenda de la peluquería dentro de la plataforma.}
-\end{itemize}
+A continuación se presenta el catálogo de requisitos funcionales en formato ejecutivo. Los requisitos mantienen identificadores únicos para facilitar su trazabilidad, siguiendo las recomendaciones de identificación y seguimiento propuestas por ISO/IEC/IEEE 29148 \cite{ieee29148}. La versión extensa empleada durante el desarrollo se conserva en el repositorio como copia de apoyo.
+
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.13}
+\newcommand{\RFModuleHeader}[1]{%
+\hline\hline
+\multicolumn{4}{|>{\RaggedRight\arraybackslash}p{0.94\linewidth}|}{\textbf{#1}}\\
+\hline\hline
+}
+\begin{longtable}{|>{\RaggedRight\arraybackslash}p{0.11\linewidth}|>{\RaggedRight\arraybackslash}p{0.18\linewidth}|>{\RaggedRight\arraybackslash}p{0.18\linewidth}|>{\RaggedRight\arraybackslash}p{0.43\linewidth}|}
+\caption{Catálogo ejecutivo de requisitos funcionales agrupado por módulos}
+\label{tab:functional-requirements-executive}\\
+\hline
+\textbf{ID} & \textbf{Módulo} & \textbf{Actores} & \textbf{Requisito funcional sintetizado} \\
+\hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Módulo} & \textbf{Actores} & \textbf{Requisito funcional sintetizado} \\
+\hline
+\endhead
+\RFModuleHeader{M1. Acceso, alta y seguridad de cuentas}
+\texttt{RF-M1-01} & Acceso y alta & Cliente, administrador & Registrar solicitudes de alta y permitir la creación directa de cuentas, manteniendo revisión administrativa, aprobación, rechazo, activación, desactivación y trazabilidad de la gestión. \\
+\hline
+\texttt{RF-M1-02} & Acceso y alta & Todos los roles & Autenticar usuarios mediante credenciales seguras, permitir solo cuentas activas y autorizadas, limitar intentos abusivos y registrar accesos correctos y fallidos. \\
+\hline
+\texttt{RF-M1-03} & Acceso y alta & Administrador & Gestionar roles de administrador, comercial y cliente profesional, restringiendo navegación, pantallas y operaciones según el rol autenticado. \\
+\hline
+\texttt{RF-M1-04} & Acceso y alta & Administrador & Aplicar condiciones de autorización comercial sobre cuentas profesionales y conservar el estado operativo de cada usuario junto con su historial administrativo. \\
+\hline
+\texttt{RF-M1-05} & Acceso y alta & Todos los roles & Crear, mantener y cerrar sesiones de usuario, impidiendo la reutilización de sesiones expiradas o revocadas. \\
+\hline
+\texttt{RF-M1-06} & Acceso y alta & Todos los roles & Permitir consulta y edición del perfil propio, imagen, datos de contacto y cambio de credenciales conforme a las políticas de seguridad. \\
+\hline
+\RFModuleHeader{M2. Clientes profesionales, comerciales y rutas}
+\texttt{RF-M2-01} & Clientes y comerciales & Administrador & Registrar clientes profesionales, actualizar su información operativa, asignarlos o reasignarlos a comerciales y conservar la trazabilidad de esas asignaciones. \\
+\hline
+\texttt{RF-M2-02} & Clientes y comerciales & Comercial, cliente & Consultar la ficha operativa del cliente con datos de contacto, localización, observaciones, asignación comercial y contexto de planificación. \\
+\hline
+\texttt{RF-M2-03} & Clientes y comerciales & Comercial, cliente & Planificar, registrar, completar, aplazar o cancelar visitas comerciales, notificando cambios relevantes y respetando la ventana horaria del cliente. \\
+\hline
+\texttt{RF-M2-04} & Clientes y comerciales & Comercial & Previsualizar y ordenar rutas comerciales diarias con geolocalización, estimación de tiempos y secuencia de visitas. \\
+\hline
+\texttt{RF-M2-05} & Clientes y comerciales & Comercial, cliente & Configurar la jornada diaria del comercial y mostrar al cliente una estimación de llegada cuando exista una visita de reparto real vinculada. \\
+\hline
+\RFModuleHeader{M3. Catálogo, productos y coloración}
+\texttt{RF-M3-01} & Catálogo & Cliente, comercial & Consultar el catálogo activo de productos con información comercial, técnica e imagen asociada. \\
+\hline
+\texttt{RF-M3-02} & Catálogo & Cliente, comercial & Filtrar y buscar productos por categoría, línea, subcategoría, referencia, nombre y estado de disponibilidad. \\
+\hline
+\texttt{RF-M3-03} & Catálogo & Cliente, comercial & Visualizar cartas de color y referencias cromáticas asociadas a productos y líneas comerciales. \\
+\hline
+\texttt{RF-M3-04} & Catálogo & Administrador & Mantener productos, categorías, líneas, subcategorías, recursos de apoyo, cartas de color y referencias desde administración. \\
+\hline
+\RFModuleHeader{M4. Pedidos, reparto y cobro}
+\texttt{RF-M4-01} & Pedidos y reparto & Cliente, comercial & Crear, editar, confirmar, cancelar y consultar pedidos, manteniendo líneas, productos, referencias de color y estados coherentes. \\
+\hline
+\texttt{RF-M4-02} & Pedidos y reparto & Comercial, cliente & Vincular pedidos confirmados a visitas de reparto, validar entregas mediante QR y sincronizar el estado logístico con la visita. \\
+\hline
+\texttt{RF-M4-03} & Pedidos y reparto & Comercial, administrador & Registrar el estado mínimo de cobro de pedidos entregados, incluyendo método, fecha, notas y usuario responsable. \\
+\hline
+\texttt{RF-M4-04} & Pedidos y reparto & Administrador, comercial, cliente & Consultar la trazabilidad cruzada de pedidos, repartos y cobros desde las vistas correspondientes a cada rol. \\
+\hline
+\RFModuleHeader{M5. Gestión técnica del salón}
+\texttt{RF-M5-01} & Salón & Cliente profesional & Gestionar fichas de clientes finales del salón con datos de contacto, observaciones e historial asociado. \\
+\hline
+\texttt{RF-M5-02} & Salón & Cliente profesional & Registrar servicios realizados a clientes del salón con fecha, descripción, resultado y relación con la ficha correspondiente. \\
+\hline
+\texttt{RF-M5-03} & Salón & Cliente profesional & Registrar información técnica de tratamientos, fórmulas, tonalidades, tiempos, productos usados y observaciones profesionales. \\
+\hline
+\texttt{RF-M5-04} & Salón & Cliente profesional & Consultar el historial técnico de cada cliente del salón, filtrando servicios, tratamientos y resultados previos. \\
+\hline
+\texttt{RF-M5-05} & Salón & Cliente profesional & Registrar y consultar productos utilizados en servicios para facilitar seguimiento técnico y reposición. \\
+\hline
+\texttt{RF-M5-06} & Salón & Cliente profesional & Proponer sugerencias de productos a partir del historial de tratamientos y necesidades detectadas. \\
+\hline
+\texttt{RF-M5-07} & Salón & Cliente profesional & Gestionar plantillas reutilizables e imágenes del resultado final de los servicios. \\
+\hline
+\texttt{RF-M5-08} & Salón & Cliente profesional & Generar borradores de correo técnico a partir de la ficha del servicio para contactar con el cliente final. \\
+\hline
+\RFModuleHeader{M6. Comunicaciones, promociones y formación}
+\texttt{RF-M6-01} & Comunicaciones & Administrador, cliente, comercial & Crear, editar, publicar, retirar y consultar promociones comerciales segmentadas por rol, vigencia, producto o cliente. \\
+\hline
+\texttt{RF-M6-02} & Comunicaciones & Administrador, cliente & Gestionar segmentos o categorías de clientes y aplicar promociones o descuentos según pertenencia a dichos segmentos. \\
+\hline
+\texttt{RF-M6-03} & Comunicaciones & Administrador, todos los roles & Emitir notificaciones internas, correos, recordatorios y avisos Web Push asociados a eventos relevantes del sistema. \\
+\hline
+\texttt{RF-M6-04} & Comunicaciones & Administrador, cliente, comercial & Publicar formaciones, mostrar su disponibilidad y permitir la inscripción o cancelación por parte de usuarios autorizados. \\
+\hline
+\RFModuleHeader{M7. Administración técnica e integraciones}
+\texttt{RF-M7-01} & Administración técnica & Administrador & Agrupar las funciones administrativas reales: usuarios, clientes, catálogo, comunicaciones, pedidos, auditoría y ajustes de avisos automáticos. \\
+\hline
+\texttt{RF-M7-02} & Administración técnica & Administrador & Consultar información útil para la gestión diaria sin convertir los diagnósticos técnicos internos en pantallas de uso ordinario. \\
+\hline
+\texttt{RF-M7-03} & Administración técnica & Administrador & Mantener una base técnica de integraciones externas y servicios auxiliares que pueda ser reutilizada por scripts, validación e integraciones futuras. \\
+\hline
+\texttt{RF-M7-04} & Administración técnica & Administrador & Preparar la base de integración con sistemas de gestión comercial o ERP, especialmente para intercambios futuros con Factusol mediante automatización intermedia con n8n. \\
+\hline
+\texttt{RF-M7-05} & Administración técnica & Administrador & Generar propuestas de pedido a proveedor a partir de productos activos, criterios de reposición y datos persistentes de integración. \\
+\hline
+\texttt{RF-M7-06} & Administración técnica & Administrador & Consultar y exportar auditoría de accesos, acciones administrativas y eventos relevantes en formato trazable. \\
+\hline
+\texttt{RF-M7-07} & Administración técnica & Equipo técnico & Aplicar y diagnosticar internamente políticas globales de rate limiting sobre acceso y APIs sensibles, reservando su modificación a operación técnica. \\
+\hline
+\texttt{RF-M7-08} & Administración técnica & Administrador, cliente & Ofrecer soporte transversal de compatibilidad, PWA, navegador no soportado e instalación, manteniendo la comprobación detallada de servicios auxiliares como infraestructura interna. \\
+\hline
+\RFModuleHeader{\textcolor{red}{M8. Funcionalidades futuras}}
+\textcolor{red}{\texttt{RF-M8-01}} & \textcolor{red}{Funcionalidades futuras} & \textcolor{red}{Cliente profesional} & \textcolor{red}{Proponer tratamientos mediante un asistente inteligente a partir de información técnica, historial y contexto del cliente del salón.} \\
+\hline
+\textcolor{red}{\texttt{RF-M8-02}} & \textcolor{red}{Funcionalidades futuras} & \textcolor{red}{Cliente profesional} & \textcolor{red}{Simular estilos o coloraciones sobre imágenes para apoyar decisiones técnicas futuras.} \\
+\hline
+\textcolor{red}{\texttt{RF-M8-03}} & \textcolor{red}{Funcionalidades futuras} & \textcolor{red}{Cliente profesional, comercial} & \textcolor{red}{Reconocer productos mediante cámara o imagen para consulta, pedido o soporte operativo.} \\
+\hline
+\textcolor{red}{\texttt{RF-M8-04}} & \textcolor{red}{Funcionalidades futuras} & \textcolor{red}{Cliente final, cliente profesional} & \textcolor{red}{Gestionar reservas online de clientes finales vinculadas a salones profesionales.} \\
+\hline
+\end{longtable}
+}

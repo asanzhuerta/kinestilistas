@@ -41,6 +41,7 @@ export default async function CommercialOrderDetailPage({
 			initialDetail={detail}
 			mode="commercial"
 			updateApiPath={`/api/commercial/orders/${id}`}
+			qrPdfHref={`/api/commercial/orders/${id}/qr-pdf`}
 			relatedLinks={[
 				{
 					label: "Ver ficha del cliente",

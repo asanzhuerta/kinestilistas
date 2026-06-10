@@ -18,13 +18,15 @@ export default async function ClientOrdersPage() {
 		<OrderWorkspace
 			mode="client"
 			title="Pedidos"
-			subtitle="Crea pedidos y consulta su historial"
+			subtitle=""
 			backHref="/clients"
 			apiPath="/api/clients/orders"
 			detailBasePath="/clients/orders"
 			productOptions={productOptions}
 			initialOrders={orders}
 			initialDraftOrder={draftOrder}
+			showHistory={false}
+			historyHref="/clients/orders/history"
 		/>
 	);
 }

@@ -11,7 +11,8 @@ El proyecto necesita validar flujos sin depender siempre de la interfaz. Mantene
 ## Scripts destacados
 
 - `upload-product-images.ts`: sube imágenes de catálogo a Cloudinary y actualiza `products.image_url`.
+- `m1-m3-closeout-smoke.ts`: comprueba alta/autorización, gestión comercial básica y catálogo con datos temporales.
 - `m5-*smoke.ts`: comprueba funcionalidades de fichas técnicas y resultado visual.
 - `m6-*smoke.ts`: comprueba comunicaciones, promociones y rangos.
-- `m7-*smoke.ts`: comprueba auditoría, soporte, operaciones, rate limiting e integraciones.
+- `m7-*smoke.ts`: comprueba auditoría, soporte interno, operaciones técnicas, rate limiting e integraciones. Parte de estas comprobaciones valida infraestructura que ya no se expone como pantalla normal de administración.
 - `load-env.cjs`: carga variables de entorno para scripts fuera de Next.js.

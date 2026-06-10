@@ -1,0 +1,1029 @@
+En esta sección se describen los requisitos de gestión de información (datos) que el sistema debe gestionar. Estos requisitos especifican los tipos de información que el sistema debe almacenar, consultar y mantener a lo largo de su funcionamiento.
+
+A diferencia de los requisitos funcionales, que describen los servicios que el sistema proporciona, los requisitos de información definen las estructuras de datos necesarias para soportar dichos servicios. La definición detallada de las relaciones entre estos datos y de sus restricciones de integridad se abordará posteriormente en el modelo conceptual de datos.
+
+% ------------------------------------------------------------------------------
+\subsection{RI-M1}
+% ------------------------------------------------------------------------------
+
+El modelo de información del módulo M1 se ha diseñado con el objetivo de garantizar la integridad, el control y la trazabilidad de los usuarios del sistema, incorporando estructuras específicas para la gestión de usuarios, solicitudes de registro, eventos de acceso y acciones administrativas.
+
+\subsubsection*{Usuario}
+
+El sistema debe almacenar información básica de cada usuario registrado en la plataforma. Esta información permite identificar al usuario, gestionar su acceso al sistema y mantener información básica de contacto.
+
+Los datos asociados a un usuario incluyen:
+
+\begin{itemize}
+    \item Identificador del usuario.
+    \item Dirección de correo electrónico.
+    \item Contraseña cifrada.
+    \item Nombre completo.
+    \item Teléfono de contacto.
+    \item Empresa o entidad a la que pertenece.
+    \item Rol asignado dentro del sistema.
+    \item Estado de la cuenta de usuario.
+    \item Imagen de perfil.
+    \item Fecha del último acceso al sistema.
+    \item Fecha de creación de la cuenta.
+    \item Fecha de última actualización de la cuenta.
+\end{itemize}
+\subsubsection*{Rol}
+
+El sistema debe gestionar los diferentes roles que determinan los permisos y
+responsabilidades de los usuarios dentro de la aplicación.
+
+Los datos asociados a un rol incluyen:
+
+\begin{itemize}
+    \item Identificador del rol.
+    \item Código del rol.
+    \item Nombre del rol.
+    \item Descripción del rol.
+\end{itemize}
+
+\subsubsection*{Estado de usuario}
+
+El sistema debe gestionar un catálogo controlado de estados de usuario para representar de forma consistente la situación operativa de cada cuenta dentro del sistema.
+
+Los datos asociados a un estado de usuario incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Estado de solicitud de registro}
+
+El sistema debe gestionar un catálogo controlado de estados de solicitud para representar el ciclo de revisión de las peticiones de alta.
+
+Los datos asociados a un estado de solicitud incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Origen de solicitud de registro}
+
+El sistema debe gestionar un catálogo controlado de origenes de solicitud para distinguir como se ha generado cada petición de alta.
+
+Los datos asociados a un origen de solicitud incluyen:
+
+\begin{itemize}
+    \item Identificador del origen.
+    \item Código interno del origen.
+    \item Nombre visible del origen.
+\end{itemize}
+
+\subsubsection*{Solicitud de registro}
+
+El sistema debe almacenar las solicitudes de registro realizadas por usuarios
+que desean acceder a la plataforma. Estas solicitudes podrán ser revisadas por
+un administrador antes de conceder o denegar el acceso.
+
+Los datos asociados a una solicitud de registro incluyen:
+
+\begin{itemize}
+    \item Identificador de la solicitud.
+    \item Correo electrónico del solicitante.
+    \item Contraseña cifrada propuesta.
+    \item Nombre del solicitante.
+    \item Teléfono de contacto.
+    \item Empresa asociada.
+    \item Rol solicitado.
+    \item Estado de la solicitud.
+    \item Origen de la solicitud de registro.
+    \item Fecha de realización de la solicitud.
+    \item Fecha de revisión de la solicitud.
+    \item Usuario que realizó la revisión.
+    \item Motivo de rechazo (en caso de que la solicitud sea denegada).
+    \item Usuario creado a partir de la solicitud, en caso de aprobación.
+\end{itemize}
+
+\subsubsection*{Registro de administración de usuarios}
+
+El sistema debe mantener un historial de las acciones administrativas realizadas sobre las cuentas de usuario con el objetivo de disponer de trazabilidad sobre los cambios efectuados en el sistema.
+
+Los datos asociados a cada registro de administración incluyen:
+
+\begin{itemize}
+    \item Identificador del registro.
+    \item Usuario sobre el que se realiza la acción.
+    \item Usuario que realiza la acción administrativa.
+    \item Tipo de acción realizada.
+    \item Estado previo del usuario.
+    \item Nuevo estado del usuario.
+    \item Rol previo del usuario.
+    \item Nuevo rol del usuario.
+    \item Motivo de la acción administrativa.
+    \item Notas adicionales asociadas a la acción.
+    \item Fecha en la que se realizó la acción.
+\end{itemize}
+
+\subsubsection*{Registro de acceso}
+
+El sistema debe registrar los eventos relacionados con el acceso al sistema con el objetivo de mejorar la seguridad, detectar accesos indebidos y disponer
+de información para auditoría.
+
+Los datos asociados a un registro de acceso incluyen:
+
+\begin{itemize}
+    \item Identificador del registro de acceso.
+    \item Usuario asociado al evento de acceso.
+    \item Dirección de correo electrónico utilizada en el intento de acceso.
+    \item Tipo de evento de acceso.
+    \item Resultado del intento de acceso.
+    \item Motivo del fallo de acceso, en caso de error.
+    \item Identificador de sesión asociado al acceso.
+    \item Dirección IP desde la que se realizó el acceso.
+    \item Información del agente de usuario (navegador o dispositivo).
+    \item Fecha y hora del evento de acceso.
+    \item Fecha de revocación de la sesión, en caso de existir.
+    \item Fecha de expiración de la sesión.
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\subsubsection*{Tipo de acción administrativa}
+
+El sistema debe gestionar un catálogo controlado de tipos de acción administrativa para clasificar de forma homogenea las operaciones realizadas sobre cuentas de usuario.
+
+Los datos asociados a un tipo de acción administrativa incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo de acción.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
+\subsubsection*{Tipo de evento de acceso}
+
+El sistema debe gestionar un catálogo controlado de tipos de evento de acceso para distinguir entre autenticación, cierre de sesión u otros hitos relevantes de seguridad.
+
+Los datos asociados a un tipo de evento de acceso incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo de evento.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
+\subsubsection*{Tipo de resultado de acceso}
+
+El sistema debe gestionar un catálogo controlado de resultados de acceso para clasificar de forma uniforme los intentos exitosos, fallidos o revocados.
+
+Los datos asociados a un tipo de resultado de acceso incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo de resultado.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
+\subsection{RI-M2}
+% ------------------------------------------------------------------------------
+
+\subsubsection*{Cliente}
+
+El sistema debe almacenar la información básica de cada cliente profesional atendido por el distribuidor. Esta información permite identificar cada establecimiento, registrar los datos comerciales relevantes, mantener la relación entre la peluquería como entidad de negocio y su cuenta de acceso en la plataforma y facilitar al agente comercial la consulta de los datos de contacto y localización necesarios para la planificación de visitas y rutas comerciales.
+
+Los datos asociados a un cliente incluyen:
+
+\begin{itemize}
+    \item Identificador del cliente.
+    \item Nombre del establecimiento o peluquería.
+    \item Nombre de la persona de contacto.
+    \item Identificador fiscal del cliente, cuando corresponda.
+    \item Dirección del establecimiento.
+    \item Localidad o ciudad.
+    \item Código postal.
+    \item Provincia o zona.
+    \item Usuario asociado al cliente dentro del sistema.
+    \item Latitud y longitud del establecimiento, cuando hayan sido confirmadas.
+    \item Hora de inicio de la franja permitida para visitas comerciales, cuando se configure.
+    \item Hora de fin de la franja permitida para visitas comerciales, cuando se configure.
+    \item Observaciones o notas comerciales.
+    \item Fecha de creación del registro del cliente.
+    \item Fecha de última actualización de la información del cliente.
+\end{itemize}
+
+Esta información podrá ser utilizada por el sistema para mostrar al comercial los datos necesarios para localizar al cliente durante la planificación y ejecución de rutas comerciales y para calcular si la llegada estimada a dicho establecimiento se encuentra dentro de su ventana horaria válida.
+
+\subsubsection*{Comercial}
+
+El sistema debe almacenar la información operativa asociada a cada usuario comercial. Esta información sirve de apoyo para configurar la jornada de trabajo, el punto de inicio y fin de ruta y las duraciones base utilizadas por el algoritmo de planificación diaria.
+
+Los datos asociados a un comercial incluyen:
+
+\begin{itemize}
+    \item Identificador del comercial.
+    \item Usuario del sistema asociado al perfil comercial.
+    \item Código interno de empleado, cuando corresponda.
+    \item Territorio o zona comercial, cuando se utilice.
+    \item Observaciones internas del perfil comercial.
+    \item Hora de inicio de la jornada de trabajo.
+    \item Hora de fin de la jornada de trabajo.
+    \item Duración prevista de las visitas de reparto.
+    \item Duración prevista de las visitas rutinarias o comerciales.
+    \item Dirección y coordenadas del punto de salida configurado.
+    \item Dirección y coordenadas del punto final configurado.
+    \item Indicador de regreso al punto de salida al finalizar la jornada.
+    \item Fecha de creación del perfil comercial.
+    \item Fecha de última actualización del perfil comercial.
+\end{itemize}
+
+\subsubsection*{Asignación comercial-cliente}
+
+El sistema debe permitir almacenar la relación entre clientes y comerciales de forma trazable, de modo que la asignación activa de un cliente pueda cambiar a lo largo del tiempo sin perder el historial de movimientos.
+
+Los datos asociados a una asignación comercial-cliente incluyen:
+
+\begin{itemize}
+    \item Identificador de la asignación.
+    \item Cliente asociado.
+    \item Comercial asociado.
+    \item Fecha y hora de asignación.
+    \item Fecha y hora de desasignación, cuando la relación deje de estar activa.
+    \item Usuario que realizó la asignación, cuando corresponda.
+    \item Usuario que realizó la desasignación, cuando corresponda.
+    \item Observaciones asociadas a la asignación.
+\end{itemize}
+
+\subsubsection*{Visita comercial}
+
+El sistema debe permitir registrar las visitas comerciales realizadas por los agentes a los clientes profesionales. Estas visitas permiten documentar la actividad comercial, registrar observaciones o resultados obtenidos durante la interacción con el cliente y servir de entrada para la planificación diaria de rutas.
+
+Los datos asociados a una visita comercial incluyen:
+
+\begin{itemize}
+    \item Identificador de la visita.
+    \item Cliente visitado.
+    \item Usuario comercial que realiza la visita.
+    \item Fecha prevista de la visita.
+    \item Tipo de visita comercial.
+    \item Estado de la visita (planificada, aplazada, realizada o cancelada).
+    \item Observaciones registradas durante la visita.
+    \item Resultado o conclusión de la visita.
+\end{itemize}
+
+La hora concreta de atención no se almacena como un campo fijo de la visita, sino que se deriva diariamente a partir del algoritmo de planificación, la configuración del comercial y la franja horaria admitida por el cliente.
+
+Las notificaciones operativas asociadas a una visita se apoyan en las entidades de comunicación de \texttt{M6}. No se crea una tabla específica por cada aviso de visita: el origen se identifica mediante el tipo de notificación y el identificador de la visita comercial cuando procede.
+
+\subsubsection*{Estado de visita comercial}
+
+El sistema debe gestionar un catálogo controlado de estados de visita comercial para representar situaciones como planificada, aplazada, completada o cancelada.
+
+Los datos asociados a un estado de visita comercial incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Tipo de visita comercial}
+
+El sistema debe gestionar un catálogo controlado de tipos de visita comercial para distinguir entre visitas rutinarias, visitas comerciales y visitas de reparto.
+
+Los datos asociados a un tipo de visita comercial incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
+\subsubsection*{Ruta comercial}
+
+El sistema debe permitir organizar las rutas de trabajo de los agentes comerciales. Una ruta representa la planificación persistida de visitas que un comercial debe realizar durante una jornada o recorrido determinado y sirve de soporte para composiciones de ruta mantenidas por el sistema.
+
+Los datos asociados a una ruta comercial incluyen:
+
+\begin{itemize}
+    \item Identificador de la ruta.
+    \item Usuario comercial responsable de la ruta.
+    \item Fecha de la ruta comercial.
+    \item Nombre o descripción de la ruta.
+    \item Estado de la ruta.
+    \item Fecha de creación de la ruta.
+\end{itemize}
+
+\subsubsection*{Estado de ruta comercial}
+
+El sistema debe gestionar un catálogo controlado de estados de ruta comercial para distinguir rutas abiertas, completadas o canceladas según la evolución de la jornada.
+
+Los datos asociados a un estado de ruta incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Visita en ruta}
+
+El sistema debe permitir registrar las visitas que forman parte de una ruta comercial concreta. Esta información permite definir las visitas comerciales incluidas en la ruta y el orden previsto en el que deben realizarse, facilitando así la organización del recorrido comercial diario.
+
+Los datos asociados a una visita dentro de una ruta incluyen:
+
+\begin{itemize}
+    \item Identificador del registro.
+    \item Ruta comercial asociada.
+    \item Visita comercial incluida en la ruta.
+    \item Orden previsto de la visita dentro de la ruta.
+\end{itemize}
+
+\subsubsection*{Planificación diaria de ruta}
+
+El sistema debe gestionar también información derivada de planificación diaria, calculada dinámicamente a partir de las visitas previstas, la configuración operativa del comercial y la geolocalización de los clientes. Esta información no tiene por qué almacenarse como entidad persistente independiente, pero sí debe poder ser consultada y presentada a los usuarios.
+
+Los datos gestionados dentro de una planificación diaria incluyen:
+
+\begin{itemize}
+    \item Punto de inicio de la ruta utilizado para el cálculo.
+    \item Punto final previsto de la jornada.
+    \item Conjunto de paradas ordenadas de la ruta.
+    \item Orden previsto de visita para cada cliente.
+    \item Hora estimada de llegada y salida para cada parada.
+    \item Tiempo aproximado de desplazamiento y espera entre paradas.
+    \item Franja horaria permitida del cliente y detección de llegadas fuera de ventana.
+    \item Número de visitas previstas y su tipología.
+    \item Tiempo total comprometido de la jornada.
+    \item Margen operativo restante y minutos de sobrecarga, cuando existan.
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\subsection{RI-M3}
+% ------------------------------------------------------------------------------
+
+\subsubsection*{Producto}
+
+El sistema debe almacenar la información básica de cada producto profesional incluido en el catálogo. Esta información permite identificar el producto, clasificarlo dentro de la oferta comercial y mostrar sus características principales a los usuarios del sistema.
+
+Los datos asociados a un producto incluyen:
+
+\begin{itemize}
+    \item Identificador del producto.
+    \item Nombre del producto.
+    \item Referencia comercial del producto.
+    \item Descripción del producto.
+    \item Categoría o familia a la que pertenece.
+    \item Línea comercial asociada.
+    \item Subcategoría asociada, cuando corresponda.
+    \item Imagen principal del producto.
+    \item Formato comercial, cuando exista.
+    \item Packing o número de unidades por envase, cuando corresponda.
+    \item Información técnica o modo de aplicación.
+    \item Estado del producto dentro del catálogo.
+    \item Precio base del producto.
+    \item Proveedor asociado al producto, cuando corresponda.
+    \item Fecha de creación del registro del producto.
+    \item Fecha de última actualización de la información del producto.
+\end{itemize}
+
+\subsubsection*{Categoría de producto}
+
+El sistema debe almacenar la clasificación general de los productos del catálogo con el fin de facilitar su organización y consulta estructurada.
+
+Los datos asociados a una categoría de producto incluyen:
+
+\begin{itemize}
+    \item Identificador de la categoría.
+    \item Nombre de la categoría.
+    \item Descripción de la categoría.
+    \item Orden o posición de visualización.
+\end{itemize}
+
+\subsubsection*{Línea comercial}
+
+El sistema debe almacenar la información de las líneas comerciales en las que se agrupan los productos. Esta información permite organizar el catálogo según la estructura comercial utilizada por el distribuidor.
+
+Los datos asociados a una línea comercial incluyen:
+
+\begin{itemize}
+    \item Identificador de la línea comercial.
+    \item Nombre de la línea comercial.
+    \item Descripción de la línea comercial.
+    \item Categoría asociada.
+    \item Imagen o recurso gráfico representativo.
+    \item Orden o posición de visualización.
+\end{itemize}
+
+\subsubsection*{Subcategoría de producto}
+
+El sistema debe almacenar una clasificación intermedia y jerárquica dentro de cada línea comercial para organizar mejor el catálogo y facilitar su navegación.
+
+Los datos asociados a una subcategoría de producto incluyen:
+
+\begin{itemize}
+    \item Identificador de la subcategoría.
+    \item Línea comercial asociada.
+    \item Nombre de la subcategoría.
+    \item Descripción de la subcategoría.
+    \item Subcategoría padre, cuando exista una jerarquía.
+    \item Imagen o recurso grafico representativo, cuando exista.
+    \item Orden o posición de visualización.
+    \item Fecha de creación del registro.
+    \item Fecha de última actualización de la subcategoría.
+\end{itemize}
+
+\subsubsection*{Recurso de apoyo}
+
+El sistema debe permitir almacenar recursos de apoyo asociados a los productos o líneas comerciales del catálogo. Estos recursos facilitan el acceso a documentación técnica, catálogos comerciales o materiales formativos.
+
+Los datos asociados a un recurso de apoyo incluyen:
+
+\begin{itemize}
+    \item Identificador del recurso.
+    \item Título o nombre del recurso.
+    \item Descripción del recurso.
+    \item Tipo de recurso.
+    \item Ubicación o enlace al recurso.
+    \item Producto asociado, en caso de existir.
+    \item Línea comercial asociada, en caso de existir.
+    \item Fecha de creación del recurso.
+\end{itemize}
+
+\subsubsection*{Carta de color}
+
+El sistema debe permitir almacenar cartas de color asociadas a las líneas de coloración disponibles en el catálogo. Estas cartas permiten organizar y consultar las referencias cromáticas comercializadas.
+
+Los datos asociados a una carta de color incluyen:
+
+\begin{itemize}
+    \item Identificador de la carta de color.
+    \item Nombre de la carta de color.
+    \item Descripción de la carta.
+    \item Línea comercial asociada.
+    \item Imagen o recurso visual principal de la carta.
+    \item Fecha de creación del registro de la carta.
+    \item Fecha de última actualización de la carta.
+\end{itemize}
+
+\subsubsection*{Referencia de color}
+
+El sistema debe almacenar las referencias individuales incluidas en cada carta de color. Estas referencias permiten identificar tonos concretos según la nomenclatura comercial empleada por la marca.
+
+Los datos asociados a una referencia de color incluyen:
+
+\begin{itemize}
+    \item Identificador de la referencia de color.
+    \item Carta de color asociada.
+    \item Código o nomenclatura comercial del tono.
+    \item Nombre o denominación del tono.
+    \item Descripción del tono.
+    \item Imagen o muestra visual asociada.
+    \item Miniatura visual asociada, cuando exista.
+    \item Producto del catálogo asociado, cuando la referencia sea pedible.
+    \item Referencia ERP asociada, cuando exista.
+    \item Indicador de si la referencia puede pedirse o solo consultarse.
+    \item Orden o posición dentro de la carta.
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\subsubsection*{Estado de producto}
+
+El sistema debe gestionar un catálogo controlado de estados de producto para distinguir articulos activos, inactivos o descontinuados dentro del catálogo.
+
+Los datos asociados a un estado de producto incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Tipo de recurso de apoyo}
+
+El sistema debe gestionar un catálogo controlado de tipos de recurso de apoyo para clasificar de forma uniforme fichas técnicas, catálogos, documentos o materiales formativos.
+
+Los datos asociados a un tipo de recurso incluyen:
+
+\begin{itemize}
+    \item Identificador del tipo.
+    \item Código interno del tipo.
+    \item Nombre visible del tipo.
+\end{itemize}
+
+\subsection{RI-M4}
+% ------------------------------------------------------------------------------
+
+\subsubsection*{Pedido}
+
+El sistema debe almacenar la información general asociada a cada pedido realizado por un cliente profesional o por un usuario autorizado en su nombre. Esta información permite identificar el pedido, conocer su situación dentro del flujo comercial y relacionarlo tanto con su ciclo logístico como con su situación mínima de cobro.
+
+Los datos asociados a un pedido incluyen:
+
+\begin{itemize}
+    \item Identificador del pedido.
+    \item Cliente asociado al pedido.
+    \item Usuario que registra el pedido.
+    \item Estado del pedido.
+    \item Estado de cobro del pedido.
+    \item Visita de reparto vinculada, cuando exista.
+    \item Método de cobro, cuando se haya registrado.
+    \item Notas de cobro, cuando se hayan registrado.
+    \item Fecha del cobro, cuando exista.
+    \item Usuario que marco el cobro, cuando exista.
+    \item Importe total del pedido.
+    \item Observaciones asociadas al pedido.
+    \item Fecha de creación del pedido.
+    \item Fecha de última actualización del pedido.
+\end{itemize}
+
+\subsubsection*{Línea de pedido}
+
+El sistema debe almacenar el detalle de los productos incluidos en cada pedido. Esta información permite conocer que productos se han solicitado, en que cantidades y con que instantánea comercial se consolidaron en el momento del pedido.
+
+Los datos asociados a una línea de pedido incluyen:
+
+\begin{itemize}
+    \item Identificador de la línea de pedido.
+    \item Pedido asociado.
+    \item Producto incluido en la línea.
+    \item Referencia cromática asociada, cuando proceda.
+    \item Cantidad solicitada.
+    \item Precio unitario consolidado en el momento del pedido.
+    \item Porcentaje de descuento aplicado a la línea.
+    \item Importe total de la línea.
+    \item Referencia comercial consolidada del producto.
+    \item Código y nombre de variante consolidados, cuando existan.
+\end{itemize}
+
+\subsubsection*{Estado de pedido}
+
+El sistema debe gestionar un catálogo controlado de estados de pedido para representar el ciclo de vida permitido de cada encargo.
+
+Los datos asociados a un estado de pedido incluyen:
+
+\begin{itemize}
+    \item Identificador del estado.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Estado de cobro del pedido}
+
+El sistema debe gestionar un catálogo controlado de estados de cobro para representar el seguimiento mínimo del pago asociado al pedido.
+
+Los datos asociados a un estado de cobro incluyen:
+
+\begin{itemize}
+    \item Identificador del estado de cobro.
+    \item Código interno del estado.
+    \item Nombre visible del estado.
+\end{itemize}
+
+\subsubsection*{Visita comercial de reparto vinculada}
+
+La implementación actual reutiliza la entidad de visita comercial del módulo \texttt{M2} para modelar la fase logística del pedido. Cuando un pedido queda asociado a un reparto, la relación se almacena mediante una visita comercial de tipo entrega o reparto.
+
+Los datos relevantes de esa visita vinculada incluyen:
+
+\begin{itemize}
+    \item Identificador de la visita de reparto.
+    \item Cliente asociado a la visita.
+    \item Comercial responsable.
+    \item Fecha prevista del reparto.
+    \item Tipo de visita, que debe corresponder a reparto.
+    \item Estado de la visita.
+    \item Observaciones o resultado asociados a la visita.
+\end{itemize}
+
+En la implementación actual no existe una entidad de cobro independiente ni una entidad de entrega separada del subsistema de visitas comerciales. El seguimiento mínimo del cobro se resuelve sobre el propio pedido y la fase logística reutiliza visitas comerciales de tipo reparto.
+% ------------------------------------------------------------------------------
+\subsection{RI-M5}
+% ------------------------------------------------------------------------------
+
+\subsubsection*{Cliente del salón}
+
+El sistema debe almacenar la información básica de cada cliente final atendido por una peluquería usuaria del sistema.
+
+Para cada cliente del salón el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador del cliente del salón.
+    \item Cliente profesional o peluquería a la que pertenece.
+    \item Nombre del cliente del salón.
+    \item Teléfono de contacto, en caso de registrarse.
+    \item Correo electrónico de contacto, en caso de registrarse.
+    \item Observaciones generales asociadas al cliente.
+    \item Fecha de creación del registro.
+    \item Fecha de última actualización de la información.
+\end{itemize}
+
+\subsubsection*{Correo generado a partir de la ficha técnica}
+
+El sistema debe permitir generar correos electrónicos dirigidos a los clientes del salón a partir de la información registrada en su ficha técnica. Estos correos podrán incluir información relevante sobre tratamientos realizados, productos utilizados, sugerencias basadas en el historial técnico del cliente y promociones que el profesional del salón desee comunicar.
+
+Para cada correo generado el sistema debe poder gestionar:
+
+\begin{itemize}
+    \item Cliente del salón destinatario del correo.
+    \item Dirección de correo electrónico del destinatario.
+    \item Asunto del correo.
+    \item Contenido generado a partir de la información técnica registrada.
+    \item Contenido personalizado por el profesional antes del envío.
+    \item Fecha y hora de generación del correo, en caso de registrarse.
+\end{itemize}
+
+\subsubsection*{Servicio realizado}
+
+El sistema debe almacenar la información básica de cada servicio o tratamiento realizado a un cliente del salón.
+
+Para cada servicio realizado el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador del servicio realizado.
+    \item Cliente del salón asociado.
+    \item Cliente profesional o peluquería en la que se realiza el servicio.
+    \item Usuario que registra o realiza el servicio, cuando corresponda.
+    \item Fecha de realización del servicio.
+    \item Tipo de servicio o tratamiento aplicado.
+    \item Observaciones generales del servicio.
+    \item Resultado o descripción final del trabajo realizado.
+\end{itemize}
+
+\subsubsection*{Ficha técnica del servicio}
+
+El sistema debe permitir almacenar la información técnica asociada a cada servicio realizado. Esta información recoge los detalles profesionales necesarios para documentar correctamente el tratamiento aplicado.
+
+Para cada ficha técnica el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la ficha técnica.
+    \item Servicio realizado asociado.
+    \item Descripción técnica del tratamiento.
+    \item Fórmula o formulación utilizada, en caso de existir.
+    \item Observaciones técnicas asociadas al servicio.
+    \item Fecha de creación del registro técnico.
+    \item Fecha de última actualización de la ficha técnica.
+\end{itemize}
+
+\subsubsection*{Producto utilizado en servicio}
+
+El sistema debe permitir registrar los productos utilizados durante la realización de un servicio técnico.
+
+Para cada producto utilizado en un servicio el sistema debe almacenar:
+
+\begin{itemize}
+    \item Identificador del registro de uso de producto.
+    \item Servicio realizado asociado.
+    \item Producto utilizado.
+    \item Cantidad utilizada, en caso de registrarse.
+    \item Observaciones asociadas al uso del producto.
+\end{itemize}
+
+\subsubsection*{Sugerencia de producto}
+
+El sistema debe permitir almacenar sugerencias de productos generadas a partir del historial técnico de un cliente del salón. Estas sugerencias se presentan como apoyo a la consulta profesional y no sustituyen el criterio técnico del usuario.
+
+Para cada sugerencia de producto el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la sugerencia.
+    \item Cliente del salón asociado a la sugerencia.
+    \item Producto sugerido.
+    \item Motivo o justificación de la sugerencia.
+    \item Fecha de generación de la sugerencia.
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\subsection{RI-M6}
+% ------------------------------------------------------------------------------
+
+\subsubsection*{Promoción}
+
+El sistema debe almacenar la información básica asociada a cada promoción comercial definida por el distribuidor.
+
+Para cada promoción el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la promoción.
+    \item Título o nombre de la promoción.
+    \item Descripción de la promoción.
+    \item Tipo de promoción.
+    \item Valor o beneficio promocional asociado.
+    \item Fecha de inicio de vigencia.
+    \item Fecha de fin de vigencia.
+    \item Estado de la promoción.
+    \item Producto asociado, cuando corresponda.
+    \item Línea de producto asociada, cuando corresponda.
+    \item Cliente asociado, cuando corresponda.
+    \item Categoría de clientes asociada, cuando corresponda.
+    \item Fecha de creación de la promoción.
+    \item Fecha de última actualización de la promoción.
+\end{itemize}
+
+\subsubsection*{Asignación de cliente a categoría}
+
+El sistema debe permitir almacenar la relación entre clientes profesionales y categorías comerciales, de forma que una promoción pueda mostrarse únicamente a los clientes incluidos en el segmento correspondiente.
+
+Para cada asignación de cliente a categoría el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la asignación.
+    \item Cliente profesional asignado.
+    \item Categoría o segmento asociado.
+    \item Usuario administrador que realiza la asignación, cuando corresponda.
+    \item Notas internas de la asignación, en caso de existir.
+    \item Fecha de creación de la asignación.
+\end{itemize}
+
+\subsubsection*{Categoría de cliente}
+
+El sistema debe permitir almacenar categorías de clientes utilizadas para segmentar a las peluquerías usuarias del sistema en función de criterios comerciales o de uso definidos por el distribuidor.
+
+Para cada categoría de cliente el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la categoría.
+    \item Nombre de la categoría.
+    \item Descripción de la categoría, en caso de existir.
+    \item Criterios o condiciones asociados a la categoría, cuando corresponda.
+    \item Fecha de creación de la categoría.
+    \item Fecha de última actualización de la categoría.
+\end{itemize}
+
+\subsubsection*{Notificación}
+
+El sistema debe almacenar la información asociada a las notificaciones o avisos generados para los usuarios del sistema.
+
+Para cada notificación el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la notificación.
+    \item Usuario destinatario de la notificación.
+    \item Título de la notificación.
+    \item Contenido o mensaje de la notificación.
+    \item Tipo de notificación.
+    \item Canal de notificación utilizado.
+    \item Tipo y entidad origen de la notificación, cuando proceda.
+    \item Fecha y hora de creación de la notificación.
+    \item Estado de lectura de la notificación.
+    \item Fecha de lectura, cuando corresponda.
+\end{itemize}
+
+El canal persistido en la notificación interna identifica la entrada principal dentro de la aplicación. Cuando el usuario o el administrador habilitan canales externos, el sistema puede derivar el mismo aviso hacia correo electrónico o Web Push sin duplicar la entidad de notificación interna.
+
+\subsubsection*{Suscripción push de usuario}
+
+El sistema debe almacenar las suscripciones Web Push activadas por clientes y comerciales desde la PWA o desde un navegador compatible. Esta información permite enviar notificaciones del sistema al dispositivo cuando el usuario haya concedido permiso.
+
+Para cada suscripción push el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la suscripción.
+    \item Usuario propietario de la suscripción.
+    \item Endpoint Web Push único proporcionado por el navegador.
+    \item Claves públicas \texttt{p256dh} y \texttt{auth} necesarias para cifrar la notificación.
+    \item Fecha de expiración comunicada por el navegador, cuando exista.
+    \item Agente de usuario del dispositivo o navegador.
+    \item Fecha de último uso de la suscripción.
+    \item Fecha de revocación, cuando el usuario desactive el canal o el proveedor indique que la suscripción ya no es válida.
+    \item Fechas de creación y última actualización.
+\end{itemize}
+
+\subsubsection*{Recordatorio}
+
+El sistema debe permitir almacenar recordatorios asociados a eventos o acciones relevantes del sistema, como visitas comerciales programadas o fechas de entrega de pedidos.
+
+Para cada recordatorio el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador del recordatorio.
+    \item Usuario destinatario del recordatorio.
+    \item Título o descripción breve del recordatorio.
+    \item Contenido del recordatorio.
+    \item Fecha y hora programadas para el recordatorio.
+    \item Estado del recordatorio.
+    \item Fecha de creación del recordatorio.
+\end{itemize}
+
+\subsubsection*{Formación}
+
+El sistema debe almacenar la información básica asociada a cada actividad formativa publicada por el distribuidor.
+
+Para cada formación el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la formación.
+    \item Título o nombre de la formación.
+    \item Descripción de la actividad formativa.
+    \item Fecha y hora de celebración.
+    \item Ubicación o modalidad de realización.
+    \item Contenido o información adicional de la formación.
+    \item Estado de la formación.
+    \item Capacidad máxima, cuando corresponda.
+    \item Fecha de creación del registro de formación.
+    \item Fecha de última actualización de la formación.
+\end{itemize}
+
+\subsubsection*{Inscripción a formación}
+
+El sistema debe permitir registrar la inscripción de usuarios autorizados a las actividades formativas publicadas por el distribuidor.
+
+Para cada inscripción a formación el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la inscripción.
+    \item Formación asociada.
+    \item Usuario inscrito.
+    \item Fecha de inscripción.
+    \item Estado de la inscripción.
+    \item Observaciones asociadas a la inscripción, cuando corresponda.
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\subsection{RI-M7}
+% ------------------------------------------------------------------------------
+
+\subsubsection*{Configuración del sistema}
+
+El sistema debe almacenar la información necesaria para mantener determinados parámetros generales de configuración de la plataforma.
+
+Para cada configuración del sistema el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la configuración.
+    \item Clave o nombre del parámetro de configuración.
+    \item Valor asociado a la configuración.
+    \item Descripción de la configuración.
+    \item Fecha de creación del registro.
+    \item Fecha de última actualización de la configuración.
+\end{itemize}
+
+\subsubsection*{Integración externa}
+
+El sistema debe almacenar la información asociada a las integraciones disponibles con herramientas o servicios externos utilizados por el distribuidor.
+
+Para cada integración externa el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la integración.
+    \item Nombre de la integración.
+    \item Tipo de integración o servicio externo.
+    \item Descripción de la integración.
+    \item Estado de la integración.
+    \item Información básica de configuración o conexión.
+    \item Fecha de creación del registro.
+    \item Fecha de última actualización de la integración.
+\end{itemize}
+
+En el incremento actual de \texttt{M7}, la aplicación persiste ya un registro básico de integraciones externas y operaciones de intercambio. Esta información se consulta desde \path{/admin/enterprise-operations} y permite diferenciar el inventario técnico calculado de los servicios de soporte respecto al registro empresarial de integraciones, estados, configuraciones y ejecuciones. Dentro de este inventario se registran también las integraciones \textit{SMTP transaccional} y \textit{Web Push PWA}, utilizadas por el sistema de notificaciones multicanal de \texttt{M6}. \textcolor{red}{La integración con Factusol mediante \texttt{n8n} queda registrada como punto preparado, aunque su automatización completa depende de credenciales y configuración real del cliente.}
+
+De forma análoga, el inventario de soporte técnico incorporado en \path{/admin/support} no crea una entidad persistente propia. Su información se deriva de elementos ya existentes en el proyecto, como \path{proxy.ts}, \path{app/manifest.ts}, \path{public/sw.js}, los iconos PWA y componentes transversales de experiencia de usuario. Por tanto, actúa como una vista de observabilidad administrativa y no como una tabla adicional del modelo de datos.
+
+El resumen operativo de \path{/admin/operations} agrega contadores procedentes de auditoría, configuración de rate limiting, inventario de integraciones de soporte, soporte técnico y operación empresarial persistente. Su finalidad es ordenar la información disponible para facilitar la revisión administrativa del módulo.
+
+La exportación \texttt{CSV} de auditoría desde \path{/admin/audit} tampoco introduce una entidad nueva. El fichero se genera bajo demanda a partir de \texttt{user\_access\_log} y \texttt{user\_management\_log}, aplicando una ventana temporal y un límite de registros para facilitar la revisión externa de accesos y acciones administrativas sin duplicar persistencia.
+
+El diagnóstico de rate limiting expuesto en \path{/admin/settings} y en \path{/api/admin/settings/rate-limits/status} reutiliza la configuración efectiva de políticas y sus valores por defecto. Por tanto, tampoco amplía el modelo de datos: resume la tabla de sobrescrituras persistidas y el catálogo estático de políticas definido en código.
+
+La exportación del informe operativo de \texttt{M7} desde \path{/admin/operations} genera un fichero \texttt{CSV} a partir del resumen agregado ya calculado para la vista de operación transversal. Este informe incluye también el bloque de operación empresarial, sin duplicar las filas persistidas en las tablas propias de integraciones, operaciones y propuestas a proveedor.
+
+\subsubsection*{Exportación o sincronización}
+
+El sistema debe permitir registrar las operaciones de exportación o sincronización de información realizadas con sistemas externos.
+
+Para cada operación de exportación o sincronización el sistema debe registrar:
+
+\begin{itemize}
+    \item Identificador de la operación.
+    \item Integración externa asociada.
+    \item Tipo de operación realizada.
+    \item Tipo de información intercambiada.
+    \item Fecha y hora de ejecución.
+    \item Estado de la operación.
+    \item Resultado o mensaje asociado a la operación.
+\end{itemize}
+
+\subsubsection*{Propuesta de pedido a proveedor}
+
+El sistema debe permitir almacenar propuestas de pedido generadas para facilitar la reposición de productos al proveedor, basadas en la información comercial registrada en el sistema o introducidas manualmente por el distribuidor.
+
+Estas propuestas deben reflejar la estructura habitual de las hojas de pedido utilizadas en la operativa real del distribuidor.
+
+Para cada propuesta de pedido a proveedor el sistema debe registrar:
+
+\begin{itemize}
+
+    \item Identificador de la propuesta.
+    \item Fecha de generación de la propuesta.
+    \item Usuario que genera la propuesta, cuando corresponda.
+    \item Estado de la propuesta.
+    \item Importe total estimado del pedido.
+    \item Número total de unidades incluidas en la propuesta.
+    \item Observaciones generales asociadas a la propuesta.
+    \item Fecha de última actualización de la propuesta.
+
+\end{itemize}
+
+\subsubsection*{Línea de propuesta de pedido a proveedor}
+
+El sistema debe permitir almacenar el detalle de productos incluidos en cada propuesta de pedido a proveedor, siguiendo la estructura de las hojas de pedido utilizadas por el distribuidor.
+
+Para cada línea de propuesta el sistema debe registrar:
+
+\begin{itemize}
+
+    \item Identificador de la línea de propuesta.
+    \item Propuesta de pedido a proveedor asociada.
+    \item Producto incluido en la propuesta.
+    \item Referencia del producto.
+    \item Descripción del producto.
+    \item Categoría o tipo de producto (técnico, reventa, marketing, etc.).
+    \item Cantidad propuesta del producto.
+    \item Precio unitario del producto.
+    \item Importe total de la línea.
+    \item Motivo o criterio de reposición utilizado (consumo histórico, rotación, reposición manual, etc.).
+
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\subsection{\textcolor{red}{RI-M8}}
+% ------------------------------------------------------------------------------
+
+\subsubsection*{\textcolor{red}{Consulta de recomendación de tratamientos}}
+
+\textcolor{red}{El sistema podrá permitir registrar consultas de recomendación de tratamientos realizadas por los profesionales a partir de determinadas características técnicas del cabello del cliente.}
+
+\textcolor{red}{Para cada consulta de recomendación el sistema podrá registrar:}
+
+\begin{itemize}
+    \item \textcolor{red}{Identificador de la consulta.}
+    \item \textcolor{red}{Usuario profesional que realiza la consulta.}
+    \item \textcolor{red}{Cliente del salón asociado, cuando corresponda.}
+    \item \textcolor{red}{Tipo de cabello.}
+    \item \textcolor{red}{Estado o condición del cabello.}
+    \item \textcolor{red}{Tratamientos previos relevantes, cuando se indiquen.}
+    \item \textcolor{red}{Observaciones o parámetros técnicos adicionales, cuando correspondan.}
+    \item \textcolor{red}{Fecha de realización de la consulta.}
+\end{itemize}
+
+\subsubsection*{\textcolor{red}{Recomendación de tratamiento}}
+
+\textcolor{red}{El sistema podrá almacenar las recomendaciones generadas a partir de una consulta de recomendación de tratamientos. Estas recomendaciones podrán incluir productos o combinaciones de tratamientos disponibles en el catálogo.}
+
+\textcolor{red}{Para cada recomendación de tratamiento el sistema podrá registrar:}
+
+\begin{itemize}
+    \item \textcolor{red}{Identificador de la recomendación.}
+    \item \textcolor{red}{Consulta de recomendación asociada.}
+    \item \textcolor{red}{Producto recomendado, cuando corresponda.}
+    \item \textcolor{red}{Descripción o justificación de la recomendación.}
+    \item \textcolor{red}{Nivel de relevancia o prioridad de la sugerencia, cuando corresponda.}
+    \item \textcolor{red}{Fecha de generación de la recomendación.}
+\end{itemize}
+
+\subsubsection*{\textcolor{red}{Simulación de coloración}}
+
+\textcolor{red}{El sistema podrá permitir registrar simulaciones visuales realizadas para previsualizar posibles cambios coloración capilar.}
+
+\textcolor{red}{Para cada simulación el sistema podrá registrar:}
+
+\begin{itemize}
+    \item \textcolor{red}{Identificador de la simulación.}
+    \item \textcolor{red}{Imagen utilizada para la simulación, cuando se conserve.}
+    \item \textcolor{red}{Descripción del cambio simulado.}
+    \item \textcolor{red}{Resultado generado o referencia al resultado visual obtenido.}
+    \item \textcolor{red}{Fecha de realización de la simulación.}
+\end{itemize}
+
+\subsubsection*{\textcolor{red}{Reconocimiento de producto mediante cámara}}
+
+\textcolor{red}{El sistema podrá permitir registrar operaciones de reconocimiento de productos realizadas a partir de imágenes o códigos de barras capturados con la cámara del dispositivo.}
+
+\textcolor{red}{Para cada operación de reconocimiento el sistema podrá registrar:}
+
+\begin{itemize}
+    \item \textcolor{red}{Identificador de la operación de reconocimiento.}
+    \item \textcolor{red}{Usuario que realiza la operación.}
+    \item \textcolor{red}{Imagen capturada o referencia al recurso utilizado, cuando corresponda.}
+    \item \textcolor{red}{Código de barras detectado, cuando corresponda.}
+    \item \textcolor{red}{Producto identificado, cuando se obtenga coincidencia.}
+    \item \textcolor{red}{Finalidad de la operación, como consulta o apoyo a pedido.}
+    \item \textcolor{red}{Fecha y hora de la operación.}
+\end{itemize}
+
+\subsubsection*{\textcolor{red}{Reserva online}}
+
+\textcolor{red}{El sistema podrá permitir registrar solicitudes de cita realizadas por clientes finales de una peluquería usuaria del sistema.}
+
+\textcolor{red}{Para cada reserva online el sistema podrá registrar:}
+
+\begin{itemize}
+    \item \textcolor{red}{Identificador de la reserva.}
+    \item \textcolor{red}{Cliente profesional o peluquería a la que se dirige la reserva.}
+    \item \textcolor{red}{Cliente final que solicita la cita.}
+    \item \textcolor{red}{Nombre de la persona que realiza la reserva.}
+    \item \textcolor{red}{Teléfono o correo electrónico de contacto.}
+    \item \textcolor{red}{Fecha y hora solicitadas para la cita.}
+    \item \textcolor{red}{Servicio solicitado, cuando corresponda.}
+    \item \textcolor{red}{Observaciones asociadas a la reserva, cuando existan.}
+    \item \textcolor{red}{Estado de la reserva.}
+    \item \textcolor{red}{Fecha de creación de la solicitud.}
+\end{itemize}

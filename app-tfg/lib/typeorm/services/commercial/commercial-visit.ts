@@ -13,7 +13,10 @@ import {
 	COMMERCIAL_VISIT_TYPE_IDS,
 	ORDER_STATUS_IDS,
 } from "@/lib/typeorm/constants/catalog-ids";
-import { normalizeOrderQrValues } from "@/lib/orders/qr";
+import {
+	extractOrderIdFromQrValue,
+	normalizeOrderQrValues,
+} from "@/lib/orders/qr";
 import { getActiveAssignmentByCommercialAndClient } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
 import { normalizeText } from "@/lib/utils/text";
 import { parseTimeToMinutes } from "@/lib/utils/time";
@@ -110,13 +113,19 @@ function toIsoString(value: Date | string | null | undefined) {
 function mapOrderToDeliveryOrderSummary(order: Order): CommercialVisitDeliveryOrder {
 	return {
 		id: order.id,
+		delivery_visit_id: order.delivery_visit_id ?? null,
 		status_id: order.status_id,
 		status_name: order.status?.name ?? "Sin estado",
 		total_amount: String(order.total_amount ?? "0.00"),
 		notes: order.notes ?? null,
 		created_at: toIsoString(order.created_at),
 		updated_at: toIsoString(order.updated_at),
-		line_count: Array.isArray(order.lines) ? order.lines.length : 0,
+		line_count: Array.isArray(order.lines)
+			? order.lines.reduce(
+					(total, line) => total + Number(line.quantity ?? 0),
+					0,
+				)
+			: 0,
 	};
 }
 
@@ -186,6 +195,7 @@ async function validateDeliveryOrderIdsForVisit(
 	const orderRepo = manager.getRepository(Order);
 	const selectedOrders = await orderRepo
 		.createQueryBuilder("order")
+		.leftJoinAndSelect("order.deliveryVisit", "deliveryVisit")
 		.where("order.id IN (:...orderIds)", {
 			orderIds: normalizedOrderIds,
 		})
@@ -208,7 +218,16 @@ async function validateDeliveryOrderIdsForVisit(
 			);
 		}
 
-		if (order.status_id !== ORDER_STATUS_IDS.CONFIRMED) {
+		const isCurrentVisitOrder =
+			Boolean(input.visitId) && order.delivery_visit_id === input.visitId;
+
+		if (
+			order.status_id !== ORDER_STATUS_IDS.CONFIRMED &&
+			!(
+				isCurrentVisitOrder &&
+				order.status_id === ORDER_STATUS_IDS.DELIVERED
+			)
+		) {
 			throw createError(
 				"Solo se pueden vincular pedidos confirmados a un reparto",
 				409,
@@ -220,11 +239,16 @@ async function validateDeliveryOrderIdsForVisit(
 			order.delivery_visit_id &&
 			order.delivery_visit_id !== (input.visitId ?? null)
 		) {
-			throw createError(
-				"Hay pedidos seleccionados que ya estan asignados a otro reparto",
-				409,
-				"VISIT_ORDER_ALREADY_ASSIGNED",
-			);
+			if (
+				order.deliveryVisit?.status_id !==
+				COMMERCIAL_VISIT_STATUS_IDS.POSTPONED
+			) {
+				throw createError(
+					"Hay pedidos seleccionados que ya estan asignados a otro reparto",
+					409,
+					"VISIT_ORDER_ALREADY_ASSIGNED",
+				);
+			}
 		}
 	}
 
@@ -260,21 +284,14 @@ function canTransitionCommercialVisitStatus(
 	}
 
 	if (currentStatusId === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED) {
-		return (
-			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.PLANNED ||
-			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.COMPLETED ||
-			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.CANCELLED
-		);
+		return false;
 	}
 
 	return false;
 }
 
 function canEditCommercialVisitPlanning(statusId: number) {
-	return (
-		statusId === COMMERCIAL_VISIT_STATUS_IDS.PLANNED ||
-		statusId === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED
-	);
+	return statusId === COMMERCIAL_VISIT_STATUS_IDS.PLANNED;
 }
 
 // --------------------------------------------------------------------------
@@ -294,6 +311,7 @@ type UpdateCommercialVisitInput = {
 	visitId: string;
 	commercialId: string;
 	deliveredOrderQrs?: string[] | null;
+	scannedOrderQr?: string | null;
 	scheduledForDate?: string;
 	visitTypeId?: number;
 	statusId?: number;
@@ -617,15 +635,55 @@ async function listAvailableOrdersForDeliveryVisit(
 		.createQueryBuilder("order")
 		.leftJoinAndSelect("order.status", "status")
 		.leftJoinAndSelect("order.lines", "lines")
+		.leftJoinAndSelect("order.deliveryVisit", "deliveryVisit")
 		.where("order.client_id = :clientId", { clientId })
 		.andWhere("order.status_id = :confirmedStatusId", {
 			confirmedStatusId: ORDER_STATUS_IDS.CONFIRMED,
 		})
 		.andWhere(
-			`("order"."delivery_visit_id" IS NULL OR "order"."delivery_visit_id" = :visitId)`,
-			{ visitId },
+			[
+				"order.delivery_visit_id IS NULL",
+				"order.delivery_visit_id = :visitId",
+				"deliveryVisit.status_id = :postponedVisitStatusId",
+			]
+				.map((condition) => `(${condition})`)
+				.join(" OR "),
+			{
+				visitId,
+				postponedVisitStatusId: COMMERCIAL_VISIT_STATUS_IDS.POSTPONED,
+			},
 		)
 		.orderBy("order.created_at", "DESC")
+		.getMany();
+
+	return orders.map(mapOrderToDeliveryOrderSummary);
+}
+
+async function listCompletedElsewhereOrdersForVisit(visit: CommercialVisit) {
+	if (
+		visit.visit_type_id !== COMMERCIAL_VISIT_TYPE_IDS.DELIVERY ||
+		visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.POSTPONED
+	) {
+		return [] as CommercialVisitDeliveryOrder[];
+	}
+
+	const ds = await getDataSource();
+	const orderRepo = ds.getRepository(Order);
+	const orders = await orderRepo
+		.createQueryBuilder("order")
+		.leftJoinAndSelect("order.status", "status")
+		.leftJoinAndSelect("order.lines", "lines")
+		.leftJoinAndSelect("order.deliveryVisit", "deliveryVisit")
+		.where("order.client_id = :clientId", { clientId: visit.client_id })
+		.andWhere("order.status_id = :deliveredStatusId", {
+			deliveredStatusId: ORDER_STATUS_IDS.DELIVERED,
+		})
+		.andWhere("order.delivery_visit_id IS NOT NULL")
+		.andWhere("order.delivery_visit_id != :visitId", { visitId: visit.id })
+		.andWhere("deliveryVisit.scheduled_for_date >= :scheduledForDate", {
+			scheduledForDate: visit.scheduled_for_date,
+		})
+		.orderBy("order.updated_at", "DESC")
 		.getMany();
 
 	return orders.map(mapOrderToDeliveryOrderSummary);
@@ -634,9 +692,14 @@ async function listAvailableOrdersForDeliveryVisit(
 async function buildCommercialVisitDetail(
 	visit: CommercialVisit,
 ): Promise<CommercialVisitDetail> {
-	const [linkedOrders, availableOrdersForDelivery] = await Promise.all([
+	const [
+		linkedOrders,
+		availableOrdersForDelivery,
+		completedElsewhereOrders,
+	] = await Promise.all([
 		listLinkedOrdersForVisit(visit.id),
 		listAvailableOrdersForDeliveryVisit(visit.client_id, visit.id),
+		listCompletedElsewhereOrdersForVisit(visit),
 	]);
 	const visitData = visit as unknown as CommercialVisitDetail;
 
@@ -644,6 +707,7 @@ async function buildCommercialVisitDetail(
 		...visitData,
 		linkedOrders,
 		availableOrdersForDelivery,
+		completedElsewhereOrders,
 	};
 }
 
@@ -750,6 +814,96 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 			);
 		}
 
+		if (visit.status_id === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED) {
+			throw new UpdateCommercialVisitError(
+				"Esta visita esta aplazada y no se puede modificar. Crea una nueva visita para continuar.",
+				409,
+				"VISIT_POSTPONED_READ_ONLY",
+			);
+		}
+
+		if (input.scannedOrderQr !== undefined) {
+			const scannedOrderId = extractOrderIdFromQrValue(input.scannedOrderQr);
+
+			if (!scannedOrderId) {
+				throw new UpdateCommercialVisitError(
+					"El QR escaneado no tiene un formato reconocido para pedidos",
+					400,
+					"DELIVERY_VISIT_QR_INVALID",
+				);
+			}
+
+			if (visit.visit_type_id !== COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) {
+				throw new UpdateCommercialVisitError(
+					"Solo las visitas de reparto permiten escanear pedidos",
+					409,
+					"VISIT_QR_REQUIRES_DELIVERY_TYPE",
+				);
+			}
+
+			if (visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.PLANNED) {
+				throw new UpdateCommercialVisitError(
+					"Solo se pueden escanear pedidos en una visita planificada",
+					409,
+					"VISIT_QR_NOT_EDITABLE",
+				);
+			}
+
+			const linkedOrder = await orderRepo
+				.createQueryBuilder("order")
+				.leftJoinAndSelect("order.status", "status")
+				.where("order.id = :orderId", { orderId: scannedOrderId })
+				.andWhere("order.delivery_visit_id = :visitId", { visitId: visit.id })
+				.getOne();
+
+			if (!linkedOrder) {
+				throw new UpdateCommercialVisitError(
+					"El QR escaneado no pertenece a ningun pedido vinculado a esta visita",
+					409,
+					"DELIVERY_VISIT_QR_ORDER_MISMATCH",
+				);
+			}
+
+			if (linkedOrder.status_id === ORDER_STATUS_IDS.DELIVERED) {
+				throw new UpdateCommercialVisitError(
+					"Este pedido ya estaba completado",
+					409,
+					"DELIVERY_ORDER_ALREADY_COMPLETED",
+				);
+			}
+
+			if (linkedOrder.status_id !== ORDER_STATUS_IDS.CONFIRMED) {
+				throw new UpdateCommercialVisitError(
+					"Este pedido no esta pendiente de entrega",
+					409,
+					"DELIVERY_ORDER_NOT_CONFIRMABLE",
+				);
+			}
+
+			await orderRepo.update(
+				{ id: linkedOrder.id },
+				{ status_id: ORDER_STATUS_IDS.DELIVERED },
+			);
+
+			const remainingConfirmedOrders = await orderRepo.count({
+				where: {
+					delivery_visit_id: visit.id,
+					status_id: ORDER_STATUS_IDS.CONFIRMED,
+				},
+			});
+
+			if (remainingConfirmedOrders === 0) {
+				visit.status_id = COMMERCIAL_VISIT_STATUS_IDS.COMPLETED;
+				visit.result =
+					normalizeText(input.result) ||
+					visit.result ||
+					"Entrega confirmada mediante QR.";
+				await repo.save(visit);
+			}
+
+			return visit.id;
+		}
+
 		const previousStatusId = visit.status_id;
 		const previousScheduledForDate = visit.scheduled_for_date;
 
@@ -768,7 +922,7 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 
 			if (!canEditCommercialVisitPlanning(visit.status_id)) {
 				throw new UpdateCommercialVisitError(
-					"Solo se puede reprogramar una visita planificada o aplazada",
+					"Solo se puede reprogramar una visita planificada",
 					409,
 					"VISIT_NOT_EDITABLE",
 				);
@@ -788,7 +942,7 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 
 			if (!canEditCommercialVisitPlanning(visit.status_id)) {
 				throw new UpdateCommercialVisitError(
-					"Solo se puede cambiar el tipo de una visita planificada o aplazada",
+					"Solo se puede cambiar el tipo de una visita planificada",
 					409,
 					"VISIT_TYPE_NOT_EDITABLE",
 				);
@@ -838,7 +992,7 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 		if (input.orderIds !== undefined) {
 			if (!canEditCommercialVisitPlanning(visit.status_id)) {
 				throw new UpdateCommercialVisitError(
-					"Solo se pueden ajustar pedidos en una visita planificada o aplazada",
+					"Solo se pueden ajustar pedidos en una visita planificada",
 					409,
 					"VISIT_ORDERS_NOT_EDITABLE",
 				);

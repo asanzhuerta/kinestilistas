@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import H1Title from "@/app/components/H1Title";
 import PageTransition from "@/app/components/animations/PageTransition";
+import { useSessionStorageState } from "@/app/hooks/useSessionStorageState";
 import { requestJson } from "@/lib/api/client";
 import type { ApiErrorResponse } from "@/lib/contracts/api";
 import type {
@@ -55,6 +57,15 @@ type Props = {
 	initialDetail: SalonClientDetail;
 	initialTemplates: SalonServiceTemplateSummary[];
 	productOptions: SalonProductOption[];
+	showOverviewPanels?: boolean;
+	showServiceForm?: boolean;
+	showHistory?: boolean;
+	showTemplateLibrary?: boolean;
+	historyHref?: string;
+	backHref?: string;
+	backLabel?: string;
+	title?: string;
+	subtitle?: string;
 };
 
 const inputClassName =
@@ -155,6 +166,15 @@ export default function SalonClientDetailView({
 	initialDetail,
 	initialTemplates,
 	productOptions,
+	showOverviewPanels = true,
+	showServiceForm = true,
+	showHistory = true,
+	showTemplateLibrary = false,
+	historyHref,
+	backHref,
+	backLabel = "Volver",
+	title,
+	subtitle,
 }: Props) {
 	const productOptionsBySelectionId = new Map(
 		productOptions.map((productOption) => [productOption.id, productOption]),
@@ -188,13 +208,28 @@ export default function SalonClientDetailView({
 	const [technicalEmailSubject, setTechnicalEmailSubject] = useState("");
 	const [technicalEmailBody, setTechnicalEmailBody] = useState("");
 	const [isLoadingTechnicalEmail, setIsLoadingTechnicalEmail] = useState(false);
-	const [historySearch, setHistorySearch] = useState("");
-	const [historyServiceType, setHistoryServiceType] = useState("");
-	const [historyDateFrom, setHistoryDateFrom] = useState("");
-	const [historyDateTo, setHistoryDateTo] = useState("");
+	const salonHistoryFilterKey = `salon-client-history:${initialDetail.salonClient.id}`;
+	const [historySearch, setHistorySearch] = useSessionStorageState(
+		`${salonHistoryFilterKey}:search`,
+		"",
+	);
+	const [historyServiceType, setHistoryServiceType] = useSessionStorageState(
+		`${salonHistoryFilterKey}:service-type`,
+		"",
+	);
+	const [historyDateFrom, setHistoryDateFrom] = useSessionStorageState(
+		`${salonHistoryFilterKey}:date-from`,
+		"",
+	);
+	const [historyDateTo, setHistoryDateTo] = useSessionStorageState(
+		`${salonHistoryFilterKey}:date-to`,
+		"",
+	);
 	const [isSavingProfile, setIsSavingProfile] = useState(false);
 	const [isSavingService, setIsSavingService] = useState(false);
 	const [templateName, setTemplateName] = useState("");
+	const [selectedTemplateId, setSelectedTemplateId] = useState("");
+	const [isTemplateSaveOpen, setIsTemplateSaveOpen] = useState(false);
 	const [isSavingTemplate, setIsSavingTemplate] = useState(false);
 	const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null);
 	const [profileFeedback, setProfileFeedback] = useState<FeedbackState>(null);
@@ -287,6 +322,9 @@ export default function SalonClientDetailView({
 		setTechnicalNotes("");
 		setProductUsages([createEmptyProductUsage("usage-1")]);
 		setResultImages([]);
+		setSelectedTemplateId("");
+		setTemplateName("");
+		setIsTemplateSaveOpen(false);
 	}
 
 	function resetTechnicalEmailDraft() {
@@ -308,6 +346,8 @@ export default function SalonClientDetailView({
 		setTechnicalDescription(service.technical_description ?? "");
 		setFormula(service.formula ?? "");
 		setTechnicalNotes(service.technical_notes ?? "");
+		setSelectedTemplateId("");
+		setIsTemplateSaveOpen(false);
 		setProductUsages(
 			service.product_usages.length > 0
 				? service.product_usages.map((_, index) =>
@@ -329,6 +369,8 @@ export default function SalonClientDetailView({
 	function applyTemplateToServiceForm(template: SalonServiceTemplateSummary) {
 		void cleanupTransientResultImages(resultImages);
 		setEditingServiceId(null);
+		setSelectedTemplateId(template.id);
+		setIsTemplateSaveOpen(false);
 		setServiceType(template.service_type);
 		setServiceNotes(template.notes ?? "");
 		setServiceResult(template.result ?? "");
@@ -495,6 +537,22 @@ export default function SalonClientDetailView({
 		applyTemplateToServiceForm(template);
 	}
 
+	function handleTemplateSelection(templateId: string) {
+		setSelectedTemplateId(templateId);
+
+		if (!templateId) {
+			return;
+		}
+
+		const selectedTemplate = templates.find(
+			(template) => template.id === templateId,
+		);
+
+		if (selectedTemplate) {
+			handleApplyTemplate(selectedTemplate);
+		}
+	}
+
 	async function handleSaveCurrentFormAsTemplate() {
 		setTemplateFeedback(null);
 		setIsSavingTemplate(true);
@@ -534,6 +592,7 @@ export default function SalonClientDetailView({
 
 			setTemplates((current) => [data, ...current]);
 			setTemplateName("");
+			setIsTemplateSaveOpen(false);
 			setTemplateFeedback({
 				type: "success",
 				message: "Plantilla técnica guardada correctamente.",
@@ -585,6 +644,9 @@ export default function SalonClientDetailView({
 
 			setTemplates((current) =>
 				current.filter((currentTemplate) => currentTemplate.id !== template.id),
+			);
+			setSelectedTemplateId((currentTemplateId) =>
+				currentTemplateId === template.id ? "" : currentTemplateId,
 			);
 			setTemplateFeedback({
 				type: "success",
@@ -899,23 +961,44 @@ export default function SalonClientDetailView({
 		filteredServices.length === detail.services.length
 			? String(detail.services.length)
 			: `${filteredServices.length} / ${detail.services.length}`;
+	const selectedTemplate =
+		templates.find((template) => template.id === selectedTemplateId) ?? null;
+	const contentGridClassName = showOverviewPanels
+		? "grid gap-6 xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)]"
+		: "space-y-6";
 	const technicalEmailMailtoHref = buildTechnicalEmailMailtoHref();
 
 	return (
 		<PageTransition>
 			<H1Title
-				title={detail.salonClient.name}
-				subtitle="Consulta la ficha técnica, el historial y las sugerencias del salón"
+				title={title ?? detail.salonClient.name}
+				subtitle={
+					subtitle ??
+					"Consulta la ficha técnica, el historial y las sugerencias del salón"
+				}
 			/>
 
-			<div className="mb-4 flex justify-end">
+			<div
+				className={`mb-4 flex flex-wrap items-center gap-3 ${
+					backHref ? "justify-between" : "justify-end"
+				}`}
+			>
+				{backHref ? (
+					<Link
+						href={backHref}
+						className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+					>
+						{backLabel}
+					</Link>
+				) : null}
 				<span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
 					{detail.salonClient.service_count} servicios
 				</span>
 			</div>
 
-			<div className="grid gap-6 xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
-				<div className="space-y-6">
+			<div className={contentGridClassName}>
+				{showOverviewPanels ? (
+					<div className="space-y-6">
 					<section className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm">
 						<h2 className="text-lg font-semibold text-slate-900">
 							Ficha técnica base
@@ -1055,9 +1138,11 @@ export default function SalonClientDetailView({
 							</div>
 						)}
 					</section>
-				</div>
+					</div>
+				) : null}
 
 				<div className="space-y-6">
+					{showTemplateLibrary ? (
 					<section className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm">
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div>
@@ -1205,7 +1290,9 @@ export default function SalonClientDetailView({
 							</div>
 						)}
 					</section>
+					) : null}
 
+					{showServiceForm ? (
 					<section className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm">
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div>
@@ -1220,6 +1307,14 @@ export default function SalonClientDetailView({
 										: "Documenta el trabajo realizado, la formula y el producto usado."}
 								</p>
 							</div>
+							{historyHref ? (
+								<Link
+									href={historyHref}
+									className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+								>
+									Ver historial técnico
+								</Link>
+							) : null}
 							{editingServiceId ? (
 								<button
 									type="button"
@@ -1233,6 +1328,65 @@ export default function SalonClientDetailView({
 						</div>
 
 						<form className="mt-5 space-y-4" onSubmit={handleServiceSubmit}>
+							{!editingServiceId ? (
+								<div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+									<div className="flex flex-wrap items-start justify-between gap-3">
+										<div>
+											<h3 className="text-base font-semibold text-slate-900">
+												¿Desea reutilizar una plantilla?
+											</h3>
+											<p className="mt-1 text-sm leading-6 text-slate-500">
+												Una plantilla técnica es una receta reutilizable del
+												servicio: guarda tipo, resultado, fórmula, notas y
+												productos para cargarlos sin repetirlos a mano.
+											</p>
+										</div>
+										<span className="rounded-full bg-white px-3 py-1 text-sm font-medium text-slate-700">
+											{templates.length} plantillas
+										</span>
+									</div>
+
+									{templates.length === 0 ? (
+										<div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-5 text-sm text-slate-500">
+											Aún no hay plantillas guardadas para reutilizar.
+										</div>
+									) : (
+										<div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+											<select
+												value={selectedTemplateId}
+												onChange={(event) =>
+													handleTemplateSelection(event.target.value)
+												}
+												className={inputClassName}
+												disabled={isSavingService}
+											>
+												<option value="">No reutilizar plantilla</option>
+												{templates.map((template) => (
+													<option key={template.id} value={template.id}>
+														{template.name} - {template.service_type}
+													</option>
+												))}
+											</select>
+											{selectedTemplate ? (
+												<button
+													type="button"
+													onClick={() => handleDeleteTemplate(selectedTemplate)}
+													disabled={
+														isSavingTemplate ||
+														deletingTemplateId === selectedTemplate.id
+													}
+													className="rounded-full border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+												>
+													{deletingTemplateId === selectedTemplate.id
+														? "Eliminando..."
+														: "Eliminar plantilla"}
+												</button>
+											) : null}
+										</div>
+									)}
+								</div>
+							) : null}
+
 							{editingServiceId ? (
 								<div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
 									Estas editando un servicio ya registrado. Al guardar, se
@@ -1527,9 +1681,80 @@ export default function SalonClientDetailView({
 										? "Guardar cambios"
 										: "Registrar servicio"}
 							</button>
+
+							{!editingServiceId ? (
+								<div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+									<div className="flex flex-wrap items-center justify-between gap-3">
+										<div>
+											<h3 className="text-base font-semibold text-slate-900">
+												¿Guardar como plantilla?
+											</h3>
+											<p className="mt-1 text-sm text-slate-500">
+												Guarda los datos actuales para reutilizarlos en próximos
+												servicios técnicos.
+											</p>
+										</div>
+										<button
+											type="button"
+											onClick={() =>
+												setIsTemplateSaveOpen((currentValue) => !currentValue)
+											}
+											disabled={isSavingService || isSavingTemplate}
+											className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+										>
+											{isTemplateSaveOpen ? "Ocultar" : "¿Guardar como plantilla?"}
+										</button>
+									</div>
+
+									{isTemplateSaveOpen ? (
+										<div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+											<div>
+												<label className="mb-2 block text-sm font-medium text-slate-700">
+													Nombre de la plantilla
+												</label>
+												<input
+													value={templateName}
+													onChange={(event) =>
+														setTemplateName(event.target.value)
+													}
+													className={inputClassName}
+													placeholder="Ej. Matiz beige habitual"
+													disabled={isSavingTemplate}
+												/>
+											</div>
+											<div className="flex items-end">
+												<button
+													type="button"
+													onClick={handleSaveCurrentFormAsTemplate}
+													disabled={isSavingTemplate}
+													className="inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+												>
+													{isSavingTemplate
+														? "Guardando..."
+														: "Guardar plantilla"}
+												</button>
+											</div>
+										</div>
+									) : null}
+
+									{templateFeedback ? (
+										<div
+											className={`mt-4 rounded-2xl px-4 py-3 text-sm ${
+												templateFeedback.type === "success"
+													? "bg-emerald-50 text-emerald-700"
+													: "bg-rose-50 text-rose-700"
+											}`}
+										>
+											{templateFeedback.message}
+										</div>
+									) : null}
+								</div>
+							) : null}
 						</form>
 					</section>
+					) : null}
 
+					{showHistory ? (
 					<section className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm">
 						<div className="mb-5 flex items-center justify-between gap-3">
 							<div>
@@ -1925,6 +2150,7 @@ export default function SalonClientDetailView({
 							</div>
 						)}
 					</section>
+					) : null}
 				</div>
 			</div>
 		</PageTransition>

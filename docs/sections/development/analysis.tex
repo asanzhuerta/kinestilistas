@@ -88,9 +88,9 @@ La navegación real del sistema parte de una entrada común en \texttt{/login}. 
         \hline
         Acceso común & \texttt{/login} $\rightarrow$ redirección a \texttt{/admin}, \texttt{/commercials} o \texttt{/clients} según el rol autenticado. \\
         \hline
-        Administrador & \texttt{/admin} $\rightarrow$ usuarios, solicitudes, clientes, auditoría, catálogo, pedidos globales, operación \texttt{M7}, integraciones, soporte técnico y \texttt{/admin/settings}. Desde estos espacios se accede a listados, detalle, formularios de alta y vistas transversales de estado. \\
+        Administrador & \texttt{/admin} $\rightarrow$ usuarios, solicitudes, clientes, auditoría, catálogo, pedidos globales, comunicaciones y \texttt{/admin/settings}. Desde estos espacios se accede a listados, detalle, formularios de alta, exportación de auditoría y configuración de canales de avisos. Las pantallas de diagnóstico técnico de \texttt{M7} no forman parte de la navegación ordinaria del administrador. \\
         \hline
-        Comercial & \texttt{/commercials} $\rightarrow$ clientes, visitas, rutas, catálogo, coloración, pedidos, cobros y ajustes personales. Desde \texttt{/commercials/orders} se accede al detalle del pedido y desde \texttt{/commercials/visits} al detalle operativo de la visita de reparto. \\
+        Comercial & \texttt{/commercials} $\rightarrow$ clientes, visitas, rutas, catálogo, coloración, pedidos, promociones, formaciones, avisos y ajustes personales. Desde \texttt{/commercials/orders} se accede al detalle del pedido y al seguimiento del cobro, y desde \texttt{/commercials/visits} al detalle operativo de la visita de reparto. \\
         \hline
         Cliente profesional & \texttt{/clients} $\rightarrow$ estimación de reparto, catálogo, coloración y pedidos. Desde \texttt{/clients/orders} se accede al historial y al detalle de cada pedido. \\
         \hline
@@ -111,133 +111,21 @@ Desde el punto de vista funcional, esta navegación presenta varias propiedades 
     \item las vistas de \texttt{M4} enlazan entre pedido, visita de reparto y seguimiento de cobro para mantener trazabilidad entre operaciones relacionadas.
 \end{itemize}
 
-\subsection{Capturas reales de la interfaz}
+\subsection{Mockups pendientes de la interfaz}
 
-Las siguientes capturas proceden de la aplicación ejecutada en entorno local y muestran el estado visual real de los flujos principales. Se han seleccionado pantallas representativas de acceso, administración, trabajo comercial, consulta de catálogo, coloración, pedidos y vista cliente.
+En esta versión se ha decidido no incluir capturas reales dentro del apartado de modelo de interfaz, porque su función no es la misma que la de un mockup. Las capturas reales sirven como evidencia de pruebas o de ejecución, mientras que en este punto interesa representar la estructura prevista de las pantallas sin depender de datos reales ni del estado visual exacto de una sesión local.
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/login.png}
-        \caption{Login}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/admin-panel.png}
-        \caption{Panel admin}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/client-dashboard.png}
-        \caption{Vista cliente}
-    \end{subfigure}
-    \caption{Capturas reales de acceso y paneles por rol}
-    \label{fig:ui-real-access-roles}
-\end{figure}
+Para dejar este punto cerrado con una base más limpia, queda pendiente preparar una pequeña serie de mockups documentados. Con cinco piezas sería suficiente:
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/commercial-clients.png}
-        \caption{Clientes}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/commercial-visits.png}
-        \caption{Visitas}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/commercial-routes-map.png}
-        \caption{Rutas y mapa}
-    \end{subfigure}
-    \caption{Capturas reales del espacio comercial}
-    \label{fig:ui-real-commercial}
-\end{figure}
+\begin{itemize}
+    \item mockup de acceso y panel inicial por rol;
+    \item mockup de panel de administrador con navegación principal, auditoría y ajustes;
+    \item mockup de gestión comercial con visitas, ruta diaria y detalle de reparto;
+    \item mockup de pedido y detalle de pedido, diferenciando cliente y comercial cuando proceda;
+    \item mockup de comunicaciones y avisos, incluyendo promociones, formaciones y notificaciones.
+\end{itemize}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/client-catalog.png}
-        \caption{Catálogo}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/client-coloration.png}
-        \caption{Coloración}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/client-orders.png}
-        \caption{Pedidos}
-    \end{subfigure}
-    \caption{Capturas reales de catálogo, coloración y pedidos}
-    \label{fig:ui-real-client-modules}
-\end{figure}
-
-Como evidencia visual específica del módulo \texttt{M6}, se han incorporado también capturas del centro administrativo de comunicaciones y de las vistas finales usadas por cliente y comercial. Estas pantallas muestran la publicación de promociones, el acceso a formaciones, las notificaciones internas, el indicador de avisos pendientes desde los paneles de rol y la conexión operativa entre promociones activas y pedidos con descuento aplicado.
-
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/m6-admin-communications.png}
-        \caption{Admin comunicaciones}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/m6-client-dashboard-notification.png}
-        \caption{Panel cliente}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/m6-commercial-promotions.png}
-        \caption{Promociones comercial}
-    \end{subfigure}
-    \caption{Capturas reales del módulo M6 por perfil de usuario}
-    \label{fig:ui-real-m6-role-summary}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/m6-client-promotions.png}
-        \caption{Promociones cliente}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/m6-client-trainings.png}
-        \caption{Formaciones}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.30\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{./figures/Capturas/m6-client-notifications.png}
-        \caption{Avisos}
-    \end{subfigure}
-    \caption{Capturas reales de promociones, formaciones y avisos del módulo M6}
-    \label{fig:ui-real-m6-user-flows}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{./figures/Capturas/m6-order-promotion-discount.png}
-    \caption{Captura real de pedido con descuento promocional aplicado}
-    \label{fig:ui-real-m6-order-discount}
-\end{figure}
+Estos mockups pueden construirse a partir de la interfaz final, pero deberían presentarse como composición simplificada y no como captura literal. Las capturas reales, si se quieren conservar, encajan mejor en el capítulo de pruebas o en un anexo de evidencias.
 
 \section{Modelo de Comportamiento}
 El modelo de comportamiento se centra en los flujos que cruzan varias capas de la aplicación y que, por tanto, son especialmente relevantes para verificar la coherencia entre interfaz, autenticación, servicios de dominio y persistencia.

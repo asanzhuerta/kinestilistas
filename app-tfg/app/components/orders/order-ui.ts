@@ -87,6 +87,14 @@ export function getOrderDiscountSummary(order: OrderSummary | null | undefined) 
 	};
 }
 
+export function getOrderPackageCount(order: OrderSummary | null | undefined) {
+	const packageCount =
+		order?.lines.reduce((total, line) => total + Math.max(0, line.quantity), 0) ??
+		0;
+
+	return packageCount > 0 ? packageCount : order?.line_count ?? 0;
+}
+
 export function getOrderStatusClasses(statusCode: string) {
 	switch (statusCode) {
 		case "draft":

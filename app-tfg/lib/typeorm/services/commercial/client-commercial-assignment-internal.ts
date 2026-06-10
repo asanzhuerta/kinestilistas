@@ -39,16 +39,16 @@ export async function assignClientToCommercialInternal(
 	const commercialRepo = manager.getRepository(Commercial);
 	const assignmentRepo = manager.getRepository(ClientCommercialAssignment);
 
-	const [client, commercial, activeAssignment] = await Promise.all([
-		clientRepo.findOne({ where: { id: input.clientId } }),
-		commercialRepo.findOne({ where: { id: input.commercialId } }),
-		assignmentRepo.findOne({
-			where: {
-				client_id: input.clientId,
-				unassigned_at: IsNull(),
-			},
-		}),
-	]);
+	const client = await clientRepo.findOne({ where: { id: input.clientId } });
+	const commercial = await commercialRepo.findOne({
+		where: { id: input.commercialId },
+	});
+	const activeAssignment = await assignmentRepo.findOne({
+		where: {
+			client_id: input.clientId,
+			unassigned_at: IsNull(),
+		},
+	});
 
 	if (!client) {
 		throw new AssignClientToCommercialInternalError(

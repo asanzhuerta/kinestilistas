@@ -4,7 +4,7 @@ export default function ClientOrdersLoading() {
 	return (
 		<RouteLoadingState
 			title="Pedidos"
-			subtitle="Cargando tu borrador, historial de pedidos y opciones de producto."
+			subtitle="Cargando tu pedido en curso y opciones de producto."
 			variant="detail"
 		/>
 	);

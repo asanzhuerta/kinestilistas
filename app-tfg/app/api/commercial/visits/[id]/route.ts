@@ -57,6 +57,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 			visitId: id,
 			commercialId: commercial.id,
 			deliveredOrderQrs: body.deliveredOrderQrs,
+			scannedOrderQr: body.scannedOrderQr,
 			scheduledForDate: body.scheduledForDate,
 			visitTypeId: body.visitTypeId,
 			statusId: body.statusId,

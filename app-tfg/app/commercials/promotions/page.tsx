@@ -16,6 +16,7 @@ export default async function CommercialPromotionsPage() {
 			subtitle="Campañas vigentes para seguimiento comercial"
 			backHref="/commercials"
 			promotions={promotions.map(serializePromotion)}
+			showIntro={false}
 		/>
 	);
 }

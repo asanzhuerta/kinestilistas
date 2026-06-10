@@ -1,7 +1,7 @@
-# Operaciones admin
+# Operaciones técnicas
 
-Panel operativo de administración.
+Resumen técnico de operación.
 
 ## Función
 
-Mostrar indicadores, reportes y acciones de seguimiento global del sistema.
+Agrupar indicadores y reportes para scripts, validación y mantenimiento. Esta carpeta no debe interpretarse como una pantalla final de trabajo para administración.

@@ -222,29 +222,35 @@ export default function RouteMapCard({
 				<p className="mt-4 text-sm text-slate-600">{subtitle}</p>
 
 				{timingSummary ? (
-					<div className="mt-3 flex flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap text-[10px] font-medium text-slate-500">
-						<span>
+					<div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium leading-5 text-slate-500 sm:text-sm">
+						<span className="whitespace-nowrap">
 							Visitas diarias{" "}
 							<strong className="font-semibold text-slate-800">
 								{timingSummary.plannedVisitsCount}
 							</strong>
 						</span>
-						<span aria-hidden="true">/</span>
-						<span>
+						<span aria-hidden="true" className="text-slate-300">
+							/
+						</span>
+						<span className="whitespace-nowrap">
 							Visitas restantes{" "}
 							<strong className="font-semibold text-slate-800">
 								{waypoints.length}
 							</strong>
 						</span>
-						<span aria-hidden="true">/</span>
-						<span>
+						<span aria-hidden="true" className="text-slate-300">
+							/
+						</span>
+						<span className="whitespace-nowrap">
 							Tiempo comprometido{" "}
 							<strong className="font-semibold text-slate-800">
 								{formatMinutes(timingSummary.totalCommittedRouteMinutes)}
 							</strong>
 						</span>
-						<span aria-hidden="true">/</span>
-						<span>
+						<span aria-hidden="true" className="text-slate-300">
+							/
+						</span>
+						<span className="whitespace-nowrap">
 							Margen del día{" "}
 							<strong className="font-semibold text-slate-800">
 								{formatRouteMargin(

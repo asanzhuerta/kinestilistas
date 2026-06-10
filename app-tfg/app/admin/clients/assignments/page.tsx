@@ -8,6 +8,7 @@ import {
 	type AdminCommercialOption,
 } from "@/app/admin/users/_shared/admin-commercial-options";
 import PageTransition from "@/app/components/animations/PageTransition";
+import { useSessionStorageState } from "@/app/hooks/useSessionStorageState";
 import { requestJson } from "@/lib/api/client";
 import type { CommercialClient } from "@/lib/contracts/commercial-client";
 import type {
@@ -50,8 +51,14 @@ function AdminClientCommercialAssignmentsPageContent() {
 	const [selectedCommercialId, setSelectedCommercialId] = useState("");
 	const [currentAssignment, setCurrentAssignment] =
 		useState<ClientCommercialAssignment | null>(null);
-	const [clientSearch, setClientSearch] = useState("");
-	const [commercialSearch, setCommercialSearch] = useState("");
+	const [clientSearch, setClientSearch] = useSessionStorageState(
+		"admin-client-commercial-assignments:client-search",
+		"",
+	);
+	const [commercialSearch, setCommercialSearch] = useSessionStorageState(
+		"admin-client-commercial-assignments:commercial-search",
+		"",
+	);
 	const [notes, setNotes] = useState("");
 	const [loadingBaseData, setLoadingBaseData] = useState(true);
 	const [loadingAssignment, setLoadingAssignment] = useState(false);

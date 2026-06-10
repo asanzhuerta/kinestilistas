@@ -31,8 +31,8 @@ export default async function ClientOrderDetailPage({ params }: PageProps) {
 		<OrderDetailView
 			title="Detalle de pedido"
 			subtitle="Consulta las referencias y el estado actual de tu pedido."
-			backHref="/clients/orders"
-			backLabel="Volver a pedidos"
+			backHref="/clients/orders/history"
+			backLabel="Volver al historial"
 			initialDetail={detail}
 			mode="client"
 		/>

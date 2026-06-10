@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import PageTransition from "@/app/components/animations/PageTransition";
 import SafeForm from "@/app/components/forms/SafeForm";
 import SubmitButton from "@/app/components/forms/SubmitButton";
@@ -205,14 +204,6 @@ export default function AdminEnterpriseOperationsWorkspace({
 								conceptual: parámetros de configuración, integraciones externas,
 								operaciones de intercambio y propuestas de reposición.
 							</p>
-						</div>
-						<div className="flex flex-wrap gap-3">
-							<Link
-								href="/admin/integrations"
-								className="inline-flex rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-							>
-								Ver integraciones soporte
-							</Link>
 						</div>
 					</div>
 				</section>

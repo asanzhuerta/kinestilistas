@@ -252,16 +252,16 @@ Como convención general, las rutas autenticadas devuelven \texttt{401} cuando n
 \endfirsthead
 \apiHeader
 \endhead
-\texttt{GET} & \path{/api/admin/operations/status} & Admin & Sin parámetros. Respuesta \texttt{200}: resumen agregado de operación transversal de \texttt{M7}.\\
-\texttt{GET} & \path{/api/admin/operations/report} & Admin & Sin parámetros. Respuesta \texttt{200}: fichero \texttt{CSV} descargable con el informe operativo de \texttt{M7}.\\
-\texttt{GET} & \path{/api/admin/enterprise-operations} & Admin & Sin parámetros. Respuesta \texttt{200}: configuraciones, integraciones externas, operaciones recientes y propuestas a proveedor de \texttt{M7}.\\
+\texttt{GET} & \path{/api/admin/operations/status} & Admin & Sin parámetros. Respuesta \texttt{200}: resumen técnico agregado de operación transversal de \texttt{M7}, usado por scripts y validación interna.\\
+\texttt{GET} & \path{/api/admin/operations/report} & Admin & Sin parámetros. Respuesta \texttt{200}: fichero \texttt{CSV} descargable con el informe técnico operativo de \texttt{M7}.\\
+\texttt{GET} & \path{/api/admin/enterprise-operations} & Admin & Sin parámetros. Respuesta \texttt{200}: configuraciones, integraciones externas, operaciones recientes y propuestas a proveedor de \texttt{M7}, como base para integración futura.\\
 \texttt{POST} & \path{/api/admin/enterprise-operations/operations} & Admin & JSON con \texttt{integrationId}, \texttt{operationType}, \texttt{dataType}, \texttt{status} y \texttt{result}. Respuesta \texttt{201}: operación de integración registrada.\\
 \texttt{POST} & \path{/api/admin/enterprise-operations/supplier-proposals} & Admin & JSON con \texttt{productIds}, \texttt{quantity}, \texttt{reason}, \texttt{notes} y \texttt{status}. Respuesta \texttt{201}: propuesta de pedido a proveedor generada con sus líneas.\\
 \texttt{GET} & \path{/api/admin/audit/export} & Admin & Query \texttt{type} igual a \texttt{access} o \texttt{management}, \texttt{days} y \texttt{limit} opcionales. Respuesta \texttt{200}: fichero \texttt{CSV} descargable con registros recientes de auditoría.\\
-\texttt{GET} & \path{/api/admin/integrations/status} & Admin & Sin parámetros. Respuesta \texttt{200}: resumen e inventario operativo de integraciones de soporte.\\
-\texttt{GET} & \path{/api/admin/support/status} & Admin & Sin parámetros. Respuesta \texttt{200}: resumen e inventario operativo de soporte técnico, PWA y compatibilidad.\\
-\texttt{GET} & \path{/api/admin/settings/rate-limits/status} & Admin & Sin parámetros. Respuesta \texttt{200}: diagnóstico agregado de políticas de rate limiting, incluyendo activas, personalizadas, desactivadas y valores por defecto.\\
-\texttt{GET} & \path{/api/admin/settings/rate-limits} & Admin & Sin parámetros. Respuesta \texttt{200}: políticas de \textit{rate limiting}, valores por defecto y valores configurados.\\
-\texttt{PUT} & \path{/api/admin/settings/rate-limits} & Admin & JSON con \texttt{policies[]}: \texttt{name}, \texttt{enabled}, \texttt{maxRequests}, \texttt{windowMinutes}. Respuesta \texttt{200}: políticas actualizadas.\\
+\texttt{GET} & \path{/api/admin/integrations/status} & Admin & Sin parámetros. Respuesta \texttt{200}: resumen e inventario técnico de integraciones de soporte.\\
+\texttt{GET} & \path{/api/admin/support/status} & Admin & Sin parámetros. Respuesta \texttt{200}: resumen e inventario técnico de soporte, PWA y compatibilidad.\\
+\texttt{GET} & \path{/api/admin/settings/rate-limits/status} & Admin técnico & Sin parámetros. Respuesta \texttt{200}: diagnóstico agregado de políticas de rate limiting cuando la ruta técnica está habilitada por entorno; en caso contrario devuelve \texttt{404}.\\
+\texttt{GET} & \path{/api/admin/settings/rate-limits} & Admin técnico & Sin parámetros. Respuesta \texttt{200}: políticas de \textit{rate limiting}, valores por defecto y valores configurados cuando la ruta técnica está habilitada; en caso contrario devuelve \texttt{404}.\\
+\texttt{PUT} & \path{/api/admin/settings/rate-limits} & Admin técnico & JSON con \texttt{policies[]}: \texttt{name}, \texttt{enabled}, \texttt{maxRequests}, \texttt{windowMinutes}. Respuesta \texttt{200}: políticas actualizadas solo con la ruta técnica habilitada.\\
 \end{longtable}
 }

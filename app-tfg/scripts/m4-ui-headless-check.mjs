@@ -504,9 +504,9 @@ summary.commercialVisitErrorHandlingScreenshot = await captureScreenshot(
 	"commercial-visit-error.png",
 );
 
-console.error("[m4-ui] checking commercial cobros");
-await navigate(client, sessionId, `${BASE_URL}/commercials/cobros`);
-summary.commercialCobros = await evaluate(
+console.error("[m4-ui] checking commercial orders payment summary");
+await navigate(client, sessionId, `${BASE_URL}/commercials/orders`);
+summary.commercialOrdersPaymentSummary = await evaluate(
 	client,
 	sessionId,
 	`(() => {
@@ -517,7 +517,7 @@ summary.commercialCobros = await evaluate(
 		return {
 			path: location.pathname,
 			hasPendingAndPaid: text.includes('pendientes de cobro') && text.includes('cobrados'),
-			hasHistoryText:
+			hasOrderPaymentText:
 				text.includes('metodo de cobro') ||
 				text.includes('cobrado') ||
 				text.includes('pendiente')
@@ -525,10 +525,10 @@ summary.commercialCobros = await evaluate(
 	})()`,
 	true,
 );
-summary.commercialCobrosScreenshot = await captureScreenshot(
+summary.commercialOrdersPaymentSummaryScreenshot = await captureScreenshot(
 	client,
 	sessionId,
-	"commercial-cobros.png",
+	"commercial-orders-payment-summary.png",
 );
 
 console.error("[m4-ui] checking commercial delivered order detail");

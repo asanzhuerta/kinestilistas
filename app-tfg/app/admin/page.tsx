@@ -41,19 +41,9 @@ const navItems = [
 		href: "/admin/audit",
 	},
 	{
-		title: "Operación M7",
-		icon: <ReportsIcon className="h-6 w-6" />,
-		href: "/admin/operations",
-	},
-	{
-		title: "Operaciones empresariales",
-		icon: <ReportsIcon className="h-6 w-6" />,
-		href: "/admin/enterprise-operations",
-	},
-	{
 		title: "Configuración",
 		icon: <SettingsIcon className="h-6 w-6" />,
-		href: "/admin/configuration",
+		href: "/admin/settings",
 	},
 ];
 

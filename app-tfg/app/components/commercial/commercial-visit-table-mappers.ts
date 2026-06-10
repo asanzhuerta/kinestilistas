@@ -2,6 +2,7 @@ import type { EntityTableItem } from "@/app/components/entity-table/entity-table
 import type { CommercialVisit } from "./commercial-visit-types";
 import {
 	formatVisitDate,
+	getVisitStatusClasses,
 	getVisitStatusLabel,
 	getVisitTypeLabel,
 } from "./commercial-visit-types";
@@ -29,14 +30,25 @@ export function mapCommercialVisitsToEntityTableItems(
 				: routeMetadata?.sequence
 					? `#${routeMetadata.sequence}`
 					: routeMetadata?.estimatedArrivalTime || null;
+		const visitTypeLabel = getVisitTypeLabel(visit.visit_type_id);
+		const visitStatusLabel = getVisitStatusLabel(visit.status_id);
+		const phone = visit.client?.user?.phone?.trim() || "Sin teléfono";
 		const badges = [
 			{
 				label: formatVisitDate(visit.scheduled_for_date),
 				className: "bg-slate-100 text-slate-700",
 			},
 			{
-				label: getVisitTypeLabel(visit.visit_type_id),
+				label: visitTypeLabel,
 				className: "bg-blue-50 text-blue-700",
+			},
+			{
+				label: visitStatusLabel,
+				className: getVisitStatusClasses(visit.status_id),
+			},
+			{
+				label: location,
+				className: "bg-slate-50 text-slate-700",
 			},
 		];
 
@@ -57,42 +69,21 @@ export function mapCommercialVisitsToEntityTableItems(
 		return {
 			id: visit.id,
 			title: visit.client?.name ?? "Cliente",
-			subtitle:
-				visit.client?.contact_name ||
-				visit.client?.user?.email ||
-				"Sin persona de contacto",
+			subtitle: phone,
 			imageUrl: visit.client?.user?.profile_image_url ?? null,
 			category: visit.client?.province || "Sin provincia",
-			status: getVisitStatusLabel(visit.status_id),
+			status: visitStatusLabel,
 			primaryDate: visit.scheduled_for_date,
 			secondaryDate: null,
 			badges,
-			fields: [
-				{
-					label: "Correo",
-					value: visit.client?.user?.email || "-",
-				},
-				{
-					label: "Ubicacion",
-					value: location,
-				},
-				{
-					label: "Tipo",
-					value: getVisitTypeLabel(visit.visit_type_id),
-				},
-				{
-					label: "Estado",
-					value: getVisitStatusLabel(visit.status_id),
-				},
-				{
-					label: "Ruta",
-					value: routeLabel || "-",
-				},
-				{
-					label: "Notas",
-					value: visit.notes || "-",
-				},
-			],
+			fields: visit.notes
+				? [
+						{
+							label: "Notas",
+							value: visit.notes,
+						},
+					]
+				: [],
 			actions: [
 				{
 					label: "Ver detalle",
@@ -103,13 +94,14 @@ export function mapCommercialVisitsToEntityTableItems(
 			searchText: [
 				visit.client?.name,
 				visit.client?.contact_name,
+				visit.client?.user?.phone,
 				visit.client?.user?.email,
 				visit.client?.city,
 				visit.client?.province,
 				visit.notes,
 				visit.result,
-				getVisitStatusLabel(visit.status_id),
-				getVisitTypeLabel(visit.visit_type_id),
+				visitStatusLabel,
+				visitTypeLabel,
 				routeLabel,
 			]
 				.filter(Boolean)

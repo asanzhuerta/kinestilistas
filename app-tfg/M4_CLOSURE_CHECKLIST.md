@@ -91,7 +91,7 @@ Rutas principales:
 - `/commercials/orders/[id]`
 - `/commercials/visits`
 - `/commercials/visits/[id]`
-- `/commercials/cobros`
+- `/commercials/orders/[id]` para seguimiento de cobro integrado
 
 Checklist de pedidos:
 
@@ -114,7 +114,7 @@ Checklist de reparto:
 
 Checklist de cobros:
 
-- [x] En `/commercials/cobros` solo aparecen pedidos entregados.
+- [x] En el detalle comercial del pedido entregado aparece el seguimiento mínimo de cobro.
 - [x] La lista distingue entre `pending` y `paid`.
 - [x] El comercial puede registrar método de cobro, fecha y notas.
 - [x] El detalle del pedido refleja el nuevo estado de cobro inmediatamente.
@@ -123,14 +123,14 @@ Checklist de cobros:
 Notas:
 
 - Validado a nivel servicio: borrador comercial, creación de pedido para cliente asignado, bloqueo de cobro antes de entrega, reparto sin pedidos bloqueado, QR obligatorio, entrega correcta, cobro y vuelta a `pending`.
-- Validado en sesión autenticada `comercial@email.com / comercial123$`: `/commercials/orders`, `/commercials/visits` y `/commercials/cobros` responden `200` y cargan con sesión `commercial`.
+- Validado en sesión autenticada `comercial@email.com / comercial123$`: `/commercials/orders`, `/commercials/visits` y el detalle de pedido comercial responden `200` y cargan con sesión `commercial`.
 - `GET /api/commercial/clients`: `8` clientes asignados al comercial.
 - `GET /api/commercial/orders`: `2` pedidos visibles para el comercial, con estados `confirmed` y `cancelled`, ambos con cobro `pending`.
 - `GET /api/commercial/visits?dateFrom=2026-06-01&dateTo=2026-06-01`: `2` visitas del día. El detalle `0a650fea-1ab3-4353-9e78-2d3ea26b4f60` es una visita `delivery` en estado `planned` para `Salón de belleza Lucy` con `1` pedido vinculado.
-- `/commercials/cobros` ya muestra seguimiento real de cobro para el pedido entregado `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
-- Verificación visual adicional en `/commercials/cobros`: la página renderiza los bloques `Pendientes de cobro` y `Cobrados`, y contiene el pedido entregado `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
+- El detalle comercial del pedido ya muestra seguimiento real de cobro para el pedido entregado `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
+- Verificación visual adicional en el detalle comercial: la página renderiza el bloque de seguimiento del cobro y contiene el pedido entregado `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
 - Verificación visual adicional en `/commercials/orders/2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`: el detalle renderiza `Entregado`, `Pendiente`, enlace a `Ver visita de reparto` y el bloque `Método de cobro`.
-- Prueba real del subflujo de cobro: al pasar el pedido `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2` de `pending` a `paid`, `/commercials/cobros` cambia de `1/0` a `0/1` en los contadores `Pendientes/Cobrados`, el detalle muestra `Cobrado`, y al revertir vuelve a `1/0`.
+- Prueba real del subflujo de cobro: al pasar el pedido `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2` de `pending` a `paid`, el detalle muestra `Cobrado`, registra método, fecha y usuario, y permite revertir a pendiente.
 - El smoke de cierre `M4` valida además que un reparto solo acepte pedidos `confirmed` del cliente correcto y rechace pedidos `cancelled`, `delivered` o de otro cliente.
 - Verificación adicional en sesión autenticada `comercial@email.com / comercial123$`: `POST /api/commercial/orders` contra un cliente no asignado devuelve `403`, confirmando el bloqueo por asignación.
 - Verificación adicional en `/commercials/orders/[id]`: un pedido temporal renderiza `QR del paquete` y `Código QR` correctamente.
@@ -191,7 +191,7 @@ Notas:
   - `/clients/orders`
   - `/commercials/orders`
   - `/commercials/visits`
-  - `/commercials/cobros`
+  - `/commercials/orders/[id]` para seguimiento de cobro integrado
   - `/admin/orders`
 - [x] No aparecen bucles de render, tormentas de peticiones ni errores de sesión al navegar por el flujo de `M4`.
 - [x] La base de datos no acumula estados inconsistentes tras la prueba manual completa.
@@ -207,7 +207,7 @@ Notas:
 - `.\node_modules\.bin\next.cmd build --webpack` OK tras el ajuste del layout raíz.
 - Smoke test de servicios `M4`: `19/19` OK con limpieza final de datos temporales.
 - Corregido el leak de conexiones en desarrollo en [data-source.ts](/C:/Users/MADAO/Desktop/TFG-AlejandroSanzHuerta/app-tfg/lib/typeorm/data-source.ts), que estaba disparando `53300 too many clients already`.
-- Comprobacion autenticada de rutas comerciales por HTTP: `/commercials/orders`, `/commercials/visits` y `/commercials/cobros` responden `200` con sesión valida de comercial.
+- Comprobacion autenticada de rutas comerciales por HTTP: `/commercials/orders`, `/commercials/visits` y el detalle de pedido comercial responden `200` con sesión valida de comercial.
 - Comprobacion autenticada de rutas cliente y admin por HTTP: `/clients/orders`, `/clients/orders/[id]`, `/admin/orders` y `/admin/orders/[id]` responden `200` con sesiones validas.
 - Verificación de UI hidratada reusable disponible en [m4-ui-headless-check.mjs](/C:/Users/MADAO/Desktop/TFG-AlejandroSanzHuerta/app-tfg/scripts/m4-ui-headless-check.mjs) y comando `npm run m4:ui-check`, con capturas generadas en `.codex-artifacts/m4-ui-evidence/`.
 - La pasada hidratada completa sobre cliente, comercial y admin finalizo sin reproducir los antiguos errores `Maximum update depth exceeded` ni `JWTSessionError`.
@@ -221,7 +221,7 @@ Notas:
 - [x] Tienes una captura del detalle de visita con pedidos vinculados.
 - [x] Dispones de evidencia del cierre de reparto con validación QR.
 - [x] Tienes una captura del detalle de pedido entregado.
-- [x] Tienes una captura del subflujo de cobro en `/commercials/cobros`.
+- [x] Tienes una captura del subflujo de cobro integrado en el detalle del pedido comercial.
 - [x] Queda resumido por escrito el flujo completo `pedido -> reparto -> entrega -> cobro`.
 - [x] Queda explicitado por escrito que no cubre el flujo mínimo de cobros: pagos parciales, facturación, conciliación, etc.
 

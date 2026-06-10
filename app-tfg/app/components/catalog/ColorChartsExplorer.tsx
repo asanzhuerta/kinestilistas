@@ -176,15 +176,6 @@ export default function ColorChartsExplorer({
 			),
 		[colorCharts],
 	);
-	const categoryBadgeClassMap = useMemo(
-		() =>
-			buildCategoryBadgeClassMap(
-				colorCharts.map(
-					(colorChart) => colorChart.productLine?.productCategory?.name,
-				),
-			),
-		[colorCharts],
-	);
 	const colorChartBadgeClassMap = useMemo(
 		() => buildCategoryBadgeClassMap(colorCharts.map((colorChart) => colorChart.name)),
 		[colorCharts],
@@ -376,7 +367,7 @@ export default function ColorChartsExplorer({
 							key={productLineId}
 							className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md"
 						>
-							<div className="flex flex-wrap items-start gap-4 p-5">
+							<div className="grid gap-4 p-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-start">
 								<UserAvatar
 									name={productLine.name}
 									imageUrl={productLine.image_url}
@@ -384,19 +375,11 @@ export default function ColorChartsExplorer({
 									shape="soft-square"
 									imageFit="contain"
 									imageBackgroundClass="bg-white"
-									className="flex-shrink-0"
+									className="sm:row-start-1"
 								/>
 
-								<div className="min-w-0 flex-1">
+								<div className="min-w-0">
 									<div className="flex flex-wrap gap-2">
-										<span
-											className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getCategoryBadgeClass(
-												productLine.productCategory?.name,
-												categoryBadgeClassMap,
-											)}`}
-										>
-											{productLine.productCategory?.name ?? "Sin categoría"}
-										</span>
 										<span className="inline-flex rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
 											{charts.length === 1 ? "1 carta" : `${charts.length} cartas`}
 										</span>
@@ -409,19 +392,19 @@ export default function ColorChartsExplorer({
 									>
 										{productLine.name}
 									</button>
-
-									{productLine.description ? (
-										<p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-											{productLine.description}
-										</p>
-									) : null}
 								</div>
+
+								{productLine.description ? (
+									<p className="text-sm leading-6 text-slate-600 sm:col-span-3">
+										{productLine.description}
+									</p>
+								) : null}
 
 								<button
 									type="button"
 									onClick={() => toggleLine(productLineId)}
 									aria-expanded={isExpanded}
-									className="rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+									className="w-fit rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800 sm:col-start-3 sm:row-start-1 sm:justify-self-end"
 								>
 									{isExpanded ? "Ocultar cartas" : "Ver cartas"}
 								</button>

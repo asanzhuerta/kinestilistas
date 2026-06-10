@@ -7,6 +7,10 @@ body {
 	background: #f8fafc;
 }
 
+:root {
+	--role-sidebar-modal-offset: 0px;
+}
+
 .glass-card {
 	background: rgba(255, 255, 255, 0.15);
 	backdrop-filter: blur(8px);
@@ -112,6 +116,37 @@ body {
 .role-sidebar-scroll::-webkit-scrollbar {
 	height: 0;
 	width: 0;
+}
+
+.app-modal-overlay {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(2, 6, 23, 0.82);
+	backdrop-filter: blur(2px);
+	-webkit-backdrop-filter: blur(2px);
+}
+
+.app-modal-dialog-centered {
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+@media (min-width: 1024px) {
+	.app-modal-overlay {
+		left: var(--role-sidebar-modal-offset, 0px);
+	}
+
+	.app-modal-dialog-centered {
+		left: calc(
+			var(--role-sidebar-modal-offset, 0px) +
+				((100vw - var(--role-sidebar-modal-offset, 0px)) / 2)
+		);
+	}
 }
 
 @keyframes pageEnter {

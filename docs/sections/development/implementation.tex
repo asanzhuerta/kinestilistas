@@ -173,13 +173,11 @@ Aunque no constituyen un módulo de negocio independiente del mismo volumen que 
 \begin{itemize}
     \item vista de auditoría administrativa y de accesos desde el área \texttt{/admin};
     \item exportación \texttt{CSV} de accesos y acciones administrativas desde \path{/admin/audit}, protegida por rol de administrador;
-    \item panel de operación transversal en \path{/admin/operations}, que agrega auditoría, rate limiting, integraciones y soporte técnico;
-    \item exportación \texttt{CSV} del informe operativo de \texttt{M7} desde \path{/admin/operations};
-    \item navegación administrativa agrupada para operación, integraciones, soporte y ajustes transversales dentro del bloque de configuración;
-    \item configuración global de políticas de rate limiting persistida en base de datos, con diagnóstico agregado de políticas activas, personalizadas y desactivadas;
-    \item panel de integraciones y soporte en \path{/admin/integrations}, con inventario operativo de Cloudinary, Nominatim, OSRM, QuickChart, SMTP transaccional y Web Push PWA, mostrando proveedor, estado de configuración, uso funcional y degradación prevista;
-    \item panel de soporte técnico en \path{/admin/support}, con inventario operativo de compatibilidad de navegador, PWA, \textit{service worker} y formularios seguros ante hidratación;
-    \item panel de operaciones empresariales en \path{/admin/enterprise-operations}, con configuraciones persistidas, integraciones externas, operaciones de intercambio y propuestas de pedido a proveedor;
+    \item configuración visible de canales de avisos automáticos desde \path{/admin/settings};
+    \item políticas de rate limiting persistidas y diagnosticables desde servicios internos, sin exposición como ajuste ordinario del administrador;
+    \item inventarios técnicos de integraciones y soporte, conservados para scripts, validación y mantenimiento;
+    \item base persistente para integraciones externas, operaciones de intercambio y propuestas de pedido a proveedor;
+    \item punto tipado de preparación para Factusol mediante n8n en \path{lib/integrations/factusol-n8n.ts};
     \item estados de carga por segmento para rutas con consultas de servidor relevantes, entre ellas catálogo, coloración, pedidos, fichas de salón, rutas, comunicaciones, auditoría y operaciones;
     \item optimización responsive de imágenes con \texttt{next/image}, especialmente en catálogo, cartas de color y galerías técnicas de servicios;
     \item cache selectiva de lecturas casi estáticas de catálogo y coloración, con invalidación tras escrituras administrativas;
@@ -187,19 +185,19 @@ Aunque no constituyen un módulo de negocio independiente del mismo volumen que 
     \item compatibilidad mínima de navegador con redirección a pantalla específica de no soporte.
 \end{itemize}
 
-El inventario de integraciones de soporte se calcula en \path{lib/integrations/operational-status.ts} y se expone también mediante \path{/api/admin/integrations/status}. Su finalidad es reforzar la observabilidad administrativa de los servicios de soporte que ya sostienen los módulos implementados.
+El inventario de integraciones de soporte se calcula en \path{lib/integrations/operational-status.ts} y se expone también mediante \path{/api/admin/integrations/status}. En la versión final de esta iteración no se presenta como una página de trabajo del administrador, sino como una lectura técnica que ayuda a validar qué servicios auxiliares sostienen los módulos implementados.
 
-La operación empresarial persistente se centraliza en \path{lib/typeorm/services/admin/enterprise-operations.ts}. Este servicio lista configuraciones, integraciones externas, operaciones recientes y propuestas a proveedor; además permite registrar nuevas operaciones de integración y generar propuestas de reposición desde productos activos del catálogo. La vista \path{/admin/enterprise-operations} consume este servicio y los endpoints \path{/api/admin/enterprise-operations}, \path{/api/admin/enterprise-operations/operations} y \path{/api/admin/enterprise-operations/supplier-proposals}.
+La operación empresarial persistente se centraliza en \path{lib/typeorm/services/admin/enterprise-operations.ts}. Este servicio lista configuraciones, integraciones externas, operaciones recientes y propuestas a proveedor; además permite registrar nuevas operaciones de integración y generar propuestas de reposición desde productos activos del catálogo. La pantalla visible de diagnóstico queda fuera del flujo ordinario, pero los endpoints \path{/api/admin/enterprise-operations}, \path{/api/admin/enterprise-operations/operations} y \path{/api/admin/enterprise-operations/supplier-proposals} se conservan como base para la futura integración real.
 
-El inventario de soporte técnico se calcula en \path{lib/support/operational-support.ts} y se expone mediante \path{/api/admin/support/status}. A diferencia de la configuración de rate limiting, no requiere migraciones ni tablas nuevas, ya que inspecciona activos y configuraciones existentes del propio proyecto: \path{proxy.ts}, \path{app/manifest.ts}, \path{public/sw.js}, iconos PWA y componentes transversales.
+El inventario de soporte técnico se calcula en \path{lib/support/operational-support.ts} y se expone mediante \path{/api/admin/support/status}. No requiere migraciones ni tablas nuevas, ya que inspecciona activos y configuraciones existentes del propio proyecto: \path{proxy.ts}, \path{app/manifest.ts}, \path{public/sw.js}, iconos PWA y componentes transversales. Su utilidad queda ligada a mantenimiento y pruebas, no a la operativa diaria del negocio.
 
-La vista agregada de operación se calcula en \path{lib/admin/operational-overview.ts} y se expone mediante \path{/api/admin/operations/status}. Este servicio combina contadores de auditoría, estado de políticas de rate limiting, resúmenes de los inventarios de integración y soporte, y métricas del registro empresarial persistente para ofrecer una lectura ejecutiva del estado de \texttt{M7}.
+La vista agregada de operación se calcula en \path{lib/admin/operational-overview.ts} y se expone mediante \path{/api/admin/operations/status}. Este servicio combina contadores de auditoría, estado de políticas de rate limiting, resúmenes de los inventarios de integración y soporte, y métricas del registro empresarial persistente para ofrecer una lectura técnica del estado de \texttt{M7}. Como ocurre con las rutas anteriores, queda fuera de la navegación final para no convertir la administración en una documentación viva del sistema.
 
-El informe operativo exportable se genera en \path{lib/admin/operational-report.ts} y se expone mediante \path{/api/admin/operations/report}. Su contenido transforma las secciones y métricas del resumen de operación en un fichero \texttt{CSV}, útil para conservar evidencias de revisión sin introducir una nueva entidad persistente.
+El informe operativo exportable se genera en \path{lib/admin/operational-report.ts} y se expone mediante \path{/api/admin/operations/report}. Su contenido transforma las secciones y métricas del resumen de operación en un fichero \texttt{CSV}, útil para conservar evidencias de revisión técnica sin introducir una nueva entidad persistente.
 
 La exportación de auditoría se centraliza en \path{lib/admin/audit-export.ts} y se pública mediante \path{/api/admin/audit/export}. El servicio genera bajo demanda ficheros \texttt{CSV} para accesos y acciones administrativas recientes, con límite de filas y ventana temporal configurable por query string. De este modo, el administrador puede conservar evidencias sin duplicar información ni añadir nuevas tablas al modelo físico.
 
-El diagnóstico de rate limiting se calcula en \path{lib/admin/rate-limit-diagnostics.ts} y se expone mediante \path{/api/admin/settings/rate-limits/status}. La vista \path{/admin/settings} utiliza esta misma lectura conceptual para mostrar un resumen operativo antes del formulario de edición, diferenciando políticas activas, personalizadas y desactivadas.
+El diagnóstico de rate limiting se calcula en \path{lib/admin/rate-limit-diagnostics.ts}. Los endpoints \path{/api/admin/settings/rate-limits/status} y \path{/api/admin/settings/rate-limits} quedan desactivados por defecto y solo responden si el entorno técnico habilita \texttt{ADMIN\_RATE\_LIMIT\_SETTINGS\_ENABLED=true}. La vista \path{/admin/settings} ya no permite editar estas políticas; se limita a la configuración funcional de avisos automáticos.
 
 \section{Scripts de Base de datos}
 
@@ -219,7 +217,7 @@ La serie de migraciones actual queda organizada del siguiente modo:
     \item Migración \texttt{032}: soporte para referencias cromáticas pedibles y persistencia de borradores.
     \item Migración \texttt{033}: vinculación de pedidos a visitas comerciales de reparto.
     \item Migración \texttt{034}: seguimiento mínimo de cobro sobre el propio pedido, con método, notas, fecha y usuario responsable.
-    \item Migración \texttt{035}: tabla \texttt{app\_rate\_limit\_policies} para configuración global de políticas de rate limiting desde administración.
+    \item Migración \texttt{035}: tabla \texttt{app\_rate\_limit\_policies} para sobrescrituras técnicas de políticas de rate limiting, no expuestas como ajuste ordinario de administración.
     \item Migración \texttt{036}: base persistente del primer incremento de \texttt{M5}, con fichas de clientes del salón, servicios, ficha técnica, uso de productos y sugerencias derivadas.
     \item Migración \texttt{037}: plantillas reutilizables de servicio para \texttt{M5}, con cabecera de plantilla y productos predefinidos asociados.
     \item Migración \texttt{038}: soporte para tonalidades enlazadas a usos de producto del salón y galería de imágenes de resultado final por servicio.
