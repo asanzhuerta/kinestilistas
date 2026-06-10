@@ -2,11 +2,20 @@ import { NextResponse } from "next/server";
 import { getRateLimitDiagnostics } from "@/lib/admin/rate-limit-diagnostics";
 import {
 	jsonFromError,
+	notFoundError,
 	requireRoleUser,
 	unauthorizedError,
 } from "@/lib/api/server";
 
+function isTechnicalRateLimitSettingsEnabled() {
+	return process.env.ADMIN_RATE_LIMIT_SETTINGS_ENABLED === "true";
+}
+
 export async function GET() {
+	if (!isTechnicalRateLimitSettingsEnabled()) {
+		return notFoundError("Configuración técnica no disponible");
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

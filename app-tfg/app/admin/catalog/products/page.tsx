@@ -170,7 +170,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
 					emptyMessage: "No hay productos registrados todavía.",
 					cardVariant: "catalog-product",
 					gridClassName:
-						"grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6",
+						"grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1920px]:grid-cols-6",
 				}}
 			/>
 		</div>
