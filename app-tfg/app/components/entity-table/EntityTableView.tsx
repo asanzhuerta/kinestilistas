@@ -49,6 +49,7 @@ function EntityCard({
 	const isMediaVariant = cardVariant === "media";
 	const isCatalogProductVariant = cardVariant === "catalog-product";
 	const isColorReferenceVariant = cardVariant === "color-reference";
+	const isCompactVisitVariant = cardVariant === "compact-visit";
 	const hasSubtitle = item.subtitle.trim().length > 0;
 	const hasSecondaryImage = Boolean(
 		item.secondaryImageUrl || item.secondaryImageLabel,
@@ -128,6 +129,83 @@ function EntityCard({
 		}
 
 		return colorReferenceCard;
+	}
+
+	if (isCompactVisitVariant) {
+		return (
+			<m.div
+				layout
+				{...motionProps}
+				className="flex h-full min-h-[12rem] flex-col rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+			>
+				<div className="flex items-start gap-3">
+					<UserAvatar
+						name={item.title}
+						imageUrl={item.imageUrl}
+						size="md"
+						shape="circle"
+						imageFit="cover"
+						imageBackgroundClass="bg-white"
+						className="flex-shrink-0"
+					/>
+
+					<div className="min-w-0 flex-1">
+						<p className="truncate text-sm font-semibold text-slate-900">
+							{item.title}
+						</p>
+						<p className="mt-0.5 truncate text-xs text-slate-600">
+							{item.subtitle}
+						</p>
+					</div>
+				</div>
+
+				{item.badges?.length ? (
+					<div className="mt-3 flex flex-wrap gap-1.5">
+						{item.badges.map((badge) => (
+							<span
+								key={`${item.id}-${badge.label}`}
+								className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none ${badge.className ?? "bg-slate-100 text-slate-700"}`}
+								title={badge.label}
+							>
+								<span className="truncate">{badge.label}</span>
+							</span>
+						))}
+					</div>
+				) : null}
+
+				{item.fields.length ? (
+					<div className="mt-3 space-y-1.5 text-xs text-slate-600">
+						{item.fields.map((field) => (
+							<p
+								key={`${item.id}-${field.label}`}
+								className="line-clamp-2 leading-snug"
+							>
+								<span className="font-medium text-slate-700">
+									{field.label}:
+								</span>{" "}
+								{field.value || "-"}
+							</p>
+						))}
+					</div>
+				) : null}
+
+				{item.actions?.length ? (
+					<div className="mt-auto flex flex-wrap gap-2 pt-3">
+						{item.actions.map((action) => (
+							<Link
+								key={`${item.id}-${action.label}`}
+								href={action.href}
+								className={`inline-flex min-h-9 flex-1 items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold transition ${getActionClasses(
+									action.variant,
+								)}`}
+							>
+								{action.label}
+							</Link>
+						))}
+					</div>
+				) : null}
+			</m.div>
+		);
 	}
 
 	if (isCatalogProductVariant) {

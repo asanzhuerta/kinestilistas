@@ -71,17 +71,6 @@ function isActiveHref(pathname: string, href: string) {
 		return true;
 	}
 
-	if (
-		href === "/admin/configuration" &&
-		["/admin/integrations", "/admin/support", "/admin/settings"].some(
-			(adminConfigurationHref) =>
-				pathname === adminConfigurationHref ||
-				pathname.startsWith(`${adminConfigurationHref}/`),
-		)
-	) {
-		return true;
-	}
-
 	if (href === "/admin" || href === "/clients" || href === "/commercials") {
 		return false;
 	}
@@ -103,10 +92,29 @@ export default function RoleSidebar({
 	const labels = roleSidebarLabels[role];
 	const sections = roleSidebarSections[role];
 	const roleDisplayName = roleDisplayNames[role];
+	const activeHref =
+		sections
+			.flatMap((section) => section.items)
+			.filter((item) => isActiveHref(pathname, item.href))
+			.toSorted((left, right) => right.href.length - left.href.length)[0]
+			?.href ?? null;
 	const sidebarStyle = {
 		"--role-sidebar-width": isExpanded ? "18rem" : "5rem",
 		"--sidebar-motion-duration": `${MOBILE_SIDEBAR_ANIMATION_MS}ms`,
 	} as CSSProperties;
+
+	useEffect(() => {
+		document.documentElement.style.setProperty(
+			"--role-sidebar-modal-offset",
+			isExpanded ? "18rem" : "5rem",
+		);
+
+		return () => {
+			document.documentElement.style.removeProperty(
+				"--role-sidebar-modal-offset",
+			);
+		};
+	}, [isExpanded]);
 
 	useEffect(() => {
 		return () => {
@@ -312,7 +320,7 @@ export default function RoleSidebar({
 							<div className="space-y-1">
 								{section.items.map((item) => {
 									const Icon = iconMap[item.icon];
-									const isActive = isActiveHref(pathname, item.href);
+									const isActive = item.href === activeHref;
 
 									return (
 										<Link
