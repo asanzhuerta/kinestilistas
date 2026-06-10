@@ -53,9 +53,9 @@ A continuación se presenta el catálogo de requisitos funcionales en formato ej
 \texttt{RF-M3-04} & Catálogo & Administrador & Mantener productos, categorías, líneas, subcategorías, recursos de apoyo, cartas de color y referencias desde administración. \\
 \hline
 \RFModuleHeader{M4. Pedidos, reparto y cobro}
-\texttt{RF-M4-01} & Pedidos y reparto & Cliente, comercial & Crear, editar, confirmar, cancelar y consultar pedidos, manteniendo líneas, productos, referencias de color y estados coherentes. \\
+\texttt{RF-M4-01} & Pedidos y reparto & Cliente, comercial & Crear, editar, confirmar, cancelar y consultar pedidos, manteniendo líneas, productos, referencias de color, imágenes de apoyo, descuentos visibles y estados coherentes. \\
 \hline
-\texttt{RF-M4-02} & Pedidos y reparto & Comercial, cliente & Vincular pedidos confirmados a visitas de reparto, validar entregas mediante QR y sincronizar el estado logístico con la visita. \\
+\texttt{RF-M4-02} & Pedidos y reparto & Comercial, cliente & Vincular pedidos confirmados a visitas de reparto, validar entregas mediante QR escaneado o introducción manual y sincronizar el estado logístico con la visita. \\
 \hline
 \texttt{RF-M4-03} & Pedidos y reparto & Comercial, administrador & Registrar el estado mínimo de cobro de pedidos entregados, incluyendo método, fecha, notas y usuario responsable. \\
 \hline
@@ -81,7 +81,7 @@ A continuación se presenta el catálogo de requisitos funcionales en formato ej
 \RFModuleHeader{M6. Comunicaciones, promociones y formación}
 \texttt{RF-M6-01} & Comunicaciones & Administrador, cliente, comercial & Crear, editar, publicar, retirar y consultar promociones comerciales segmentadas por rol, vigencia, producto o cliente. \\
 \hline
-\texttt{RF-M6-02} & Comunicaciones & Administrador, cliente & Gestionar segmentos o categorías de clientes y aplicar promociones o descuentos según pertenencia a dichos segmentos. \\
+\texttt{RF-M6-02} & Comunicaciones & Administrador, cliente & Gestionar segmentos o categorías jerárquicas de clientes y aplicar promociones o descuentos por pertenencia heredada, resolviendo como máximo una promoción por línea de pedido. \\
 \hline
 \texttt{RF-M6-03} & Comunicaciones & Administrador, todos los roles & Emitir notificaciones internas, correos, recordatorios y avisos Web Push asociados a eventos relevantes del sistema. \\
 \hline

@@ -39,6 +39,8 @@ En el flujo de autenticación, el sistema distingue entre credenciales incorrect
 
 Una vez dentro de la aplicación, cada rol dispone de una barra lateral izquierda con las opciones disponibles para su perfil. En escritorio la barra se muestra como panel lateral, identifica el rol activo mediante los textos \textit{PROFESIONAL}, \textit{COMERCIAL} o \textit{ADMINISTRADOR}, e incorpora el logo de la aplicación. La barra puede plegarse para dejar solo los iconos y sustituye a la antigua navegación inferior. En móvil se abre desde el botón \textit{Menu}, se cierra al elegir una opción o al pulsar fuera del panel, y mantiene las mismas rutas principales que la versión de escritorio.
 
+En el área de cliente, la misma barra lateral muestra junto al nombre del salón el badge del rango comercial asignado: \textit{Plata}, \textit{Oro} o \textit{Platino}. Este indicador permite reconocer de forma rápida el nivel comercial activo sin tener que abrir el perfil.
+
 \subsection{Uso como administrador}
 
 El panel de administración concentra actualmente cinco áreas principales:
@@ -76,20 +78,20 @@ Los flujos disponibles son:
     \item consultar la vista previa de la ruta del día, con clientes mapeados, tiempos aproximados y margen restante;
     \item acceder al listado de clientes asignados;
     \item abrir la ficha de un cliente para consultar su información operativa;
-    \item consultar, crear y actualizar visitas comerciales;
+    \item consultar, crear, filtrar y actualizar visitas comerciales;
     \item revisar desde avisos las visitas aplazadas automáticamente y abrir su reubicación cuando sea necesario;
     \item ajustar la jornada base, los puntos de salida y la duración estimada de visitas en \texttt{/commercials/settings};
     \item abrir la página \texttt{/commercials/routes} para visualizar la ruta en una vista dedicada;
     \item acceder al catálogo de productos activos con filtros por categoría, línea y subcategoría;
     \item consultar fichas de producto con información técnica, recursos asociados y vinculos a coloración;
     \item explorar cartas de color y localizar tonos concretos dentro de cada línea comercial;
-    \item preparar borradores de pedido y confirmarlos para clientes asignados;
+    \item preparar borradores de pedido y confirmarlos para clientes asignados, con búsqueda de producto y vista previa económica de descuentos;
     \item consultar el listado de pedidos del área comercial;
-    \item gestionar visitas de reparto, vincular pedidos confirmados y completar la entrega con validación QR;
+    \item gestionar visitas rutinarias y de reparto, vincular pedidos confirmados, terminar visitas sin entrega asociada y completar repartos con validación QR;
     \item registrar el cobro mínimo de pedidos ya entregados desde el detalle del pedido comercial.
 \end{enumerate}
 
-En el detalle de una visita de reparto, la confirmación de entrega se apoya en un flujo específico de QR. El comercial puede abrir el escaner, utilizar la cámara del dispositivo para capturar el código del paquete o introducir el valor manualmente si la lectura automática falla. Solo cuando el sistema dispone de todos los QR requeridos para los pedidos vinculados habilita la confirmación final de la entrega.
+En el detalle de una visita de reparto, la confirmación de entrega se apoya en un flujo específico de QR. El comercial puede abrir el escáner en un modal centrado y de pantalla completa; la cámara permanece activa leyendo de forma continua hasta detectar el código del paquete. Si el navegador o el dispositivo no permiten una lectura fiable, se conserva la introducción manual como alternativa. Solo cuando el sistema dispone de todos los QR requeridos para los pedidos vinculados habilita la confirmación final de la entrega.
 
 La información de ruta se apoya en la geolocalización del dispositivo cuando está disponible. Si el navegador no concede permiso, el sistema intenta utilizar el punto de salida guardado para el comercial.
 
@@ -118,11 +120,11 @@ La tarjeta de reparto indica, cuando existe una visita de entrega planificada:
 
 Si no existe reparto para ese día, o si la visita ha quedado fuera de la franja horaria permitida, el sistema lo comunica expresamente.
 
-Desde \texttt{/clients/orders}, el cliente puede consultar pedidos en distintos estados, abrir su detalle y seguir la trazabilidad mínima de reparto y cobro. Desde el catálogo, puede navegar por productos activos, aplicar filtros y abrir la ficha completa de cada referencia. Esa ficha reúne información técnica, recursos de apoyo y, cuando corresponde, accesos directos a cartas de color relacionadas.
+Desde \texttt{/clients/orders}, el cliente puede consultar pedidos en distintos estados, abrir su detalle y seguir la trazabilidad mínima de reparto y cobro. Al preparar un pedido, cada línea permite buscar el producto por texto además de usar el desplegable de referencias, y muestra la imagen del producto junto a la selección para reducir errores de captura. Desde el catálogo, puede navegar por productos activos, aplicar filtros y abrir la ficha completa de cada referencia. Esa ficha reúne información técnica, recursos de apoyo y, cuando corresponde, accesos directos a cartas de color relacionadas.
 
-Desde la pantalla de avisos, clientes y comerciales pueden activar las notificaciones \textit{Push PWA} si el navegador lo permite y la aplicación está correctamente configurada. Al activar este canal, las comunicaciones seleccionadas por administración pueden llegar también como notificación del sistema en el dispositivo. El canal interno de avisos se mantiene siempre disponible aunque el correo o la notificación push no estén configurados.
+Desde la pantalla de avisos, clientes y comerciales pueden activar las notificaciones del dispositivo mediante \textit{Web Push} si el navegador lo permite y la aplicación está correctamente configurada. Al activar este canal, las comunicaciones seleccionadas por administración pueden llegar también como notificación del sistema en el dispositivo. El canal interno de avisos se mantiene siempre disponible aunque el correo o la notificación push no estén configurados.
 
-En \texttt{/profile}, el sistema muestra el rango comercial asignado al salón: \textit{Plata}, \textit{Oro} o \textit{Platino}. El rango \textit{Plata} actúa como nivel base para todos los clientes profesionales que todavía no tengan una categoría superior asignada. Este badge resume las ventajas asociadas al segmento y enlaza con las promociones activas disponibles para el cliente, mientras que el panel inicial de cliente prioriza la información operativa de reparto.
+En \texttt{/profile}, el sistema muestra el rango comercial asignado al salón: \textit{Plata}, \textit{Oro} o \textit{Platino}. El rango \textit{Plata} actúa como nivel base para todos los clientes profesionales que todavía no tengan una categoría superior asignada. Los rangos son jerárquicos: un cliente \textit{Oro} puede beneficiarse también de promociones \textit{Plata}, y un cliente \textit{Platino} puede beneficiarse de promociones \textit{Oro} y \textit{Plata}. Este badge resume las ventajas asociadas al segmento y enlaza con las promociones activas disponibles para el cliente, mientras que el panel inicial de cliente prioriza la información operativa de reparto.
 
 Desde \texttt{/clients/salon-clients}, el cliente profesional puede crear fichas de clientes finales del salón, revisar su historial técnico y abrir el detalle de cada una. En dicho detalle puede actualizar la ficha base, registrar nuevos servicios con fecha, tipo de tratamiento, resumen del resultado, fórmula, notas técnicas y productos utilizados, seleccionar la tonalidad concreta cuando un tinte o producto de coloración enlaza referencias cromáticas, subir varias imágenes del resultado final, guardar plantillas reutilizables a partir del formulario actual, aplicar esas plantillas para acelerar nuevos registros, editar o eliminar servicios ya existentes y filtrar el historial por texto, tipo o fecha. Quedan además visibles las sugerencias de producto derivadas del historial acumulado y, para cada servicio, un borrador técnico editable de correo que puede copiarse o abrirse en el gestor de correo del dispositivo.
 
@@ -148,5 +150,5 @@ En escritorio, la vista de perfil se organiza como un panel compacto para consul
     \item el catálogo y la coloración forman parte del alcance operativo de comerciales y clientes;
     \item el flujo de pedidos, reparto y cobro mínimo ya está operativo;
     \item el módulo de salón ya dispone de un bloque operativo de fichas técnicas, historial con mantenimiento posterior, tonos e imágenes finales por servicio, plantillas reutilizables y borradores técnicos de correo, \textcolor{red}{aunque el envío real y otras automatizaciones siguen pendientes};
-    \item promociones, formaciones, avisos internos, correo SMTP, Web Push PWA y descuentos promocionales sobre pedidos forman parte del alcance operativo actual; \textcolor{red}{quedan para iteraciones futuras \textit{WhatsApp}, otros canales externos y automatizaciones más avanzadas.}
+    \item promociones, formaciones, avisos internos, correo SMTP, Web Push y descuentos promocionales sobre pedidos forman parte del alcance operativo actual; \textcolor{red}{quedan para iteraciones futuras \textit{WhatsApp}, otros canales externos y automatizaciones más avanzadas.}
 \end{itemize}

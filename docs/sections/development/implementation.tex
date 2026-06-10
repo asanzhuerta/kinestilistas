@@ -68,7 +68,8 @@ Actualmente ya estan implementados:
     \item asignación, desasignación y reasignacion de clientes a comerciales;
     \item geolocalización de establecimientos mediante búsqueda de dirección y confirmación manual sobre mapa;
     \item configuración operativa del comercial para jornada base, puntos de salida y duración de visitas;
-    \item alta, consulta y seguimiento de visitas comerciales por fecha, tipo y estado;
+    \item alta, consulta y seguimiento de visitas comerciales por fecha, tipo y estado, con filtros compactables en el listado para mantener una interfaz móvil manejable;
+    \item finalización explícita de visitas rutinarias desde su detalle cuando no existe flujo de reparto asociado;
     \item avisos automáticos al cliente cuando se crea una visita o se reubica una visita aplazada, y avisos operativos al comercial cuando el sistema aplaza visitas por horario;
     \item previsualización de ruta diaria con orden previsto, tiempos estimados, margen disponible e incidencias de franja horaria;
     \item consulta por parte del cliente de la hora aproximada de reparto cuando existe una visita de entrega planificada para el día.
@@ -100,11 +101,11 @@ El módulo \texttt{M4} se construye sobre las rutas de pedidos y cobros para cli
 Actualmente ya estan implementados:
 
 \begin{itemize}
-    \item creación, recuperación y confirmación de borradores de pedido tanto desde cliente como desde comercial;
+    \item creación, recuperación y confirmación de borradores de pedido tanto desde cliente como desde comercial, con buscador por producto, selector de referencia e imagen de producto en cada línea;
     \item consulta de historial y detalle de pedidos para cliente, comercial y administrador, con estados de pedido y de cobro diferenciados;
     \item regla de negocio que limita a un máximo de dos pedidos abiertos pendientes de cobro por cliente;
     \item bandeja comercial de pedidos confirmados pendientes de reparto y vinculación de dichos pedidos a visitas de tipo \texttt{delivery};
-    \item cierre de reparto con validación QR, transicion de pedidos a \texttt{delivered} y mantenimiento coherente de cancelaciones o aplazamientos;
+    \item cierre de reparto con validación QR mediante escáner continuo de cámara en un modal de pantalla completa, fallback manual, transicion de pedidos a \texttt{delivered} y mantenimiento coherente de cancelaciones o aplazamientos;
     \item flujo mínimo de cobro mediante estados \texttt{pending}/\texttt{paid}, con registro de método, fecha, notas y usuario que realiza la acción;
     \item consulta de ETA para cliente solo cuando existe una visita de reparto valida y alineada con el pedido.
 \end{itemize}
@@ -149,14 +150,14 @@ Actualmente ya están implementados:
 \begin{itemize}
     \item gestión administrativa de segmentos de cliente, con alta, edición, borrado, código, nombre, descripción y criterios comerciales;
     \item asignación manual de clientes profesionales a segmentos, con trazabilidad del administrador responsable y notas internas;
-    \item visualización del rango comercial del cliente en \path{/profile}, priorizando los segmentos \textit{Platino}, \textit{Oro} y \textit{Plata}, asignando \textit{Plata} como rango base cuando no existe una categoría superior y mostrando las promociones activas disponibles;
+    \item visualización del rango comercial del cliente en \path{/profile} y en la navegación lateral del área cliente mediante un badge metálico, priorizando los segmentos \textit{Platino}, \textit{Oro} y \textit{Plata}, asignando \textit{Plata} como rango base cuando no existe una categoría superior y mostrando las promociones activas disponibles;
     \item creación, edición, cambio de estado y borrado con confirmación inline de promociones con estado \texttt{draft}, \texttt{active} o \texttt{archived}, periodo de vigencia y asociación opcional a producto, línea comercial, cliente o segmento;
-    \item consulta de promociones activas por parte de clientes y comerciales, aplicando en cliente la visibilidad derivada de su asignación a segmentos;
+    \item consulta de promociones activas por parte de clientes y comerciales, aplicando en cliente la visibilidad derivada de su asignación a segmentos y de la jerarquía comercial \textit{Plata}, \textit{Oro} y \textit{Platino};
     \item aplicación automática de descuentos porcentuales activos sobre borradores y pedidos cuando la promoción coincide con el cliente, segmento, producto o línea comercial del pedido, manteniendo el descuento y el total final como \textit{snapshot} de línea;
     \item creación, edición, publicación, cancelación, finalización y borrado con confirmación inline de formaciones con modalidad, fecha, ubicación, contenido, capacidad opcional y estado de ciclo de vida;
     \item inscripción y cancelación de inscripción a formaciones publicadas, validando en servidor la disponibilidad de plazas;
     \item generación de notificaciones internas cuando se publican promociones o formaciones relevantes, respetando en promociones el alcance global, por cliente o por segmento definido por administración;
-    \item selección de canales de entrega para promociones y formaciones mediante \texttt{deliveryChannels}, manteniendo el canal interno y permitiendo añadir correo SMTP o Web Push PWA;
+    \item selección de canales de entrega para promociones y formaciones mediante \texttt{deliveryChannels}, manteniendo el canal interno y permitiendo añadir correo SMTP o Web Push;
     \item activación y revocación de suscripciones Web Push por cliente o comercial desde la pantalla de avisos, persistidas en \texttt{user\_push\_subscriptions};
     \item envío de correo electrónico mediante \texttt{Nodemailer} cuando existe configuración SMTP y envío Web Push mediante VAPID cuando el usuario tiene suscripciones activas;
     \item consulta y marcado de lectura de notificaciones por parte de clientes y comerciales, con indicador de avisos sin leer en sus paneles de inicio;
@@ -226,7 +227,7 @@ La serie de migraciones actual queda organizada del siguiente modo:
     \item Migración \texttt{039}: base persistente de \texttt{M6}, con segmentos de cliente, asignaciones cliente-segmento, promociones, formaciones, inscripciones, notificaciones internas y recordatorios.
     \item Migración \texttt{040}: ampliación persistente de \texttt{M7}, con configuraciones del sistema, integraciones externas, operaciones de integración, propuestas de pedido a proveedor y líneas de propuesta.
     \item Migración \texttt{041}: asignación del rango base \textit{Plata} a los clientes sin rango comercial previo, manteniendo la coherencia del sistema de ventajas de \texttt{M6}.
-    \item Migración \texttt{042}: ampliación multicanal apoyada en \texttt{M7}, con suscripciones Web Push de usuario e inserción de las integraciones externas \textit{SMTP transaccional} y \textit{Web Push PWA}.
+    \item Migración \texttt{042}: ampliación multicanal apoyada en \texttt{M7}, con suscripciones Web Push de usuario e inserción de las integraciones externas \textit{SMTP transaccional} y \textit{Web Push}.
 \end{itemize}
 
 Esta estrategia permite reconstruir el esquema de forma controlada en cualquier entorno, auditar los cambios estructurales del sistema y extender el proyecto sin depender de modificaciones manuales sobre la base de datos.
