@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import PageTransition from "@/app/components/animations/PageTransition";
+import H1Title from "@/app/components/H1Title";
 import UserAvatar from "@/app/components/users/UserAvatar";
 import { requireAdminSession } from "@/lib/auth/require-session";
 import { getClientById } from "@/lib/typeorm/services/commercial/client";
@@ -11,6 +13,38 @@ type PageProps = {
 		id: string;
 	}>;
 };
+
+function DetailRow({
+	label,
+	value,
+}: {
+	label: string;
+	value?: string | null;
+}) {
+	return (
+		<p className="text-sm leading-6 text-slate-700">
+			<span className="font-semibold text-slate-950">{label}:</span>{" "}
+			{value?.trim() || "-"}
+		</p>
+	);
+}
+
+function DetailCard({
+	title,
+	children,
+}: {
+	title: string;
+	children: ReactNode;
+}) {
+	return (
+		<div className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-sm">
+			<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+				{title}
+			</p>
+			<div className="mt-3 space-y-1">{children}</div>
+		</div>
+	);
+}
 
 export default async function AdminClientDetailPage({ params }: PageProps) {
 	const [{ id }] = await Promise.all([params, requireAdminSession()]);
@@ -30,32 +64,14 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
 	return (
 		<PageTransition>
 			<div className="space-y-6">
-				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-					<div>
-						<p className="text-sm font-medium uppercase tracking-wide text-slate-500">
-							M2 · Gestión comercial
-						</p>
-						<h1 className="text-3xl font-bold text-slate-900">
-							Ficha de cliente
-						</h1>
-						<p className="mt-2 text-sm text-slate-600">
-							Detalle del cliente y de su comercial asignado actual.
-						</p>
-					</div>
+				<H1Title
+					title="Ficha de cliente"
+					subtitle="Detalle del cliente profesional y su comercial asignado."
+				/>
 
-					<div className="flex flex-wrap gap-3">
-						<Link
-							href={`/admin/clients/assignments?clientId=${client.id}`}
-							className="inline-flex items-center rounded-2xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
-						>
-							Gestionar asignación
-						</Link>
-					</div>
-				</div>
-
-				<div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-					<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-						<div className="flex items-start gap-4">
+				<section className="glass-card rounded-3xl border border-white/30 bg-white/80 p-5 shadow-xl backdrop-blur sm:p-6">
+					<div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+						<div className="flex min-w-0 items-start gap-4">
 							<UserAvatar
 								name={client.user?.name ?? client.name}
 								imageUrl={client.user?.profile_image_url ?? null}
@@ -64,10 +80,13 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
 							/>
 
 							<div className="min-w-0">
-								<h2 className="text-2xl font-semibold text-slate-900">
+								<span className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-800">
+									Cliente profesional
+								</span>
+								<h1 className="mt-3 break-words text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
 									{client.name}
-								</h2>
-								<p className="mt-1 text-sm text-slate-500">
+								</h1>
+								<p className="mt-2 text-sm text-slate-600">
 									{client.user?.email || "Sin correo vinculado"}
 								</p>
 								<p className="mt-1 text-sm text-slate-500">
@@ -76,72 +95,82 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
 							</div>
 						</div>
 
-						<div className="mt-6 grid gap-4 sm:grid-cols-2">
-							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-								<p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-									Contacto
-								</p>
-								<p className="mt-2 text-sm text-slate-800">
-									<strong>Nombre:</strong> {client.contact_name || "-"}
-								</p>
-								<p className="mt-1 text-sm text-slate-800">
-									<strong>Correo:</strong> {client.user?.email || "-"}
-								</p>
-								<p className="mt-1 text-sm text-slate-800">
-									<strong>Teléfono:</strong> {client.user?.phone || "-"}
-								</p>
-								<p className="mt-1 text-sm text-slate-800">
-									<strong>Empresa:</strong> {client.user?.company || "-"}
-								</p>
-							</div>
+						<Link
+							href={`/admin/clients/assignments?clientId=${client.id}`}
+							className="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:w-auto"
+						>
+							Gestionar asignación
+						</Link>
+					</div>
+				</section>
 
-							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-								<p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-									Datos fiscales y ubicación
-								</p>
-								<p className="mt-2 text-sm text-slate-800">
-									<strong>NIF/CIF:</strong> {client.tax_id || "-"}
-								</p>
-								<p className="mt-1 text-sm text-slate-800">
-									<strong>Dirección:</strong> {client.address || "-"}
-								</p>
-								<p className="mt-1 text-sm text-slate-800">
-									<strong>Ciudad:</strong> {client.city || "-"}
-								</p>
-								<p className="mt-1 text-sm text-slate-800">
-									<strong>Provincia:</strong> {client.province || "-"}
-								</p>
-								<p className="mt-1 text-sm text-slate-800">
-									<strong>Código postal:</strong> {client.postal_code || "-"}
-								</p>
-								<p className="mt-1 text-sm text-slate-800">
-									<strong>Latitud:</strong> {client.lat || "-"}
-								</p>
-								<p className="mt-1 text-sm text-slate-800">
-									<strong>Longitud:</strong> {client.lng || "-"}
-								</p>
-							</div>
+				<div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+					<section className="glass-card rounded-3xl border border-white/30 bg-white/80 p-5 shadow-xl backdrop-blur sm:p-6">
+						<div className="mb-5">
+							<h2 className="text-xl font-semibold tracking-tight text-slate-950">
+								Datos del cliente
+							</h2>
+							<p className="mt-1 text-sm text-slate-600">
+								Información principal para administración y seguimiento.
+							</p>
 						</div>
 
-						<div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-							<p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-								Notas
-							</p>
-							<p className="mt-2 text-sm text-slate-800">
-								{client.notes || "Sin notas registradas."}
-							</p>
+						<div className="grid gap-4 md:grid-cols-2">
+							<DetailCard title="Contacto">
+								<DetailRow label="Nombre" value={client.contact_name} />
+								<DetailRow label="Correo" value={client.user?.email} />
+								<DetailRow label="Teléfono" value={client.user?.phone} />
+								<DetailRow label="Empresa" value={client.user?.company} />
+							</DetailCard>
+
+							<DetailCard title="Datos fiscales y ubicación">
+								<DetailRow label="NIF/CIF" value={client.tax_id} />
+								<DetailRow label="Dirección" value={client.address} />
+								<DetailRow label="Ciudad" value={client.city} />
+								<DetailRow label="Provincia" value={client.province} />
+								<DetailRow label="Código postal" value={client.postal_code} />
+							</DetailCard>
+						</div>
+
+						<div className="mt-4 grid gap-4 md:grid-cols-2">
+							<DetailCard title="Coordenadas">
+								<DetailRow label="Latitud" value={client.lat} />
+								<DetailRow label="Longitud" value={client.lng} />
+							</DetailCard>
+
+							<DetailCard title="Notas">
+								<p className="text-sm leading-6 text-slate-700">
+									{client.notes || "Sin notas registradas."}
+								</p>
+							</DetailCard>
 						</div>
 					</section>
 
-					<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-						<h2 className="text-lg font-semibold text-slate-900">
-							Comercial asignado actual
-						</h2>
+					<aside className="glass-card rounded-3xl border border-white/30 bg-white/80 p-5 shadow-xl backdrop-blur sm:p-6">
+						<div className="flex items-start justify-between gap-3">
+							<div>
+								<h2 className="text-xl font-semibold tracking-tight text-slate-950">
+									Comercial asignado
+								</h2>
+								<p className="mt-1 text-sm text-slate-600">
+									Cartera activa del cliente.
+								</p>
+							</div>
+							<span
+								className={`rounded-full px-3 py-1 text-xs font-semibold ${
+									assignedCommercial
+										? "border border-cyan-200 bg-cyan-50 text-cyan-800"
+										: "border border-amber-200 bg-amber-50 text-amber-800"
+								}`}
+							>
+								{assignedCommercial ? "Asignado" : "Pendiente"}
+							</span>
+						</div>
 
 						{assignedCommercial ? (
-							<div className="mt-4 space-y-4">
-								<div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
-									<p className="text-sm font-semibold text-cyan-900">
+							<div className="mt-5 space-y-4">
+								<div className="rounded-3xl border border-cyan-100 bg-cyan-50/80 p-5 shadow-sm">
+									<p className="text-base font-semibold text-cyan-950">
 										{assignedCommercialUser?.name || "Comercial sin nombre"}
 									</p>
 									<p className="mt-1 text-sm text-cyan-800">
@@ -149,31 +178,31 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
 									</p>
 								</div>
 
-								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-									<p className="text-sm text-slate-800">
-										<strong>Código:</strong>{" "}
-										{assignedCommercial.employee_code || "-"}
-									</p>
-									<p className="mt-1 text-sm text-slate-800">
-										<strong>Territorio:</strong>{" "}
-										{assignedCommercial.territory || "-"}
-									</p>
-									<p className="mt-1 text-sm text-slate-800">
-										<strong>Asignado el:</strong>{" "}
-										{formatDate(activeAssignment?.assigned_at)}
-									</p>
-									<p className="mt-1 text-sm text-slate-800">
-										<strong>Notas asignación:</strong>{" "}
-										{activeAssignment?.notes || "-"}
-									</p>
-								</div>
+								<DetailCard title="Asignación">
+									<DetailRow
+										label="Código"
+										value={assignedCommercial.employee_code}
+									/>
+									<DetailRow
+										label="Territorio"
+										value={assignedCommercial.territory}
+									/>
+									<DetailRow
+										label="Asignado el"
+										value={formatDate(activeAssignment?.assigned_at)}
+									/>
+									<DetailRow
+										label="Notas"
+										value={activeAssignment?.notes || "-"}
+									/>
+								</DetailCard>
 							</div>
 						) : (
-							<div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+							<div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50/80 p-5 text-sm leading-6 text-amber-800">
 								Este cliente no tiene comercial asignado actualmente.
 							</div>
 						)}
-					</section>
+					</aside>
 				</div>
 			</div>
 		</PageTransition>

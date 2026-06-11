@@ -51,6 +51,9 @@ function EntityCard({
 	const isColorReferenceVariant = cardVariant === "color-reference";
 	const isCompactVisitVariant = cardVariant === "compact-visit";
 	const hasSubtitle = item.subtitle.trim().length > 0;
+	const hasMobileVisibleFields = item.fields.some(
+		(field) => !field.mobileHidden,
+	);
 	const hasSecondaryImage = Boolean(
 		item.secondaryImageUrl || item.secondaryImageLabel,
 	);
@@ -106,7 +109,7 @@ function EntityCard({
 
 					<div className="max-w-[16ch]">
 						<p
-							className="text-2xl font-semibold leading-[1.05] text-white sm:text-[2rem]"
+							className="break-words text-lg font-semibold leading-[1.08] text-white sm:text-xl"
 							style={{ textShadow: "0 3px 16px rgba(0, 0, 0, 0.72)" }}
 						>
 							{item.title}
@@ -174,11 +177,19 @@ function EntityCard({
 				) : null}
 
 				{item.fields.length ? (
-					<div className="mt-3 space-y-1.5 text-xs text-slate-600">
+					<div
+						className={`mt-3 space-y-1.5 text-xs text-slate-600 ${
+							hasMobileVisibleFields ? "" : "hidden sm:block"
+						}`}
+					>
 						{item.fields.map((field) => (
 							<p
 								key={`${item.id}-${field.label}`}
-								className="line-clamp-2 leading-snug"
+								className={
+									field.mobileHidden
+										? "hidden leading-snug sm:line-clamp-2"
+										: "line-clamp-2 leading-snug"
+								}
 							>
 								<span className="font-medium text-slate-700">
 									{field.label}:
@@ -300,7 +311,9 @@ function EntityCard({
 							{item.fields.map((field) => (
 								<div
 									key={`${item.id}-${field.label}`}
-									className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2"
+									className={`rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 ${
+										field.mobileHidden ? "hidden sm:block" : ""
+									}`}
 								>
 									<p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
 										{field.label}
@@ -419,9 +432,18 @@ function EntityCard({
 							) : null}
 
 							{item.fields.length ? (
-								<div className="mt-4 grid grid-cols-1 gap-y-2 text-sm text-slate-600">
+								<div
+									className={`mt-4 grid grid-cols-1 gap-y-2 text-sm text-slate-600 ${
+										hasMobileVisibleFields ? "" : "hidden sm:grid"
+									}`}
+								>
 									{item.fields.map((field) => (
-										<div key={`${item.id}-${field.label}`}>
+										<div
+											key={`${item.id}-${field.label}`}
+											className={
+												field.mobileHidden ? "hidden sm:block" : undefined
+											}
+										>
 											<span className="font-medium text-slate-700">
 												{field.label}:
 											</span>{" "}
@@ -479,7 +501,12 @@ function EntityCard({
 							{item.fields.length ? (
 								<div className="mt-4 grid grid-cols-1 gap-y-2 text-sm text-slate-600 xl:gap-x-5">
 									{item.fields.map((field) => (
-										<div key={`${item.id}-${field.label}`}>
+										<div
+											key={`${item.id}-${field.label}`}
+											className={
+												field.mobileHidden ? "hidden sm:block" : undefined
+											}
+										>
 											<span className="font-medium text-slate-700">
 												{field.label}:
 											</span>{" "}
@@ -623,9 +650,16 @@ function EntityCard({
 					</div>
 
 					{!isHeadlineVariant && !isMediaVariant ? (
-						<div className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-slate-600">
+						<div
+							className={`mt-2.5 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-slate-600 ${
+								hasMobileVisibleFields ? "" : "hidden sm:grid"
+							}`}
+						>
 							{item.fields.map((field) => (
-								<div key={`${item.id}-${field.label}`}>
+								<div
+									key={`${item.id}-${field.label}`}
+									className={field.mobileHidden ? "hidden sm:block" : undefined}
+								>
 									<span className="font-medium text-slate-700">
 										{field.label}:
 									</span>{" "}

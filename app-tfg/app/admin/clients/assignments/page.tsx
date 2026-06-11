@@ -17,21 +17,6 @@ import type {
 } from "@/lib/contracts/client-commercial-assignment";
 import { formatDateTime } from "@/lib/utils/user-utils";
 
-// Construye una etiqueta descriptiva para un cliente comercial, incluyendo su nombre, ciudad y provincia si están disponibles.
-function getClientLabel(client: CommercialClient) {
-	const parts = [client.name];
-
-	if (client.city?.trim()) {
-		parts.push(client.city.trim());
-	}
-
-	if (client.province?.trim()) {
-		parts.push(client.province.trim());
-	}
-
-	return parts.join(" · ");
-}
-
 function AdminClientCommercialAssignmentsFallback() {
 	return (
 		<PageTransition>
@@ -110,6 +95,9 @@ function AdminClientCommercialAssignmentsPageContent() {
 
 	const selectedClient =
 		clients.find((client) => client.id === selectedClientId) ?? null;
+	const selectedClientVisible = filteredClients.some(
+		(client) => client.id === selectedClientId,
+	);
 	const selectedCommercial =
 		commercials.find((commercial) => commercial.id === selectedCommercialId) ??
 		null;
@@ -348,7 +336,7 @@ function AdminClientCommercialAssignmentsPageContent() {
 
 	return (
 		<PageTransition>
-			<div className="space-y-6">
+			<div className="max-w-full space-y-6 overflow-x-hidden">
 				{error ? (
 					<div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
 						{error}
@@ -361,8 +349,8 @@ function AdminClientCommercialAssignmentsPageContent() {
 					</div>
 				) : null}
 
-				<div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-					<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+				<div className="max-w-full space-y-6">
+					<section className="min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
 						<div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<div>
 								<h2 className="text-lg font-semibold text-slate-900">
@@ -379,73 +367,48 @@ function AdminClientCommercialAssignmentsPageContent() {
 								value={clientSearch}
 								onChange={(event) => setClientSearch(event.target.value)}
 								placeholder="Buscar cliente..."
-								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:max-w-xs"
+								className="min-w-0 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:max-w-xs"
 							/>
 						</div>
 
-						<div className="max-h-[34rem] space-y-3 overflow-y-auto pr-1">
-							{loadingBaseData ? (
-								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-									Cargando clientes...
-								</div>
-							) : filteredClients.length === 0 ? (
-								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-									No hay clientes que coincidan con la búsqueda.
-								</div>
-							) : (
-								filteredClients.map((client) => {
-									const isSelected = client.id === selectedClientId;
+						<select
+							value={selectedClientId}
+							onChange={(event) => setSelectedClientId(event.target.value)}
+							disabled={loadingBaseData || clients.length === 0}
+							className="mb-4 w-full min-w-0 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+						>
+							<option value="">
+								{loadingBaseData
+									? "Cargando clientes..."
+									: filteredClients.length === 0
+										? "Sin coincidencias"
+										: "Selecciona un cliente"}
+							</option>
+							{selectedClient && !selectedClientVisible ? (
+								<option value={selectedClient.id}>{selectedClient.name}</option>
+							) : null}
+							{filteredClients.map((client) => (
+								<option key={client.id} value={client.id}>
+									{client.name}
+								</option>
+							))}
+						</select>
 
-									return (
-										<button
-											key={client.id}
-											type="button"
-											onClick={() => setSelectedClientId(client.id)}
-											className={`w-full rounded-2xl border p-4 text-left transition ${
-												isSelected
-													? "border-cyan-300 bg-cyan-50 shadow-sm"
-													: "border-slate-200 bg-white hover:bg-slate-50"
-											}`}
-										>
-											<div className="flex items-start justify-between gap-3">
-												<div className="min-w-0">
-													<div className="truncate text-base font-semibold text-slate-900">
-														{client.name}
-													</div>
-													<div className="mt-1 text-sm text-slate-500">
-														{getClientLabel(client)}
-													</div>
-												</div>
-
-												{isSelected ? (
-													<span className="rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1 text-xs font-medium text-cyan-800">
-														Seleccionado
-													</span>
-												) : null}
-											</div>
-
-											<div className="mt-3 grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
-												<div>
-													<strong className="font-medium text-slate-900">
-														Contacto:
-													</strong>{" "}
-													{client.contact_name || "-"}
-												</div>
-												<div>
-													<strong className="font-medium text-slate-900">
-														Correo:
-													</strong>{" "}
-													{client.user?.email || "-"}
-												</div>
-											</div>
-										</button>
-									);
-								})
-							)}
+						<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+							<div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+								Cliente seleccionado
+							</div>
+							<div className="mt-1 truncate text-base font-semibold text-slate-900">
+								{selectedClient?.name ?? "Selecciona un cliente"}
+							</div>
+							<p className="mt-1 text-xs text-slate-500">
+								Mostrando {filteredClients.length} de {clients.length} clientes.
+							</p>
 						</div>
+
 					</section>
 
-					<section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+					<section className="min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
 						<div className="space-y-5">
 							<div>
 								<h2 className="text-lg font-semibold text-slate-900">
@@ -464,19 +427,6 @@ function AdminClientCommercialAssignmentsPageContent() {
 									</div>
 									<div className="mt-2 text-lg font-semibold text-slate-900">
 										{selectedClient.name}
-									</div>
-									<div className="mt-2 text-sm text-slate-600">
-										{selectedClient.address || "Dirección sin definir"}
-										{selectedClient.city ? ` · ${selectedClient.city}` : ""}
-										{selectedClient.province
-											? ` · ${selectedClient.province}`
-											: ""}
-									</div>
-									<div className="mt-2 text-sm text-slate-600">
-										<strong className="font-medium text-slate-900">
-											Contacto:
-										</strong>{" "}
-										{selectedClient.contact_name || "-"}
 									</div>
 								</div>
 							) : (

@@ -74,30 +74,37 @@ export function mapClientsToEntityTableItems(
 				{
 					label: "Correo",
 					value: client.user?.email || "-",
+					mobileHidden: true,
 				},
 				{
 					label: "Teléfono",
 					value: client.user?.phone || "-",
+					mobileHidden: true,
 				},
 				{
 					label: "Ciudad",
 					value: client.city || "-",
+					mobileHidden: true,
 				},
 				{
 					label: "Provincia",
 					value: client.province || "-",
+					mobileHidden: true,
 				},
 				{
 					label: "Comercial asignado",
 					value: assignedCommercialName,
+					mobileHidden: true,
 				},
 				{
 					label: "Correo comercial",
 					value: assignedCommercialEmail,
+					mobileHidden: true,
 				},
 				{
 					label: "Fecha asignación",
 					value: formatDate(activeAssignment?.assigned_at),
+					mobileHidden: true,
 				},
 			],
 			actions: [

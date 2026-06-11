@@ -15,6 +15,7 @@ export type EntityTableAction = {
 export type EntityTableField = {
 	label: string;
 	value: string;
+	mobileHidden?: boolean;
 };
 
 export type EntityTableExtraFilter = {
