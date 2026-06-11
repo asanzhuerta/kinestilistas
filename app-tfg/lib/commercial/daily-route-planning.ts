@@ -5,7 +5,7 @@ import type {
 } from "@/lib/contracts/commercial-route";
 import { MADRID_TIME_ZONE, parseTimeToMinutes } from "@/lib/utils/time";
 
-const APPROX_TRAVEL_SPEED_KMH = 28;
+const APPROX_TRAVEL_SPEED_KMH = 58;
 
 export type RoutePlanningCommercial = {
 	workday_start_time: string | null;
@@ -310,6 +310,7 @@ function buildTimingSummary(input: {
 	commercial: RoutePlanningCommercial;
 	visits: RoutePlanningVisit[];
 	now: MadridClock;
+	plannedStartMinutes: number;
 	approxTravelMinutes: number;
 	totalWaitingMinutes: number;
 	pastWindowStopsCount: number;
@@ -318,6 +319,7 @@ function buildTimingSummary(input: {
 		commercial,
 		visits,
 		now,
+		plannedStartMinutes,
 		approxTravelMinutes,
 		totalWaitingMinutes,
 		pastWindowStopsCount,
@@ -355,28 +357,31 @@ function buildTimingSummary(input: {
 	const totalWorkdayMinutes = hasValidWorkdayRange
 		? endMinutes! - startMinutes!
 		: null;
+	const availableRouteMinutes =
+		totalWorkdayMinutes === null
+			? null
+			: Math.max(endMinutes! - Math.max(plannedStartMinutes, startMinutes!), 0);
 	const elapsedWorkdayMinutes =
 		totalWorkdayMinutes === null
 			? null
 			: Math.min(Math.max(now.totalMinutes - startMinutes!, 0), totalWorkdayMinutes);
 	const remainingWorkdayMinutes =
-		totalWorkdayMinutes === null
-			? null
-			: Math.max(endMinutes! - Math.max(now.totalMinutes, startMinutes!), 0);
+		availableRouteMinutes;
 	const remainingOperationalMarginMinutes =
-		remainingWorkdayMinutes === null
+		availableRouteMinutes === null
 			? null
-			: Math.max(remainingWorkdayMinutes - totalCommittedRouteMinutes, 0);
+			: Math.max(availableRouteMinutes - totalCommittedRouteMinutes, 0);
 	const overbookedMinutes =
-		remainingWorkdayMinutes === null
+		availableRouteMinutes === null
 			? null
-			: Math.max(totalCommittedRouteMinutes - remainingWorkdayMinutes, 0);
+			: Math.max(totalCommittedRouteMinutes - availableRouteMinutes, 0);
 
 	const summary: CommercialRouteTimingSummary = {
 		hasWorkdayConfig,
 		hasValidWorkdayRange,
 		workdayStartTime,
 		workdayEndTime,
+		plannedStartTime: formatMinutesAsTimeLabel(plannedStartMinutes),
 		currentTimeLabel: now.timeLabel,
 		totalWorkdayMinutes,
 		elapsedWorkdayMinutes,
@@ -418,7 +423,7 @@ export function buildCommercialDailyRoutePlan(input: {
 			return now.totalMinutes;
 		}
 
-		return Math.max(now.totalMinutes, configuredStartMinutes);
+		return configuredStartMinutes;
 	})();
 
 	let totalTravelMinutes = 0;
@@ -494,6 +499,7 @@ export function buildCommercialDailyRoutePlan(input: {
 		commercial: input.commercial,
 		visits: input.visits,
 		now,
+		plannedStartMinutes,
 		approxTravelMinutes: totalTravelMinutes,
 		totalWaitingMinutes,
 		pastWindowStopsCount,

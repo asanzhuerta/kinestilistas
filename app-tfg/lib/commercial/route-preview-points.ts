@@ -7,29 +7,30 @@ export function buildRoutePreviewStartPoint(input: {
 	savedStartLng: number | null;
 	savedStartAddress: string | null;
 }) {
-	const usingCurrentLocation =
+	const hasCurrentLocation =
 		input.currentStartLat !== null && input.currentStartLng !== null;
+	const hasSavedStart =
+		input.savedStartLat !== null && input.savedStartLng !== null;
+	const usingCurrentLocation = !hasSavedStart && hasCurrentLocation;
 	const usingSavedStartFallback =
-		!usingCurrentLocation &&
-		input.savedStartLat !== null &&
-		input.savedStartLng !== null;
+		hasSavedStart;
 
-	const startPoint: RoutePoint | null = usingCurrentLocation
+	const startPoint: RoutePoint | null = usingSavedStartFallback
 		? {
-				id: "route-start-current",
-				label: "Ubicacion actual",
-				lat: input.currentStartLat!,
-				lng: input.currentStartLng!,
-				description: "Punto de inicio detectado desde el dispositivo",
+				id: "route-start-fallback",
+				label: "Punto de salida guardado",
+				lat: input.savedStartLat!,
+				lng: input.savedStartLng!,
+				description:
+					input.savedStartAddress || "Fallback configurado en perfil",
 			}
-		: usingSavedStartFallback
+		: usingCurrentLocation
 			? {
-					id: "route-start-fallback",
-					label: "Punto de salida guardado",
-					lat: input.savedStartLat!,
-					lng: input.savedStartLng!,
-					description:
-						input.savedStartAddress || "Fallback configurado en perfil",
+					id: "route-start-current",
+					label: "Ubicación actual",
+					lat: input.currentStartLat!,
+					lng: input.currentStartLng!,
+					description: "Punto de inicio detectado desde el dispositivo",
 				}
 			: null;
 
@@ -64,7 +65,7 @@ export function buildRoutePreviewEndPoint(input: {
 					...input.startPoint,
 					id: "route-end-return",
 					label: "Regreso al punto de salida",
-					description: "Fin de ruta volviendo al punto de inicio del dia",
+					description: "Fin de ruta volviendo al punto de inicio del día",
 				}
 			: configuredEndPoint;
 

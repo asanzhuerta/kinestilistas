@@ -172,6 +172,7 @@ export default function CommercialVisitsList() {
 					{
 						sequence: point.sequence ?? null,
 						estimatedArrivalTime: point.estimatedArrivalTime ?? null,
+						estimatedDepartureTime: point.estimatedDepartureTime ?? null,
 						isPastVisitWindow: point.isPastVisitWindow ?? false,
 					},
 				]),

@@ -11,11 +11,16 @@ import type { Relation } from "typeorm";
 
 import { Commercial } from "./Commercial";
 import { CommercialRouteStatus } from "./CommercialRouteStatus";
+import type { CommercialDailyRoutePlan } from "../../commercial/daily-route-planning";
 
 @Entity("commercial_routes")
 @Index("commercial_routes_commercial_id_index", ["commercial_id"])
 @Index("commercial_routes_route_date_index", ["route_date"])
 @Index("commercial_routes_status_id_index", ["status_id"])
+@Index("commercial_routes_commercial_id_route_date_index", [
+	"commercial_id",
+	"route_date",
+])
 export class CommercialRoute {
 	@PrimaryGeneratedColumn("uuid")
 	id!: string;
@@ -31,6 +36,18 @@ export class CommercialRoute {
 
 	@Column({ type: "smallint" })
 	status_id!: number;
+
+	@Column({ type: "text", nullable: true })
+	planning_signature!: string | null;
+
+	@Column({ type: "time", nullable: true })
+	planned_start_time!: string | null;
+
+	@Column({ type: "jsonb", nullable: true })
+	route_plan!: CommercialDailyRoutePlan | null;
+
+	@Column({ type: "timestamptz", nullable: true })
+	planned_at!: Date | null;
 
 	@ManyToOne(() => Commercial, { onDelete: "RESTRICT", onUpdate: "CASCADE" })
 	@JoinColumn({ name: "commercial_id" })

@@ -36,6 +36,7 @@ export type CommercialRouteTimingSummary = {
 	hasValidWorkdayRange: boolean;
 	workdayStartTime: string | null;
 	workdayEndTime: string | null;
+	plannedStartTime: string | null;
 	currentTimeLabel: string;
 	totalWorkdayMinutes: number | null;
 	elapsedWorkdayMinutes: number | null;

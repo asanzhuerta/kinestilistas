@@ -10,6 +10,7 @@ import {
 export type VisitRouteMetadata = {
 	sequence?: number | null;
 	estimatedArrivalTime?: string | null;
+	estimatedDepartureTime?: string | null;
 	isPastVisitWindow?: boolean;
 };
 
@@ -26,7 +27,11 @@ export function mapCommercialVisitsToEntityTableItems(
 			: undefined;
 		const routeLabel =
 			routeMetadata?.sequence && routeMetadata.estimatedArrivalTime
-				? `#${routeMetadata.sequence} · ${routeMetadata.estimatedArrivalTime}`
+				? `#${routeMetadata.sequence} · ${routeMetadata.estimatedArrivalTime}${
+						routeMetadata.estimatedDepartureTime
+							? `-${routeMetadata.estimatedDepartureTime}`
+							: ""
+					}`
 				: routeMetadata?.sequence
 					? `#${routeMetadata.sequence}`
 					: routeMetadata?.estimatedArrivalTime || null;

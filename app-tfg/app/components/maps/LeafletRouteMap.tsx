@@ -190,18 +190,25 @@ export default function LeafletRouteMap({
 	heightClassName = "h-[24rem]",
 }: LeafletRouteMapProps) {
 	const {
-		data: routeGeometry,
-		error: routeError,
-		run,
-		setData: setRouteGeometry,
-		setError: setRouteError,
+		data: mainRouteGeometry,
+		error: mainRouteError,
+		run: runMainRoute,
+		setData: setMainRouteGeometry,
+		setError: setMainRouteError,
+	} = useApiRequest<LatLngExpression[]>(EMPTY_ROUTE_POSITIONS);
+	const {
+		data: returnRouteGeometry,
+		error: returnRouteError,
+		run: runReturnRoute,
+		setData: setReturnRouteGeometry,
+		setError: setReturnRouteError,
 	} = useApiRequest<LatLngExpression[]>(EMPTY_ROUTE_POSITIONS);
 
 	useEffect(() => {
 		ensureLeafletDefaultIcon();
 	}, []);
 
-	const points = useMemo(() => {
+	const mainRoutePoints = useMemo(() => {
 		const result: RoutePoint[] = [];
 
 		if (startPoint) {
@@ -210,30 +217,85 @@ export default function LeafletRouteMap({
 
 		result.push(...waypoints);
 
+		return result;
+	}, [startPoint, waypoints]);
+
+	const returnRoutePoints = useMemo(() => {
+		if (!endPoint) {
+			return EMPTY_ROUTE_POINTS;
+		}
+
+		const previousPoint = waypoints[waypoints.length - 1] ?? startPoint;
+
+		if (!previousPoint) {
+			return EMPTY_ROUTE_POINTS;
+		}
+
+		return [previousPoint, endPoint];
+	}, [endPoint, startPoint, waypoints]);
+
+	const points = useMemo(() => {
+		const result = [...mainRoutePoints];
+
 		if (endPoint) {
 			result.push(endPoint);
 		}
 
 		return result;
-	}, [startPoint, endPoint, waypoints]);
+	}, [endPoint, mainRoutePoints]);
 
-	const pointPositions = useMemo(
-		() => points.map((point) => [point.lat, point.lng] as LatLngExpression),
-		[points],
+	const mainRoutePointPositions = useMemo(
+		() =>
+			mainRoutePoints.map((point) => [point.lat, point.lng] as LatLngExpression),
+		[mainRoutePoints],
+	);
+	const returnRoutePointPositions = useMemo(
+		() =>
+			returnRoutePoints.map(
+				(point) => [point.lat, point.lng] as LatLngExpression,
+			),
+		[returnRoutePoints],
 	);
 
 	useEffect(() => {
-		if (points.length < 2) {
-			setRouteGeometry([]);
-			setRouteError("");
+		if (mainRoutePoints.length < 2) {
+			setMainRouteGeometry([]);
+			setMainRouteError("");
 			return;
 		}
 
-		void run(() => loadRoutePolyline(points));
-	}, [points, run, setRouteError, setRouteGeometry]);
+		void runMainRoute(() => loadRoutePolyline(mainRoutePoints));
+	}, [
+		mainRoutePoints,
+		runMainRoute,
+		setMainRouteError,
+		setMainRouteGeometry,
+	]);
 
-	const routePositions =
-		routeGeometry && routeGeometry.length >= 2 ? routeGeometry : pointPositions;
+	useEffect(() => {
+		if (returnRoutePoints.length < 2) {
+			setReturnRouteGeometry([]);
+			setReturnRouteError("");
+			return;
+		}
+
+		void runReturnRoute(() => loadRoutePolyline(returnRoutePoints));
+	}, [
+		returnRoutePoints,
+		runReturnRoute,
+		setReturnRouteError,
+		setReturnRouteGeometry,
+	]);
+
+	const mainRoutePositions =
+		mainRouteGeometry && mainRouteGeometry.length >= 2
+			? mainRouteGeometry
+			: mainRoutePointPositions;
+	const returnRoutePositions =
+		returnRouteGeometry && returnRouteGeometry.length >= 2
+			? returnRouteGeometry
+			: returnRoutePointPositions;
+	const routeError = mainRouteError || returnRouteError;
 
 	const fallbackCenter: LatLngExpression = [36.5297, -6.2926];
 
@@ -302,6 +364,14 @@ export default function LeafletRouteMap({
 											</span>
 										</p>
 									) : null}
+									{point.estimatedDepartureTime ? (
+										<p className="text-slate-700">
+											Salida aprox:{" "}
+											<span className="font-medium">
+												{point.estimatedDepartureTime}
+											</span>
+										</p>
+									) : null}
 									{point.visitWindowStartTime && point.visitWindowEndTime ? (
 										<p className="text-slate-600">
 											Franja: {formatTimeLabel(point.visitWindowStartTime)} -{" "}
@@ -341,8 +411,23 @@ export default function LeafletRouteMap({
 						</Marker>
 					) : null}
 
-					{routePositions.length >= 2 ? (
-						<Polyline positions={routePositions} />
+					{mainRoutePositions.length >= 2 ? (
+						<Polyline
+							positions={mainRoutePositions}
+							pathOptions={{ color: "#2563eb", weight: 5, opacity: 0.86 }}
+						/>
+					) : null}
+
+					{returnRoutePositions.length >= 2 ? (
+						<Polyline
+							positions={returnRoutePositions}
+							pathOptions={{
+								color: "#dc2626",
+								weight: 5,
+								opacity: 0.86,
+								dashArray: "8 8",
+							}}
+						/>
 					) : null}
 				</MapContainer>
 			</div>

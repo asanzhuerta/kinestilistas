@@ -10,7 +10,6 @@ import {
 	buildRoutePreviewStartPoint,
 } from "@/lib/commercial/route-preview-points";
 import {
-	buildCommercialDailyRoutePlan,
 	getTodayRangeInMadrid,
 	parseCoordinate,
 	type RoutePlanningVisit,
@@ -18,6 +17,7 @@ import {
 import type { CommercialRoutePreviewResponse } from "@/lib/contracts/commercial-route";
 import { COMMERCIAL_VISIT_STATUS_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
+import { getOrCreateDailyRoutePlanForCommercial } from "@/lib/typeorm/services/commercial/commercial-route";
 import { listCommercialVisitsByCommercial } from "@/lib/typeorm/services/commercial/commercial-visit";
 
 // GET /api/commercial/routes/preview?startLat=&startLng=
@@ -64,8 +64,9 @@ export async function GET(request: Request) {
 			dateTo,
 		})) as RoutePlanningVisit[];
 
-		const routePlan = buildCommercialDailyRoutePlan({
+		const routePlan = await getOrCreateDailyRoutePlanForCommercial({
 			commercial,
+			routeDate: dateFrom,
 			visits,
 			startPoint,
 		});

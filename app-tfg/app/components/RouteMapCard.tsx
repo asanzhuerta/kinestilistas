@@ -368,7 +368,7 @@ export default function RouteMapCard({
 								</p>
 								<p className="mt-1 text-sm text-slate-600">
 									{hasValidWorkdayRange
-										? `${formatMinutes(timingSummary.totalWorkdayMinutes)} totales / ahora ${timingSummary.currentTimeLabel}`
+										? `${formatMinutes(timingSummary.totalWorkdayMinutes)} totales / plan desde ${formatTimeLabel(timingSummary.plannedStartTime)}`
 										: hasWorkdayConfig
 											? "El fin de jornada debe ser posterior al inicio."
 											: "Configura tu horario habitual en Ajustes."}
@@ -434,8 +434,8 @@ export default function RouteMapCard({
 								>
 									{hasValidWorkdayRange
 										? (overbookedMinutes ?? 0) > 0
-											? `La ruta ya supera la jornada disponible desde las ${timingSummary.currentTimeLabel}.`
-											: `Quedan ${formatMinutes(timingSummary.remainingWorkdayMinutes)} de jornada real desde ahora.`
+											? "La ruta supera la jornada planificada."
+											: `Quedan ${formatMinutes(timingSummary.remainingOperationalMarginMinutes)} de margen planificado.`
 										: "Completa tu horario para calcular el margen real."}
 								</p>
 							</div>
@@ -467,8 +467,8 @@ export default function RouteMapCard({
 					hasValidWorkdayRange &&
 					(overbookedMinutes ?? 0) > 0 ? (
 						<div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-							La planificación actual supera la jornada disponible desde este
-							momento por <strong>{formatMinutes(overbookedMinutes)}</strong>.
+							La planificación actual supera la jornada disponible por{" "}
+							<strong>{formatMinutes(overbookedMinutes)}</strong>.
 							Conviene reordenar o liberar paradas antes de salir a ruta.
 						</div>
 					) : null}
@@ -490,8 +490,7 @@ export default function RouteMapCard({
 
 					{!preview.usingCurrentLocation && preview.usingSavedStartFallback ? (
 						<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-							No se pudo usar tu ubicación actual. Se ha utilizado el punto de
-							salida guardado en tu perfil como fallback.
+							La planificación usa el punto de salida guardado en tu perfil.
 						</div>
 					) : null}
 
