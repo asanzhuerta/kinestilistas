@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import type {
 	EntitySortDirection,
 	EntitySortField,
@@ -33,6 +34,7 @@ type Props = {
 	totalCount: number;
 	resetFilters: () => void;
 	config?: EntityTableConfig;
+	headerAction?: ReactNode;
 };
 
 // Panel reutilizable de filtros para el listado generico de entidades.
@@ -61,6 +63,7 @@ export default function EntityTableFilters({
 	totalCount,
 	resetFilters,
 	config,
+	headerAction,
 }: Props) {
 	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 	const [contentHeight, setContentHeight] = useState(0);
@@ -86,13 +89,17 @@ export default function EntityTableFilters({
 					<strong>{totalCount}</strong>
 				</p>
 
-				<button
-					type="button"
-					onClick={() => setIsFiltersOpen((prev) => !prev)}
-					className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-gray-50"
-				>
-					{isFiltersOpen ? "Ocultar filtros" : "Mostrar filtros"}
-				</button>
+				<div className="flex flex-wrap items-center gap-2">
+					{headerAction}
+
+					<button
+						type="button"
+						onClick={() => setIsFiltersOpen((prev) => !prev)}
+						className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-gray-50"
+					>
+						{isFiltersOpen ? "Ocultar filtros" : "Mostrar filtros"}
+					</button>
+				</div>
 			</div>
 
 			<div

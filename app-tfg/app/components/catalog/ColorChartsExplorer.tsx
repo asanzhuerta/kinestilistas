@@ -219,16 +219,6 @@ export default function ColorChartsExplorer({
 		<div className="space-y-6">
 			<H1Title title={title} subtitle={subtitle} />
 
-			<div className="flex justify-end">
-				<button
-					type="button"
-					onClick={() => setShowAllColors((current) => !current)}
-					className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
-				>
-					{showAllColors ? "Volver a la vista por cartas" : "Ver todos los tonos"}
-				</button>
-			</div>
-
 			<EntityTableFilters
 				search={showAllColors ? flatColorsTable.search : table.search}
 				setSearch={showAllColors ? flatColorsTable.setSearch : table.setSearch}
@@ -310,6 +300,15 @@ export default function ColorChartsExplorer({
 						: Array.from(chartGroupsByLineId.keys()).length
 				}
 				resetFilters={showAllColors ? flatColorsTable.resetFilters : table.resetFilters}
+				headerAction={
+					<button
+						type="button"
+						onClick={() => setShowAllColors((current) => !current)}
+						className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+					>
+						{showAllColors ? "Vista por cartas" : "Ver todos los tonos"}
+					</button>
+				}
 				config={
 					showAllColors
 						? {
@@ -412,7 +411,7 @@ export default function ColorChartsExplorer({
 
 							{isExpanded ? (
 								<div className="border-t border-slate-200 bg-slate-50/70 p-4">
-									<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+									<div className="grid grid-cols-1 gap-4">
 										{charts.map((colorChart) => {
 											const isChartExpanded = expandedChartId === colorChart.id;
 											const chartReferences =
@@ -421,10 +420,10 @@ export default function ColorChartsExplorer({
 											return (
 												<article
 													key={colorChart.id}
-													className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+													className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
 												>
 													<div
-														className="relative min-h-[18rem] bg-slate-100 bg-cover bg-center"
+														className="relative min-h-[13rem] overflow-hidden bg-slate-900 bg-cover bg-center sm:min-h-[12rem]"
 														style={
 															colorChart.image_url
 																? {
@@ -433,9 +432,10 @@ export default function ColorChartsExplorer({
 																: undefined
 														}
 													>
-														<div className="flex min-h-[18rem] flex-col justify-between p-4 sm:p-5">
-															<div className="flex justify-end">
-																<div className="flex max-w-full flex-wrap justify-end gap-2">
+														<div className="absolute inset-0 bg-gradient-to-r from-slate-950/72 via-slate-950/28 to-slate-950/10" />
+														<div className="relative flex min-h-[13rem] flex-col justify-between gap-6 p-5 sm:min-h-[12rem] sm:p-6">
+															<div className="flex flex-wrap gap-2">
+																<div className="flex max-w-full flex-wrap gap-2">
 																	<span
 																		className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm ${getCategoryBadgeClass(
 																			colorChart.productLine?.name,
@@ -452,11 +452,11 @@ export default function ColorChartsExplorer({
 																</div>
 															</div>
 
-															<div className="max-w-[18ch]">
+															<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 																<button
 																	type="button"
 																	onClick={() => toggleChart(colorChart.id)}
-																	className="text-left text-2xl font-semibold leading-tight tracking-tight text-white transition hover:text-slate-100"
+																	className="max-w-2xl text-left text-2xl font-semibold leading-tight tracking-tight text-white transition hover:text-slate-100 sm:text-3xl"
 																	style={{
 																		textShadow:
 																			"0 3px 16px rgba(0, 0, 0, 0.72)",
@@ -464,30 +464,28 @@ export default function ColorChartsExplorer({
 																>
 																	{colorChart.name}
 																</button>
+
+																<div className="flex flex-wrap gap-2">
+																	<Link
+																		href={`${detailBasePath}/${colorChart.id}`}
+																		className="rounded-xl border border-white/70 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur transition hover:bg-white"
+																	>
+																		Abrir carta
+																	</Link>
+																	<button
+																		type="button"
+																		onClick={() => toggleChart(colorChart.id)}
+																		className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+																	>
+																		{isChartExpanded ? "Ocultar tonos" : "Ver tonos"}
+																	</button>
+																</div>
 															</div>
 														</div>
 													</div>
 
-													<div className="p-4">
-														<div className="flex flex-wrap gap-2">
-															<Link
-																href={`${detailBasePath}/${colorChart.id}`}
-																className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-															>
-																Abrir carta
-															</Link>
-															<button
-																type="button"
-																onClick={() => toggleChart(colorChart.id)}
-																className="rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
-															>
-																{isChartExpanded ? "Ocultar tonos" : "Ver tonos"}
-															</button>
-														</div>
-													</div>
-
 													{isChartExpanded ? (
-														<div className="mt-4">
+														<div className="border-t border-slate-200 bg-white">
 															<EntityTableView
 																items={mapColorReferencesToEntityTableItems(
 																	chartReferences,
