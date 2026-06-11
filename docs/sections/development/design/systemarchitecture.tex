@@ -1,4 +1,4 @@
-En esta sección se documenta la arquitectura lógica actual del sistema, centrada en la aplicación web, la organización del código y las integraciones externas necesarias para soportar los módulos ya implementados.
+En esta sección se documenta la arquitectura lógica actual del sistema, centrada en la aplicación web, la organización del código y las integraciones externas necesarias para soportar los módulos ya implementados. La Figura~\ref{fig:system-context} sitúa el sistema dentro de su contexto de uso y sus actores externos.
 
 \begin{figure}[H]
     \centering
@@ -11,7 +11,7 @@ En esta sección se documenta la arquitectura lógica actual del sistema, centra
 
 KinEstilistas se implementa como una aplicación web monolitica full-stack. La misma base de código contiene tanto la interfaz de usuario como la lógica de servidor y el acceso a datos, lo que simplifica la trazabilidad entre requisitos, código y despliegue.
 
-Los contenedores logicos que forman la solución son los siguientes:
+Los contenedores logicos que forman la solución se sintetizan en la Figura~\ref{fig:system-containers} y son los siguientes:
 
 \begin{itemize}
     \item \textbf{Cliente web}: interfaz renderizada con \texttt{Next.js} y \texttt{React}, diferenciada por rol.
@@ -40,7 +40,7 @@ La aplicación resuelve además varias responsabilidades transversales desde una
 
 \subsection{Diseño detallado}
 
-La estructura del código combina una organización por capas técnicas con subdirectorios funcionales para las áreas principales del dominio.
+La estructura del código combina una organización por capas técnicas con subdirectorios funcionales para las áreas principales del dominio. La Figura~\ref{fig:next-components} resume los componentes internos más relevantes de la aplicación \texttt{Next.js}.
 
 \begin{itemize}
     \item \texttt{app/admin/}, \texttt{app/commercials/} y \texttt{app/clients/}: entrada funcional por rol.
