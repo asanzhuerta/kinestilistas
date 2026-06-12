@@ -67,6 +67,11 @@ const sections: Array<{
 				icon: <OrderIcon className="h-6 w-6" />,
 				href: "/commercials/orders",
 			},
+			{
+				title: "Preparar repartos",
+				icon: <OrderIcon className="h-6 w-6" />,
+				href: "/commercials/orders/preparation",
+			},
 		],
 	},
 	{

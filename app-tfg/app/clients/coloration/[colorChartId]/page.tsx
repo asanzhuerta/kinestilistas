@@ -23,6 +23,7 @@ export default async function ClientColorChartDetailPage({
 			title="Carta de color"
 			subtitle="Localiza tonos y referencias en tu catálogo profesional"
 			backHref="/clients/coloration"
+			toneDetailBasePath="/clients/coloration/tones"
 			colorChart={toClientPlain(serializeColorChartDetail(colorChart))}
 		/>
 	);

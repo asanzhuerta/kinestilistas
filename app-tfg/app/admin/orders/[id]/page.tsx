@@ -35,6 +35,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
 			initialDetail={detail}
 			mode="admin"
 			updateApiPath={`/api/admin/orders/${id}`}
+			paymentApiPath={`/api/admin/orders/${id}/payments`}
 			relatedLinks={[
 				{
 					label: "Ver ficha del cliente",

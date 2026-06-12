@@ -135,6 +135,11 @@ export const roleSidebarSections: Record<
 					icon: "color",
 				},
 				{ title: "Pedidos", href: "/commercials/orders", icon: "orders" },
+				{
+					title: "Preparar repartos",
+					href: "/commercials/orders/preparation",
+					icon: "orders",
+				},
 			],
 		},
 		{

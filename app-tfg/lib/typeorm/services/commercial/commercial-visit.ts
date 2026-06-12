@@ -7,6 +7,7 @@ import { CommercialVisit } from "@/lib/typeorm/entities/CommercialVisit";
 import { Client } from "@/lib/typeorm/entities/Client";
 import { Commercial } from "@/lib/typeorm/entities/Commercial";
 import { Order } from "@/lib/typeorm/entities/Order";
+import { OrderDelivery } from "@/lib/typeorm/entities/OrderDelivery";
 import { Repository } from "typeorm";
 import {
 	COMMERCIAL_VISIT_STATUS_IDS,
@@ -14,9 +15,17 @@ import {
 	ORDER_STATUS_IDS,
 } from "@/lib/typeorm/constants/catalog-ids";
 import {
+	extractOrderDeliveryIdFromQrValue,
 	extractOrderIdFromQrValue,
+	normalizeOrderDeliveryQrValues,
 	normalizeOrderQrValues,
 } from "@/lib/orders/qr";
+import {
+	listAvailableOrderDeliveriesForVisit,
+	loadOrderDeliveriesByIdsForVisitValidation,
+	mapOrderDeliveryToSummary,
+	syncOrderDeliveredStatusFromDeliveries,
+} from "@/lib/typeorm/services/orders/order-delivery";
 import { getActiveAssignmentByCommercialAndClient } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
 import { normalizeText } from "@/lib/utils/text";
 import { parseTimeToMinutes } from "@/lib/utils/time";
@@ -139,6 +148,16 @@ function normalizeOrderIds(orderIds: string[] | null | undefined) {
 	);
 }
 
+function normalizeDeliveryIds(deliveryIds: string[] | null | undefined) {
+	return Array.from(
+		new Set(
+			(Array.isArray(deliveryIds) ? deliveryIds : [])
+				.map((deliveryId) => String(deliveryId ?? "").trim())
+				.filter(Boolean),
+		),
+	);
+}
+
 function validateDeliveredOrderQrs(
 	finalAssignedOrderIds: string[],
 	deliveredOrderQrs: string[] | null | undefined,
@@ -171,6 +190,125 @@ function validateDeliveredOrderQrs(
 	}
 
 	return scannedOrderIds;
+}
+
+function validateDeliveredDeliveryQrs(
+	finalAssignedDeliveryIds: string[],
+	deliveredDeliveryQrs: string[] | null | undefined,
+) {
+	const scannedDeliveryIds = normalizeOrderDeliveryQrValues(deliveredDeliveryQrs);
+
+	if (finalAssignedDeliveryIds.length === 0) {
+		return [] as string[];
+	}
+
+	if (scannedDeliveryIds.length === 0) {
+		throw new UpdateCommercialVisitError(
+			"Debes escanear o pegar los QR de todos los repartos antes de completar la visita",
+			409,
+			"DELIVERY_VISIT_QR_REQUIRED",
+		);
+	}
+
+	if (
+		scannedDeliveryIds.length !== finalAssignedDeliveryIds.length ||
+		finalAssignedDeliveryIds.some(
+			(deliveryId) => !scannedDeliveryIds.includes(deliveryId),
+		)
+	) {
+		throw new UpdateCommercialVisitError(
+			"Los QR escaneados no coinciden con todos los repartos vinculados a la visita",
+			409,
+			"DELIVERY_VISIT_QR_MISMATCH",
+		);
+	}
+
+	return scannedDeliveryIds;
+}
+
+async function validateOrderDeliveryIdsForVisit(
+	manager: Awaited<ReturnType<typeof getDataSource>>["manager"],
+	input: {
+		clientId: string;
+		visitId?: string | null;
+		deliveryIds?: string[] | null;
+		errorFactory?: (message: string, status: number, code: string) => Error;
+	},
+) {
+	const normalizedDeliveryIds = normalizeDeliveryIds(input.deliveryIds);
+	const createError =
+		input.errorFactory ??
+		((message: string, status: number, code: string) =>
+			new UpdateCommercialVisitError(message, status, code));
+
+	if (normalizedDeliveryIds.length === 0) {
+		return [] as string[];
+	}
+
+	const selectedDeliveries = await loadOrderDeliveriesByIdsForVisitValidation(
+		manager,
+		normalizedDeliveryIds,
+	);
+
+	if (selectedDeliveries.length !== normalizedDeliveryIds.length) {
+		throw createError(
+			"Uno o varios repartos indicados no existen",
+			404,
+			"VISIT_DELIVERY_NOT_FOUND",
+		);
+	}
+
+	for (const delivery of selectedDeliveries) {
+		if (delivery.order?.client_id !== input.clientId) {
+			throw createError(
+				"Solo puedes vincular repartos del mismo cliente de la visita",
+				409,
+				"VISIT_DELIVERY_CLIENT_MISMATCH",
+			);
+		}
+
+		if (delivery.order?.status_id !== ORDER_STATUS_IDS.CONFIRMED) {
+			throw createError(
+				"Solo se pueden vincular repartos de pedidos confirmados",
+				409,
+				"VISIT_DELIVERY_ORDER_STATUS_INVALID",
+			);
+		}
+
+		if (delivery.status === "delivered") {
+			throw createError(
+				"Hay repartos seleccionados que ya constan como entregados",
+				409,
+				"VISIT_DELIVERY_ALREADY_DELIVERED",
+			);
+		}
+
+		if (delivery.status === "cancelled") {
+			throw createError(
+				"Hay repartos seleccionados que estan cancelados",
+				409,
+				"VISIT_DELIVERY_CANCELLED",
+			);
+		}
+
+		if (
+			delivery.delivery_visit_id &&
+			delivery.delivery_visit_id !== (input.visitId ?? null)
+		) {
+			if (
+				delivery.deliveryVisit?.status_id !==
+				COMMERCIAL_VISIT_STATUS_IDS.POSTPONED
+			) {
+				throw createError(
+					"Hay repartos seleccionados que ya estan asignados a otra visita",
+					409,
+					"VISIT_DELIVERY_ALREADY_ASSIGNED",
+				);
+			}
+		}
+	}
+
+	return normalizedDeliveryIds;
 }
 
 async function validateDeliveryOrderIdsForVisit(
@@ -305,19 +443,24 @@ type CreateCommercialVisitInput = {
 	visitTypeId: number;
 	notes?: string | null;
 	orderIds?: string[] | null;
+	deliveryIds?: string[] | null;
 };
 
 type UpdateCommercialVisitInput = {
 	visitId: string;
 	commercialId: string;
+	actedByUserId?: string | null;
 	deliveredOrderQrs?: string[] | null;
+	deliveredDeliveryQrs?: string[] | null;
 	scannedOrderQr?: string | null;
+	scannedDeliveryQr?: string | null;
 	scheduledForDate?: string;
 	visitTypeId?: number;
 	statusId?: number;
 	notes?: string | null;
 	result?: string | null;
 	orderIds?: string[] | null;
+	deliveryIds?: string[] | null;
 };
 
 type ListCommercialVisitsByCommercialInput = {
@@ -507,20 +650,43 @@ export async function createCommercialVisit(input: CreateCommercialVisitInput) {
 		}
 
 		const normalizedInputOrderIds = normalizeOrderIds(input.orderIds);
+		const normalizedInputDeliveryIds = normalizeDeliveryIds(input.deliveryIds);
 
 		if (
 			Number(input.visitTypeId) !== COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
-			normalizedInputOrderIds.length > 0
+			(normalizedInputOrderIds.length > 0 ||
+				normalizedInputDeliveryIds.length > 0)
 		) {
 			throw new CreateCommercialVisitError(
-				"Solo las visitas de reparto pueden crearse con pedidos vinculados",
+				"Solo las visitas de reparto pueden crearse con repartos vinculados",
 				409,
 				"VISIT_ORDERS_REQUIRE_DELIVERY_TYPE",
 			);
 		}
 
-		const validatedOrderIds =
+		if (
+			normalizedInputOrderIds.length > 0 &&
+			normalizedInputDeliveryIds.length > 0
+		) {
+			throw new CreateCommercialVisitError(
+				"No mezcles pedidos y repartos en la misma visita. Prepara repartos y vincula esos repartos.",
+				409,
+				"VISIT_DELIVERY_MIXED_LINKS",
+			);
+		}
+
+		const validatedDeliveryIds =
 			Number(input.visitTypeId) === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY
+				? await validateOrderDeliveryIdsForVisit(manager, {
+						clientId: input.clientId,
+						deliveryIds: normalizedInputDeliveryIds,
+						errorFactory: (message, status, code) =>
+							new CreateCommercialVisitError(message, status, code),
+					})
+				: [];
+		const validatedOrderIds =
+			Number(input.visitTypeId) === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
+			validatedDeliveryIds.length === 0
 				? await validateDeliveryOrderIdsForVisit(manager, {
 						clientId: input.clientId,
 						orderIds: normalizedInputOrderIds,
@@ -531,10 +697,11 @@ export async function createCommercialVisit(input: CreateCommercialVisitInput) {
 
 		if (
 			Number(input.visitTypeId) === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
+			validatedDeliveryIds.length === 0 &&
 			validatedOrderIds.length === 0
 		) {
 			throw new CreateCommercialVisitError(
-				"Debes seleccionar al menos un pedido confirmado para crear un reparto",
+				"Debes seleccionar al menos un reparto preparado para crear una visita de reparto",
 				409,
 				"DELIVERY_VISIT_REQUIRES_ORDERS",
 			);
@@ -553,7 +720,20 @@ export async function createCommercialVisit(input: CreateCommercialVisitInput) {
 		await visitRepo.save(visit);
 		await notifyClientVisitCreated(manager, visit);
 
-		if (validatedOrderIds.length > 0) {
+		if (validatedDeliveryIds.length > 0) {
+			await manager
+				.getRepository(OrderDelivery)
+				.createQueryBuilder()
+				.update(OrderDelivery)
+				.set({
+					delivery_visit_id: visit.id,
+					status: "planned",
+				})
+				.where("id IN (:...deliveryIds)", {
+					deliveryIds: validatedDeliveryIds,
+				})
+				.execute();
+		} else if (validatedOrderIds.length > 0) {
 			await orderRepo
 				.createQueryBuilder()
 				.update(Order)
@@ -625,6 +805,31 @@ async function listLinkedOrdersForVisit(visitId: string) {
 	return orders.map(mapOrderToDeliveryOrderSummary);
 }
 
+async function listLinkedDeliveriesForVisit(visitId: string) {
+	const ds = await getDataSource();
+	const deliveryRepo = ds.getRepository(OrderDelivery);
+	const linkedDeliveries = await deliveryRepo
+		.createQueryBuilder("delivery")
+		.leftJoinAndSelect("delivery.order", "order")
+		.leftJoinAndSelect("order.client", "client")
+		.leftJoinAndSelect("client.user", "clientUser")
+		.leftJoinAndSelect("order.status", "orderStatus")
+		.leftJoinAndSelect("delivery.commercial", "commercial")
+		.leftJoinAndSelect("commercial.user", "commercialUser")
+		.leftJoinAndSelect("delivery.deliveryVisit", "deliveryVisit")
+		.leftJoinAndSelect("deliveryVisit.status", "deliveryVisitStatus")
+		.leftJoinAndSelect("delivery.lines", "deliveryLines")
+		.leftJoinAndSelect("deliveryLines.orderLine", "orderLine")
+		.leftJoinAndSelect("orderLine.product", "product")
+		.leftJoinAndSelect("product.productLine", "productLine")
+		.leftJoinAndSelect("orderLine.colorReference", "colorReference")
+		.where("delivery.delivery_visit_id = :visitId", { visitId })
+		.orderBy("delivery.created_at", "DESC")
+		.getMany();
+
+	return linkedDeliveries.map(mapOrderDeliveryToSummary);
+}
+
 async function listAvailableOrdersForDeliveryVisit(
 	clientId: string,
 	visitId: string,
@@ -659,6 +864,14 @@ async function listAvailableOrdersForDeliveryVisit(
 	return orders.map(mapOrderToDeliveryOrderSummary);
 }
 
+async function listAvailableDeliveriesForDeliveryVisit(
+	clientId: string,
+	visitId: string,
+) {
+	const ds = await getDataSource();
+	return listAvailableOrderDeliveriesForVisit(ds.manager, { clientId, visitId });
+}
+
 async function listCompletedElsewhereOrdersForVisit(visit: CommercialVisit) {
 	if (
 		visit.visit_type_id !== COMMERCIAL_VISIT_TYPE_IDS.DELIVERY ||
@@ -689,6 +902,46 @@ async function listCompletedElsewhereOrdersForVisit(visit: CommercialVisit) {
 	return orders.map(mapOrderToDeliveryOrderSummary);
 }
 
+async function listCompletedElsewhereDeliveriesForVisit(visit: CommercialVisit) {
+	if (
+		visit.visit_type_id !== COMMERCIAL_VISIT_TYPE_IDS.DELIVERY ||
+		visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.POSTPONED
+	) {
+		return [] as ReturnType<typeof mapOrderDeliveryToSummary>[];
+	}
+
+	const ds = await getDataSource();
+	const deliveryRepo = ds.getRepository(OrderDelivery);
+	const deliveries = await deliveryRepo
+		.createQueryBuilder("delivery")
+		.leftJoinAndSelect("delivery.order", "order")
+		.leftJoinAndSelect("order.client", "client")
+		.leftJoinAndSelect("client.user", "clientUser")
+		.leftJoinAndSelect("order.status", "orderStatus")
+		.leftJoinAndSelect("delivery.commercial", "commercial")
+		.leftJoinAndSelect("commercial.user", "commercialUser")
+		.leftJoinAndSelect("delivery.deliveryVisit", "deliveryVisit")
+		.leftJoinAndSelect("deliveryVisit.status", "deliveryVisitStatus")
+		.leftJoinAndSelect("delivery.lines", "deliveryLines")
+		.leftJoinAndSelect("deliveryLines.orderLine", "orderLine")
+		.leftJoinAndSelect("orderLine.product", "product")
+		.leftJoinAndSelect("product.productLine", "productLine")
+		.leftJoinAndSelect("orderLine.colorReference", "colorReference")
+		.where("order.client_id = :clientId", { clientId: visit.client_id })
+		.andWhere("delivery.status = :deliveredStatus", {
+			deliveredStatus: "delivered",
+		})
+		.andWhere("delivery.delivery_visit_id IS NOT NULL")
+		.andWhere("delivery.delivery_visit_id != :visitId", { visitId: visit.id })
+		.andWhere("deliveryVisit.scheduled_for_date >= :scheduledForDate", {
+			scheduledForDate: visit.scheduled_for_date,
+		})
+		.orderBy("delivery.updated_at", "DESC")
+		.getMany();
+
+	return deliveries.map(mapOrderDeliveryToSummary);
+}
+
 async function buildCommercialVisitDetail(
 	visit: CommercialVisit,
 ): Promise<CommercialVisitDetail> {
@@ -696,10 +949,16 @@ async function buildCommercialVisitDetail(
 		linkedOrders,
 		availableOrdersForDelivery,
 		completedElsewhereOrders,
+		linkedDeliveries,
+		availableDeliveriesForDelivery,
+		completedElsewhereDeliveries,
 	] = await Promise.all([
 		listLinkedOrdersForVisit(visit.id),
 		listAvailableOrdersForDeliveryVisit(visit.client_id, visit.id),
 		listCompletedElsewhereOrdersForVisit(visit),
+		listLinkedDeliveriesForVisit(visit.id),
+		listAvailableDeliveriesForDeliveryVisit(visit.client_id, visit.id),
+		listCompletedElsewhereDeliveriesForVisit(visit),
 	]);
 	const visitData = visit as unknown as CommercialVisitDetail;
 
@@ -708,6 +967,9 @@ async function buildCommercialVisitDetail(
 		linkedOrders,
 		availableOrdersForDelivery,
 		completedElsewhereOrders,
+		linkedDeliveries,
+		availableDeliveriesForDelivery,
+		completedElsewhereDeliveries,
 	};
 }
 
@@ -792,6 +1054,7 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 	const visitId = await ds.transaction(async (manager) => {
 		const repo = manager.getRepository(CommercialVisit);
 		const orderRepo = manager.getRepository(Order);
+		const deliveryRepo = manager.getRepository(OrderDelivery);
 
 		const visit = await repo.findOne({
 			where: {
@@ -802,6 +1065,13 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 		const currentLinkedOrders = await orderRepo
 			.createQueryBuilder("order")
 			.where("order.delivery_visit_id = :visitId", {
+				visitId: input.visitId,
+			})
+			.getMany();
+		const currentLinkedDeliveries = await deliveryRepo
+			.createQueryBuilder("delivery")
+			.leftJoinAndSelect("delivery.order", "order")
+			.where("delivery.delivery_visit_id = :visitId", {
 				visitId: input.visitId,
 			})
 			.getMany();
@@ -820,6 +1090,102 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 				409,
 				"VISIT_POSTPONED_READ_ONLY",
 			);
+		}
+
+		if (input.scannedDeliveryQr !== undefined) {
+			const scannedDeliveryId = extractOrderDeliveryIdFromQrValue(
+				input.scannedDeliveryQr,
+			);
+
+			if (!scannedDeliveryId) {
+				throw new UpdateCommercialVisitError(
+					"El QR escaneado no tiene un formato reconocido para repartos",
+					400,
+					"DELIVERY_VISIT_QR_INVALID",
+				);
+			}
+
+			if (visit.visit_type_id !== COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) {
+				throw new UpdateCommercialVisitError(
+					"Solo las visitas de reparto permiten escanear repartos",
+					409,
+					"VISIT_QR_REQUIRES_DELIVERY_TYPE",
+				);
+			}
+
+			if (visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.PLANNED) {
+				throw new UpdateCommercialVisitError(
+					"Solo se pueden escanear repartos en una visita planificada",
+					409,
+					"VISIT_QR_NOT_EDITABLE",
+				);
+			}
+
+			const linkedDelivery = await deliveryRepo
+				.createQueryBuilder("delivery")
+				.leftJoinAndSelect("delivery.order", "order")
+				.where("delivery.id = :deliveryId", { deliveryId: scannedDeliveryId })
+				.andWhere("delivery.delivery_visit_id = :visitId", {
+					visitId: visit.id,
+				})
+				.getOne();
+
+			if (!linkedDelivery) {
+				throw new UpdateCommercialVisitError(
+					"El QR escaneado no pertenece a ningun reparto vinculado a esta visita",
+					409,
+					"DELIVERY_VISIT_QR_DELIVERY_MISMATCH",
+				);
+			}
+
+			if (linkedDelivery.status === "delivered") {
+				throw new UpdateCommercialVisitError(
+					"Este reparto ya estaba completado",
+					409,
+					"DELIVERY_ALREADY_COMPLETED",
+				);
+			}
+
+			if (linkedDelivery.status !== "planned") {
+				throw new UpdateCommercialVisitError(
+					"Este reparto no esta pendiente de entrega",
+					409,
+					"DELIVERY_NOT_DELIVERABLE",
+				);
+			}
+
+			await deliveryRepo.update(
+				{ id: linkedDelivery.id },
+				{
+					status: "delivered",
+					delivered_at: new Date(),
+					delivered_by_user_id:
+						String(input.actedByUserId ?? "").trim() || null,
+				},
+			);
+			await syncOrderDeliveredStatusFromDeliveries(
+				manager,
+				linkedDelivery.order_id,
+			);
+
+			const remainingPlannedDeliveries = await deliveryRepo
+				.createQueryBuilder("delivery")
+				.where("delivery.delivery_visit_id = :visitId", { visitId: visit.id })
+				.andWhere("delivery.status IN (:...pendingStatuses)", {
+					pendingStatuses: ["prepared", "planned"],
+				})
+				.getCount();
+
+			if (remainingPlannedDeliveries === 0) {
+				visit.status_id = COMMERCIAL_VISIT_STATUS_IDS.COMPLETED;
+				visit.result =
+					normalizeText(input.result) ||
+					visit.result ||
+					"Entrega confirmada mediante QR.";
+				await repo.save(visit);
+			}
+
+			return visit.id;
 		}
 
 		if (input.scannedOrderQr !== undefined) {
@@ -969,7 +1335,11 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 				? normalizeText(input.result) || null
 				: visit.result;
 		const currentLinkedOrderIds = currentLinkedOrders.map((order) => order.id);
+		const currentLinkedDeliveryIds = currentLinkedDeliveries.map(
+			(delivery) => delivery.id,
+		);
 		let finalAssignedOrderIds = currentLinkedOrderIds;
+		let finalAssignedDeliveryIds = currentLinkedDeliveryIds;
 
 		if (input.statusId !== undefined) {
 			if (!isValidCommercialVisitStatus(nextStatusId)) {
@@ -1005,12 +1375,28 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 			});
 		}
 
+		if (input.deliveryIds !== undefined) {
+			if (!canEditCommercialVisitPlanning(visit.status_id)) {
+				throw new UpdateCommercialVisitError(
+					"Solo se pueden ajustar repartos en una visita planificada",
+					409,
+					"VISIT_DELIVERIES_NOT_EDITABLE",
+				);
+			}
+
+			finalAssignedDeliveryIds = await validateOrderDeliveryIdsForVisit(manager, {
+				clientId: visit.client_id,
+				visitId: visit.id,
+				deliveryIds: input.deliveryIds,
+			});
+		}
+
 		if (
 			nextVisitTypeId !== COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
-			finalAssignedOrderIds.length > 0
+			(finalAssignedOrderIds.length > 0 || finalAssignedDeliveryIds.length > 0)
 		) {
 			throw new UpdateCommercialVisitError(
-				"Solo las visitas de reparto pueden tener pedidos vinculados",
+				"Solo las visitas de reparto pueden tener repartos vinculados",
 				409,
 				"VISIT_ORDERS_REQUIRE_DELIVERY_TYPE",
 			);
@@ -1019,10 +1405,11 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 		if (
 			nextVisitTypeId === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
 			nextStatusId !== COMMERCIAL_VISIT_STATUS_IDS.CANCELLED &&
-			finalAssignedOrderIds.length === 0
+			finalAssignedOrderIds.length === 0 &&
+			finalAssignedDeliveryIds.length === 0
 		) {
 			throw new UpdateCommercialVisitError(
-				"Un reparto debe mantener al menos un pedido confirmado vinculado mientras siga activo",
+				"Una visita de reparto debe mantener al menos un reparto preparado vinculado mientras siga activa",
 				409,
 				"DELIVERY_VISIT_REQUIRES_ORDERS",
 			);
@@ -1039,10 +1426,11 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 		if (
 			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.COMPLETED &&
 			nextVisitTypeId === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
-			finalAssignedOrderIds.length === 0
+			finalAssignedOrderIds.length === 0 &&
+			finalAssignedDeliveryIds.length === 0
 		) {
 			throw new UpdateCommercialVisitError(
-				"Debes vincular al menos un pedido confirmado antes de completar un reparto",
+				"Debes vincular al menos un reparto preparado antes de completar una visita de reparto",
 				409,
 				"DELIVERY_VISIT_REQUIRES_ORDERS",
 			);
@@ -1053,10 +1441,17 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.COMPLETED &&
 			nextVisitTypeId === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY
 		) {
-			validateDeliveredOrderQrs(
-				finalAssignedOrderIds,
-				input.deliveredOrderQrs,
-			);
+			if (finalAssignedDeliveryIds.length > 0) {
+				validateDeliveredDeliveryQrs(
+					finalAssignedDeliveryIds,
+					input.deliveredDeliveryQrs,
+				);
+			} else {
+				validateDeliveredOrderQrs(
+					finalAssignedOrderIds,
+					input.deliveredOrderQrs,
+				);
+			}
 		}
 
 		if (input.notes !== undefined) {
@@ -1094,6 +1489,46 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 					.where("id IN (:...orderIds)", {
 						orderIds: orderIdsToAssign,
 					})
+				.execute();
+			}
+		}
+
+		if (input.deliveryIds !== undefined) {
+			const deliveryIdsToUnassign = currentLinkedDeliveryIds.filter(
+				(deliveryId) => !finalAssignedDeliveryIds.includes(deliveryId),
+			);
+			const deliveryIdsToAssign = finalAssignedDeliveryIds.filter(
+				(deliveryId) => !currentLinkedDeliveryIds.includes(deliveryId),
+			);
+
+			if (deliveryIdsToUnassign.length > 0) {
+				await deliveryRepo
+					.createQueryBuilder()
+					.update(OrderDelivery)
+					.set({
+						delivery_visit_id: null,
+						status: "prepared",
+					})
+					.where("id IN (:...deliveryIds)", {
+						deliveryIds: deliveryIdsToUnassign,
+					})
+					.andWhere("status = :plannedStatus", {
+						plannedStatus: "planned",
+					})
+					.execute();
+			}
+
+			if (deliveryIdsToAssign.length > 0) {
+				await deliveryRepo
+					.createQueryBuilder()
+					.update(OrderDelivery)
+					.set({
+						delivery_visit_id: visit.id,
+						status: "planned",
+					})
+					.where("id IN (:...deliveryIds)", {
+						deliveryIds: deliveryIdsToAssign,
+					})
 					.execute();
 			}
 		}
@@ -1115,6 +1550,21 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 			nextVisitTypeId === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
 			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.CANCELLED
 		) {
+			await deliveryRepo
+				.createQueryBuilder()
+				.update(OrderDelivery)
+				.set({
+					delivery_visit_id: null,
+					status: "prepared",
+				})
+				.where("delivery_visit_id = :visitId", {
+					visitId: visit.id,
+				})
+				.andWhere("status = :plannedStatus", {
+					plannedStatus: "planned",
+				})
+				.execute();
+
 			await orderRepo
 				.createQueryBuilder()
 				.update(Order)
@@ -1134,6 +1584,41 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 			nextVisitTypeId === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
 			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.COMPLETED
 		) {
+			if (finalAssignedDeliveryIds.length > 0) {
+				await deliveryRepo
+					.createQueryBuilder()
+					.update(OrderDelivery)
+					.set({
+						status: "delivered",
+						delivered_at: new Date(),
+						delivered_by_user_id:
+							String(input.actedByUserId ?? "").trim() || null,
+					})
+					.where("id IN (:...deliveryIds)", {
+						deliveryIds: finalAssignedDeliveryIds,
+					})
+					.andWhere("status = :plannedStatus", {
+						plannedStatus: "planned",
+					})
+					.execute();
+
+				const completedDeliveries = await deliveryRepo
+					.createQueryBuilder("delivery")
+					.where("delivery.id IN (:...deliveryIds)", {
+						deliveryIds: finalAssignedDeliveryIds,
+					})
+					.getMany();
+				const orderIdsToSync = Array.from(
+					new Set(completedDeliveries.map((delivery) => delivery.order_id)),
+				);
+
+				for (const orderId of orderIdsToSync) {
+					await syncOrderDeliveredStatusFromDeliveries(manager, orderId);
+				}
+
+				return visit.id;
+			}
+
 			await orderRepo
 				.createQueryBuilder()
 				.update(Order)

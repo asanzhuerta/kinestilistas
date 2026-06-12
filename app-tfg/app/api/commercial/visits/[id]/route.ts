@@ -56,14 +56,18 @@ export async function PATCH(request: Request, context: RouteContext) {
 		const visit = await updateCommercialVisit({
 			visitId: id,
 			commercialId: commercial.id,
+			actedByUserId: user.id,
 			deliveredOrderQrs: body.deliveredOrderQrs,
+			deliveredDeliveryQrs: body.deliveredDeliveryQrs,
 			scannedOrderQr: body.scannedOrderQr,
+			scannedDeliveryQr: body.scannedDeliveryQr,
 			scheduledForDate: body.scheduledForDate,
 			visitTypeId: body.visitTypeId,
 			statusId: body.statusId,
 			notes: body.notes,
 			result: body.result,
 			orderIds: body.orderIds,
+			deliveryIds: body.deliveryIds,
 		});
 
 		return NextResponse.json(visit, { status: 200 });

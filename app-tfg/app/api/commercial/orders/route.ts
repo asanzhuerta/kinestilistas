@@ -60,6 +60,7 @@ export async function POST(request: Request) {
 			user.id,
 			{
 				clientId: input.clientId,
+				fulfillmentMethod: input.fulfillmentMethod,
 				notes: input.notes,
 				lines: input.lines,
 			},

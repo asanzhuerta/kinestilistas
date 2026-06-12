@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class M7NotificationDeliveryChannels1780612000000
+export class M7NotificationDeliveryChannels1781257362729
 	implements MigrationInterface
 {
-	name = "M7NotificationDeliveryChannels1780612000000";
+	name = "M7NotificationDeliveryChannels1781257362729";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`
@@ -64,4 +64,5 @@ export class M7NotificationDeliveryChannels1780612000000
 		await queryRunner.query(`DROP INDEX "user_push_subscriptions_user_id_index"`);
 		await queryRunner.query(`DROP TABLE "user_push_subscriptions"`);
 	}
+
 }

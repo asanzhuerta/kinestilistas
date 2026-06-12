@@ -28,7 +28,7 @@ De forma más concreta, los objetivos generales del sistema son los siguientes:
     \item Centralizar en una única aplicación la gestión de usuarios, clientes, catálogo, visitas, rutas, pedidos y seguimiento de cobros.
     \item Garantizar un acceso diferenciado por roles, de manera que cada perfil utilice una interfaz y un conjunto de operaciones acordes a sus responsabilidades reales dentro del proceso comercial.
     \item Facilitar al distribuidor la administración operativa del sistema, incluyendo la gestión de usuarios, la auditoría de acciones relevantes, la consulta global de pedidos, la configuración de avisos automáticos y las bases técnicas necesarias para futuras integraciones empresariales.
-    \item Proporcionar al comercial una herramienta móvil y operativa para planificar su jornada, consultar la ficha de sus clientes, preparar pedidos, organizar repartos y registrar el resultado de sus visitas.
+    \item Proporcionar al comercial una herramienta móvil y operativa para planificar su jornada, consultar la ficha de sus clientes, preparar pedidos, organizar repartos, imprimir etiquetas y registrar el resultado de sus visitas.
     \item Permitir al cliente profesional consultar el catálogo, revisar cartas de color, preparar pedidos, consultar su historial y conocer el estado logístico de sus entregas cuando exista un reparto real planificado.
     \item Mantener trazabilidad sobre los procesos críticos del sistema, especialmente en autenticación, gestión administrativa de usuarios, ciclo de vida del pedido y seguimiento de cobros.
     \item Integrar servicios externos de soporte cuando aporten valor claro al flujo funcional, como almacenamiento de imágenes, geocodificación, cálculo de rutas, generación de QR o soporte de instalación como aplicación web progresiva.
@@ -68,12 +68,14 @@ Las reglas de negocio describen restricciones operativas que el sistema debe res
     \item El cliente solo debe visualizar una ETA cuando exista una visita de reparto real, valida y vinculada a pedidos coherentes para la jornada.
     \item Los pedidos pueden iniciarse como borrador y confirmarse posteriormente, pero no deben saltar arbitrariamente entre estados incompatibles.
     \item Un mismo cliente no puede acumular más de dos pedidos abiertos pendientes de cobro al mismo tiempo.
-    \item Solo pueden vincularse a una visita de reparto los pedidos confirmados del cliente correcto; no deben poder asociarse pedidos cancelados, ya entregados o pertenecientes a otro cliente.
-    \item Una visita de reparto no debe poder completarse sin pedidos vinculados ni sin la validación QR correspondiente a cada pedido entregado.
-    \item El cierre correcto de una visita de reparto debe marcar como entregados los pedidos asociados, manteniendo sincronizado el estado logístico del pedido con el de la visita.
-    \item Si una visita de reparto se aplaza o se cancela, el sistema debe evitar estados huerfanos o inconsistentes entre visita, pedido y ETA mostrada al cliente.
-    \item El registro de cobro solo aplica al alcance mínimo definido en esta iteración: distinguir entre pedidos pendientes de cobro y pedidos cobrados, con método, fecha, notas y usuario responsable.
-    \item \textcolor{red}{La gestión de cobros no incluye por ahora pagos parciales, facturación ni conciliación contable avanzada, por lo que el sistema no debe simular dichas capacidades.}
+    \item Solo pueden prepararse repartos desde pedidos confirmados del cliente correcto; no deben poder servirse líneas canceladas, ya entregadas o pertenecientes a otro cliente.
+    \item El número de bultos de un reparto se registra manualmente, porque depende de la preparación física realizada por el distribuidor.
+    \item Solo pueden vincularse a una visita de reparto los repartos comerciales preparados para el cliente correcto; los repartos por agencia quedan diferenciados mediante etiqueta específica.
+    \item Una visita de reparto no debe poder completarse sin repartos vinculados ni sin la validación QR correspondiente a cada reparto comercial entregado.
+    \item El cierre correcto de todos los repartos comerciales de un pedido debe marcar el pedido como entregado, manteniendo sincronizado el estado logístico del pedido con el de la visita.
+    \item Si una visita de reparto se aplaza o se cancela, el sistema debe evitar estados huerfanos o inconsistentes entre visita, reparto, pedido y ETA mostrada al cliente.
+    \item El registro de cobro admite pagos parciales o totales, conserva historial de pagos y actualiza el estado de cobro según el importe acumulado.
+    \item \textcolor{red}{La gestión de cobros no incluye por ahora facturación, conciliación contable avanzada ni vencimientos automáticos, por lo que el sistema no debe simular dichas capacidades.}
     \item Las políticas de rate limiting forman parte de la seguridad técnica del sistema y no deben exponerse como ajuste ordinario del administrador de negocio; su modificación queda reservada a mantenimiento técnico o despliegue.
 \end{itemize}
 

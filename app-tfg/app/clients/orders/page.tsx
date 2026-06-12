@@ -5,13 +5,15 @@ import {
 	listOrderProductOptionsForClientUser,
 	listOrdersForClientUser,
 } from "@/lib/typeorm/services/orders/order";
+import { getOrderBusinessSettings } from "@/lib/typeorm/services/orders/order-settings";
 
 export default async function ClientOrdersPage() {
 	const session = await requireClientSession();
-	const [productOptions, orders, draftOrder] = await Promise.all([
+	const [productOptions, orders, draftOrder, orderSettings] = await Promise.all([
 		listOrderProductOptionsForClientUser(session.user.id),
 		listOrdersForClientUser(session.user.id),
 		getDraftOrderForClientUser(session.user.id),
+		getOrderBusinessSettings(),
 	]);
 
 	return (
@@ -23,6 +25,7 @@ export default async function ClientOrdersPage() {
 			apiPath="/api/clients/orders"
 			detailBasePath="/clients/orders"
 			productOptions={productOptions}
+			agencyDeliveryFee={orderSettings.agencyDeliveryFee}
 			initialOrders={orders}
 			initialDraftOrder={draftOrder}
 			showHistory={false}

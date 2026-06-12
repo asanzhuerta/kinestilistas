@@ -1,5 +1,6 @@
 import type {
 	getColorChartById,
+	getColorReferenceById,
 	listColorCharts,
 	listColorReferences,
 } from "@/lib/typeorm/services/catalog/color-chart";
@@ -96,6 +97,63 @@ export type SerializedColorChartDetail = {
 		is_orderable: boolean;
 		display_order: number;
 	}>;
+};
+
+export type SerializedColorReferenceDetail = {
+	id: string;
+	color_chart_id: string;
+	product_id: string | null;
+	code: string;
+	name: string;
+	description: string | null;
+	image_url: string | null;
+	thumb_image_url: string | null;
+	erp_reference: string | null;
+	is_orderable: boolean;
+	display_order: number;
+	colorChart: {
+		id: string;
+		name: string;
+		description: string | null;
+		image_url: string | null;
+		productLine: {
+			id: string;
+			name: string;
+			description: string | null;
+			image_url: string | null;
+			productCategory: {
+				id: string;
+				name: string;
+				description: string | null;
+			} | null;
+		} | null;
+	} | null;
+	product: {
+		id: string;
+		name: string;
+		reference: string;
+		description: string | null;
+		image_url: string | null;
+		format: string | null;
+		packing: number | null;
+		technical_info: string | null;
+		base_price: string;
+		productCategory: {
+			id: string;
+			name: string;
+			description: string | null;
+		} | null;
+		productLine: {
+			id: string;
+			name: string;
+			description: string | null;
+		} | null;
+		productSubcategory: {
+			id: string;
+			name: string;
+			description: string | null;
+		} | null;
+	} | null;
 };
 
 export function toClientPlain<T>(value: T): T {
@@ -227,5 +285,86 @@ export function serializeColorChartDetail(
 			is_orderable: Boolean(reference.is_orderable),
 			display_order: reference.display_order,
 		})),
+	};
+}
+
+export function serializeColorReferenceDetail(
+	colorReference: NonNullable<Awaited<ReturnType<typeof getColorReferenceById>>>,
+): SerializedColorReferenceDetail {
+	return {
+		id: colorReference.id,
+		color_chart_id: colorReference.color_chart_id,
+		product_id: colorReference.product_id ?? null,
+		code: colorReference.code,
+		name: colorReference.name,
+		description: colorReference.description,
+		image_url: colorReference.image_url,
+		thumb_image_url: colorReference.thumb_image_url,
+		erp_reference: colorReference.erp_reference ?? null,
+		is_orderable: Boolean(colorReference.is_orderable),
+		display_order: colorReference.display_order,
+		colorChart: colorReference.colorChart
+			? {
+					id: colorReference.colorChart.id,
+					name: colorReference.colorChart.name,
+					description: colorReference.colorChart.description,
+					image_url: colorReference.colorChart.image_url,
+					productLine: colorReference.colorChart.productLine
+						? {
+								id: colorReference.colorChart.productLine.id,
+								name: colorReference.colorChart.productLine.name,
+								description:
+									colorReference.colorChart.productLine.description,
+								image_url: colorReference.colorChart.productLine.image_url,
+								productCategory:
+									colorReference.colorChart.productLine.productCategory
+										? {
+												id: colorReference.colorChart.productLine.productCategory.id,
+												name: colorReference.colorChart.productLine.productCategory.name,
+												description:
+													colorReference.colorChart.productLine.productCategory
+														.description,
+										  }
+										: null,
+						  }
+						: null,
+			  }
+			: null,
+		product: colorReference.product
+			? {
+					id: colorReference.product.id,
+					name: colorReference.product.name,
+					reference: colorReference.product.reference,
+					description: colorReference.product.description,
+					image_url: colorReference.product.image_url,
+					format: colorReference.product.format,
+					packing: colorReference.product.packing,
+					technical_info: colorReference.product.technical_info,
+					base_price: colorReference.product.base_price,
+					productCategory: colorReference.product.productCategory
+						? {
+								id: colorReference.product.productCategory.id,
+								name: colorReference.product.productCategory.name,
+								description:
+									colorReference.product.productCategory.description,
+						  }
+						: null,
+					productLine: colorReference.product.productLine
+						? {
+								id: colorReference.product.productLine.id,
+								name: colorReference.product.productLine.name,
+								description: colorReference.product.productLine.description,
+						  }
+						: null,
+					productSubcategory: colorReference.product.productSubcategory
+						? {
+								id: colorReference.product.productSubcategory.id,
+								name: colorReference.product.productSubcategory.name,
+								description:
+									colorReference.product.productSubcategory.description,
+						  }
+						: null,
+			  }
+			: null,
 	};
 }

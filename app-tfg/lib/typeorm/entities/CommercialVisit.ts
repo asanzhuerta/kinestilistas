@@ -13,6 +13,7 @@ import { Commercial } from "./Commercial";
 import { CommercialVisitStatus } from "./CommercialVisitStatus";
 import { CommercialVisitType } from "./CommercialVisitType";
 import { Order } from "./Order";
+import { OrderDelivery } from "./OrderDelivery";
 
 @Entity("commercial_visits")
 @Index("commercial_visits_client_id_index", ["client_id"])
@@ -69,4 +70,7 @@ export class CommercialVisit {
 
 	@OneToMany(() => Order, (order) => order.deliveryVisit)
 	deliveryOrders!: Relation<Order[]>;
+
+	@OneToMany(() => OrderDelivery, (delivery) => delivery.deliveryVisit)
+	deliveryRepartos!: Relation<OrderDelivery[]>;
 }

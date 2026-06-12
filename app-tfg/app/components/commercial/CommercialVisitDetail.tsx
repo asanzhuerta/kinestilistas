@@ -15,9 +15,12 @@ import {
 	ORDER_STATUS_IDS,
 } from "@/lib/typeorm/constants/catalog-ids";
 import {
+	extractOrderDeliveryIdFromQrValue,
 	extractOrderIdFromQrValue,
+	normalizeOrderDeliveryQrValues,
 	normalizeOrderQrValues,
 } from "@/lib/orders/qr";
+import type { OrderDeliverySummary } from "@/lib/contracts/order";
 import { formatTimeLabel } from "@/lib/utils/time";
 import { formatDateTime } from "@/lib/utils/user-utils";
 import {
@@ -112,6 +115,59 @@ function OrderMiniCard({
 	);
 }
 
+function DeliveryMiniCard({
+	delivery,
+	message,
+}: {
+	delivery: OrderDeliverySummary;
+	message?: string;
+}) {
+	return (
+		<article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+			<div className="flex flex-wrap items-center gap-2">
+				<span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+					Reparto {delivery.id.slice(0, 8)}
+				</span>
+				<span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+					{delivery.status_name}
+				</span>
+			</div>
+
+			{message ? (
+				<p className="mt-3 rounded-2xl bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
+					{message}
+				</p>
+			) : null}
+
+			<div className="mt-3 grid gap-2 sm:grid-cols-3">
+				<DetailRow label="Pedido" value={delivery.order_short_id} />
+				<DetailRow label="Bultos" value={String(delivery.package_count)} />
+				<DetailRow label="Referencias" value={String(delivery.line_count)} />
+			</div>
+
+			<div className="mt-3 space-y-2">
+				{delivery.lines.map((line) => (
+					<div
+						key={line.id}
+						className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+					>
+						<span className="font-semibold text-slate-900">
+							{line.quantity} x {line.order_reference}
+						</span>{" "}
+						{line.product_name}
+					</div>
+				))}
+			</div>
+
+			{delivery.notes ? (
+				<p className="mt-3 text-sm leading-6 text-slate-600">
+					{delivery.notes}
+				</p>
+			) : null}
+		</article>
+	);
+}
+
 export default function CommercialVisitDetail({ visitId }: Props) {
 	const {
 		data: visit,
@@ -129,7 +185,9 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [isMounted, setIsMounted] = useState(false);
 	const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+	const [selectedDeliveryIds, setSelectedDeliveryIds] = useState<string[]>([]);
 	const [deliveredOrderQrInput, setDeliveredOrderQrInput] = useState("");
+	const [deliveredDeliveryQrInput, setDeliveredDeliveryQrInput] = useState("");
 	const [formState, setFormState] = useState<VisitFormState>(
 		DEFAULT_VISIT_FORM_STATE,
 	);
@@ -151,7 +209,11 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			result: visit.result ?? "",
 		});
 		setSelectedOrderIds(visit.linkedOrders.map((order) => order.id));
+		setSelectedDeliveryIds(
+			visit.linkedDeliveries.map((delivery) => delivery.id),
+		);
 		setDeliveredOrderQrInput("");
+		setDeliveredDeliveryQrInput("");
 		setQrScanFeedback("");
 	}, [visit]);
 
@@ -163,41 +225,48 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 	const isRoutineVisit =
 		visit?.visit_type_id === COMMERCIAL_VISIT_TYPE_IDS.ROUTINE;
 	const hasLinkedOrders = Boolean(visit?.linkedOrders.length);
+	const hasLinkedDeliveries = Boolean(visit?.linkedDeliveries.length);
 	const hasCompletedElsewhereOrders = Boolean(
 		visit?.completedElsewhereOrders.length,
+	);
+	const hasCompletedElsewhereDeliveries = Boolean(
+		visit?.completedElsewhereDeliveries.length,
 	);
 	const hasPendingLinkedOrders = Boolean(
 		visit?.linkedOrders.some(
 			(order) => order.status_id === ORDER_STATUS_IDS.CONFIRMED,
 		),
 	);
+	const hasPendingLinkedDeliveries = Boolean(
+		visit?.linkedDeliveries.some((delivery) => delivery.status === "planned"),
+	);
 	const canScanQr =
 		Boolean(visit) &&
 		isDeliveryVisit &&
 		isPlanned &&
-		hasLinkedOrders &&
-		hasPendingLinkedOrders &&
+		(hasLinkedDeliveries || hasLinkedOrders) &&
+		(hasPendingLinkedDeliveries || hasPendingLinkedOrders) &&
 		!isPostponed;
 	const canCompleteRoutineVisit =
 		Boolean(visit) && isRoutineVisit && isPlanned && !isPostponed;
 	const canEditManually = Boolean(visit) && !isPostponed;
 
-	const deliveryOrdersForEdit = useMemo(() => {
+	const deliveriesForEdit = useMemo(() => {
 		if (!visit) {
-			return [] as CommercialVisitDeliveryOrder[];
+			return [] as OrderDeliverySummary[];
 		}
 
-		const ordersById = new Map<string, CommercialVisitDeliveryOrder>();
+		const deliveriesById = new Map<string, OrderDeliverySummary>();
 
-		for (const order of visit.linkedOrders) {
-			ordersById.set(order.id, order);
+		for (const delivery of visit.linkedDeliveries) {
+			deliveriesById.set(delivery.id, delivery);
 		}
 
-		for (const order of visit.availableOrdersForDelivery) {
-			ordersById.set(order.id, order);
+		for (const delivery of visit.availableDeliveriesForDelivery) {
+			deliveriesById.set(delivery.id, delivery);
 		}
 
-		return Array.from(ordersById.values());
+		return Array.from(deliveriesById.values());
 	}, [visit]);
 
 	const scannedDeliveredOrderIds = useMemo(
@@ -209,6 +278,16 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 					.filter(Boolean),
 			).filter((orderId) => selectedOrderIds.includes(orderId)),
 		[deliveredOrderQrInput, selectedOrderIds],
+	);
+	const scannedDeliveredDeliveryIds = useMemo(
+		() =>
+			normalizeOrderDeliveryQrValues(
+				deliveredDeliveryQrInput
+					.split(/\r?\n/)
+					.map((value) => value.trim())
+					.filter(Boolean),
+			).filter((deliveryId) => selectedDeliveryIds.includes(deliveryId)),
+		[deliveredDeliveryQrInput, selectedDeliveryIds],
 	);
 
 	const locationLabel = visit
@@ -222,11 +301,13 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 				)} - ${formatTimeLabel(visit.client.visit_window_end_time)}`
 			: "-";
 
-	function toggleOrderSelection(orderId: string) {
-		setSelectedOrderIds((currentOrderIds) =>
-			currentOrderIds.includes(orderId)
-				? currentOrderIds.filter((currentOrderId) => currentOrderId !== orderId)
-				: [...currentOrderIds, orderId],
+	function toggleDeliverySelection(deliveryId: string) {
+		setSelectedDeliveryIds((currentDeliveryIds) =>
+			currentDeliveryIds.includes(deliveryId)
+				? currentDeliveryIds.filter(
+						(currentDeliveryId) => currentDeliveryId !== deliveryId,
+					)
+				: [...currentDeliveryIds, deliveryId],
 		);
 	}
 
@@ -254,6 +335,56 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 				message:
 					"Esta visita esta aplazada y no se puede modificar. Crea una nueva visita.",
 			};
+		}
+
+		const deliveryId = extractOrderDeliveryIdFromQrValue(rawValue);
+
+		if (deliveryId) {
+			const linkedDelivery = visit.linkedDeliveries.find(
+				(delivery) => delivery.id === deliveryId,
+			);
+
+			if (linkedDelivery) {
+				if (linkedDelivery.status === "delivered") {
+					return {
+						accepted: false,
+						message: "Este reparto ya estaba completado.",
+					};
+				}
+
+				try {
+					setSavingQr(true);
+					setSubmissionError("");
+					setSuccess("");
+
+					await save({
+						scannedDeliveryQr: rawValue,
+						result: formState.result || "Entrega confirmada mediante QR.",
+					});
+
+					setQrScanFeedback("Reparto completado correctamente mediante QR.");
+					setSuccess("Reparto completado correctamente mediante QR.");
+
+					return {
+						accepted: true,
+						message: "Reparto completado correctamente mediante QR.",
+						stop: true,
+					};
+				} catch (err) {
+					const message =
+						err instanceof Error
+							? err.message
+							: "No se pudo completar el reparto escaneado.";
+					setSubmissionError(message);
+
+					return {
+						accepted: false,
+						message,
+					};
+				} finally {
+					setSavingQr(false);
+				}
+			}
 		}
 
 		const orderId = extractOrderIdFromQrValue(rawValue);
@@ -359,10 +490,11 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 		if (
 			formState.visitTypeId === String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) &&
 			formState.statusId !== String(COMMERCIAL_VISIT_STATUS_IDS.CANCELLED) &&
-			selectedOrderIds.length === 0
+			selectedOrderIds.length === 0 &&
+			selectedDeliveryIds.length === 0
 		) {
 			setSubmissionError(
-				"Un reparto activo debe tener al menos un pedido confirmado vinculado.",
+				"Una visita de reparto activa debe tener al menos un reparto preparado vinculado.",
 			);
 			return;
 		}
@@ -371,10 +503,24 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 			formState.visitTypeId === String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) &&
 			visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.COMPLETED &&
 			formState.statusId === String(COMMERCIAL_VISIT_STATUS_IDS.COMPLETED) &&
+			selectedDeliveryIds.length > 0 &&
+			scannedDeliveredDeliveryIds.length !== selectedDeliveryIds.length
+		) {
+			setSubmissionError(
+				"Para completar una visita de reparto manualmente debes aportar el QR de todos los repartos vinculados.",
+			);
+			return;
+		}
+
+		if (
+			formState.visitTypeId === String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) &&
+			visit.status_id !== COMMERCIAL_VISIT_STATUS_IDS.COMPLETED &&
+			formState.statusId === String(COMMERCIAL_VISIT_STATUS_IDS.COMPLETED) &&
+			selectedDeliveryIds.length === 0 &&
 			scannedDeliveredOrderIds.length !== selectedOrderIds.length
 		) {
 			setSubmissionError(
-				"Para completar un reparto manualmente debes aportar el QR de todos los pedidos vinculados.",
+				"Para completar un reparto antiguo manualmente debes aportar el QR de todos los pedidos vinculados.",
 			);
 			return;
 		}
@@ -394,8 +540,20 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 								String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY)
 									? selectedOrderIds
 									: [],
+							deliveryIds:
+								formState.visitTypeId ===
+								String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY)
+									? selectedDeliveryIds
+									: [],
 						}
 					: {}),
+				deliveredDeliveryQrs:
+					formState.visitTypeId === String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY)
+						? deliveredDeliveryQrInput
+								.split(/\r?\n/)
+								.map((value) => value.trim())
+								.filter(Boolean)
+						: [],
 				deliveredOrderQrs:
 					formState.visitTypeId === String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY)
 						? deliveredOrderQrInput
@@ -596,10 +754,32 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 									</div>
 								</section>
 
-								{hasLinkedOrders || hasCompletedElsewhereOrders ? (
+								{hasLinkedDeliveries || hasCompletedElsewhereDeliveries ? (
 									<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
 										<h2 className="text-lg font-semibold text-slate-900">
-											Pedidos del reparto
+											Repartos de la visita
+										</h2>
+										<div className="mt-4 grid gap-3 xl:grid-cols-2">
+											{visit.linkedDeliveries.map((delivery) => (
+												<DeliveryMiniCard
+													key={delivery.id}
+													delivery={delivery}
+												/>
+											))}
+
+											{visit.completedElsewhereDeliveries.map((delivery) => (
+												<DeliveryMiniCard
+													key={`elsewhere-delivery-${delivery.id}`}
+													delivery={delivery}
+													message="Este reparto ya se ha completado en otra visita."
+												/>
+											))}
+										</div>
+									</section>
+								) : hasLinkedOrders || hasCompletedElsewhereOrders ? (
+									<section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+										<h2 className="text-lg font-semibold text-slate-900">
+											Pedidos del reparto antiguo
 										</h2>
 										<div className="mt-4 grid gap-3 xl:grid-cols-2">
 											{visit.linkedOrders.map((order) => (
@@ -777,22 +957,24 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 							String(COMMERCIAL_VISIT_TYPE_IDS.DELIVERY) ? (
 								<div className="md:col-span-2 rounded-3xl border border-slate-200 bg-slate-50 p-4">
 									<h3 className="text-sm font-semibold text-slate-900">
-										Pedidos vinculados
+										Repartos vinculados
 									</h3>
-									{deliveryOrdersForEdit.length === 0 ? (
+									{deliveriesForEdit.length === 0 ? (
 										<p className="mt-3 text-sm text-slate-500">
-											No hay pedidos disponibles para vincular.
+											No hay repartos preparados para vincular. Prepara primero
+											el reparto desde pedidos.
 										</p>
 									) : (
 										<div className="mt-3 grid gap-2 md:grid-cols-2">
-											{deliveryOrdersForEdit.map((order) => {
-												const isSelected = selectedOrderIds.includes(order.id);
-												const isDelivered =
-													order.status_id === ORDER_STATUS_IDS.DELIVERED;
+											{deliveriesForEdit.map((delivery) => {
+												const isSelected = selectedDeliveryIds.includes(
+													delivery.id,
+												);
+												const isDelivered = delivery.status === "delivered";
 
 												return (
 													<label
-														key={order.id}
+														key={delivery.id}
 														className={`rounded-2xl border px-3 py-3 text-sm transition ${
 															isSelected
 																? "border-sky-300 bg-sky-50"
@@ -807,17 +989,21 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 															<input
 																type="checkbox"
 																checked={isSelected}
-																onChange={() => toggleOrderSelection(order.id)}
+																onChange={() =>
+																	toggleDeliverySelection(delivery.id)
+																}
 																disabled={!isPlanned || isDelivered}
 																className="mt-1 h-4 w-4 rounded border-slate-300"
 															/>
 															<div>
 																<p className="font-semibold text-slate-900">
-																	Pedido {order.id.slice(0, 8)}
+																	Reparto {delivery.id.slice(0, 8)}
 																</p>
 																<p className="mt-1 text-slate-500">
-																	{order.status_name} -{" "}
-																	{formatOrderCurrency(order.total_amount)}
+																	Pedido {delivery.order_short_id} -{" "}
+																	{delivery.package_count} bulto
+																	{delivery.package_count === 1 ? "" : "s"} -{" "}
+																	{delivery.status_name}
 																</p>
 															</div>
 														</div>
@@ -835,24 +1021,24 @@ export default function CommercialVisitDetail({ visitId }: Props) {
 								String(COMMERCIAL_VISIT_STATUS_IDS.COMPLETED) ? (
 								<div className="md:col-span-2">
 									<label
-										htmlFor="visit-delivered-order-qrs"
+										htmlFor="visit-delivered-delivery-qrs"
 										className="mb-2 block text-sm font-medium text-slate-700"
 									>
-										QR para completar manualmente
+										QR de repartos para completar manualmente
 									</label>
 									<textarea
-										id="visit-delivered-order-qrs"
-										value={deliveredOrderQrInput}
+										id="visit-delivered-delivery-qrs"
+										value={deliveredDeliveryQrInput}
 										onChange={(event) =>
-											setDeliveredOrderQrInput(event.target.value)
+											setDeliveredDeliveryQrInput(event.target.value)
 										}
 										rows={3}
 										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-										placeholder="Un QR por bulto"
+										placeholder="Un QR por reparto"
 									/>
 									<p className="mt-2 text-sm text-slate-500">
-										QR reconocidos: {scannedDeliveredOrderIds.length}/
-										{selectedOrderIds.length}
+										QR reconocidos: {scannedDeliveredDeliveryIds.length}/
+										{selectedDeliveryIds.length}
 									</p>
 								</div>
 							) : null}

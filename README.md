@@ -15,18 +15,18 @@ El repositorio agrupa la aplicación principal, la documentación académica, la
 La aplicación ya cubre los bloques operativos principales del TFG:
 
 - `M1`: autenticación, registro administrado, roles, usuarios, solicitudes, perfil y trazabilidad básica de accesos.
-- `M2`: clientes, asignaciones comercial-cliente, visitas, geolocalización, rutas, configuración diaria y estimación de reparto.
-- `M3`: catálogo, categorías, líneas, subcategorías, productos, recursos técnicos, cartas de color y referencias cromáticas.
-- `M4`: pedidos, borradores, confirmación, historial, reparto integrado, validación QR y seguimiento operativo.
+- `M2`: clientes, asignaciones comercial-cliente, visitas, geolocalización, rutas, configuración diaria y estimación persistida de reparto.
+- `M3`: catálogo, categorías, líneas, subcategorías, productos, recursos técnicos, cartas de color, referencias cromáticas y consulta de tonos por filas o cartas.
+- `M4`: pedidos, borradores, confirmación, historial, preparación de repartos parciales, etiquetas QR, entregas por comercial o agencia, pagos parciales y seguimiento operativo.
 - `M5`: fichas técnicas de salón, servicios, plantillas, productos usados, tonos de coloración e imágenes de resultado.
 - `M6`: comunicaciones, promociones, rangos de cliente, descuentos segmentados, avisos y formaciones.
-- `M7`: soporte, auditoría, rate limiting, operaciones, reportes e integraciones preparadas para automatizaciones futuras.
+- `M7`: soporte, auditoría, ajustes operativos, tarifa de agencia configurable, rate limiting, operaciones, reportes e integraciones preparadas para automatizaciones futuras.
 
 ## Roles de la aplicación
 
 - `admin`: administra usuarios, clientes, asignaciones, catálogo, comunicaciones, auditoría, soporte, operaciones e integraciones.
-- `commercial`: consulta clientes asignados, rutas, visitas, pedidos, catálogo, coloración, promociones y formaciones.
-- `client`: gestiona perfil, pedidos, catálogo, coloración, promociones, formaciones y fichas técnicas de su salón.
+- `commercial`: consulta clientes asignados, rutas, visitas, pedidos, preparación de repartos, catálogo, coloración, promociones y formaciones.
+- `client`: gestiona perfil, pedidos con entrega por comercial o agencia, catálogo, coloración, promociones, formaciones y fichas técnicas de su salón.
 
 ## Stack principal
 

@@ -23,6 +23,7 @@ export default async function ClientColorationPage() {
 			colorCharts={serializedColorCharts}
 			colorReferences={serializedColorReferences}
 			detailBasePath="/clients/coloration"
+			toneDetailBasePath="/clients/coloration/tones"
 		/>
 	);
 }

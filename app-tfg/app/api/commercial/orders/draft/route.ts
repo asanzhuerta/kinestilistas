@@ -56,6 +56,7 @@ export async function PUT(request: Request) {
 
 		const draftOrder = await saveDraftForCommercialUser(user.id, {
 			clientId: String(input.clientId),
+			fulfillmentMethod: input.fulfillmentMethod,
 			notes: input.notes,
 			lines: input.lines,
 		});

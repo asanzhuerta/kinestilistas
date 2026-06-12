@@ -1,3 +1,5 @@
+import type { OrderDeliverySummary } from "@/lib/contracts/order";
+
 export type CommercialVisitStatusCode =
 	| "planned"
 	| "completed"
@@ -82,6 +84,9 @@ export type CommercialVisitDetail = CommercialVisit & {
 	linkedOrders: CommercialVisitDeliveryOrder[];
 	availableOrdersForDelivery: CommercialVisitDeliveryOrder[];
 	completedElsewhereOrders: CommercialVisitDeliveryOrder[];
+	linkedDeliveries: OrderDeliverySummary[];
+	availableDeliveriesForDelivery: OrderDeliverySummary[];
+	completedElsewhereDeliveries: OrderDeliverySummary[];
 };
 
 export type CreateCommercialVisitBody = {
@@ -91,6 +96,7 @@ export type CreateCommercialVisitBody = {
 	visitTypeId?: number;
 	notes?: string | null;
 	orderIds?: string[];
+	deliveryIds?: string[];
 };
 
 export type UpdateCommercialVisitBody = {
@@ -100,6 +106,9 @@ export type UpdateCommercialVisitBody = {
 	notes?: string | null;
 	result?: string | null;
 	deliveredOrderQrs?: string[];
+	deliveredDeliveryQrs?: string[];
 	scannedOrderQr?: string;
+	scannedDeliveryQr?: string;
 	orderIds?: string[];
+	deliveryIds?: string[];
 };

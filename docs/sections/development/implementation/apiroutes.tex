@@ -150,28 +150,33 @@ Como convención general, las rutas autenticadas devuelven \texttt{401} cuando n
 
 {\apiTableSetup
 \begin{longtable}{A{0.10\textwidth}A{0.27\textwidth}A{0.15\textwidth}A{0.38\textwidth}}
-\caption{Endpoints de pedidos y cobros}\\
+\caption{Endpoints de pedidos, repartos y cobros}\\
 \apiHeader
 \endfirsthead
 \apiHeader
 \endhead
 \texttt{GET} & \path{/api/clients/orders} & Cliente & Sin parámetros. Respuesta \texttt{200}: historial de pedidos del cliente autenticado.\\
-\texttt{POST} & \path{/api/clients/orders} & Cliente & JSON con \texttt{notes} y \texttt{lines} de producto, referencia de color y cantidad. Respuesta \texttt{201}: pedido creado.\\
+\texttt{POST} & \path{/api/clients/orders} & Cliente & JSON con \texttt{notes}, \texttt{fulfillmentMethod} y \texttt{lines} de producto, referencia de color y cantidad. Respuesta \texttt{201}: pedido creado, aplicando cargo de agencia si procede.\\
 \texttt{GET} & \path{/api/clients/orders/:id} & Cliente & Parámetro \texttt{id}. Respuesta \texttt{200}: detalle del pedido del cliente.\\
 \texttt{GET} & \path{/api/clients/orders/draft} & Cliente & Sin parámetros. Respuesta \texttt{200}: borrador activo del cliente.\\
-\texttt{PUT} & \path{/api/clients/orders/draft} & Cliente & JSON con \texttt{notes} y \texttt{lines}. Respuesta \texttt{200}: borrador guardado.\\
+\texttt{PUT} & \path{/api/clients/orders/draft} & Cliente & JSON con \texttt{notes}, \texttt{fulfillmentMethod} y \texttt{lines}. Respuesta \texttt{200}: borrador guardado.\\
 \texttt{DELETE} & \path{/api/clients/orders/draft} & Cliente & Sin cuerpo. Respuesta \texttt{200}: borrador eliminado.\\
 \texttt{POST} & \path{/api/clients/orders/draft/items} & Cliente & JSON con \texttt{productId}, \texttt{colorReferenceId}, \texttt{quantity}. Respuesta \texttt{200}: línea agregada al borrador.\\
-\texttt{GET} & \path{/api/commercial/orders} & Comercial & Query opcional \texttt{clientId}, \texttt{pendingDeliveryOnly}. Respuesta \texttt{200}: pedidos visibles para el comercial.\\
-\texttt{POST} & \path{/api/commercial/orders} & Comercial & JSON con \texttt{clientId}, \texttt{notes} y \texttt{lines}. Respuesta \texttt{201}: pedido creado para cliente asignado.\\
+\texttt{GET} & \path{/api/commercial/orders} & Comercial & Query opcional \texttt{clientId}, \texttt{pendingDeliveryOnly}. Respuesta \texttt{200}: pedidos visibles para el comercial; el filtrado por fecha se aplica en las vistas de historial.\\
+\texttt{POST} & \path{/api/commercial/orders} & Comercial & JSON con \texttt{clientId}, \texttt{notes}, \texttt{fulfillmentMethod} y \texttt{lines}. Respuesta \texttt{201}: pedido creado para cliente asignado, aplicando promociones y cargo de agencia si corresponde.\\
 \texttt{GET} & \path{/api/commercial/orders/:id} & Comercial & Parámetro \texttt{id}. Respuesta \texttt{200}: detalle del pedido accesible para el comercial.\\
-\texttt{PATCH} & \path{/api/commercial/orders/:id} & Comercial & JSON con \texttt{statusId}, \texttt{paymentStatusId}, \texttt{paymentMethod}, \texttt{paymentNotes}. Respuesta \texttt{200}: pedido, reparto o cobro actualizado.\\
+\texttt{PATCH} & \path{/api/commercial/orders/:id} & Comercial & JSON con \texttt{statusId}, \texttt{paymentStatusId}, \texttt{paymentMethod}, \texttt{paymentNotes}. Respuesta \texttt{200}: pedido actualizado conservando compatibilidad con el seguimiento de cobro.\\
+\texttt{POST} & \path{/api/commercial/orders/:id/payments} & Comercial & JSON con \texttt{amount}, \texttt{paymentMethod}, \texttt{paidAt} y \texttt{notes}. Respuesta \texttt{201}: pago parcial o total registrado y pedido recalculado.\\
 \texttt{GET} & \path{/api/commercial/orders/draft} & Comercial & Query \texttt{clientId}. Respuesta \texttt{200}: borrador del comercial para ese cliente.\\
-\texttt{PUT} & \path{/api/commercial/orders/draft} & Comercial & JSON con \texttt{clientId}, \texttt{notes} y \texttt{lines}. Respuesta \texttt{200}: borrador guardado.\\
+\texttt{PUT} & \path{/api/commercial/orders/draft} & Comercial & JSON con \texttt{clientId}, \texttt{notes}, \texttt{fulfillmentMethod} y \texttt{lines}. Respuesta \texttt{200}: borrador guardado.\\
 \texttt{DELETE} & \path{/api/commercial/orders/draft} & Comercial & Query \texttt{clientId}. Respuesta \texttt{200}: borrador eliminado.\\
 \texttt{POST} & \path{/api/commercial/orders/draft/items} & Comercial & JSON con \texttt{clientId}, \texttt{productId}, \texttt{colorReferenceId}, \texttt{quantity}. Respuesta \texttt{200}: línea agregada.\\
-\texttt{GET} & \path{/api/admin/orders/:id} & Admin & Parámetro \texttt{id}. Respuesta \texttt{200}: detalle administrativo del pedido.\\
+\texttt{GET} & \path{/api/admin/orders/:id} & Admin & Parámetro \texttt{id}. Respuesta \texttt{200}: detalle administrativo del pedido, repartos y pagos.\\
 \texttt{PATCH} & \path{/api/admin/orders/:id} & Admin & JSON con \texttt{statusId}, \texttt{paymentStatusId}, \texttt{paymentMethod}, \texttt{paymentNotes}. Respuesta \texttt{200}: estado de pedido o cobro actualizado.\\
+\texttt{POST} & \path{/api/admin/orders/:id/payments} & Admin & JSON con \texttt{amount}, \texttt{paymentMethod}, \texttt{paidAt} y \texttt{notes}. Respuesta \texttt{201}: pago registrado desde administración.\\
+\texttt{GET} & \path{/api/commercial/order-deliveries} & Comercial & Query opcional \texttt{mode=preparation}, \texttt{clientId}, \texttt{fulfillmentMethod} y \texttt{status}. Respuesta \texttt{200}: pedidos pendientes de preparación o repartos ya preparados.\\
+\texttt{POST} & \path{/api/commercial/order-deliveries} & Comercial & JSON con \texttt{orderId}, \texttt{packageCount}, \texttt{notes} y líneas/cantidades seleccionadas. Respuesta \texttt{201}: reparto preparado.\\
+\texttt{GET} & \path{/api/commercial/order-deliveries/:id/qr-pdf} & Comercial & Parámetro \texttt{id}. Respuesta \texttt{200}: PDF de etiqueta de reparto; en agencia muestra marca \texttt{AGENCIA} en lugar de QR.\\
 \end{longtable}
 }
 
@@ -254,6 +259,8 @@ Como convención general, las rutas autenticadas devuelven \texttt{401} cuando n
 \endhead
 \texttt{GET} & \path{/api/admin/operations/status} & Admin & Sin parámetros. Respuesta \texttt{200}: resumen técnico agregado de operación transversal de \texttt{M7}, usado por scripts y validación interna.\\
 \texttt{GET} & \path{/api/admin/operations/report} & Admin & Sin parámetros. Respuesta \texttt{200}: fichero \texttt{CSV} descargable con el informe técnico operativo de \texttt{M7}.\\
+\texttt{GET} & \path{/api/admin/settings/orders} & Admin & Sin parámetros. Respuesta \texttt{200}: ajustes de negocio de pedidos, incluyendo cargo de agencia.\\
+\texttt{PUT} & \path{/api/admin/settings/orders} & Admin & JSON con \texttt{agencyDeliveryFee}. Respuesta \texttt{200}: ajustes de pedidos actualizados.\\
 \texttt{GET} & \path{/api/admin/enterprise-operations} & Admin & Sin parámetros. Respuesta \texttt{200}: configuraciones, integraciones externas, operaciones recientes y propuestas a proveedor de \texttt{M7}, como base para integración futura.\\
 \texttt{POST} & \path{/api/admin/enterprise-operations/operations} & Admin & JSON con \texttt{integrationId}, \texttt{operationType}, \texttt{dataType}, \texttt{status} y \texttt{result}. Respuesta \texttt{201}: operación de integración registrada.\\
 \texttt{POST} & \path{/api/admin/enterprise-operations/supplier-proposals} & Admin & JSON con \texttt{productIds}, \texttt{quantity}, \texttt{reason}, \texttt{notes} y \texttt{status}. Respuesta \texttt{201}: propuesta de pedido a proveedor generada con sus líneas.\\

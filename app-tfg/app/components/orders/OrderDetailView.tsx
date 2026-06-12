@@ -33,9 +33,33 @@ type Props = {
 	initialDetail: OrderDetail;
 	mode: "client" | "commercial" | "admin";
 	updateApiPath?: string | null;
+	paymentApiPath?: string | null;
 	qrPdfHref?: string | null;
 	relatedLinks?: RelatedLink[];
 };
+
+function parseOrderAmount(value: string | null | undefined) {
+	const parsed = Number(value);
+
+	return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function isPartiallyPaid(order: OrderDetail["order"]) {
+	return (
+		parseOrderAmount(order.paid_amount) > 0 &&
+		parseOrderAmount(order.pending_amount) > 0
+	);
+}
+
+function getPaymentStatusLabel(order: OrderDetail["order"]) {
+	return isPartiallyPaid(order) ? "Parcial" : order.payment_status_name;
+}
+
+function getPaymentStatusClass(order: OrderDetail["order"]) {
+	return isPartiallyPaid(order)
+		? "bg-sky-100 text-sky-700"
+		: getOrderPaymentStatusClasses(order.payment_status_code);
+}
 
 export default function OrderDetailView({
 	title,
@@ -43,6 +67,7 @@ export default function OrderDetailView({
 	initialDetail,
 	mode,
 	updateApiPath = null,
+	paymentApiPath = null,
 	qrPdfHref = null,
 	relatedLinks = [],
 }: Props) {
@@ -51,6 +76,10 @@ export default function OrderDetailView({
 	const [updatingPaymentStatusId, setUpdatingPaymentStatusId] = useState<
 		number | null
 	>(null);
+	const [registeringPayment, setRegisteringPayment] = useState(false);
+	const [paymentAmount, setPaymentAmount] = useState(
+		initialDetail.order.pending_amount,
+	);
 	const [paymentMethod, setPaymentMethod] = useState(
 		initialDetail.order.payment_method ?? "cash",
 	);
@@ -66,14 +95,27 @@ export default function OrderDetailView({
 
 	const order = detail.order;
 	const discountSummary = getOrderDiscountSummary(order);
-	const packageCount = getOrderPackageCount(order);
-	const isBusy = updatingStatusId !== null || updatingPaymentStatusId !== null;
+	const deliveryPackageCount = order.deliveries.reduce(
+		(total, delivery) => total + Number(delivery.package_count ?? 0),
+		0,
+	);
+	const packageCount =
+		deliveryPackageCount > 0 ? deliveryPackageCount : getOrderPackageCount(order);
+	const isBusy =
+		updatingStatusId !== null ||
+		updatingPaymentStatusId !== null ||
+		registeringPayment;
 	const canUpdateStatus =
 		Boolean(updateApiPath) && detail.availableStatusTransitions.length > 0;
 	const canUpdatePayment =
 		Boolean(updateApiPath) &&
+		!paymentApiPath &&
 		order.status_code === "delivered" &&
 		detail.availablePaymentTransitions.length > 0;
+	const canRegisterPayment =
+		Boolean(paymentApiPath) &&
+		order.status_code === "delivered" &&
+		parseOrderAmount(order.pending_amount) > 0;
 	const markAsPaidOption = detail.availablePaymentTransitions.find(
 		(option) => option.code === "paid",
 	);
@@ -83,17 +125,25 @@ export default function OrderDetailView({
 	const createdByCommercial =
 		order.created_by_user_role_id === ROLE_IDS.COMMERCIAL;
 	const showDeliveryState =
-		Boolean(order.delivery_visit_id) || order.status_code === "confirmed";
+		order.deliveries.length > 0 ||
+		Boolean(order.delivery_visit_id) ||
+		order.status_code === "confirmed";
 
 	useEffect(() => {
 		setIsMounted(true);
 	}, []);
 
 	useEffect(() => {
+		setPaymentAmount(
+			parseOrderAmount(detail.order.pending_amount) > 0
+				? detail.order.pending_amount
+				: "",
+		);
 		setPaymentMethod(detail.order.payment_method ?? "cash");
 		setPaymentNotes(detail.order.payment_notes ?? "");
 	}, [
 		detail.order.id,
+		detail.order.pending_amount,
 		detail.order.payment_method,
 		detail.order.payment_notes,
 		detail.order.payment_status_id,
@@ -165,7 +215,7 @@ export default function OrderDetailView({
 		if (nextPaymentStatus.code === "paid" && !String(paymentMethod).trim()) {
 			setFeedback({
 				type: "error",
-				message: "Selecciona primero el metodo de cobro utilizado.",
+				message: "Selecciona primero el método de cobro utilizado.",
 			});
 			return;
 		}
@@ -218,6 +268,85 @@ export default function OrderDetailView({
 		}
 	}
 
+	async function handleRegisterPayment() {
+		if (!paymentApiPath) {
+			return;
+		}
+
+		const parsedAmount = Number(String(paymentAmount).replace(",", "."));
+
+		if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+			setFeedback({
+				type: "error",
+				message: "Indica un importe de cobro mayor que cero.",
+			});
+			return;
+		}
+
+		if (parsedAmount > parseOrderAmount(order.pending_amount)) {
+			setFeedback({
+				type: "error",
+				message: "El importe no puede superar el pendiente de cobro.",
+			});
+			return;
+		}
+
+		if (!String(paymentMethod).trim()) {
+			setFeedback({
+				type: "error",
+				message: "Selecciona primero el método de cobro utilizado.",
+			});
+			return;
+		}
+
+		setFeedback(null);
+		setRegisteringPayment(true);
+
+		try {
+			const response = await fetch(paymentApiPath, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					amount: paymentAmount,
+					paymentMethod,
+					paymentNotes,
+				}),
+			});
+			const data = (await response.json().catch(() => null)) as
+				| OrderDetail
+				| { error?: string }
+				| null;
+
+			if (!response.ok || !data || !("order" in data)) {
+				setFeedback({
+					type: "error",
+					message:
+						(data && "error" in data && data.error) ||
+						"No se ha podido registrar el pago del pedido.",
+				});
+				return;
+			}
+
+			setDetail(data);
+			setPaymentNotes("");
+			setFeedback({
+				type: "success",
+				message: `Pago registrado por ${formatOrderCurrency(String(paymentAmount))}.`,
+			});
+		} catch (error) {
+			console.error("[orders][detail][payment-register] error:", error);
+			setFeedback({
+				type: "error",
+				message:
+					"Ha ocurrido un error inesperado al registrar el pago del pedido.",
+			});
+		} finally {
+			setRegisteringPayment(false);
+		}
+	}
+
 	return (
 		<PageTransition>
 			<div className="space-y-6">
@@ -251,11 +380,11 @@ export default function OrderDetailView({
 								</span>
 								{order.status_code === "delivered" ? (
 									<span
-										className={`rounded-full px-3 py-1 text-xs font-semibold ${getOrderPaymentStatusClasses(
-											order.payment_status_code,
+										className={`rounded-full px-3 py-1 text-xs font-semibold ${getPaymentStatusClass(
+											order,
 										)}`}
 									>
-										{order.payment_status_name}
+										{getPaymentStatusLabel(order)}
 									</span>
 								) : null}
 								{mode === "client" && createdByCommercial ? (
@@ -265,6 +394,17 @@ export default function OrderDetailView({
 								) : null}
 								<span className="rounded-full bg-fuchsia-100 px-3 py-1 text-xs font-semibold text-fuchsia-700">
 									{order.client_name}
+								</span>
+								<span
+									className={`rounded-full px-3 py-1 text-xs font-semibold ${
+										order.fulfillment_method === "agency"
+											? "bg-amber-100 text-amber-800"
+											: "bg-sky-100 text-sky-800"
+									}`}
+								>
+									{order.fulfillment_method === "agency"
+										? "Agencia"
+										: "Comercial"}
 								</span>
 							</div>
 
@@ -307,6 +447,11 @@ export default function OrderDetailView({
 										{formatOrderCents(discountSummary.totalDiscountCents)}
 									</p>
 								) : null}
+								{order.fulfillment_method === "agency" ? (
+									<p className="mt-1 text-xs font-semibold text-amber-700">
+										Agencia + {formatOrderCurrency(order.agency_delivery_fee)}
+									</p>
+								) : null}
 							</div>
 							<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
 								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -331,7 +476,18 @@ export default function OrderDetailView({
 						<div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
 							<div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
 								<span className="font-semibold text-slate-900">Reparto</span>
-								{order.delivery_visit_id ? (
+								{order.deliveries.length > 0 ? (
+									order.deliveries.map((delivery) => (
+										<span
+											key={delivery.id}
+											className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+										>
+											{delivery.id.slice(0, 8)} · {delivery.status_name} ·{" "}
+											{delivery.package_count} bulto
+											{delivery.package_count === 1 ? "" : "s"}
+										</span>
+									))
+								) : order.delivery_visit_id ? (
 									<>
 										<span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700">
 											Visita {order.delivery_visit_id.slice(0, 8)}
@@ -351,7 +507,23 @@ export default function OrderDetailView({
 					) : null}
 
 					<div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
-						{mode !== "client" && qrPdfHref ? (
+						{mode === "commercial" && order.deliveries.length > 0
+							? order.deliveries.map((delivery) => (
+									<a
+										key={delivery.id}
+										href={`/api/commercial/order-deliveries/${delivery.id}/qr-pdf`}
+										download
+										className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+									>
+										{delivery.fulfillment_method === "agency"
+											? "Etiqueta agencia"
+											: "Etiqueta QR"}{" "}
+										{delivery.id.slice(0, 8)}
+									</a>
+								))
+							: null}
+
+						{mode !== "client" && order.deliveries.length === 0 && qrPdfHref ? (
 							<a
 								href={qrPdfHref}
 								download
@@ -413,65 +585,88 @@ export default function OrderDetailView({
 							permanece en espera.
 						</div>
 					) : (
-						<div className="mt-4 grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-							<div className="grid gap-2">
-								<div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+						<div className="mt-4 space-y-4">
+							<div className="grid gap-3 md:grid-cols-4">
+								<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
 									<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
 										Estado
 									</p>
 									<p
-										className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getOrderPaymentStatusClasses(
-											order.payment_status_code,
+										className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getPaymentStatusClass(
+											order,
 										)}`}
 									>
-										{order.payment_status_name}
+										{getPaymentStatusLabel(order)}
 									</p>
 								</div>
-								<div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+								<div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
 									<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-										Metodo
+										Total
 									</p>
-									<p className="text-sm font-semibold text-slate-900">
-										{getOrderPaymentMethodLabel(order.payment_method)}
+									<p className="mt-2 text-lg font-semibold text-slate-900">
+										{formatOrderCurrency(order.total_amount)}
 									</p>
 								</div>
-								<div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+								<div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
 									<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-										Fecha
+										Cobrado
 									</p>
-									<p className="text-sm font-semibold text-slate-900">
-										{order.paid_at ? formatDateTime(order.paid_at) : "-"}
+									<p className="mt-2 text-lg font-semibold text-emerald-800">
+										{formatOrderCurrency(order.paid_amount)}
 									</p>
 								</div>
-								<div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+								<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
 									<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-										Registrado
+										Pendiente
 									</p>
-									<p className="text-sm font-semibold text-slate-900">
-										{order.paid_by_user_name || "-"}
+									<p className="mt-2 text-lg font-semibold text-amber-800">
+										{formatOrderCurrency(order.pending_amount)}
 									</p>
 								</div>
 							</div>
 
-							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-								{order.payment_notes ? (
-									<p className="mb-3 text-sm leading-6 text-slate-600">
-										<span className="font-semibold text-slate-900">
-											Observaciones:
-										</span>{" "}
-										{order.payment_notes}
-									</p>
-								) : null}
+							<div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.85fr)]">
+								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+									<h3 className="text-base font-semibold text-slate-900">
+										Registrar pago
+									</h3>
 
-								{canUpdatePayment ? (
-									<>
-										<div className="grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)]">
+									{canRegisterPayment ? (
+										<form
+											className="mt-4 grid gap-3 lg:grid-cols-[180px_220px_minmax(0,1fr)]"
+											onSubmit={(event) => {
+												event.preventDefault();
+												void handleRegisterPayment();
+											}}
+										>
+											<div>
+												<label
+													htmlFor="order-payment-amount"
+													className="mb-2 block text-sm font-medium text-slate-700"
+												>
+													Importe
+												</label>
+												<input
+													id="order-payment-amount"
+													type="number"
+													min="0.01"
+													max={order.pending_amount}
+													step="0.01"
+													value={paymentAmount}
+													onChange={(event) =>
+														setPaymentAmount(event.target.value)
+													}
+													disabled={isBusy}
+													className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+												/>
+											</div>
+
 											<div>
 												<label
 													htmlFor="order-payment-method"
 													className="mb-2 block text-sm font-medium text-slate-700"
 												>
-													Metodo de cobro
+													Método
 												</label>
 												<select
 													id="order-payment-method"
@@ -494,7 +689,7 @@ export default function OrderDetailView({
 													htmlFor="order-payment-notes"
 													className="mb-2 block text-sm font-medium text-slate-700"
 												>
-													Observaciones del cobro
+													Observaciones
 												</label>
 												<textarea
 													id="order-payment-notes"
@@ -504,12 +699,24 @@ export default function OrderDetailView({
 													}
 													rows={2}
 													disabled={isBusy}
-													placeholder="Metodo real usado, incidencia, comprobante o contexto adicional"
+													placeholder="Comprobante, incidencia o contexto adicional"
 													className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100"
 												/>
 											</div>
-										</div>
 
+											<div className="lg:col-span-3">
+												<button
+													type="submit"
+													disabled={isBusy}
+													className="rounded-2xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+												>
+													{registeringPayment
+														? "Registrando pago..."
+														: "Registrar pago"}
+												</button>
+											</div>
+										</form>
+									) : canUpdatePayment ? (
 										<div className="mt-3 flex flex-wrap gap-2">
 											{markAsPaidOption ? (
 												<button
@@ -541,14 +748,57 @@ export default function OrderDetailView({
 												</button>
 											) : null}
 										</div>
-									</>
-								) : (
-									<p className="text-sm text-slate-600">
-										{order.payment_notes
-											? "No hay acciones de cobro pendientes."
-											: "Sin observaciones ni acciones de cobro pendientes."}
-									</p>
-								)}
+									) : (
+										<p className="mt-3 text-sm text-slate-600">
+											{order.payment_status_code === "paid"
+												? "Pedido cobrado por completo."
+												: "No hay acciones de cobro pendientes."}
+										</p>
+									)}
+								</div>
+
+								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+									<h3 className="text-base font-semibold text-slate-900">
+										Historial de pagos
+									</h3>
+
+									{order.payments.length > 0 ? (
+										<div className="mt-3 grid gap-2">
+											{order.payments.map((payment) => (
+												<div
+													key={payment.id}
+													className="rounded-2xl border border-slate-200 bg-white px-4 py-3"
+												>
+													<div className="flex flex-wrap items-center justify-between gap-2">
+														<p className="text-base font-semibold text-slate-900">
+															{formatOrderCurrency(payment.amount)}
+														</p>
+														<span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+															{getOrderPaymentMethodLabel(
+																payment.payment_method,
+															)}
+														</span>
+													</div>
+													<p className="mt-2 text-sm text-slate-600">
+														{formatDateTime(payment.paid_at)}
+														{" · "}
+														{payment.registered_by_user_name ||
+															"Usuario no disponible"}
+													</p>
+													{payment.notes ? (
+														<p className="mt-2 text-sm leading-6 text-slate-600">
+															{payment.notes}
+														</p>
+													) : null}
+												</div>
+											))}
+										</div>
+									) : (
+										<p className="mt-3 text-sm text-slate-600">
+											Todavía no hay pagos registrados para este pedido.
+										</p>
+									)}
+								</div>
 							</div>
 						</div>
 					)}

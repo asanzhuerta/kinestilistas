@@ -34,6 +34,9 @@ import { OrderStatus } from "./entities/OrderStatus";
 import { OrderPaymentStatus } from "./entities/OrderPaymentStatus";
 import { Order } from "./entities/Order";
 import { OrderLine } from "./entities/OrderLine";
+import { OrderPayment } from "./entities/OrderPayment";
+import { OrderDelivery } from "./entities/OrderDelivery";
+import { OrderDeliveryLine } from "./entities/OrderDeliveryLine";
 import { AppRateLimitPolicy } from "./entities/AppRateLimitPolicy";
 import { SalonClient } from "./entities/SalonClient";
 import { SalonService } from "./entities/SalonService";
@@ -91,6 +94,9 @@ export const entities = [
 	OrderPaymentStatus,
 	Order,
 	OrderLine,
+	OrderPayment,
+	OrderDelivery,
+	OrderDeliveryLine,
 	AppRateLimitPolicy,
 	SalonClient,
 	SalonService,

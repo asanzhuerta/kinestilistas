@@ -7,6 +7,7 @@ import {
 	listOrderProductOptionsForCommercialUser,
 	listOrdersForCommercialUser,
 } from "@/lib/typeorm/services/orders/order";
+import { getOrderBusinessSettings } from "@/lib/typeorm/services/orders/order-settings";
 
 type CommercialOrdersPageProps = {
 	searchParams?: Promise<{
@@ -27,7 +28,7 @@ export default async function CommercialOrdersPage({
 	);
 	const initialSelectedClientId =
 		requestedClient?.id ?? clients[0]?.id ?? null;
-	const [productOptions, orders, initialDraftOrder] = await Promise.all([
+	const [productOptions, orders, initialDraftOrder, orderSettings] = await Promise.all([
 		listOrderProductOptionsForCommercialUser(session.user.id, {
 			clientId: initialSelectedClientId,
 		}),
@@ -35,6 +36,7 @@ export default async function CommercialOrdersPage({
 		getDraftOrderForCommercialUser(session.user.id, {
 			clientId: initialSelectedClientId,
 		}),
+		getOrderBusinessSettings(),
 	]);
 
 	return (
@@ -46,6 +48,7 @@ export default async function CommercialOrdersPage({
 			apiPath="/api/commercial/orders"
 			detailBasePath="/commercials/orders"
 			productOptions={productOptions}
+			agencyDeliveryFee={orderSettings.agencyDeliveryFee}
 			initialOrders={orders}
 			initialDraftOrder={initialDraftOrder}
 			initialSelectedClientId={initialSelectedClientId}

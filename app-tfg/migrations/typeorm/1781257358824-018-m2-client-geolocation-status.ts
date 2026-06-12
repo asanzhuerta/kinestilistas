@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class M2ClientGeolocationStatus1776880200000
+export class M2ClientGeolocationStatus1781257358824
 	implements MigrationInterface
 {
-	name = "M2ClientGeolocationStatus1776880200000";
+	name = "M2ClientGeolocationStatus1781257358824";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`
@@ -40,4 +40,5 @@ export class M2ClientGeolocationStatus1776880200000
 			DROP COLUMN "geolocation_status"
 		`);
 	}
+
 }

@@ -39,6 +39,7 @@ export default async function CommercialOrderDetailPage({
 			initialDetail={detail}
 			mode="commercial"
 			updateApiPath={`/api/commercial/orders/${id}`}
+			paymentApiPath={`/api/commercial/orders/${id}/payments`}
 			qrPdfHref={`/api/commercial/orders/${id}/qr-pdf`}
 			relatedLinks={[
 				{
@@ -53,6 +54,17 @@ export default async function CommercialOrderDetailPage({
 							},
 						]
 					: []),
+				...detail.order.deliveries
+					.filter((delivery) => Boolean(delivery.delivery_visit_id))
+					.slice(0, 1)
+					.map((delivery) => ({
+						label: "Ver visita del reparto",
+						href: `/commercials/visits/${delivery.delivery_visit_id}`,
+					})),
+				{
+					label: "Preparar repartos",
+					href: "/commercials/orders/preparation",
+				},
 				{
 					label: "Ver agenda comercial",
 					href: "/commercials/visits",

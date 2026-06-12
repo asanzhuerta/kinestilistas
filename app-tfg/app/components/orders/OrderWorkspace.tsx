@@ -7,6 +7,7 @@ import PageTransition from "@/app/components/animations/PageTransition";
 import H1Title from "@/app/components/H1Title";
 import { useSessionStorageState } from "@/app/hooks/useSessionStorageState";
 import type {
+	OrderFulfillmentMethod,
 	OrderProductOption,
 	OrderSummary,
 } from "@/lib/contracts/order";
@@ -41,6 +42,7 @@ type WorkspaceProps = {
 	apiPath: string;
 	detailBasePath: string;
 	productOptions: OrderProductOption[];
+	agencyDeliveryFee?: string;
 	initialOrders: OrderSummary[];
 	initialDraftOrder?: OrderSummary | null;
 	clientOptions?: OrderClientOption[];
@@ -286,6 +288,40 @@ function matchesOrderSearch(order: OrderSummary, searchTerm: string) {
 		.includes(normalizedSearchTerm);
 }
 
+function getLocalDateInputValue(value: string | null | undefined) {
+	const date = new Date(String(value ?? ""));
+
+	if (Number.isNaN(date.getTime())) {
+		return "";
+	}
+
+	const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+
+	return localDate.toISOString().slice(0, 10);
+}
+
+function isOrderInsideDateRange(
+	order: OrderSummary,
+	dateFrom: string,
+	dateTo: string,
+) {
+	const orderDate = getLocalDateInputValue(order.created_at);
+
+	if (!orderDate) {
+		return false;
+	}
+
+	if (dateFrom && orderDate < dateFrom) {
+		return false;
+	}
+
+	if (dateTo && orderDate > dateTo) {
+		return false;
+	}
+
+	return true;
+}
+
 export default function OrderWorkspace({
 	mode,
 	title,
@@ -293,6 +329,7 @@ export default function OrderWorkspace({
 	apiPath,
 	detailBasePath,
 	productOptions,
+	agencyDeliveryFee = "8.00",
 	initialOrders,
 	initialDraftOrder = null,
 	clientOptions = [],
@@ -316,6 +353,12 @@ export default function OrderWorkspace({
 	const [selectedClientId, setSelectedClientId] = useState(
 		initialCommercialClientId,
 	);
+	const [fulfillmentMethod, setFulfillmentMethod] =
+		useState<OrderFulfillmentMethod>(
+			initialDraftOrder?.fulfillment_method === "agency"
+				? "agency"
+				: "commercial",
+		);
 	const [notes, setNotes] = useState(initialDraftOrder?.notes ?? "");
 	const [submitting, setSubmitting] = useState(false);
 	const [savingDraft, setSavingDraft] = useState(false);
@@ -336,6 +379,12 @@ export default function OrderWorkspace({
 	const [historyStatusFilter, setHistoryStatusFilter] = useSessionStorageState(
 		`${workspaceHistoryFilterKey}:status`,
 		"all",
+	);
+	const [historyDateFromFilter, setHistoryDateFromFilter] =
+		useSessionStorageState(`${workspaceHistoryFilterKey}:dateFrom`, "");
+	const [historyDateToFilter, setHistoryDateToFilter] = useSessionStorageState(
+		`${workspaceHistoryFilterKey}:dateTo`,
+		"",
 	);
 	const [isHistoryFiltersOpen, setIsHistoryFiltersOpen] = useState(false);
 	const [isCreatePanelOpen, setIsCreatePanelOpen] = useState(
@@ -388,10 +437,22 @@ export default function OrderWorkspace({
 				return false;
 			}
 
+			if (
+				!isOrderInsideDateRange(
+					order,
+					historyDateFromFilter,
+					historyDateToFilter,
+				)
+			) {
+				return false;
+			}
+
 			return matchesOrderSearch(order, historySearch);
 		});
 	}, [
 		historyClientFilter,
+		historyDateFromFilter,
+		historyDateToFilter,
 		historyPaymentFilter,
 		historySearch,
 		historyStatusFilter,
@@ -402,6 +463,8 @@ export default function OrderWorkspace({
 		historySearch.trim().length > 0 ||
 		historyStatusFilter !== "all" ||
 		historyPaymentFilter !== "all" ||
+		historyDateFromFilter ||
+		historyDateToFilter ||
 		(mode === "commercial" && historyClientFilter !== "all");
 	const summaryCounts = useMemo(() => {
 		const blockedClients = new Set(
@@ -436,9 +499,54 @@ export default function OrderWorkspace({
 	const orderLineLabel = mode === "client" ? "Producto" : "Bulto";
 	const addLineLabel =
 		mode === "client" ? "Añadir nuevo producto" : "Añadir bulto";
+	const agencyDeliveryFeeCents = parseMoneyToCents(agencyDeliveryFee);
+	const orderPreview = useMemo(() => {
+		const lineTotals = lines.reduce(
+			(accumulator, line) => {
+				const selectedProductOption = findSelectedProductOption(
+					line,
+					currentProductOptions,
+				);
+				const linePreview = buildLinePreview(line, selectedProductOption);
+
+				if (!linePreview) {
+					return accumulator;
+				}
+
+				return {
+					subtotalCents: accumulator.subtotalCents + linePreview.subtotalCents,
+					discountCents: accumulator.discountCents + linePreview.discountCents,
+					totalCents: accumulator.totalCents + linePreview.totalCents,
+				};
+			},
+			{
+				subtotalCents: 0,
+				discountCents: 0,
+				totalCents: 0,
+			},
+		);
+		const deliveryFeeCents =
+			fulfillmentMethod === "agency" ? agencyDeliveryFeeCents : 0;
+
+		return {
+			...lineTotals,
+			deliveryFeeCents,
+			finalTotalCents: lineTotals.totalCents + deliveryFeeCents,
+		};
+	}, [
+		agencyDeliveryFeeCents,
+		currentProductOptions,
+		fulfillmentMethod,
+		lines,
+	]);
 
 	function syncDraftState(nextDraftOrder: OrderSummary | null) {
 		setNotes(nextDraftOrder?.notes ?? "");
+		setFulfillmentMethod(
+			nextDraftOrder?.fulfillment_method === "agency"
+				? "agency"
+				: "commercial",
+		);
 		setLines(mapOrderToEditableLines(nextDraftOrder));
 		setProductSearchByLineId({});
 	}
@@ -448,6 +556,8 @@ export default function OrderWorkspace({
 		setHistoryClientFilter("all");
 		setHistoryStatusFilter("all");
 		setHistoryPaymentFilter("all");
+		setHistoryDateFromFilter("");
+		setHistoryDateToFilter("");
 	}
 
 	useEffect(() => {
@@ -725,6 +835,7 @@ export default function OrderWorkspace({
 				},
 				body: JSON.stringify({
 					clientId: mode === "commercial" ? selectedClientId : undefined,
+					fulfillmentMethod,
 					notes,
 					lines: buildPayloadLines(),
 				}),
@@ -847,6 +958,7 @@ export default function OrderWorkspace({
 				},
 				body: JSON.stringify({
 					clientId: mode === "commercial" ? selectedClientId : undefined,
+					fulfillmentMethod,
 					notes,
 					lines: buildPayloadLines(),
 				}),
@@ -1046,6 +1158,93 @@ export default function OrderWorkspace({
 									Actualizando promociones del cliente...
 								</div>
 							) : null}
+
+							<div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+								<div>
+									<p className="text-sm font-semibold text-slate-900">
+										Entrega del pedido
+									</p>
+									<div className="mt-3 grid gap-2 sm:grid-cols-2">
+										{[
+											{
+												value: "commercial" as const,
+												title: "Comercial",
+												description: "Se planifica como reparto comercial.",
+											},
+											{
+												value: "agency" as const,
+												title: "Agencia",
+												description: `Suma ${formatOrderCents(
+													agencyDeliveryFeeCents,
+												)} al pedido y genera etiqueta de agencia.`,
+											},
+										].map((option) => (
+											<label
+												key={option.value}
+												className={`cursor-pointer rounded-2xl border px-4 py-3 transition ${
+													fulfillmentMethod === option.value
+														? "border-slate-950 bg-slate-950 text-white"
+														: "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+												}`}
+											>
+												<input
+													type="radio"
+													name="fulfillmentMethod"
+													value={option.value}
+													checked={fulfillmentMethod === option.value}
+													onChange={() => setFulfillmentMethod(option.value)}
+													className="sr-only"
+												/>
+												<span className="block text-sm font-semibold">
+													{option.title}
+												</span>
+												<span
+													className={`mt-1 block text-xs ${
+														fulfillmentMethod === option.value
+															? "text-slate-200"
+															: "text-slate-500"
+													}`}
+												>
+													{option.description}
+												</span>
+											</label>
+										))}
+									</div>
+								</div>
+
+								<div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
+									<div className="flex items-center justify-between gap-3 text-slate-600">
+										<span>Productos</span>
+										<span className="font-semibold text-slate-900">
+											{formatOrderCents(orderPreview.totalCents)}
+										</span>
+									</div>
+									{orderPreview.discountCents > 0 ? (
+										<div className="mt-2 flex items-center justify-between gap-3 text-emerald-700">
+											<span>Descuento aplicado</span>
+											<span className="font-semibold">
+												-{formatOrderCents(orderPreview.discountCents)}
+											</span>
+										</div>
+									) : null}
+									{orderPreview.deliveryFeeCents > 0 ? (
+										<div className="mt-2 flex items-center justify-between gap-3 text-slate-600">
+											<span>Cargo agencia</span>
+											<span className="font-semibold text-slate-900">
+												{formatOrderCents(orderPreview.deliveryFeeCents)}
+											</span>
+										</div>
+									) : null}
+									<div className="mt-3 border-t border-slate-100 pt-3">
+										<div className="flex items-center justify-between gap-3 text-base font-semibold text-slate-950">
+											<span>Total estimado</span>
+											<span>
+												{formatOrderCents(orderPreview.finalTotalCents)}
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
 
 							<div className="space-y-3">
 								{lines.map((line, index) => {
@@ -1332,8 +1531,8 @@ export default function OrderWorkspace({
 							<div
 								className={`mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 ${
 									mode === "commercial"
-										? "lg:grid-cols-[minmax(0,1.2fr)_220px_220px_220px]"
-										: "lg:grid-cols-[minmax(0,1fr)_220px_220px]"
+										? "lg:grid-cols-[minmax(0,1.2fr)_180px_180px_190px_190px_220px]"
+										: "lg:grid-cols-[minmax(0,1fr)_180px_180px_200px_200px]"
 								}`}
 							>
 								<div>
@@ -1349,6 +1548,42 @@ export default function OrderWorkspace({
 										value={historySearch}
 										onChange={(event) => setHistorySearch(event.target.value)}
 										placeholder="Pedido, cliente, creador o referencia"
+										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+									/>
+								</div>
+
+								<div>
+									<label
+										htmlFor="orders-history-date-from-filter"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
+										Desde
+									</label>
+									<input
+										id="orders-history-date-from-filter"
+										type="date"
+										value={historyDateFromFilter}
+										onChange={(event) =>
+											setHistoryDateFromFilter(event.target.value)
+										}
+										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+									/>
+								</div>
+
+								<div>
+									<label
+										htmlFor="orders-history-date-to-filter"
+										className="mb-2 block text-sm font-medium text-slate-700"
+									>
+										Hasta
+									</label>
+									<input
+										id="orders-history-date-to-filter"
+										type="date"
+										value={historyDateToFilter}
+										onChange={(event) =>
+											setHistoryDateToFilter(event.target.value)
+										}
 										className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 									/>
 								</div>
@@ -1491,6 +1726,17 @@ export default function OrderWorkspace({
 														{order.client_name}
 													</span>
 												) : null}
+												<span
+													className={`rounded-full px-3 py-1 text-xs font-semibold ${
+														order.fulfillment_method === "agency"
+															? "bg-amber-100 text-amber-800"
+															: "bg-sky-100 text-sky-800"
+													}`}
+												>
+													{order.fulfillment_method === "agency"
+														? "Agencia"
+														: "Comercial"}
+												</span>
 											</div>
 
 											<p className="text-sm text-slate-600">
@@ -1532,6 +1778,12 @@ export default function OrderWorkspace({
 															getOrderDiscountSummary(order)
 																.totalDiscountCents,
 														)}
+													</p>
+												) : null}
+												{order.fulfillment_method === "agency" ? (
+													<p className="mt-1 text-xs font-semibold text-amber-700">
+														Agencia +{" "}
+														{formatCurrency(order.agency_delivery_fee)}
 													</p>
 												) : null}
 											</div>

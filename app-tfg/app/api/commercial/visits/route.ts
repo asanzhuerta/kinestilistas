@@ -73,6 +73,7 @@ export async function POST(request: Request) {
 			visitTypeId: Number(body.visitTypeId),
 			notes: body.notes ?? null,
 			orderIds: Array.isArray(body.orderIds) ? body.orderIds : [],
+			deliveryIds: Array.isArray(body.deliveryIds) ? body.deliveryIds : [],
 		});
 
 		return NextResponse.json(visit, { status: 201 });

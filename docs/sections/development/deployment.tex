@@ -8,10 +8,12 @@ La arquitectura física realmente necesaria para ejecutar la aplicación puede r
     \item un nodo de aplicación que ejecute \texttt{Next.js} en entorno \texttt{Node.js};
     \item una base de datos \texttt{PostgreSQL} accesible desde la aplicación \citep{postgresdocs2026};
     \item un servicio externo de almacenamiento multimedia para imágenes en \texttt{Cloudinary} \citep{cloudinaryupload2026};
-    \item servicios HTTP externos de soporte para geocodificación, rutas y representación de QR, concretamente \texttt{Nominatim}, \texttt{OSRM} y \texttt{QuickChart} \citep{nominatimapi2026,osrmdocs2026,quickchartqr2026}.
+    \item servicios HTTP externos de soporte para geocodificación, rutas y representación de QR de reparto, concretamente \texttt{Nominatim}, \texttt{OSRM} y \texttt{QuickChart} \citep{nominatimapi2026,osrmdocs2026,quickchartqr2026}.
 \end{itemize}
 
 Desde el punto de vista del despliegue, la aplicación no separa frontend y backend en productos distintos. La misma instancia de \texttt{Next.js} sirve la interfaz web, resuelve los \textit{Route Handlers}, aplica autenticación, rate limiting y control de acceso, y coordina la lectura y escritura sobre la base de datos.
+
+\textcolor{red}{Revisar precisión: validar si realmente se quiere defender este despliegue como producción equivalente o solo como arquitectura de referencia.} La Figura~\ref{fig:physical-deployment} resume esta arquitectura física de referencia, válida tanto para el entorno local de desarrollo como para un despliegue de producción equivalente con base de datos gestionada.
 
 \begin{figure}[H]
     \centering
@@ -43,7 +45,7 @@ En el estado actual del proyecto, los servicios externos relevantes son:
     \item \texttt{Cloudinary}, para imágenes de perfil y de catálogo.
     \item \texttt{Nominatim}, para geocodificación de direcciones.
     \item \texttt{OSRM}, para cálculo de geometrías de ruta y trayectos.
-    \item \texttt{QuickChart}, para generar la imagen QR asociada a los pedidos.
+    \item \texttt{QuickChart}, para generar la imagen QR asociada a los repartos comerciales.
 \end{itemize}
 
 De ellos, solo \texttt{Cloudinary} requiere credenciales obligatorias para los flujos de subida. Las demás integraciones pueden mantenerse con sus endpoints públicos por defecto o sustituirse mediante configuración.

@@ -1,6 +1,6 @@
 Durante el desarrollo del presente proyecto se han identificado diversas oportunidades de mejora y líneas de evolución del sistema que no han sido abordadas en la versión actual, pero que resultan coherentes con la arquitectura y con el alcance funcional definido en el análisis.
 
-En particular, la aplicación ya dispone de una base operativa sólida en los módulos \texttt{M1} a \texttt{M7}. Por ello, las líneas de trabajo futuro no deben entenderse como una corrección del alcance actual, sino como profundizaciones naturales sobre una base ya implementada, documentada y verificada. \textcolor{red}{El módulo \texttt{M8}, por su carácter más exploratorio, se mantiene como una línea de evolución posterior.}
+En particular, la aplicación ya dispone de una base operativa sólida en los módulos \texttt{M1} a \texttt{M7}. \textcolor{red}{Revisar tono: ``base operativa sólida'' y ``profundizaciones naturales'' pueden sonar poco concretas; valorar si se sustituyen por una descripción más directa del alcance implementado.} Por ello, las líneas de trabajo futuro no deben entenderse como una corrección del alcance actual, sino como profundizaciones naturales sobre una base ya implementada, documentada y verificada. \textcolor{red}{El módulo \texttt{M8}, por su carácter más exploratorio, se mantiene como una línea de evolución posterior.}
 
 \subsection*{M1. Gestión de acceso, alta y autorización de usuarios}
 \begin{itemize}
@@ -26,11 +26,11 @@ En particular, la aplicación ya dispone de una base operativa sólida en los m�
 
 \subsection*{M4. Pedidos, entregas y cobros}
 \begin{itemize}
-    \item Extension del subflujo de cobro hacia pagos parciales, vencimientos y conciliación básica.
+    \item Extensión del subflujo de cobro ya parcial hacia vencimientos, conciliación bancaria e informes económicos avanzados.
     \item Incorporación de facturación o documentos comerciales derivados del pedido.
-    \item Refuerzo de la logística con incidencias de entrega, intentos fallidos y seguimiento de pendientes de servir.
+    \item Refuerzo de la logística con incidencias de entrega, intentos fallidos, seguimiento externo de agencia y pendientes de servir.
     \item Mejora de la captura operativa del QR y de la experiencia móvil asociada a la confirmación de entrega.
-    \item Implementación de un buscador avanzado y consistente para la selección de referencias en pedidos, con filtrado por referencia, producto, tono y línea comercial.
+    \item Generación de informes sobre pagos, repartos preparados, agencia y tiempos de entrega.
 \end{itemize}
 
 \subsection*{M5. Gestión técnica del salón}
@@ -59,7 +59,7 @@ En particular, la aplicación ya dispone de una base operativa sólida en los m�
 
 Una línea de evolución especialmente relevante consiste en conectar el flujo de pedidos y reparto de la aplicación con TeamSystem Factusol mediante una capa de automatización externa. La aplicación ya dispone de un primer registro persistente de integraciones, operaciones y propuestas a proveedor dentro de \texttt{M7}; \textcolor{red}{el siguiente salto consistiría en conectar esa base con un flujo real de automatización. Esta integración permitiría convertir pedidos confirmados o entregados en documentos comerciales, sincronizar clientes y artículos, generar albaranes, marcar documentos como facturados y devolver a la aplicación estados administrativos de facturación o cobro.}
 
-La opción técnicamente más limpia sería utilizar \texttt{n8n} como orquestador de procesos. Sus nodos de \textit{webhook} permiten iniciar flujos desde llamadas HTTP entrantes, mientras que el nodo \textit{HTTP Request} permite consumir servicios REST de terceros \citep{n8n-webhook,n8n-http-request}. En este escenario, la aplicación podría publicar un evento cuando un pedido pasase a estado entregado; \texttt{n8n} validaría el pedido, transformaría las líneas al formato esperado por Factusol y llamaría a la API correspondiente.
+\textcolor{red}{Revisar precisión: ``la opción técnicamente más limpia'' es una valoración subjetiva; si se mantiene, conviene justificarla con criterios como desacoplamiento, bajo impacto en la aplicación y facilidad de mantenimiento.} La opción técnicamente más limpia sería utilizar \texttt{n8n} como orquestador de procesos. Sus nodos de \textit{webhook} permiten iniciar flujos desde llamadas HTTP entrantes, mientras que el nodo \textit{HTTP Request} permite consumir servicios REST de terceros \citep{n8n-webhook,n8n-http-request}. En este escenario, la aplicación podría publicar un evento cuando un pedido pasase a estado entregado; \texttt{n8n} validaría el pedido, transformaría las líneas al formato esperado por Factusol y llamaría a la API correspondiente.
 
 La viabilidad concreta depende de la modalidad contratada por el cliente. TeamSystem indica que Factusol puede trabajar en local o con datos en nube, y que su ciclo comercial incluye presupuestos, pedidos, albaranes, facturas, cobros, generación de facturas desde albaranes y exportación de documentos \citep{sdelsol-factusol}. Además, API DELSOL permite acceder de forma automatizada a datos de sus soluciones en nube, incluyendo TeamSystem Factusol, y su documentación expone operaciones de autenticación, lectura, inserción y actualización de registros \citep{sdelsol-api,sdelsol-api-doc}. Por tanto, si el cliente dispone de Factusol en nube con acceso a API, la integración debería plantearse como un flujo API-to-API.
 
@@ -72,4 +72,4 @@ Si el cliente trabaja exclusivamente con Factusol local, la integración sería 
     \item Incorporación progresiva de pruebas automatizadas de integración y de interfaz para reducir regresiones manuales.
     \item Reorganización interna adicional del código por \textit{feature}, especialmente en las áreas comercial, catálogo y pedidos.
     \item Profundización de la capa PWA, ampliando la experiencia offline más allá del \textit{app shell} actual.
-\end{itemize}}
+\end{itemize}

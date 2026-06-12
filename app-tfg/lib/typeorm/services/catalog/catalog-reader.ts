@@ -1,7 +1,12 @@
 import { PRODUCT_STATUS_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { isSyntheticProductReference } from "@/lib/catalog/product-reference";
 import { createCatalogDataCache } from "@/lib/cache/catalog-cache";
-import { listColorCharts, getColorChartById, listColorReferences } from "./color-chart";
+import {
+	listColorCharts,
+	getColorChartById,
+	getColorReferenceById,
+	listColorReferences,
+} from "./color-chart";
 import { getProductById, listProducts } from "./product";
 import { listSupportResources } from "./support-resource";
 
@@ -100,6 +105,10 @@ async function getCatalogColorChartDetailUncached(colorChartId: string) {
 	return getColorChartById(colorChartId);
 }
 
+async function getCatalogColorReferenceDetailUncached(colorReferenceId: string) {
+	return getColorReferenceById(colorReferenceId);
+}
+
 export const listActiveCatalogProducts = createCatalogDataCache(
 	listActiveCatalogProductsUncached,
 	["catalog", "active-products"],
@@ -118,4 +127,9 @@ export const listCatalogColorChartsWithReferences = createCatalogDataCache(
 export const getCatalogColorChartDetail = createCatalogDataCache(
 	getCatalogColorChartDetailUncached,
 	["catalog", "color-chart-detail"],
+);
+
+export const getCatalogColorReferenceDetail = createCatalogDataCache(
+	getCatalogColorReferenceDetailUncached,
+	["catalog", "color-reference-detail"],
 );

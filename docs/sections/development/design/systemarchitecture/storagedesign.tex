@@ -9,19 +9,19 @@ La información principal del dominio se almacena en \texttt{PostgreSQL} mediant
     \item clientes, comerciales y asignaciones entre ambos;
     \item visitas, rutas comerciales y ordenacion de paradas;
     \item estructura de catálogo, productos, cartas de color y referencias cromáticas;
-    \item pedidos, líneas de pedido, estados de negocio y estado mínimo de cobro;
+    \item pedidos, líneas de pedido, repartos, líneas de reparto, estados de negocio, pagos parciales y estado de cobro derivado;
     \item fichas técnicas del salón, servicios, plantillas, productos utilizados, sugerencias e imágenes finales referenciadas;
     \item segmentos de cliente, asignaciones comerciales de segmentación, promociones, formaciones, inscripciones, notificaciones internas y recordatorios;
     \item catálogos controlados de roles, estados y tipos operativos utilizados por los módulos ya implementados;
     \item sobrescrituras técnicas persistidas para políticas de rate limiting;
-    \item configuraciones del sistema, integraciones externas, operaciones de integración y propuestas de pedido a proveedor con sus líneas.
+    \item configuraciones del sistema, tarifa de agencia, integraciones externas, operaciones de integración y propuestas de pedido a proveedor con sus líneas.
 \end{itemize}
 
 Este modelo relacional actúa como fuente de verdad del sistema. Las operaciones críticas de autenticación, gestión comercial, catálogo, pedidos, administración transversal y operación empresarial se apoyan en esta capa. La Figura~\ref{fig:postgresql-physical-model} recoge el diseño físico completo de PostgreSQL.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{./figures/UML/MCD/postgresql-physical-model.pdf}
+    \includegraphics[width=\linewidth]{./figures/UML/MCD/postgresql-physical-model.png}
     \caption{Diseño físico / modelo relacional de PostgreSQL}
     \label{fig:postgresql-physical-model}
 \end{figure}
@@ -43,10 +43,11 @@ En la base de datos solo se persisten las URLs finales y, cuando procede, metada
 Existen además varios artefactos que la aplicación no persiste como entidad independiente:
 
 \begin{itemize}
-    \item el QR del pedido, que se reconstruye a partir del identificador del pedido y se representa mediante \texttt{QuickChart} \citep{quickchartqr2026};
-    \item la geometría de ruta comercial, que se consulta a \texttt{OSRM} en tiempo de ejecución \citep{osrmdocs2026};
+    \item el QR del reparto comercial, que se reconstruye a partir del identificador del reparto y se representa mediante \texttt{QuickChart} \citep{quickchartqr2026};
+    \item la etiqueta de agencia, que reutiliza el mismo formato de etiqueta logística pero sustituye el bloque QR por una marca textual de agencia;
+    \item la geometría de ruta comercial, que se consulta a \texttt{OSRM} cuando debe recalcularse la planificación diaria \citep{osrmdocs2026};
     \item la geocodificación de una dirección, que se obtiene desde \texttt{Nominatim} cuando hace falta confirmar o recalcular coordenadas \citep{nominatimapi2026};
-    \item la ETA visible para cliente, que se calcula a partir de visitas reales, reglas horarias y posición en ruta, y no como un dato fijo aislado.
+    \item la ETA visible para cliente, que se obtiene a partir de visitas reales, reglas horarias y posición en ruta, persistiendo los resultados operativos de llegada y salida cuando la planificación diaria se recalcula.
 \end{itemize}
 
 Esta separación evita almacenar resultados efímeros o fácilmente regenerables cuando su valor depende de datos del negocio ya presentes en el sistema.
@@ -62,4 +63,4 @@ La estrategia de almacenamiento aplicada en el proyecto responde a cuatro criter
     \item limitar el número de entidades persistentes a las que realmente aportan valor al modelo de negocio implementado.
 \end{itemize}
 
-Por ello, aunque el sistema ya muestra QR, ETA, mapas, capturas de cámara o recursos externos, no todo ello debe interpretarse como nuevas entidades almacenadas. La memoria debe distinguir entre datos persistidos, activos referenciados e información operativa calculada en el momento.
+Por ello, aunque el sistema ya muestra QR, ETA, mapas, capturas de cámara o recursos externos, no todo ello debe interpretarse como nuevas entidades almacenadas. La memoria debe distinguir entre datos persistidos, activos referenciados e información operativa calculada o regenerada a partir de datos persistentes.

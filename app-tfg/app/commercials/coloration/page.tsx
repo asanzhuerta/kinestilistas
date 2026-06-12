@@ -23,6 +23,7 @@ export default async function CommercialColorationPage() {
 			colorCharts={serializedColorCharts}
 			colorReferences={serializedColorReferences}
 			detailBasePath="/commercials/coloration"
+			toneDetailBasePath="/commercials/coloration/tones"
 		/>
 	);
 }

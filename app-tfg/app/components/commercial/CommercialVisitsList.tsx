@@ -11,8 +11,7 @@ import SubmitButton from "@/app/components/forms/SubmitButton";
 import { useSessionStorageState } from "@/app/hooks/useSessionStorageState";
 import { requestJson } from "@/lib/api/client";
 import type { CommercialRoutePreviewResponse } from "@/lib/contracts/commercial-route";
-import type { OrderSummary } from "@/lib/contracts/order";
-import { getOrderPackageCount } from "@/app/components/orders/order-ui";
+import type { OrderDeliverySummary } from "@/lib/contracts/order";
 import { getTodayDateInMadrid } from "@/lib/utils/time";
 import type { CommercialClient } from "./commercial-client-types";
 import type { CommercialVisit } from "./commercial-visit-types";
@@ -59,21 +58,12 @@ function buildVisitsQuery(params: {
 	return query ? `/api/commercial/visits?${query}` : "/api/commercial/visits";
 }
 
-function buildPendingDeliveryOrdersQuery() {
+function buildPendingDeliveriesQuery() {
 	const searchParams = new URLSearchParams();
-	searchParams.set("pendingDeliveryOnly", "1");
+	searchParams.set("status", "prepared");
+	searchParams.set("fulfillmentMethod", "commercial");
 
-	return `/api/commercial/orders?${searchParams.toString()}`;
-}
-
-function formatOrderCurrency(value: string | number | null | undefined) {
-	const amount = Number(value ?? 0);
-
-	return new Intl.NumberFormat("es-ES", {
-		style: "currency",
-		currency: "EUR",
-		maximumFractionDigits: 2,
-	}).format(Number.isFinite(amount) ? amount : 0);
+	return `/api/commercial/order-deliveries?${searchParams.toString()}`;
 }
 
 const DELIVERY_VISIT_TYPE_ID = "1";
@@ -120,9 +110,9 @@ export default function CommercialVisitsList() {
 
 	const [visits, setVisits] = useState<CommercialVisit[]>([]);
 	const [clients, setClients] = useState<CommercialClient[]>([]);
-	const [pendingDeliveryOrders, setPendingDeliveryOrders] = useState<OrderSummary[]>(
-		[],
-	);
+	const [pendingDeliveries, setPendingDeliveries] = useState<
+		OrderDeliverySummary[]
+	>([]);
 	const [routePreview, setRoutePreview] =
 		useState<CommercialRoutePreviewResponse | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -138,7 +128,7 @@ export default function CommercialVisitsList() {
 	const [scheduledForDate, setScheduledForDate] = useState(todayDate);
 	const [visitTypeId, setVisitTypeId] = useState("2");
 	const [notes, setNotes] = useState("");
-	const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+	const [selectedDeliveryIds, setSelectedDeliveryIds] = useState<string[]>([]);
 
 	const [filterClientId, setFilterClientId] = useSessionStorageState(
 		"commercial-visits:filter-client-id",
@@ -199,30 +189,30 @@ export default function CommercialVisitsList() {
 		[sortedVisits, routeMetadataByClientId],
 	);
 
-	const pendingDeliveryOrdersByClient = useMemo(() => {
+	const pendingDeliveriesByClient = useMemo(() => {
 		const grouped = new Map<
 			string,
 			{
 				clientId: string;
 				clientName: string;
 				clientContactName: string | null;
-				orders: OrderSummary[];
-				totalAmount: number;
+				deliveries: OrderDeliverySummary[];
+				totalPackages: number;
 			}
 		>();
 
-		for (const order of pendingDeliveryOrders) {
-			const current = grouped.get(order.client_id) ?? {
-				clientId: order.client_id,
-				clientName: order.client_name,
-				clientContactName: order.client_contact_name ?? null,
-				orders: [],
-				totalAmount: 0,
+		for (const delivery of pendingDeliveries) {
+			const current = grouped.get(delivery.client_id) ?? {
+				clientId: delivery.client_id,
+				clientName: delivery.client_name,
+				clientContactName: delivery.client_contact_name ?? null,
+				deliveries: [],
+				totalPackages: 0,
 			};
 
-			current.orders.push(order);
-			current.totalAmount += Number(order.total_amount ?? 0);
-			grouped.set(order.client_id, current);
+			current.deliveries.push(delivery);
+			current.totalPackages += Number(delivery.package_count ?? 0);
+			grouped.set(delivery.client_id, current);
 		}
 
 		return Array.from(grouped.values()).sort((left, right) =>
@@ -230,12 +220,12 @@ export default function CommercialVisitsList() {
 				sensitivity: "base",
 			}),
 		);
-	}, [pendingDeliveryOrders]);
+	}, [pendingDeliveries]);
 
-	const pendingOrdersForSelectedClient = useMemo(
+	const pendingDeliveriesForSelectedClient = useMemo(
 		() =>
-			pendingDeliveryOrders.filter((order) => order.client_id === clientId),
-		[pendingDeliveryOrders, clientId],
+			pendingDeliveries.filter((delivery) => delivery.client_id === clientId),
+		[pendingDeliveries, clientId],
 	);
 
 	const stats = useMemo(() => {
@@ -245,9 +235,9 @@ export default function CommercialVisitsList() {
 		return {
 			planned,
 			completed,
-			pendingDeliveryOrders: pendingDeliveryOrders.length,
+			pendingDeliveries: pendingDeliveries.length,
 		};
-	}, [pendingDeliveryOrders.length, visits]);
+	}, [pendingDeliveries.length, visits]);
 
 	const loadClients = useCallback(async () => {
 		const data = await requestJson<CommercialClient[]>("/api/commercial/clients", {
@@ -301,14 +291,14 @@ export default function CommercialVisitsList() {
 		);
 	}, []);
 
-	const loadPendingDeliveryOrders = useCallback(async () => {
-		const data = await requestJson<OrderSummary[]>(
-			buildPendingDeliveryOrdersQuery(),
+	const loadPendingDeliveries = useCallback(async () => {
+		const data = await requestJson<OrderDeliverySummary[]>(
+			buildPendingDeliveriesQuery(),
 			{
 				method: "GET",
 				cache: "no-store",
 				fallbackMessage:
-					"No se pudieron obtener los pedidos confirmados pendientes de reparto",
+					"No se pudieron obtener los repartos preparados pendientes de visita",
 			},
 		);
 
@@ -357,14 +347,14 @@ export default function CommercialVisitsList() {
 		}
 
 		const allowedOrderIds = new Set(
-			pendingOrdersForSelectedClient.map((order) => order.id),
+			pendingDeliveriesForSelectedClient.map((delivery) => delivery.id),
 		);
 
-		setSelectedOrderIds((current) => {
+		setSelectedDeliveryIds((current) => {
 			const next = current.filter((orderId) => allowedOrderIds.has(orderId));
 			return next.length === current.length ? current : next;
 		});
-	}, [pendingOrdersForSelectedClient, visitTypeId]);
+	}, [pendingDeliveriesForSelectedClient, visitTypeId]);
 
 	useEffect(() => {
 		let ignore = false;
@@ -374,7 +364,7 @@ export default function CommercialVisitsList() {
 				setLoading(true);
 				setError("");
 
-				const [visitsData, routePreviewData, pendingDeliveryOrdersData] =
+				const [visitsData, routePreviewData, pendingDeliveriesData] =
 					await Promise.all([
 					loadVisits({
 						clientId: filterClientId,
@@ -384,13 +374,13 @@ export default function CommercialVisitsList() {
 						dateTo: filterDateTo,
 					}),
 					loadRoutePreview(),
-					loadPendingDeliveryOrders(),
+					loadPendingDeliveries(),
 				]);
 
 				if (!ignore) {
 					setVisits(visitsData);
 					setRoutePreview(routePreviewData);
-					setPendingDeliveryOrders(pendingDeliveryOrdersData);
+					setPendingDeliveries(pendingDeliveriesData);
 				}
 			} catch (err) {
 				if (!ignore) {
@@ -413,7 +403,7 @@ export default function CommercialVisitsList() {
 			ignore = true;
 		};
 	}, [
-		loadPendingDeliveryOrders,
+		loadPendingDeliveries,
 		loadRoutePreview,
 		loadVisits,
 		filterClientId,
@@ -433,10 +423,10 @@ export default function CommercialVisitsList() {
 
 			if (
 				visitTypeId === DELIVERY_VISIT_TYPE_ID &&
-				selectedOrderIds.length === 0
+				selectedDeliveryIds.length === 0
 			) {
 				setFormError(
-					"Selecciona al menos un pedido confirmado antes de crear un reparto.",
+					"Selecciona al menos un reparto preparado antes de crear una visita de reparto.",
 				);
 				return;
 			}
@@ -451,8 +441,8 @@ export default function CommercialVisitsList() {
 					scheduledForDate,
 					visitTypeId: Number(visitTypeId),
 					notes,
-					orderIds:
-						visitTypeId === DELIVERY_VISIT_TYPE_ID ? selectedOrderIds : [],
+					deliveryIds:
+						visitTypeId === DELIVERY_VISIT_TYPE_ID ? selectedDeliveryIds : [],
 				}),
 				fallbackMessage: "No se pudo crear la visita",
 			});
@@ -461,11 +451,11 @@ export default function CommercialVisitsList() {
 			setScheduledForDate(todayDate);
 			setVisitTypeId("2");
 			setNotes("");
-			setSelectedOrderIds([]);
+			setSelectedDeliveryIds([]);
 			setIsCreateModalOpen(false);
 			setFormSuccess("Visita creada correctamente.");
 
-			const [visitsData, routePreviewData, pendingDeliveryOrdersData] =
+			const [visitsData, routePreviewData, pendingDeliveriesData] =
 				await Promise.all([
 				loadVisits({
 					clientId: filterClientId,
@@ -475,12 +465,12 @@ export default function CommercialVisitsList() {
 					dateTo: filterDateTo,
 				}),
 				loadRoutePreview(),
-				loadPendingDeliveryOrders(),
+				loadPendingDeliveries(),
 			]);
 
 			setVisits(visitsData);
 			setRoutePreview(routePreviewData);
-			setPendingDeliveryOrders(pendingDeliveryOrdersData);
+			setPendingDeliveries(pendingDeliveriesData);
 		} catch (err) {
 			setFormError(
 				err instanceof Error ? err.message : "Error al crear la visita",
@@ -493,7 +483,7 @@ export default function CommercialVisitsList() {
 	function openCreateModal(input?: {
 		clientId?: string;
 		visitTypeId?: string;
-		orderIds?: string[];
+		deliveryIds?: string[];
 	}) {
 		setFormError("");
 		setFormSuccess("");
@@ -504,9 +494,9 @@ export default function CommercialVisitsList() {
 		);
 		setVisitTypeId(nextVisitTypeId);
 		setNotes("");
-		setSelectedOrderIds(
+		setSelectedDeliveryIds(
 			nextVisitTypeId === DELIVERY_VISIT_TYPE_ID
-				? Array.from(new Set(input?.orderIds ?? []))
+				? Array.from(new Set(input?.deliveryIds ?? []))
 				: [],
 		);
 		setIsCreateModalOpen(true);
@@ -528,12 +518,12 @@ export default function CommercialVisitsList() {
 		}
 
 		const allowedOrderIds = new Set(
-			pendingDeliveryOrders
-				.filter((order) => order.client_id === nextClientId)
-				.map((order) => order.id),
+			pendingDeliveries
+				.filter((delivery) => delivery.client_id === nextClientId)
+				.map((delivery) => delivery.id),
 		);
 
-		setSelectedOrderIds((current) =>
+		setSelectedDeliveryIds((current) =>
 			current.filter((orderId) => allowedOrderIds.has(orderId)),
 		);
 	}
@@ -542,26 +532,26 @@ export default function CommercialVisitsList() {
 		setVisitTypeId(nextVisitTypeId);
 
 		if (nextVisitTypeId !== DELIVERY_VISIT_TYPE_ID) {
-			setSelectedOrderIds([]);
+			setSelectedDeliveryIds([]);
 			return;
 		}
 
 		const allowedOrderIds = new Set(
-			pendingDeliveryOrders
-				.filter((order) => order.client_id === clientId)
-				.map((order) => order.id),
+			pendingDeliveries
+				.filter((delivery) => delivery.client_id === clientId)
+				.map((delivery) => delivery.id),
 		);
 
-		setSelectedOrderIds((current) =>
+		setSelectedDeliveryIds((current) =>
 			current.filter((orderId) => allowedOrderIds.has(orderId)),
 		);
 	}
 
-	function toggleSelectedOrder(orderId: string) {
-		setSelectedOrderIds((current) =>
-			current.includes(orderId)
-				? current.filter((currentOrderId) => currentOrderId !== orderId)
-				: [...current, orderId],
+	function toggleSelectedDelivery(deliveryId: string) {
+		setSelectedDeliveryIds((current) =>
+			current.includes(deliveryId)
+				? current.filter((currentDeliveryId) => currentDeliveryId !== deliveryId)
+				: [...current, deliveryId],
 		);
 	}
 
@@ -620,26 +610,26 @@ export default function CommercialVisitsList() {
 
 							<div className="rounded-xl bg-sky-50 px-3 py-2">
 								<p className="text-[11px] font-semibold uppercase tracking-wide text-sky-700">
-									Pedidos pendientes de reparto
+									Repartos preparados
 								</p>
 								<p className="text-lg font-semibold text-sky-700">
-									{stats.pendingDeliveryOrders}
+									{stats.pendingDeliveries}
 								</p>
 							</div>
 						</div>
 					</div>
 				</section>
 
-				{pendingDeliveryOrdersByClient.length > 0 ? (
+				{pendingDeliveriesByClient.length > 0 ? (
 					<section className="rounded-2xl border border-sky-100 bg-sky-50/70 p-5 shadow-sm">
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div>
 								<h2 className="text-base font-semibold text-slate-800">
-									Pedidos confirmados sin reparto asignado
+									Repartos preparados sin visita asignada
 								</h2>
 								<p className="text-sm text-slate-600">
-									Usa esta bandeja para convertir pedidos pendientes en repartos
-									planificados sin tener que buscarlos cliente por cliente.
+									Usa esta bandeja para planificar visitas de entrega con
+									repartos ya preparados.
 								</p>
 							</div>
 
@@ -652,12 +642,12 @@ export default function CommercialVisitsList() {
 								}
 								className="rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
 							>
-								Crear reparto manual
+								Crear visita de reparto
 							</button>
 						</div>
 
 						<div className="mt-4 grid gap-4 xl:grid-cols-2">
-							{pendingDeliveryOrdersByClient.map((group) => (
+							{pendingDeliveriesByClient.map((group) => (
 								<article
 									key={group.clientId}
 									className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
@@ -677,39 +667,42 @@ export default function CommercialVisitsList() {
 										<div className="text-right text-sm text-slate-600">
 											<p>
 												<strong className="text-slate-900">
-													{group.orders.length}
+													{group.deliveries.length}
 												</strong>{" "}
-												pedido{group.orders.length === 1 ? "" : "s"}
+												reparto{group.deliveries.length === 1 ? "" : "s"}
 											</p>
 											<p className="font-medium text-slate-900">
-												{formatOrderCurrency(group.totalAmount)}
+												{group.totalPackages} bulto
+												{group.totalPackages === 1 ? "" : "s"}
 											</p>
 										</div>
 									</div>
 
 									<div className="mt-4 space-y-3">
-										{group.orders.map((order) => (
+										{group.deliveries.map((delivery) => (
 											<div
-												key={order.id}
+												key={delivery.id}
 												className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"
 											>
 												<div className="flex flex-wrap items-center justify-between gap-2">
 													<div>
 														<p className="text-sm font-semibold text-slate-900">
-															Pedido del{" "}
+															Reparto {delivery.id.slice(0, 8)} · Pedido{" "}
+															{delivery.order_short_id} ·{" "}
 															{new Intl.DateTimeFormat("es-ES", {
 																dateStyle: "medium",
-															}).format(new Date(order.created_at))}
+															}).format(new Date(delivery.created_at))}
 														</p>
 														<p className="text-xs text-slate-500">
-															{getOrderPackageCount(order)} bulto
-															{getOrderPackageCount(order) === 1 ? "" : "s"} ·{" "}
-															{formatOrderCurrency(order.total_amount)}
+															{delivery.package_count} bulto
+															{delivery.package_count === 1 ? "" : "s"} ·{" "}
+															{delivery.line_count} referencia
+															{delivery.line_count === 1 ? "" : "s"}
 														</p>
 													</div>
 
 													<Link
-														href={`/commercials/orders/${order.id}`}
+														href={`/commercials/orders/${delivery.order_id}`}
 														className="text-sm font-medium text-sky-700 hover:text-sky-800"
 													>
 														Ver pedido
@@ -721,8 +714,8 @@ export default function CommercialVisitsList() {
 
 									<div className="mt-4 flex flex-wrap items-center justify-between gap-3">
 										<p className="text-xs text-slate-500">
-											Se asignaran al reparto como pedidos confirmados y se
-											marcaran como entregados al completar la visita.
+											Se marcaran como entregados al escanear sus etiquetas QR en
+											la visita.
 										</p>
 
 										<button
@@ -731,12 +724,14 @@ export default function CommercialVisitsList() {
 												openCreateModal({
 													clientId: group.clientId,
 													visitTypeId: DELIVERY_VISIT_TYPE_ID,
-													orderIds: group.orders.map((order) => order.id),
+													deliveryIds: group.deliveries.map(
+														(delivery) => delivery.id,
+													),
 												})
 											}
 											className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
 										>
-											Crear reparto con estos pedidos
+											Crear visita con estos repartos
 										</button>
 									</div>
 								</article>
@@ -1039,63 +1034,67 @@ export default function CommercialVisitsList() {
 												<div className="flex flex-wrap items-center justify-between gap-3">
 													<div>
 														<h3 className="text-sm font-semibold text-slate-800">
-															Pedidos confirmados para este reparto
+															Repartos preparados para esta visita
 														</h3>
 														<p className="text-sm text-slate-600">
-															Selecciona los pedidos pendientes del cliente que
-															quieres cargar en esta visita de entrega.
+															Selecciona los repartos preparados del cliente que
+															quieres entregar en esta visita.
 														</p>
 													</div>
 
 													{clientId ? (
 														<p className="text-sm font-medium text-sky-700">
-															{selectedOrderIds.length} seleccionado
-															{selectedOrderIds.length === 1 ? "" : "s"}
+															{selectedDeliveryIds.length} seleccionado
+															{selectedDeliveryIds.length === 1 ? "" : "s"}
 														</p>
 													) : null}
 												</div>
 
 												{!clientId ? (
 													<p className="mt-4 text-sm text-slate-500">
-														Selecciona antes un cliente para ver sus pedidos
-														confirmados sin reparto asignado.
+														Selecciona antes un cliente para ver sus repartos
+														preparados sin visita asignada.
 													</p>
-												) : pendingOrdersForSelectedClient.length > 0 ? (
+												) : pendingDeliveriesForSelectedClient.length > 0 ? (
 													<div className="mt-4 space-y-3">
-														{pendingOrdersForSelectedClient.map((order) => (
+														{pendingDeliveriesForSelectedClient.map((delivery) => (
 															<label
-																key={order.id}
+																key={delivery.id}
 																className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-sky-300"
 															>
 																<input
 																	type="checkbox"
-																	checked={selectedOrderIds.includes(order.id)}
-																	onChange={() => toggleSelectedOrder(order.id)}
+																	checked={selectedDeliveryIds.includes(delivery.id)}
+																	onChange={() =>
+																		toggleSelectedDelivery(delivery.id)
+																	}
 																	className="mt-1 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-300"
 																/>
 
 																<div className="min-w-0 flex-1">
 																	<div className="flex flex-wrap items-center justify-between gap-2">
 																		<p className="text-sm font-semibold text-slate-900">
-																			Pedido del{" "}
+																			Reparto {delivery.id.slice(0, 8)} · Pedido{" "}
+																			{delivery.order_short_id} ·{" "}
 																			{new Intl.DateTimeFormat("es-ES", {
 																				dateStyle: "medium",
-																			}).format(new Date(order.created_at))}
+																			}).format(new Date(delivery.created_at))}
 																		</p>
 																		<p className="text-sm font-medium text-slate-900">
-																			{formatOrderCurrency(order.total_amount)}
+																			{delivery.package_count} bulto
+																			{delivery.package_count === 1 ? "" : "s"}
 																		</p>
 																	</div>
 
 																	<p className="mt-1 text-xs text-slate-500">
-																		{getOrderPackageCount(order)} bulto
-																		{getOrderPackageCount(order) === 1 ? "" : "s"} · Estado{" "}
-																		{order.status_name}
+																		{delivery.line_count} referencia
+																		{delivery.line_count === 1 ? "" : "s"} · Estado{" "}
+																		{delivery.status_name}
 																	</p>
 
-																	{order.notes ? (
+																	{delivery.notes ? (
 																		<p className="mt-2 text-sm text-slate-600">
-																			{order.notes}
+																			{delivery.notes}
 																		</p>
 																	) : null}
 																</div>

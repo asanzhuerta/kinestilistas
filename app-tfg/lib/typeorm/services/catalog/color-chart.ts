@@ -251,8 +251,17 @@ export async function getColorReferenceById(id: string) {
 	return repo.findOne({
 		where: { id },
 		relations: {
-			colorChart: true,
-			product: true,
+			colorChart: {
+				productLine: {
+					productCategory: true,
+				},
+			},
+			product: {
+				productCategory: true,
+				productLine: true,
+				productSubcategory: true,
+				status: true,
+			},
 		},
 	});
 }

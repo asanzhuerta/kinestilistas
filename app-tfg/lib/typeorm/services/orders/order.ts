@@ -1,6 +1,8 @@
 import type {
 	CreateOrderLineBody,
+	OrderFulfillmentMethod,
 	OrderDetail,
+	OrderPaymentSummary,
 	OrderPaymentMethodCode,
 	OrderPaymentStatusOption,
 	OrderProductOption,
@@ -23,10 +25,12 @@ import { Client } from "@/lib/typeorm/entities/Client";
 import { User } from "@/lib/typeorm/entities/User";
 import { Order } from "@/lib/typeorm/entities/Order";
 import { OrderLine } from "@/lib/typeorm/entities/OrderLine";
+import { OrderPayment } from "@/lib/typeorm/entities/OrderPayment";
 import { Promotion } from "@/lib/typeorm/entities/Promotion";
 import { OrderPaymentStatus } from "@/lib/typeorm/entities/OrderPaymentStatus";
 import { OrderStatus } from "@/lib/typeorm/entities/OrderStatus";
 import { CommercialVisit } from "@/lib/typeorm/entities/CommercialVisit";
+import { mapOrderDeliveryToSummary } from "@/lib/typeorm/services/orders/order-delivery";
 import { ColorReference } from "@/lib/typeorm/entities/ColorReference";
 import { ClientCommercialAssignment } from "@/lib/typeorm/entities/ClientCommercialAssignment";
 import { listApplicableCustomerSegmentIdsForClient } from "@/lib/typeorm/services/clients/client-tier";
@@ -35,6 +39,7 @@ import {
 	canCommercialAccessClient,
 } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
+import { getAgencyDeliveryFeeCents } from "@/lib/typeorm/services/orders/order-settings";
 import { listColorReferences } from "@/lib/typeorm/services/catalog/color-chart";
 import { listProducts } from "@/lib/typeorm/services/catalog/product";
 import type { Repository } from "typeorm";
@@ -42,6 +47,7 @@ import type { Repository } from "typeorm";
 type CreateOrderInput = {
 	clientId: string;
 	createdByUserId: string;
+	fulfillmentMethod?: OrderFulfillmentMethod | string | null;
 	notes?: string | null;
 	lines?: CreateOrderLineBody[];
 };
@@ -57,6 +63,7 @@ type AddDraftOrderLineInput = {
 type SaveDraftInput = {
 	clientId: string;
 	createdByUserId: string;
+	fulfillmentMethod?: OrderFulfillmentMethod | string | null;
 	notes?: string | null;
 	lines?: CreateOrderLineBody[];
 };
@@ -85,6 +92,14 @@ type UpdateOrderManagementInput = {
 	paymentNotes?: string | null;
 	paymentStatusId?: number | string | null;
 	statusId?: number | string | null;
+};
+
+type RegisterOrderPaymentInput = {
+	actedByUserId: string;
+	amount?: number | string | null;
+	orderId: string;
+	paymentMethod?: string | null;
+	paymentNotes?: string | null;
 };
 
 type NormalizedOrderLineInput = {
@@ -137,6 +152,12 @@ const ORDER_PAYMENT_METHOD_CODES = new Set<OrderPaymentMethodCode>([
 	"other",
 ]);
 
+function normalizeFulfillmentMethod(
+	value: OrderFulfillmentMethod | string | null | undefined,
+): OrderFulfillmentMethod {
+	return value === "agency" ? "agency" : "commercial";
+}
+
 const MAX_OPEN_UNPAID_ORDERS_PER_CLIENT = 2;
 
 function toIsoString(value: Date | string | null | undefined) {
@@ -155,6 +176,28 @@ function parseMoneyToCents(value: string | number) {
 			"Importe de producto no válido",
 			500,
 			"INVALID_PRODUCT_PRICE",
+		);
+	}
+
+	return Math.round(parsed * 100);
+}
+
+function parseStoredMoneyToCents(value: string | number | null | undefined) {
+	const parsed = Number(value);
+
+	return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) : 0;
+}
+
+function normalizePaymentAmountToCents(
+	value: string | number | null | undefined,
+) {
+	const parsed = Number(String(value ?? "").trim().replace(",", "."));
+
+	if (!Number.isFinite(parsed) || parsed <= 0) {
+		throw new OrderServiceError(
+			"Debes indicar un importe de cobro mayor que cero",
+			400,
+			"ORDER_PAYMENT_AMOUNT_INVALID",
 		);
 	}
 
@@ -350,6 +393,35 @@ function buildOrderSummaryLine(line: OrderLine): OrderSummaryLine {
 	};
 }
 
+function buildOrderPaymentSummary(payment: OrderPayment): OrderPaymentSummary {
+	return {
+		id: payment.id,
+		order_id: payment.order_id,
+		amount: String(payment.amount ?? "0.00"),
+		payment_method: payment.payment_method,
+		notes: payment.notes ?? null,
+		paid_at: toIsoString(payment.paid_at),
+		registered_by_user_id: payment.registered_by_user_id ?? null,
+		registered_by_user_name: payment.registeredByUser?.name ?? null,
+		created_at: toIsoString(payment.created_at),
+	};
+}
+
+function getOrderPaymentTotals(order: Order) {
+	const totalCents = parseStoredMoneyToCents(order.total_amount);
+	const paidCents = (order.payments ?? []).reduce(
+		(total, payment) => total + parseStoredMoneyToCents(payment.amount),
+		0,
+	);
+	const pendingCents = Math.max(0, totalCents - paidCents);
+
+	return {
+		totalCents,
+		paidCents,
+		pendingCents,
+	};
+}
+
 function mapOrderToSummary(order: Order): OrderSummary {
 	const sortedLines = [...(order.lines ?? [])].sort((a, b) => {
 		const referenceCompare = String(a.order_reference_snapshot ?? "").localeCompare(
@@ -368,12 +440,29 @@ function mapOrderToSummary(order: Order): OrderSummary {
 			{ sensitivity: "base" },
 		);
 	});
+	const sortedPayments = [...(order.payments ?? [])].sort((a, b) => {
+		const paidAtCompare = String(a.paid_at ?? "").localeCompare(
+			String(b.paid_at ?? ""),
+		);
+
+		if (paidAtCompare !== 0) {
+			return paidAtCompare;
+		}
+
+		return String(a.created_at ?? "").localeCompare(String(b.created_at ?? ""));
+	});
+	const sortedDeliveries = [...(order.deliveries ?? [])].sort((a, b) =>
+		String(a.created_at ?? "").localeCompare(String(b.created_at ?? "")),
+	);
+	const paymentTotals = getOrderPaymentTotals(order);
 
 	return {
 		id: order.id,
 		client_id: order.client_id,
 		client_name: order.client?.name ?? "Cliente",
 		client_contact_name: order.client?.contact_name ?? null,
+		fulfillment_method: normalizeFulfillmentMethod(order.fulfillment_method),
+		agency_delivery_fee: String(order.agency_delivery_fee ?? "0.00"),
 		created_by_user_id: order.created_by_user_id,
 		created_by_user_name: order.createdByUser?.name ?? "Usuario",
 		created_by_user_role_id: order.createdByUser?.role_id ?? null,
@@ -381,6 +470,8 @@ function mapOrderToSummary(order: Order): OrderSummary {
 		status_code: order.status?.code ?? "",
 		status_name: order.status?.name ?? "Sin estado",
 		total_amount: String(order.total_amount ?? "0.00"),
+		paid_amount: formatCents(paymentTotals.paidCents),
+		pending_amount: formatCents(paymentTotals.pendingCents),
 		notes: order.notes ?? null,
 		payment_status_id: order.payment_status_id,
 		payment_status_code: order.paymentStatus?.code ?? "",
@@ -402,6 +493,11 @@ function mapOrderToSummary(order: Order): OrderSummary {
 			0,
 		),
 		lines: sortedLines.map(buildOrderSummaryLine),
+		payments: sortedPayments.map(buildOrderPaymentSummary),
+		deliveries: sortedDeliveries.map((delivery) => {
+			delivery.order = order;
+			return mapOrderDeliveryToSummary(delivery);
+		}),
 	};
 }
 
@@ -544,6 +640,37 @@ function ensureOrderTransitionAllowed(order: Order, nextStatusId: number) {
 	}
 }
 
+function isOrderFullyDeliveredByDeliveries(order: Order) {
+	const activeDeliveries = (order.deliveries ?? []).filter(
+		(delivery) => delivery.status !== "cancelled",
+	);
+
+	if (activeDeliveries.length === 0) {
+		return true;
+	}
+
+	const deliveredByLineId = new Map<string, number>();
+
+	for (const delivery of activeDeliveries) {
+		if (delivery.status !== "delivered") {
+			continue;
+		}
+
+		for (const deliveryLine of delivery.lines ?? []) {
+			deliveredByLineId.set(
+				deliveryLine.order_line_id,
+				(deliveredByLineId.get(deliveryLine.order_line_id) ?? 0) +
+					Number(deliveryLine.quantity ?? 0),
+			);
+		}
+	}
+
+	return (order.lines ?? []).every(
+		(line) =>
+			(deliveredByLineId.get(line.id) ?? 0) >= Number(line.quantity ?? 0),
+	);
+}
+
 function ensureOrderPaymentTransitionAllowed(
 	order: Order,
 	nextPaymentStatusId: number,
@@ -632,6 +759,27 @@ function createOrdersBaseQuery(repo: Repository<Order>) {
 		.leftJoinAndSelect("order.status", "status")
 		.leftJoinAndSelect("order.paymentStatus", "paymentStatus")
 		.leftJoinAndSelect("order.paidByUser", "paidByUser")
+		.leftJoinAndSelect("order.payments", "payments")
+		.leftJoinAndSelect("payments.registeredByUser", "paymentRegisteredByUser")
+		.leftJoinAndSelect("order.deliveries", "deliveries")
+		.leftJoinAndSelect("deliveries.commercial", "deliveryCommercial")
+		.leftJoinAndSelect("deliveryCommercial.user", "deliveryCommercialUser")
+		.leftJoinAndSelect("deliveries.deliveryVisit", "deliveryVisitForReparto")
+		.leftJoinAndSelect(
+			"deliveryVisitForReparto.status",
+			"deliveryVisitForRepartoStatus",
+		)
+		.leftJoinAndSelect("deliveries.lines", "deliveryLines")
+		.leftJoinAndSelect("deliveryLines.orderLine", "deliveryOrderLine")
+		.leftJoinAndSelect("deliveryOrderLine.product", "deliveryLineProduct")
+		.leftJoinAndSelect(
+			"deliveryLineProduct.productLine",
+			"deliveryLineProductLine",
+		)
+		.leftJoinAndSelect(
+			"deliveryOrderLine.colorReference",
+			"deliveryLineColorReference",
+		)
 		.leftJoinAndSelect("order.deliveryVisit", "deliveryVisit")
 		.leftJoinAndSelect("deliveryVisit.status", "deliveryVisitStatus")
 		.leftJoinAndSelect("order.lines", "lines")
@@ -724,6 +872,17 @@ async function updateOrderManagementRecord(
 
 	if (hasStatusUpdate) {
 		ensureOrderTransitionAllowed(order, nextStatusId);
+
+		if (
+			nextStatusId === ORDER_STATUS_IDS.DELIVERED &&
+			!isOrderFullyDeliveredByDeliveries(order)
+		) {
+			throw new OrderServiceError(
+				"No se puede marcar el pedido como entregado hasta completar todos sus repartos",
+				409,
+				"ORDER_DELIVERIES_PENDING",
+			);
+		}
 	}
 
 	let nextPaymentStatusId = order.payment_status_id;
@@ -755,11 +914,24 @@ async function updateOrderManagementRecord(
 				);
 			}
 		} else {
+			if ((order.payments ?? []).length > 0) {
+				throw new OrderServiceError(
+					"No se puede marcar como pendiente un pedido con pagos registrados",
+					409,
+					"ORDER_PAYMENT_HISTORY_EXISTS",
+				);
+			}
+
 			nextPaymentMethod = null;
 			nextPaidAt = null;
 			nextPaidByUserId = null;
 		}
 	}
+	const paymentTotals = getOrderPaymentTotals(order);
+	const shouldCreateLegacyPayment =
+		hasPaymentUpdate &&
+		nextPaymentStatusId === ORDER_PAYMENT_STATUS_IDS.PAID &&
+		paymentTotals.pendingCents > 0;
 
 	const shouldUpdate =
 		order.status_id !== nextStatusId ||
@@ -783,6 +955,19 @@ async function updateOrderManagementRecord(
 
 		await ds.transaction(async (manager) => {
 			const orderRepo = manager.getRepository(Order);
+
+			if (shouldCreateLegacyPayment) {
+				await manager.getRepository(OrderPayment).save(
+					manager.getRepository(OrderPayment).create({
+						order_id: order.id,
+						amount: formatCents(paymentTotals.pendingCents),
+						payment_method: nextPaymentMethod ?? "other",
+						notes: nextPaymentNotes,
+						paid_at: nextPaidAt ?? new Date(),
+						registered_by_user_id: nextPaidByUserId,
+					}),
+				);
+			}
 
 			await orderRepo.save(
 				orderRepo.create({
@@ -829,6 +1014,100 @@ async function updateOrderManagementRecord(
 			}
 		});
 	}
+
+	const updatedOrder = await getRequiredOrderById(order.id);
+	return buildOrderDetail(updatedOrder);
+}
+
+async function registerOrderPaymentRecord(
+	order: Order,
+	input: Omit<RegisterOrderPaymentInput, "orderId">,
+) {
+	ensureManageableOrder(order);
+
+	if (order.status?.code !== "delivered") {
+		throw new OrderServiceError(
+			"Solo se puede registrar un cobro cuando el pedido ya consta como entregado",
+			400,
+			"ORDER_PAYMENT_REQUIRES_DELIVERED",
+		);
+	}
+
+	const paymentTotals = getOrderPaymentTotals(order);
+
+	if (paymentTotals.pendingCents <= 0) {
+		throw new OrderServiceError(
+			"Este pedido ya esta cobrado por completo",
+			409,
+			"ORDER_ALREADY_PAID",
+		);
+	}
+
+	const paymentAmountCents = normalizePaymentAmountToCents(input.amount);
+
+	if (paymentAmountCents > paymentTotals.pendingCents) {
+		throw new OrderServiceError(
+			"El importe indicado supera el pendiente de cobro del pedido",
+			400,
+			"ORDER_PAYMENT_AMOUNT_EXCEEDS_PENDING",
+		);
+	}
+
+	const paymentMethod = normalizePaymentMethod(input.paymentMethod, {
+		required: true,
+	});
+
+	if (!paymentMethod) {
+		throw new OrderServiceError(
+			"Debes indicar el método de cobro del pedido",
+			400,
+			"ORDER_PAYMENT_METHOD_REQUIRED",
+		);
+	}
+
+	const paymentNotes = normalizeText(input.paymentNotes) || null;
+	const actedByUserId = String(input.actedByUserId ?? "").trim();
+
+	if (!actedByUserId) {
+		throw new OrderServiceError(
+			"No se ha podido identificar el usuario que registra el cobro",
+			500,
+			"ORDER_PAYMENT_ACTOR_REQUIRED",
+		);
+	}
+
+	const paidAt = new Date();
+	const nextPaidCents = paymentTotals.paidCents + paymentAmountCents;
+	const isFullyPaid = nextPaidCents >= paymentTotals.totalCents;
+	const ds = await getDataSource();
+
+	await ds.transaction(async (manager) => {
+		await manager.getRepository(OrderPayment).save(
+			manager.getRepository(OrderPayment).create({
+				order_id: order.id,
+				amount: formatCents(paymentAmountCents),
+				payment_method: paymentMethod,
+				notes: paymentNotes,
+				paid_at: paidAt,
+				registered_by_user_id: actedByUserId,
+			}),
+		);
+
+		const orderRepo = manager.getRepository(Order);
+
+		await orderRepo.save(
+			orderRepo.create({
+				id: order.id,
+				payment_status_id: isFullyPaid
+					? ORDER_PAYMENT_STATUS_IDS.PAID
+					: ORDER_PAYMENT_STATUS_IDS.PENDING,
+				payment_method: paymentMethod,
+				payment_notes: paymentNotes,
+				paid_at: isFullyPaid ? paidAt : null,
+				paid_by_user_id: isFullyPaid ? actedByUserId : null,
+			}),
+		);
+	});
 
 	const updatedOrder = await getRequiredOrderById(order.id);
 	return buildOrderDetail(updatedOrder);
@@ -1113,6 +1392,7 @@ async function persistOrderRecord(
 		existingOrderId?: string | null;
 		clientId: string;
 		createdByUserId: string;
+		fulfillmentMethod?: OrderFulfillmentMethod | string | null;
 		statusId: number;
 		notes?: string | null;
 		lines: NormalizedOrderLineInput[];
@@ -1127,6 +1407,12 @@ async function persistOrderRecord(
 		input.clientId,
 		input.lines,
 	);
+	const fulfillmentMethod = normalizeFulfillmentMethod(input.fulfillmentMethod);
+	const agencyDeliveryFeeCents =
+		fulfillmentMethod === "agency"
+			? await getAgencyDeliveryFeeCents(manager)
+			: 0;
+	const finalTotalAmountCents = totalAmountCents + agencyDeliveryFeeCents;
 
 	const currentOrder =
 		input.existingOrderId
@@ -1142,7 +1428,9 @@ async function persistOrderRecord(
 			created_by_user_id: input.createdByUserId,
 			status_id: input.statusId,
 			delivery_visit_id: currentOrder?.delivery_visit_id ?? null,
-			total_amount: formatCents(totalAmountCents),
+			total_amount: formatCents(finalTotalAmountCents),
+			fulfillment_method: fulfillmentMethod,
+			agency_delivery_fee: formatCents(agencyDeliveryFeeCents),
 			notes: normalizeText(input.notes) || null,
 		}),
 	);
@@ -1250,6 +1538,7 @@ async function loadDraftOrderSummary(
 			existingOrderId: draftOrder.id,
 			clientId,
 			createdByUserId,
+			fulfillmentMethod: draftOrder.fulfillment_method,
 			statusId: ORDER_STATUS_IDS.DRAFT,
 			notes: draftOrder.notes,
 			lines: currentLines,
@@ -1291,6 +1580,7 @@ async function saveDraftRecord(input: SaveDraftInput) {
 			existingOrderId: existingDraftId,
 			clientId: input.clientId,
 			createdByUserId: input.createdByUserId,
+			fulfillmentMethod: input.fulfillmentMethod,
 			statusId: ORDER_STATUS_IDS.DRAFT,
 			notes: input.notes,
 			lines: normalizedLines,
@@ -1324,6 +1614,7 @@ async function addLineToDraftRecord(input: AddDraftOrderLineInput) {
 	return saveDraftRecord({
 		clientId: input.clientId,
 		createdByUserId: input.createdByUserId,
+		fulfillmentMethod: currentDraft?.fulfillment_method ?? "commercial",
 		notes: currentDraft?.notes ?? null,
 		lines: nextLines,
 	});
@@ -1346,6 +1637,7 @@ async function submitOrderRecord(input: CreateOrderInput) {
 			existingOrderId: existingDraftId,
 			clientId: input.clientId,
 			createdByUserId: input.createdByUserId,
+			fulfillmentMethod: input.fulfillmentMethod,
 			statusId: ORDER_STATUS_IDS.CREATED,
 			notes: input.notes,
 			lines: normalizedLines,
@@ -1826,6 +2118,34 @@ export async function updateOrderStatusForCommercialUser(
 	});
 }
 
+export async function registerOrderPaymentForCommercialUser(
+	userId: string,
+	input: Omit<RegisterOrderPaymentInput, "actedByUserId">,
+) {
+	const commercial = await requireCommercialByUserId(userId);
+	const order = await getRequiredOrderById(input.orderId);
+	ensureManageableOrder(order);
+	const canAccessClient = await canCommercialAccessClient(
+		commercial.id,
+		order.client_id,
+	);
+
+	if (!canAccessClient) {
+		throw new OrderServiceError(
+			"El cliente de este pedido no esta asignado a este comercial",
+			403,
+			"ORDER_CLIENT_NOT_ASSIGNED",
+		);
+	}
+
+	return registerOrderPaymentRecord(order, {
+		actedByUserId: userId,
+		amount: input.amount,
+		paymentMethod: input.paymentMethod,
+		paymentNotes: input.paymentNotes,
+	});
+}
+
 export async function updateOrderStatusForAdmin(input: UpdateOrderManagementInput) {
 	const order = await getRequiredOrderById(input.orderId);
 	ensureManageableOrder(order);
@@ -1835,6 +2155,20 @@ export async function updateOrderStatusForAdmin(input: UpdateOrderManagementInpu
 		paymentNotes: input.paymentNotes,
 		paymentStatusId: input.paymentStatusId,
 		statusId: input.statusId,
+	});
+}
+
+export async function registerOrderPaymentForAdmin(
+	input: RegisterOrderPaymentInput,
+) {
+	const order = await getRequiredOrderById(input.orderId);
+	ensureManageableOrder(order);
+
+	return registerOrderPaymentRecord(order, {
+		actedByUserId: input.actedByUserId,
+		amount: input.amount,
+		paymentMethod: input.paymentMethod,
+		paymentNotes: input.paymentNotes,
 	});
 }
 
@@ -1855,6 +2189,7 @@ export async function saveDraftForClientUser(
 	return saveDraftRecord({
 		clientId: client.id,
 		createdByUserId: userId,
+		fulfillmentMethod: input.fulfillmentMethod,
 		notes: input.notes,
 		lines: input.lines,
 	});
@@ -1881,6 +2216,7 @@ export async function saveDraftForCommercialUser(
 	return saveDraftRecord({
 		clientId: input.clientId,
 		createdByUserId: userId,
+		fulfillmentMethod: input.fulfillmentMethod,
 		notes: input.notes,
 		lines: input.lines,
 	});
@@ -1998,6 +2334,7 @@ export async function createOrderForClientUser(
 	return submitOrderRecord({
 		clientId: client.id,
 		createdByUserId: userId,
+		fulfillmentMethod: input.fulfillmentMethod,
 		notes: input.notes,
 		lines: input.lines,
 	});
@@ -2024,6 +2361,7 @@ export async function createOrderForCommercialUser(
 	return submitOrderRecord({
 		clientId: input.clientId,
 		createdByUserId: userId,
+		fulfillmentMethod: input.fulfillmentMethod,
 		notes: input.notes,
 		lines: input.lines,
 	});

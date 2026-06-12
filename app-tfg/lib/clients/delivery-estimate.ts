@@ -47,7 +47,10 @@ export async function getClientDeliveryEstimate(
 
 	const deliveryVisitIdsWithOrders = new Set(
 		clientOrders
-			.map((order) => order.delivery_visit_id)
+			.flatMap((order) => [
+				order.delivery_visit_id,
+				...order.deliveries.map((delivery) => delivery.delivery_visit_id),
+			])
 			.filter((visitId): visitId is string => Boolean(visitId)),
 	);
 

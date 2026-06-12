@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo } from "react";
 import H1Title from "@/app/components/H1Title";
 import { useSessionStorageState } from "@/app/hooks/useSessionStorageState";
@@ -11,6 +12,7 @@ type Props = {
 	title: string;
 	subtitle: string;
 	backHref: string;
+	toneDetailBasePath: string;
 	colorChart: SerializedColorChartDetail;
 };
 
@@ -25,6 +27,7 @@ function normalizeText(value: string | null | undefined) {
 export default function ColorChartDetail({
 	title,
 	subtitle,
+	toneDetailBasePath,
 	colorChart,
 }: Props) {
 	const [search, setSearch] = useSessionStorageState(
@@ -154,8 +157,9 @@ export default function ColorChartDetail({
 				) : (
 					<div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
 						{filteredReferences.map((reference) => (
-							<article
+							<Link
 								key={reference.id}
+								href={`${toneDetailBasePath}/${reference.id}`}
 								className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
 							>
 								<div className="relative aspect-square bg-slate-100">
@@ -193,7 +197,7 @@ export default function ColorChartDetail({
 										</p>
 									</div>
 								</div>
-							</article>
+							</Link>
 						))}
 					</div>
 				)}

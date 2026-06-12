@@ -109,6 +109,40 @@ function buildClientOptions(orders: OrderSummary[]) {
 	);
 }
 
+function getLocalDateInputValue(value: string | null | undefined) {
+	const date = new Date(String(value ?? ""));
+
+	if (Number.isNaN(date.getTime())) {
+		return "";
+	}
+
+	const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+
+	return localDate.toISOString().slice(0, 10);
+}
+
+function isOrderInsideDateRange(
+	order: OrderSummary,
+	dateFrom: string,
+	dateTo: string,
+) {
+	const orderDate = getLocalDateInputValue(order.created_at);
+
+	if (!orderDate) {
+		return false;
+	}
+
+	if (dateFrom && orderDate < dateFrom) {
+		return false;
+	}
+
+	if (dateTo && orderDate > dateTo) {
+		return false;
+	}
+
+	return true;
+}
+
 export default function OrderHistoryList({
 	orders,
 	mode,
@@ -131,6 +165,14 @@ export default function OrderHistoryList({
 	const [clientFilter, setClientFilter] = useSessionStorageState(
 		`${filterStorageKey}:client`,
 		"all",
+	);
+	const [dateFromFilter, setDateFromFilter] = useSessionStorageState(
+		`${filterStorageKey}:dateFrom`,
+		"",
+	);
+	const [dateToFilter, setDateToFilter] = useSessionStorageState(
+		`${filterStorageKey}:dateTo`,
+		"",
 	);
 	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 	const normalizedSearch = normalizeSearchValue(search);
@@ -166,25 +208,41 @@ export default function OrderHistoryList({
 					return false;
 				}
 
+				if (!isOrderInsideDateRange(order, dateFromFilter, dateToFilter)) {
+					return false;
+				}
+
 				if (!normalizedSearch) {
 					return true;
 				}
 
 				return buildOrderSearchText(order).includes(normalizedSearch);
 			}),
-		[clientFilter, normalizedSearch, orders, paymentFilter, statusFilter],
+		[
+			clientFilter,
+			dateFromFilter,
+			dateToFilter,
+			normalizedSearch,
+			orders,
+			paymentFilter,
+			statusFilter,
+		],
 	);
 	const hasActiveFilters =
 		search.trim() ||
 		statusFilter !== "all" ||
 		paymentFilter !== "all" ||
-		clientFilter !== "all";
+		clientFilter !== "all" ||
+		dateFromFilter ||
+		dateToFilter;
 
 	function resetFilters() {
 		setSearch("");
 		setStatusFilter("all");
 		setPaymentFilter("all");
 		setClientFilter("all");
+		setDateFromFilter("");
+		setDateToFilter("");
 	}
 
 	if (orders.length === 0) {
@@ -223,8 +281,8 @@ export default function OrderHistoryList({
 					<div
 						className={`mt-4 grid gap-3 ${
 							mode === "client"
-								? "lg:grid-cols-[minmax(0,1fr)_220px_220px]"
-								: "lg:grid-cols-[minmax(0,1fr)_220px_220px_240px]"
+								? "lg:grid-cols-[minmax(0,1fr)_180px_180px_200px_200px]"
+								: "lg:grid-cols-[minmax(0,1fr)_170px_170px_190px_190px_220px]"
 						}`}
 					>
 						<div>
@@ -240,6 +298,38 @@ export default function OrderHistoryList({
 								value={search}
 								onChange={(event) => setSearch(event.target.value)}
 								placeholder="Pedido, cliente, creador, producto, referencia o tono"
+								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+							/>
+						</div>
+
+						<div>
+							<label
+								htmlFor="order-history-date-from"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
+								Desde
+							</label>
+							<input
+								id="order-history-date-from"
+								type="date"
+								value={dateFromFilter}
+								onChange={(event) => setDateFromFilter(event.target.value)}
+								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+							/>
+						</div>
+
+						<div>
+							<label
+								htmlFor="order-history-date-to"
+								className="mb-2 block text-sm font-medium text-slate-700"
+							>
+								Hasta
+							</label>
+							<input
+								id="order-history-date-to"
+								type="date"
+								value={dateToFilter}
+								onChange={(event) => setDateToFilter(event.target.value)}
 								className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 							/>
 						</div>

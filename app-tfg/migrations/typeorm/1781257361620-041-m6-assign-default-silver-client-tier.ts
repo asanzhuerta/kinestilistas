@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class M6AssignDefaultSilverClientTier1780611000000
+export class M6AssignDefaultSilverClientTier1781257361620
 	implements MigrationInterface
 {
-	name = "M6AssignDefaultSilverClientTier1780611000000";
+	name = "M6AssignDefaultSilverClientTier1781257361620";
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.query(`
@@ -50,4 +50,5 @@ export class M6AssignDefaultSilverClientTier1780611000000
 				AND assignment."notes" = 'Asignacion automatica de rango base Plata'
 		`);
 	}
+
 }

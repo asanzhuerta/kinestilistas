@@ -13,6 +13,14 @@ export type OrderPaymentMethodCode =
 	| "transfer"
 	| "other";
 
+export type OrderFulfillmentMethod = "commercial" | "agency";
+
+export type OrderDeliveryStatusCode =
+	| "prepared"
+	| "planned"
+	| "delivered"
+	| "cancelled";
+
 export type OrderProductOption = {
 	id: string;
 	productId: string;
@@ -50,11 +58,87 @@ export type OrderSummaryLine = {
 	line_total: string;
 };
 
+export type OrderDeliveryLineSummary = {
+	id: string;
+	delivery_id: string;
+	order_line_id: string;
+	quantity: number;
+	product_name: string;
+	product_reference: string | null;
+	order_reference: string;
+	color_reference_code: string | null;
+	color_reference_name: string | null;
+	product_line_name: string | null;
+};
+
+export type OrderDeliverySummary = {
+	id: string;
+	order_id: string;
+	order_short_id: string;
+	fulfillment_method: OrderFulfillmentMethod | string;
+	client_id: string;
+	client_name: string;
+	client_contact_name: string | null;
+	client_email: string | null;
+	client_phone: string | null;
+	client_address: string | null;
+	client_city: string | null;
+	client_postal_code: string | null;
+	client_province: string | null;
+	commercial_id: string;
+	commercial_name: string | null;
+	commercial_email: string | null;
+	commercial_phone: string | null;
+	commercial_address: string | null;
+	commercial_territory: string | null;
+	delivery_visit_id: string | null;
+	delivery_visit_scheduled_for_date: string | null;
+	delivery_visit_status_id: number | null;
+	delivery_visit_status_name: string | null;
+	status: OrderDeliveryStatusCode | string;
+	status_name: string;
+	package_count: number;
+	notes: string | null;
+	delivered_at: string | null;
+	created_at: string;
+	updated_at: string;
+	line_count: number;
+	lines: OrderDeliveryLineSummary[];
+};
+
+export type PendingOrderDeliveryLine = OrderSummaryLine & {
+	prepared_quantity: number;
+	delivered_quantity: number;
+	remaining_quantity: number;
+};
+
+export type PendingOrderDeliveryPreparation = Omit<
+	OrderSummary,
+	"lines" | "deliveries"
+> & {
+	lines: PendingOrderDeliveryLine[];
+	remaining_line_count: number;
+};
+
+export type OrderPaymentSummary = {
+	id: string;
+	order_id: string;
+	amount: string;
+	payment_method: OrderPaymentMethodCode | string;
+	notes: string | null;
+	paid_at: string;
+	registered_by_user_id: string | null;
+	registered_by_user_name: string | null;
+	created_at: string;
+};
+
 export type OrderSummary = {
 	id: string;
 	client_id: string;
 	client_name: string;
 	client_contact_name: string | null;
+	fulfillment_method: OrderFulfillmentMethod | string;
+	agency_delivery_fee: string;
 	created_by_user_id: string;
 	created_by_user_name: string;
 	created_by_user_role_id: number | null;
@@ -62,6 +146,8 @@ export type OrderSummary = {
 	status_code: OrderStatusCode | string;
 	status_name: string;
 	total_amount: string;
+	paid_amount: string;
+	pending_amount: string;
 	notes: string | null;
 	payment_status_id: number;
 	payment_status_code: OrderPaymentStatusCode | string;
@@ -79,6 +165,8 @@ export type OrderSummary = {
 	delivery_visit_status_name: string | null;
 	line_count: number;
 	lines: OrderSummaryLine[];
+	payments: OrderPaymentSummary[];
+	deliveries: OrderDeliverySummary[];
 };
 
 export type OrderStatusOption = {
@@ -106,23 +194,27 @@ export type CreateOrderLineBody = {
 };
 
 export type CreateClientOrderBody = {
+	fulfillmentMethod?: OrderFulfillmentMethod | string | null;
 	notes?: string | null;
 	lines?: CreateOrderLineBody[];
 };
 
 export type CreateCommercialOrderBody = {
 	clientId?: string;
+	fulfillmentMethod?: OrderFulfillmentMethod | string | null;
 	notes?: string | null;
 	lines?: CreateOrderLineBody[];
 };
 
 export type SaveClientOrderDraftBody = {
+	fulfillmentMethod?: OrderFulfillmentMethod | string | null;
 	notes?: string | null;
 	lines?: CreateOrderLineBody[];
 };
 
 export type SaveCommercialOrderDraftBody = {
 	clientId?: string;
+	fulfillmentMethod?: OrderFulfillmentMethod | string | null;
 	notes?: string | null;
 	lines?: CreateOrderLineBody[];
 };
@@ -147,8 +239,27 @@ export type UpdateOrderStatusBody = {
 	paymentNotes?: string | null;
 };
 
+export type RegisterOrderPaymentBody = {
+	amount?: number | string | null;
+	paymentMethod?: string | null;
+	paymentNotes?: string | null;
+};
+
+export type PrepareOrderDeliveryLineBody = {
+	orderLineId?: string;
+	quantity?: number | string | null;
+};
+
+export type PrepareOrderDeliveryBody = {
+	orderId?: string;
+	packageCount?: number | string | null;
+	notes?: string | null;
+	lines?: PrepareOrderDeliveryLineBody[];
+};
+
 export function buildCreateClientOrderInput(body: CreateClientOrderBody) {
 	return {
+		fulfillmentMethod: body.fulfillmentMethod,
 		notes: body.notes,
 		lines: body.lines,
 	};
@@ -157,6 +268,7 @@ export function buildCreateClientOrderInput(body: CreateClientOrderBody) {
 export function buildCreateCommercialOrderInput(body: CreateCommercialOrderBody) {
 	return {
 		clientId: body.clientId,
+		fulfillmentMethod: body.fulfillmentMethod,
 		notes: body.notes,
 		lines: body.lines,
 	};
@@ -164,6 +276,7 @@ export function buildCreateCommercialOrderInput(body: CreateCommercialOrderBody)
 
 export function buildSaveClientOrderDraftInput(body: SaveClientOrderDraftBody) {
 	return {
+		fulfillmentMethod: body.fulfillmentMethod,
 		notes: body.notes,
 		lines: body.lines,
 	};
@@ -174,6 +287,7 @@ export function buildSaveCommercialOrderDraftInput(
 ) {
 	return {
 		clientId: body.clientId,
+		fulfillmentMethod: body.fulfillmentMethod,
 		notes: body.notes,
 		lines: body.lines,
 	};
@@ -206,5 +320,22 @@ export function buildUpdateOrderStatusInput(body: UpdateOrderStatusBody) {
 		paymentStatusId: body.paymentStatusId,
 		paymentMethod: body.paymentMethod,
 		paymentNotes: body.paymentNotes,
+	};
+}
+
+export function buildRegisterOrderPaymentInput(body: RegisterOrderPaymentBody) {
+	return {
+		amount: body.amount,
+		paymentMethod: body.paymentMethod,
+		paymentNotes: body.paymentNotes,
+	};
+}
+
+export function buildPrepareOrderDeliveryInput(body: PrepareOrderDeliveryBody) {
+	return {
+		orderId: body.orderId,
+		packageCount: body.packageCount,
+		notes: body.notes,
+		lines: body.lines,
 	};
 }

@@ -16,6 +16,8 @@ import { OrderStatus } from "./OrderStatus";
 import { OrderLine } from "./OrderLine";
 import { CommercialVisit } from "./CommercialVisit";
 import { OrderPaymentStatus } from "./OrderPaymentStatus";
+import { OrderPayment } from "./OrderPayment";
+import { OrderDelivery } from "./OrderDelivery";
 
 @Entity("orders")
 @Index("orders_client_id_index", ["client_id"])
@@ -24,6 +26,7 @@ import { OrderPaymentStatus } from "./OrderPaymentStatus";
 @Index("orders_payment_status_id_index", ["payment_status_id"])
 @Index("orders_delivery_visit_id_index", ["delivery_visit_id"])
 @Index("orders_paid_by_user_id_index", ["paid_by_user_id"])
+@Index("orders_fulfillment_method_index", ["fulfillment_method"])
 @Index("orders_created_at_index", ["created_at"])
 export class Order {
 	@PrimaryGeneratedColumn("uuid")
@@ -58,6 +61,12 @@ export class Order {
 
 	@Column({ type: "numeric", precision: 12, scale: 2 })
 	total_amount!: string;
+
+	@Column({ type: "text", default: "commercial" })
+	fulfillment_method!: "commercial" | "agency";
+
+	@Column({ type: "numeric", precision: 12, scale: 2, default: 0 })
+	agency_delivery_fee!: string;
 
 	@Column({ type: "text", nullable: true })
 	notes!: string | null;
@@ -108,6 +117,12 @@ export class Order {
 
 	@OneToMany(() => OrderLine, (orderLine) => orderLine.order)
 	lines!: Relation<OrderLine[]>;
+
+	@OneToMany(() => OrderPayment, (payment) => payment.order)
+	payments!: Relation<OrderPayment[]>;
+
+	@OneToMany(() => OrderDelivery, (delivery) => delivery.order)
+	deliveries!: Relation<OrderDelivery[]>;
 
 	@CreateDateColumn({ type: "timestamptz" })
 	created_at!: Date;

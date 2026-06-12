@@ -23,6 +23,7 @@ export default async function CommercialColorChartDetailPage({
 			title="Carta de color"
 			subtitle="Búsqueda rápida de tonos y referencias comerciales"
 			backHref="/commercials/coloration"
+			toneDetailBasePath="/commercials/coloration/tones"
 			colorChart={toClientPlain(serializeColorChartDetail(colorChart))}
 		/>
 	);
