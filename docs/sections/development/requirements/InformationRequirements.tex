@@ -67,13 +67,19 @@ En esta sección se resumen los requisitos de información que el sistema debe a
 \texttt{RI-M3} & Catálogos de catálogo & Estados de producto y tipos de recurso. & Productos y recursos de apoyo. \\
 \hline
 \RIModuleHeader{M4. Pedidos, reparto y cobro}
-\texttt{RI-M4} & Pedido & Cliente, comercial, estado, estado de cobro, importe, fechas, notas, QR de entrega y visita vinculada. & Cliente, comercial, estado, visita de reparto y líneas de pedido. \\
+\texttt{RI-M4} & Pedido & Cliente, comercial, estado, estado de cobro, importe, método de entrega, cargo de agencia, fechas y notas. & Cliente, comercial, estado, líneas de pedido, repartos y pagos. \\
 \hline
 \texttt{RI-M4} & Línea de pedido & Pedido, producto, referencia de color, cantidad, precio y observaciones. & Pedido, producto y referencia cromática. \\
 \hline
 \texttt{RI-M4} & Estados de pedido y cobro & Código, nombre y descripción de estados operativos. & Pedidos. \\
 \hline
-\texttt{RI-M4} & Visita de reparto vinculada & Visita comercial que actúa como soporte logístico de entrega. & Pedido, cliente, comercial y ETA mostrada al cliente. \\
+\texttt{RI-M4} & Reparto de pedido & Pedido, comercial, visita vinculada, estado, método de entrega, bultos manuales, notas, fecha de entrega y usuarios responsables. & Pedido, comercial, visita comercial, líneas de reparto y etiqueta logística. \\
+\hline
+\texttt{RI-M4} & Línea de reparto & Reparto, línea de pedido y cantidad servida en ese reparto. & Reparto y línea de pedido. \\
+\hline
+\texttt{RI-M4} & Pago de pedido & Pedido, importe, método, fecha de pago, notas y usuario que registra el cobro. & Pedido y usuario responsable. \\
+\hline
+\texttt{RI-M4} & Visita de reparto vinculada & Visita comercial que actúa como soporte logístico de entrega para repartos gestionados por comercial. & Reparto, pedido, cliente, comercial y ETA mostrada al cliente. \\
 \hline
 \RIModuleHeader{M5. Gestión técnica del salón}
 \texttt{RI-M5} & Cliente del salón & Cliente profesional propietario, nombre, teléfono, email, observaciones y fechas. & Cliente profesional, servicios, sugerencias y reservas futuras. \\

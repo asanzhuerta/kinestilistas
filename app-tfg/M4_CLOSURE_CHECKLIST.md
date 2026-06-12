@@ -1,7 +1,7 @@
 # M4 Closure Checklist
 
-> Última actualización: 2026-06-02
-> Módulo cubierto: `M4 - Pedidos, entregas y cobros`
+> Última actualización: 2026-06-12
+> Módulo cubierto: `M4 - Pedidos, repartos, entregas y cobros`
 > Referencia base: `TFG_STATUS_MASTER_PLAN.md`
 
 ## Como usar esta checklist
@@ -13,8 +13,8 @@
 
 ## Datos de la revisión
 
-- Fecha: `2026-06-02`
-- Rama: `feat/m4-order-status-flow`
+- Fecha: `2026-06-12`
+- Rama: `feat/coloration-row-view`
 - Base de datos revisada: `si; smoke test funcional a nivel servicio con limpieza final OK`
 - Build revisada: `si; typecheck, lint y build OK`
 - Responsable de la revisión: `usuario + Codex`
@@ -33,7 +33,7 @@
 - [x] El entorno tiene datos demo suficientes para probar `borrador`, `confirmado`, `entregado`, `cancelado` y `cobrado`.
 - [x] Existe al menos un usuario `client`, uno `commercial` y uno `admin` operativos.
 - [x] Existe al menos un cliente asignado a un comercial con productos pedidos y con visitas de reparto posibles.
-- [x] Queda claro por escrito que `M4` incluye `pedidos + entregas/repartos + cobros mínimos`.
+- [x] Queda claro por escrito que `M4` incluye `pedidos + preparación de repartos + entrega comercial/agencia + pagos parciales`.
 - [x] Existe un guion corto de defensa con credenciales y casos reales en [M4_DEMO_SCRIPT.md](/C:/Users/MADAO/Desktop/TFG-AlejandroSanzHuerta/app-tfg/M4_DEMO_SCRIPT.md).
 
 ## Bloqueantes
@@ -41,10 +41,10 @@
 - [x] Un pedido puede nacer como `draft` y mantenerse editable sin romper el historial.
 - [x] Un pedido puede pasar de `draft/created` a `confirmed` de forma coherente.
 - [x] Un pedido puede pasar de `created/confirmed` a `cancelled` sin dejar estados raros.
-- [x] Un pedido `confirmed` puede vincularse a una visita de reparto valida del cliente correcto.
-- [x] Una visita de reparto no puede completarse sin los pedidos que le corresponden.
-- [x] Completar una visita de reparto marca los pedidos vinculados como `delivered`.
-- [x] Un pedido `delivered` puede pasar a `paid` desde el subflujo de cobro.
+- [x] Un pedido `confirmed` puede dividirse en uno o varios repartos preparados con líneas y bultos manuales.
+- [x] Una visita de reparto no puede completarse sin los repartos comerciales que le corresponden.
+- [x] Completar todos los repartos comerciales de un pedido marca el pedido como `delivered`.
+- [x] Un pedido `delivered` puede recibir pagos parciales o totales desde el subflujo de cobro.
 - [x] El subflujo inverso a `pending` solo se permite si tu regla de negocio actual lo contempla y lo deja consistente.
 - [x] Cancelar o aplazar una visita no deja pedidos enlazados en estado contradictorio.
 - [x] La ETA del cliente solo aparece cuando existe un reparto real con pedidos reales vinculados.
@@ -89,9 +89,10 @@ Rutas principales:
 
 - `/commercials/orders`
 - `/commercials/orders/[id]`
+- `/commercials/orders/preparation`
 - `/commercials/visits`
 - `/commercials/visits/[id]`
-- `/commercials/orders/[id]` para seguimiento de cobro integrado
+- `/commercials/orders/[id]` para historial de pagos integrado
 
 Checklist de pedidos:
 
@@ -100,25 +101,26 @@ Checklist de pedidos:
 - [x] El comercial no puede crear pedidos para clientes no asignados.
 - [x] El comercial puede recuperar y continuar un `draft` por cliente.
 - [x] El comercial ve los estados y el estado de cobro de cada pedido.
-- [x] El detalle del pedido muestra correctamente el QR del paquete.
+- [x] El detalle del pedido muestra correctamente los repartos preparados, sus etiquetas y su estado.
 
 Checklist de reparto:
 
-- [x] En `Visitas` aparece la bandeja de pedidos confirmados pendientes de reparto.
-- [x] Al crear un reparto, solo se pueden seleccionar pedidos confirmados y del cliente correcto.
-- [x] No se puede crear un reparto sin pedidos vinculados.
-- [x] El detalle de la visita muestra claramente que pedidos estan vinculados.
-- [x] Para completar un reparto, el comercial debe escanear o pegar los QR requeridos.
+- [x] En `Preparación de repartos` aparecen pedidos confirmados pendientes de servir.
+- [x] Al crear un reparto, solo se pueden seleccionar líneas confirmadas y pendientes del cliente correcto.
+- [x] No se puede crear un reparto sin líneas ni bultos válidos.
+- [x] El detalle de la visita muestra claramente qué repartos están vinculados.
+- [x] Para completar un reparto comercial, el comercial debe escanear o pegar los QR requeridos.
 - [x] Si faltan QR o no coinciden, el reparto no se completa.
-- [x] Si los QR coinciden, la visita se completa y los pedidos quedan `delivered`.
+- [x] Si los QR coinciden, el reparto se completa y el pedido solo pasa a `delivered` cuando todos sus repartos comerciales han sido entregados.
+- [x] Los pedidos por agencia generan etiqueta diferenciada sin QR operativo y suman el cargo configurado.
 
 Checklist de cobros:
 
-- [x] En el detalle comercial del pedido entregado aparece el seguimiento mínimo de cobro.
+- [x] En el detalle comercial del pedido entregado aparece el historial de pagos.
 - [x] La lista distingue entre `pending` y `paid`.
-- [x] El comercial puede registrar método de cobro, fecha y notas.
+- [x] El comercial puede registrar importe, método de cobro, fecha y notas.
 - [x] El detalle del pedido refleja el nuevo estado de cobro inmediatamente.
-- [x] Un pedido ya cobrado deja de comportarse como pendiente.
+- [x] Un pedido queda `paid` cuando el importe acumulado alcanza el total pendiente.
 
 Notas:
 
@@ -191,7 +193,8 @@ Notas:
   - `/clients/orders`
   - `/commercials/orders`
   - `/commercials/visits`
-  - `/commercials/orders/[id]` para seguimiento de cobro integrado
+  - `/commercials/orders/[id]` para historial de pagos integrado
+  - `/commercials/orders/preparation`
   - `/admin/orders`
 - [x] No aparecen bucles de render, tormentas de peticiones ni errores de sesión al navegar por el flujo de `M4`.
 - [x] La base de datos no acumula estados inconsistentes tras la prueba manual completa.
@@ -217,13 +220,13 @@ Notas:
 
 - [x] Tienes una captura del flujo de pedido en cliente.
 - [x] Tienes una captura del flujo de pedido en comercial.
-- [x] Tienes una captura de la bandeja de repartos o pedidos pendientes de reparto.
-- [x] Tienes una captura del detalle de visita con pedidos vinculados.
-- [x] Dispones de evidencia del cierre de reparto con validación QR.
+- [x] Tienes una captura de la preparación de repartos desde pedidos pendientes.
+- [x] Tienes una captura del detalle de visita con repartos vinculados.
+- [x] Dispones de evidencia del cierre de reparto comercial con validación QR.
 - [x] Tienes una captura del detalle de pedido entregado.
-- [x] Tienes una captura del subflujo de cobro integrado en el detalle del pedido comercial.
-- [x] Queda resumido por escrito el flujo completo `pedido -> reparto -> entrega -> cobro`.
-- [x] Queda explicitado por escrito que no cubre el flujo mínimo de cobros: pagos parciales, facturación, conciliación, etc.
+- [x] Tienes una captura del historial de pagos integrado en el detalle del pedido comercial.
+- [x] Queda resumido por escrito el flujo completo `pedido -> preparación de repartos -> entrega -> pagos`.
+- [x] Queda explicitado por escrito que no cubre facturación, albaranes definitivos, vencimientos automáticos ni conciliación avanzada.
 
 ## Criterio final de cierre
 
@@ -236,7 +239,7 @@ Marca una sola opcion:
 ## Observaciones residuales
 
 1. El script `m4-ui-headless-check.mjs` queda como evidencia reusable de cierre visual para futuras regresiones de `M4`.
-2. La memoria en LaTeX debe reflejar expresamente que el alcance de cobros en `M4` es mínimo y no cubre pagos parciales ni conciliación.
+2. La memoria en LaTeX debe reflejar expresamente que `M4` cubre pagos parciales, pero no facturación, vencimientos automáticos ni conciliación avanzada.
 
 ## Decision de salida
 

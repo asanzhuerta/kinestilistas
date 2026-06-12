@@ -48,18 +48,22 @@ A continuación, la Tabla~\ref{tab:functional-requirements-executive} presenta e
 \hline
 \texttt{RF-M3-02} & Catálogo & Cliente, comercial & Filtrar y buscar productos por categoría, línea, subcategoría, referencia, nombre y estado de disponibilidad. \\
 \hline
-\texttt{RF-M3-03} & Catálogo & Cliente, comercial & Visualizar cartas de color y referencias cromáticas asociadas a productos y líneas comerciales. \\
+\texttt{RF-M3-03} & Catálogo & Cliente, comercial & Visualizar cartas de color y referencias cromáticas asociadas a productos y líneas comerciales, incluyendo vista por filas de tono principal, vista por cartas y detalle de tono con producto asociado cuando exista. \\
 \hline
 \texttt{RF-M3-04} & Catálogo & Administrador & Mantener productos, categorías, líneas, subcategorías, recursos de apoyo, cartas de color y referencias desde administración. \\
 \hline
 \RFModuleHeader{M4. Pedidos, reparto y cobro}
-\texttt{RF-M4-01} & Pedidos y reparto & Cliente, comercial & Crear, editar, confirmar, cancelar y consultar pedidos, manteniendo líneas, productos, referencias de color, imágenes de apoyo, descuentos visibles y estados coherentes. \\
+\texttt{RF-M4-01} & Pedidos y reparto & Cliente, comercial & Crear, editar, confirmar, cancelar y consultar pedidos, manteniendo líneas, productos, referencias de color, imágenes de apoyo, descuentos visibles, método de entrega y estados coherentes. \\
 \hline
-\texttt{RF-M4-02} & Pedidos y reparto & Comercial, cliente & Vincular pedidos confirmados a visitas de reparto, validar entregas mediante QR escaneado o introducción manual y sincronizar el estado logístico con la visita. \\
+\texttt{RF-M4-02} & Pedidos y reparto & Comercial, cliente & Preparar uno o varios repartos a partir de pedidos confirmados, seleccionando líneas y cantidades, registrando bultos manuales, generando etiqueta logística y vinculando los repartos comerciales a visitas de entrega. \\
 \hline
-\texttt{RF-M4-03} & Pedidos y reparto & Comercial, administrador & Registrar el estado mínimo de cobro de pedidos entregados, incluyendo método, fecha, notas y usuario responsable. \\
+\texttt{RF-M4-03} & Pedidos y reparto & Comercial, administrador & Validar entregas de repartos comerciales mediante QR escaneado o introducción manual y sincronizar el estado logístico con la visita y el pedido cuando todos sus repartos estén completados. \\
 \hline
-\texttt{RF-M4-04} & Pedidos y reparto & Administrador, comercial, cliente & Consultar la trazabilidad cruzada de pedidos, repartos y cobros desde las vistas correspondientes a cada rol. \\
+\texttt{RF-M4-04} & Pedidos y reparto & Cliente, comercial, administrador & Permitir elegir entre entrega por comercial o por agencia, aplicando en el segundo caso un cargo configurable y generando una etiqueta diferenciada sin QR de reparto comercial. \\
+\hline
+\texttt{RF-M4-05} & Pedidos y reparto & Comercial, administrador & Registrar pagos parciales o totales de pedidos entregados, conservando importe, método, fecha, notas, usuario responsable, historial de pagos y saldo pendiente. \\
+\hline
+\texttt{RF-M4-06} & Pedidos y reparto & Administrador, comercial, cliente & Consultar la trazabilidad cruzada de pedidos, repartos, etiquetas, entregas y cobros desde las vistas correspondientes a cada rol. \\
 \hline
 \RFModuleHeader{M5. Gestión técnica del salón}
 \texttt{RF-M5-01} & Salón & Cliente profesional & Gestionar fichas de clientes finales del salón con datos de contacto, observaciones e historial asociado. \\
@@ -88,7 +92,7 @@ A continuación, la Tabla~\ref{tab:functional-requirements-executive} presenta e
 \texttt{RF-M6-04} & Comunicaciones & Administrador, cliente, comercial & Publicar formaciones, mostrar su disponibilidad y permitir la inscripción o cancelación por parte de usuarios autorizados. \\
 \hline
 \RFModuleHeader{M7. Administración técnica e integraciones}
-\texttt{RF-M7-01} & Administración técnica & Administrador & Agrupar las funciones administrativas reales: usuarios, clientes, catálogo, comunicaciones, pedidos, auditoría y ajustes de avisos automáticos. \\
+\texttt{RF-M7-01} & Administración técnica & Administrador & Agrupar las funciones administrativas reales: usuarios, clientes, catálogo, comunicaciones, pedidos, auditoría, ajustes de avisos automáticos y parámetros operativos de pedidos. \\
 \hline
 \texttt{RF-M7-02} & Administración técnica & Administrador & Consultar información útil para la gestión diaria sin convertir los diagnósticos técnicos internos en pantallas de uso ordinario. \\
 \hline

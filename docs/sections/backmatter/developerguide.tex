@@ -9,7 +9,7 @@ El proyecto se desarrolla en un único repositorio con dos bloques claramente di
     \item \texttt{docs/}, que contiene la memoria técnica.
 \end{itemize}
 
-El estado actual del desarrollo cubre de forma operativa los módulos \texttt{M1}, \texttt{M2}, \texttt{M3}, \texttt{M4}, bloques funcionales de \texttt{M5} y \texttt{M6}, y una capa transversal de \texttt{M7} para auditoría, avisos configurables, seguridad técnica e integración empresarial preparada. Por tanto, cualquier cambio debería respetar especialmente la compatibilidad con los flujos de autenticación, perfiles, clientes, visitas, rutas, catálogo, pedidos, reparto, cobro mínimo, comunicaciones internas y multicanal, seguimiento técnico del salón y registro de integraciones/propuestas a proveedor.
+El estado actual del desarrollo cubre de forma operativa los módulos \texttt{M1}, \texttt{M2}, \texttt{M3}, \texttt{M4}, bloques funcionales de \texttt{M5} y \texttt{M6}, y una capa transversal de \texttt{M7} para auditoría, avisos configurables, seguridad técnica e integración empresarial preparada. Por tanto, cualquier cambio debería respetar especialmente la compatibilidad con los flujos de autenticación, perfiles, clientes, visitas, rutas, catálogo, coloración, pedidos, repartos, etiquetas, pagos parciales, comunicaciones internas y multicanal, seguimiento técnico del salón y registro de integraciones/propuestas a proveedor.
 
 %\section{Requisitos de desarrollo}
 \input{./sections/backmatter/developerguide/requirements}
@@ -75,7 +75,7 @@ Las pautas recomendadas son:
     \item conservar la trazabilidad entre requisito funcional, entidad y migración.
 \end{itemize}
 
-Actualmente el modelo persistente ya incluye usuarios, auditoría, clientes, comerciales, asignaciones, visitas, rutas, catálogo, coloración, pedidos, líneas de pedido, estados de negocio, sobrescrituras técnicas de rate limiting y suscripciones Web Push de usuario. No conviene documentar nuevas entidades como implementadas si no existen realmente en esta capa.
+Actualmente el modelo persistente ya incluye usuarios, auditoría, clientes, comerciales, asignaciones, visitas, rutas, catálogo, coloración, pedidos, líneas de pedido, repartos, líneas de reparto, pagos de pedido, estados de negocio, cargo de agencia configurable, sobrescrituras técnicas de rate limiting y suscripciones Web Push de usuario. No conviene documentar nuevas entidades como implementadas si no existen realmente en esta capa.
 
 \subsection{Integraciones externas}
 
@@ -85,13 +85,13 @@ El proyecto ya interactúa con varios servicios externos:
     \item \texttt{Cloudinary} para imágenes de perfil y catálogo;
     \item \texttt{Nominatim} para geocodificación de direcciones;
     \item \texttt{OSRM} para geometría de rutas;
-    \item \texttt{QuickChart} para representación del QR de pedido;
+    \item \texttt{QuickChart} para representación del QR de reparto;
     \item SMTP transaccional para correo electrónico de notificaciones cuando se configuran \texttt{SMTP\_HOST}, \texttt{SMTP\_PORT}, \texttt{SMTP\_USER}, \texttt{SMTP\_PASSWORD} y \texttt{SMTP\_FROM};
     \item Web Push mediante claves VAPID \texttt{VAPID\_PUBLIC\_KEY}, \texttt{VAPID\_PRIVATE\_KEY} y \texttt{VAPID\_SUBJECT};
     \item el navegador del usuario para geolocalización actual y lectura continua de QR mediante cámara.
 \end{itemize}
 
-Al tocar estas integraciones conviene mantener siempre una ruta de degradación razonable. El código actual ya contempla varios ejemplos: avatar con \textit{fallback}, punto de salida guardado si no hay geolocalización actual, ETA anulada si el reparto no es coherente, lectura manual del QR cuando el dispositivo no ofrece soporte suficiente y conservación de la notificación interna aunque SMTP, VAPID o una suscripción push no estén disponibles.
+Al tocar estas integraciones conviene mantener siempre una ruta de degradación razonable. El código actual ya contempla varios ejemplos: avatar con \textit{fallback}, punto de salida guardado si no hay geolocalización actual, ETA anulada si el reparto no es coherente, lectura manual del QR cuando el dispositivo no ofrece soporte suficiente, etiqueta de agencia sin QR comercial y conservación de la notificación interna aunque SMTP, VAPID o una suscripción push no estén disponibles.
 
 En promociones debe conservarse la regla de negocio vigente: los rangos comerciales se tratan de forma jerárquica, de modo que \textit{Oro} hereda promociones \textit{Plata} y \textit{Platino} hereda promociones \textit{Oro} y \textit{Plata}. Además, no se acumulan varias promociones en una misma línea de pedido; el servicio selecciona una única promoción aplicable según mayor descuento, especificidad y caducidad.
 
@@ -121,7 +121,7 @@ Además, debe comprobarse manualmente el flujo afectado usando el rol correcto. 
     \item clientes, geolocalización y asignaciones;
     \item visitas, ruta diaria, aplazamientos automáticos, avisos de reubicación y ETA para cliente;
     \item mantenimiento de catálogo y coloración;
-    \item pedidos, entrega con QR y cobro mínimo.
+    \item pedidos, preparación de repartos, entrega con QR o agencia y pagos parciales.
     \item promociones, formaciones, \texttt{deliveryChannels}, suscripción Web Push y degradación a notificación interna.
 \end{itemize}
 

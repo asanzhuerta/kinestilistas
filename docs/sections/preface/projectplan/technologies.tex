@@ -33,9 +33,9 @@ Estas integraciones no constituyen un módulo de negocio independiente, pero son
 
 \subsection{Imágenes externas y QR}
 
-El almacenamiento externo de imágenes se resuelve mediante \textbf{Cloudinary}, tanto para la imagen de perfil de usuario como para las imágenes del catálogo administrado por el distribuidor \citep{cloudinaryupload2026}. Para la representación del QR operativo de cada pedido se utiliza \textbf{QuickChart}, que permite generar imágenes QR a partir de una carga textual estable \citep{quickchartqr2026}.
+El almacenamiento externo de imágenes se resuelve mediante \textbf{Cloudinary}, tanto para la imagen de perfil de usuario como para las imágenes del catálogo administrado por el distribuidor \citep{cloudinaryupload2026}. Para la representación del QR operativo de cada reparto comercial se utiliza \textbf{QuickChart}, que permite generar imágenes QR a partir de una carga textual estable \citep{quickchartqr2026}.
 
-Esta decisión evita introducir una dependencia adicional de renderizado de QR en el frontend y facilita que la misma referencia pueda reutilizarse para visualización, impresión y validación en reparto.
+Esta decisión evita introducir una dependencia adicional de renderizado de QR en el frontend y facilita que la misma referencia pueda reutilizarse para visualización, impresión y validación en reparto. Cuando el pedido se gestiona por agencia, la etiqueta mantiene el mismo formato imprimible, pero sustituye el bloque QR por una marca textual para distinguir la preparación logística.
 
 \subsection{Entorno de desarrollo y acceso desde dispositivos}
 

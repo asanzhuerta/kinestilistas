@@ -2,7 +2,7 @@ Las instrucciones de uso del software se detallan a continuación. Este manual s
 
 \section{Introducción}
 
-KinEstilistas es una aplicación web para coordinar la relación entre un distribuidor de producto capilar profesional, su equipo comercial y sus clientes salón. En la versión actual el sistema cubre de forma efectiva la gestión de acceso y usuarios del módulo \texttt{M1}, la operativa comercial y de clientes del módulo \texttt{M2}, el catálogo del módulo \texttt{M3}, el flujo de pedidos, reparto y cobro mínimo del módulo \texttt{M4}, el seguimiento técnico interno del salón del módulo \texttt{M5}, las comunicaciones internas y multicanal, promociones, formaciones y descuentos del módulo \texttt{M6}, y la administración transversal de auditoría, avisos configurables y base técnica de integraciones del módulo \texttt{M7}.
+KinEstilistas es una aplicación web para coordinar la relación entre un distribuidor de producto capilar profesional, su equipo comercial y sus clientes salón. En la versión actual el sistema cubre de forma efectiva la gestión de acceso y usuarios del módulo \texttt{M1}, la operativa comercial y de clientes del módulo \texttt{M2}, el catálogo y la coloración del módulo \texttt{M3}, el flujo de pedidos, preparación de repartos, entrega por comercial o agencia y pagos parciales del módulo \texttt{M4}, el seguimiento técnico interno del salón del módulo \texttt{M5}, las comunicaciones internas y multicanal, promociones, formaciones y descuentos del módulo \texttt{M6}, y la administración transversal de auditoría, avisos configurables, cargo de agencia y base técnica de integraciones del módulo \texttt{M7}.
 
 La aplicación diferencia tres perfiles de uso:
 
@@ -64,8 +64,8 @@ Las operaciones más habituales para este rol son:
     \item mantener la estructura del catálogo y sus productos asociados;
     \item administrar cartas de color y referencias visuales por línea comercial;
     \item consultar la vista de auditoría en \texttt{/admin/audit}, incluyendo accesos recientes, acciones administrativas, resumen de sesiones activas y exportación \texttt{CSV} de registros de trazabilidad;
-    \item configurar desde \texttt{/admin/settings} los canales adicionales de avisos automáticos;
-    \item revisar el estado completo de un pedido y su trazabilidad de reparto y cobro.
+    \item configurar desde \texttt{/admin/settings} los canales adicionales de avisos automáticos y el cargo de entrega por agencia;
+    \item revisar el estado completo de un pedido, sus repartos, sus etiquetas y el historial de pagos.
 \end{enumerate}
 
 \subsection{Uso como comercial}
@@ -84,14 +84,15 @@ Los flujos disponibles son:
     \item abrir la página \texttt{/commercials/routes} para visualizar la ruta en una vista dedicada;
     \item acceder al catálogo de productos activos con filtros por categoría, línea y subcategoría;
     \item consultar fichas de producto con información técnica, recursos asociados y vinculos a coloración;
-    \item explorar cartas de color y localizar tonos concretos dentro de cada línea comercial;
-    \item preparar borradores de pedido y confirmarlos para clientes asignados, con búsqueda de producto y vista previa económica de descuentos;
+    \item explorar coloración por filas de tono principal, por cartas o por todos los tonos, y abrir el detalle del tono con el producto asociado cuando exista;
+    \item preparar borradores de pedido y confirmarlos para clientes asignados, con búsqueda de producto, vista previa económica de descuentos y elección de entrega por comercial o agencia;
     \item consultar el listado de pedidos del área comercial;
-    \item gestionar visitas rutinarias y de reparto, vincular pedidos confirmados, terminar visitas sin entrega asociada y completar repartos con validación QR;
-    \item registrar el cobro mínimo de pedidos ya entregados desde el detalle del pedido comercial.
+    \item preparar repartos a partir de pedidos confirmados, seleccionando productos y cantidades, registrando bultos manuales y descargando la etiqueta;
+    \item gestionar visitas rutinarias y de reparto, vincular repartos preparados, terminar visitas sin entrega asociada y completar repartos comerciales con validación QR;
+    \item registrar pagos parciales o totales de pedidos ya entregados desde el detalle del pedido comercial.
 \end{enumerate}
 
-En el detalle de una visita de reparto, la confirmación de entrega se apoya en un flujo específico de QR. El comercial puede abrir el escáner en un modal centrado y de pantalla completa; la cámara permanece activa leyendo de forma continua hasta detectar el código del paquete. Si el navegador o el dispositivo no permiten una lectura fiable, se conserva la introducción manual como alternativa. Solo cuando el sistema dispone de todos los QR requeridos para los pedidos vinculados habilita la confirmación final de la entrega.
+En el detalle de una visita de reparto, la confirmación de entrega se apoya en un flujo específico de QR. El comercial puede abrir el escáner en un modal centrado y de pantalla completa; la cámara permanece activa leyendo de forma continua hasta detectar el código del reparto. Si el navegador o el dispositivo no permiten una lectura fiable, se conserva la introducción manual como alternativa. Solo cuando el sistema dispone de todos los QR requeridos para los repartos vinculados habilita la confirmación final de la entrega.
 
 La información de ruta se apoya en la geolocalización del dispositivo cuando está disponible. Si el navegador no concede permiso, el sistema intenta utilizar el punto de salida guardado para el comercial.
 
@@ -120,7 +121,7 @@ La tarjeta de reparto indica, cuando existe una visita de entrega planificada:
 
 Si no existe reparto para ese día, o si la visita ha quedado fuera de la franja horaria permitida, el sistema lo comunica expresamente.
 
-Desde \texttt{/clients/orders}, el cliente puede consultar pedidos en distintos estados, abrir su detalle y seguir la trazabilidad mínima de reparto y cobro. Al preparar un pedido, cada línea permite buscar el producto por texto además de usar el desplegable de referencias, y muestra la imagen del producto junto a la selección para reducir errores de captura. Desde el catálogo, puede navegar por productos activos, aplicar filtros y abrir la ficha completa de cada referencia. Esa ficha reúne información técnica, recursos de apoyo y, cuando corresponde, accesos directos a cartas de color relacionadas.
+Desde \texttt{/clients/orders}, el cliente puede consultar pedidos en distintos estados, abrir su detalle y seguir la trazabilidad de reparto y pagos. Al preparar un pedido, cada línea permite buscar el producto por texto además de usar el desplegable de referencias, muestra la imagen del producto junto a la selección para reducir errores de captura y permite elegir si la entrega la realizará el comercial o una agencia. Si se elige agencia, el pedido incorpora el cargo configurado por administración. Desde el catálogo, puede navegar por productos activos, aplicar filtros y abrir la ficha completa de cada referencia. Esa ficha reúne información técnica, recursos de apoyo y, cuando corresponde, accesos directos a cartas de color relacionadas.
 
 Desde la pantalla de avisos, clientes y comerciales pueden activar las notificaciones del dispositivo mediante \textit{Web Push} si el navegador lo permite y la aplicación está correctamente configurada. Al activar este canal, las comunicaciones seleccionadas por administración pueden llegar también como notificación del sistema en el dispositivo. El canal interno de avisos se mantiene siempre disponible aunque el correo o la notificación push no estén configurados.
 
@@ -148,7 +149,7 @@ En escritorio, la vista de perfil se organiza como un panel compacto para consul
 \begin{itemize}
     \item la previsualización de ruta existe tanto en el panel comercial principal como en una página independiente de rutas;
     \item el catálogo y la coloración forman parte del alcance operativo de comerciales y clientes;
-    \item el flujo de pedidos, reparto y cobro mínimo ya está operativo;
+    \item el flujo de pedidos, preparación de repartos, entrega comercial o por agencia y pagos parciales ya está operativo;
     \item el módulo de salón ya dispone de un bloque operativo de fichas técnicas, historial con mantenimiento posterior, tonos e imágenes finales por servicio, plantillas reutilizables y borradores técnicos de correo, \textcolor{red}{aunque el envío real y otras automatizaciones siguen pendientes};
     \item promociones, formaciones, avisos internos, correo SMTP, Web Push y descuentos promocionales sobre pedidos forman parte del alcance operativo actual; \textcolor{red}{quedan para iteraciones futuras \textit{WhatsApp}, otros canales externos y automatizaciones más avanzadas.}
 \end{itemize}

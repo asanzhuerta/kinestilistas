@@ -1,7 +1,7 @@
 # M4 Demo Script
 
-> Última actualización: `2026-06-01`
-> Objetivo: defender `M4 - Pedidos, entregas y cobros` en `2-3` minutos sin improvisar.
+> Última actualización: `2026-06-12`
+> Objetivo: defender `M4 - Pedidos, repartos, entregas y cobros` en `3-4` minutos sin improvisar.
 
 ## Credenciales
 
@@ -73,7 +73,26 @@ Que decir:
 - "En M4 el cliente puede consultar su historial y el detalle de cada pedido."
 - "Aqui ya se ve el ciclo de vida: pedido confirmado, pedido entregado y un pedido cancelado."
 
-### 2. Comercial - reparto
+### 2. Comercial - preparación de reparto
+
+Rutas:
+
+- `/commercials/orders/preparation`
+- `/commercials/visits`
+- `/commercials/visits/0a650fea-1ab3-4353-9e78-2d3ea26b4f60`
+
+Que ensenar:
+
+- La preparación permite seleccionar líneas pendientes de pedidos confirmados.
+- Los bultos se introducen manualmente.
+- Las etiquetas se generan por reparto, no por pedido.
+
+Que decir:
+
+- "El pedido puede dividirse en varios repartos si no todo el producto está disponible."
+- "Cada reparto tiene sus líneas, sus bultos y su etiqueta propia."
+
+### 3. Comercial - entrega
 
 Rutas:
 
@@ -84,14 +103,14 @@ Que ensenar:
 
 - Existe una visita `delivery` en estado `planned`.
 - La visita pertenece al cliente correcto.
-- La visita tiene un pedido vinculado.
+- La visita tiene repartos vinculados.
 
 Que decir:
 
-- "El comercial organiza y consulta los repartos pendientes."
-- "Cada visita de reparto queda vinculada a pedidos concretos del cliente correcto."
+- "La visita de reparto ya no transporta pedidos completos de forma directa, sino repartos preparados."
+- "Un pedido solo queda entregado cuando todos sus repartos comerciales están cerrados mediante QR."
 
-### 3. Comercial - cobro
+### 4. Comercial - pagos
 
 Ruta:
 
@@ -99,15 +118,15 @@ Ruta:
 
 Que ensenar:
 
-- El pedido `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2` debe aparecer como entregado y con seguimiento de cobro visible.
-- Registra o actualiza el cobro en directo si quieres cerrar la demo con una accion visible.
+- El pedido `2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2` debe aparecer como entregado y con historial de pagos visible.
+- Registra un pago parcial en directo si quieres cerrar la demo con una acción visible.
 
 Que decir:
 
-- "Una vez entregado, el pedido pasa al flujo mínimo de cobro."
-- "El cobro queda integrado en el propio detalle del pedido para no duplicar pantallas comerciales."
+- "Una vez entregado, el pedido admite uno o varios pagos hasta cubrir el importe total."
+- "El historial queda integrado en el propio detalle del pedido para informes posteriores."
 
-### 4. Admin - trazabilidad global
+### 5. Admin - trazabilidad global
 
 Ruta:
 
@@ -131,22 +150,23 @@ Que decir:
 1. Entrar como `client` y abrir `/clients/orders`.
 2. Mostrar el pedido `delivered` y el pedido `cancelled`.
 3. Cambiar a `commercial` y abrir `/commercials/visits`.
-4. Mostrar la visita `planned` con pedido vinculado.
-5. Ir al detalle del pedido en `/commercials/orders/2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
-6. Registrar el cobro del pedido si quieres terminar con un cambio de estado en vivo.
-7. Cambiar a `admin` y abrir `/admin/orders/2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
-8. Confirmar que el estado final del pedido y del cobro queda reflejado globalmente.
+4. Abrir `/commercials/orders/preparation` y mostrar la preparación de repartos con bultos manuales.
+5. Mostrar la visita `planned` con reparto vinculado.
+6. Ir al detalle del pedido en `/commercials/orders/2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
+7. Registrar un pago parcial si quieres terminar con un cambio de estado en vivo.
+8. Cambiar a `admin` y abrir `/admin/orders/2ba93afe-01dd-4621-9e1d-5f9b81fcc8f2`.
+9. Confirmar que el estado final del pedido, los repartos y los pagos quedan reflejados globalmente.
 
 ## Frases utiles para la defensa
 
-- "M4 cubre el flujo pedido -> reparto -> entrega -> cobro mínimo."
-- "No estoy cubriendo pagos parciales, facturación ni conciliación avanzada; eso queda fuera de alcance."
-- "La aplicación ya soporta los roles implicados y la trazabilidad entre pedido, visita de reparto y cobro."
+- "M4 cubre el flujo pedido -> preparación de repartos -> entrega -> pagos."
+- "Los pagos parciales ya están modelados; lo que queda fuera son facturación, vencimientos automáticos y conciliación avanzada."
+- "La aplicación ya soporta los roles implicados y la trazabilidad entre pedido, reparto, visita y pago."
 
 ## Riesgos conocidos antes de la defensa
 
 - `next build --webpack` ya pasa en local sin depender de `Google Fonts`.
-- El alcance de cobros sigue siendo mínimo: no cubre pagos parciales, facturación ni conciliación avanzada.
+- El alcance económico cubre pagos parciales, pero no facturación, vencimientos automáticos ni conciliación avanzada.
 
 ## Nota operativa
 

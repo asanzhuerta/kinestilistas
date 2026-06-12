@@ -1,249 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1045" height="872" viewBox="0 0 1045 872">
-	<defs>
-		<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-			<path d="M 0 0 L 10 5 L 0 10 z" fill="#666"/>
-		</marker>
-	</defs>
-	<rect width="1045" height="872" fill="#ffffff"/>
-	<text x="48" y="38" font-family="Arial, sans-serif" font-size="20" fill="#111" font-weight="700">M4 - Pedidos, reparto y cobro</text>
-	<line x1="192.5" y1="196" x2="852.5" y2="441" stroke="#666" stroke-width="1.3" marker-end="url(#arrow)" opacity="0.72"/>
-<line x1="192.5" y1="196" x2="192.5" y2="730" stroke="#666" stroke-width="1.3" marker-end="url(#arrow)" opacity="0.72"/>
-<line x1="192.5" y1="196" x2="852.5" y2="130" stroke="#666" stroke-width="1.3" marker-end="url(#arrow)" opacity="0.72"/>
-<line x1="192.5" y1="196" x2="192.5" y2="430" stroke="#666" stroke-width="1.3" marker-end="url(#arrow)" opacity="0.72"/>
-<line x1="192.5" y1="196" x2="522.5" y2="463" stroke="#666" stroke-width="1.3" marker-end="url(#arrow)" opacity="0.72"/>
-<line x1="522.5" y1="163" x2="192.5" y2="196" stroke="#666" stroke-width="1.3" marker-end="url(#arrow)" opacity="0.72"/>
-<line x1="522.5" y1="163" x2="522.5" y2="741" stroke="#666" stroke-width="1.3" marker-end="url(#arrow)" opacity="0.72"/>
-<line x1="522.5" y1="163" x2="852.5" y2="741" stroke="#666" stroke-width="1.3" marker-end="url(#arrow)" opacity="0.72"/>
-	
-				<g>
-					<rect x="70" y="80" width="245" height="232" fill="#ffffff" stroke="#333333" stroke-width="1.2"/>
-					<rect x="70" y="80" width="245" height="30" fill="#f5f5f5" stroke="#333333" stroke-width="1.2"/>
-					<text x="192.5" y="100" font-family="Arial, sans-serif" font-size="12" fill="#111" font-weight="700" text-anchor="middle">Pedido</text>
-					
-						<line x1="70" y1="110" x2="315" y2="110" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="125" font-family="Arial, sans-serif" font-size="11" fill="#222">id</text>
-					
-
-						<line x1="70" y1="132" x2="315" y2="132" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="147" font-family="Arial, sans-serif" font-size="11" fill="#222">cliente</text>
-					
-
-						<line x1="70" y1="154" x2="315" y2="154" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="169" font-family="Arial, sans-serif" font-size="11" fill="#222">comercial</text>
-					
-
-						<line x1="70" y1="176" x2="315" y2="176" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="191" font-family="Arial, sans-serif" font-size="11" fill="#222">estado</text>
-					
-
-						<line x1="70" y1="198" x2="315" y2="198" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="213" font-family="Arial, sans-serif" font-size="11" fill="#222">estadoCobro</text>
-					
-
-						<line x1="70" y1="220" x2="315" y2="220" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="235" font-family="Arial, sans-serif" font-size="11" fill="#222">importe</text>
-					
-
-						<line x1="70" y1="242" x2="315" y2="242" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="257" font-family="Arial, sans-serif" font-size="11" fill="#222">fechaConfirmacion</text>
-					
-
-						<line x1="70" y1="264" x2="315" y2="264" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="279" font-family="Arial, sans-serif" font-size="11" fill="#222">fechaEntrega</text>
-					
-
-						<line x1="70" y1="286" x2="315" y2="286" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="301" font-family="Arial, sans-serif" font-size="11" fill="#222">qrEntrega</text>
-					
-				</g>
-			
-
-				<g>
-					<rect x="400" y="80" width="245" height="166" fill="#ffffff" stroke="#333333" stroke-width="1.2"/>
-					<rect x="400" y="80" width="245" height="30" fill="#f5f5f5" stroke="#333333" stroke-width="1.2"/>
-					<text x="522.5" y="100" font-family="Arial, sans-serif" font-size="12" fill="#111" font-weight="700" text-anchor="middle">Línea de pedido</text>
-					
-						<line x1="400" y1="110" x2="645" y2="110" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="125" font-family="Arial, sans-serif" font-size="11" fill="#222">id</text>
-					
-
-						<line x1="400" y1="132" x2="645" y2="132" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="147" font-family="Arial, sans-serif" font-size="11" fill="#222">pedido</text>
-					
-
-						<line x1="400" y1="154" x2="645" y2="154" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="169" font-family="Arial, sans-serif" font-size="11" fill="#222">producto</text>
-					
-
-						<line x1="400" y1="176" x2="645" y2="176" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="191" font-family="Arial, sans-serif" font-size="11" fill="#222">referenciaColor</text>
-					
-
-						<line x1="400" y1="198" x2="645" y2="198" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="213" font-family="Arial, sans-serif" font-size="11" fill="#222">cantidad</text>
-					
-
-						<line x1="400" y1="220" x2="645" y2="220" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="235" font-family="Arial, sans-serif" font-size="11" fill="#222">precio</text>
-					
-				</g>
-			
-
-				<g>
-					<rect x="730" y="80" width="245" height="100" fill="#ffffff" stroke="#333333" stroke-width="1.2"/>
-					<rect x="730" y="80" width="245" height="30" fill="#f5f5f5" stroke="#333333" stroke-width="1.2"/>
-					<text x="852.5" y="100" font-family="Arial, sans-serif" font-size="12" fill="#111" font-weight="700" text-anchor="middle">Estado de pedido</text>
-					
-						<line x1="730" y1="110" x2="975" y2="110" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="125" font-family="Arial, sans-serif" font-size="11" fill="#222">id</text>
-					
-
-						<line x1="730" y1="132" x2="975" y2="132" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="147" font-family="Arial, sans-serif" font-size="11" fill="#222">codigo</text>
-					
-
-						<line x1="730" y1="154" x2="975" y2="154" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="169" font-family="Arial, sans-serif" font-size="11" fill="#222">nombre</text>
-					
-				</g>
-			
-
-				<g>
-					<rect x="70" y="380" width="245" height="100" fill="#ffffff" stroke="#333333" stroke-width="1.2"/>
-					<rect x="70" y="380" width="245" height="30" fill="#f5f5f5" stroke="#333333" stroke-width="1.2"/>
-					<text x="192.5" y="400" font-family="Arial, sans-serif" font-size="12" fill="#111" font-weight="700" text-anchor="middle">Estado de cobro</text>
-					
-						<line x1="70" y1="410" x2="315" y2="410" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="425" font-family="Arial, sans-serif" font-size="11" fill="#222">id</text>
-					
-
-						<line x1="70" y1="432" x2="315" y2="432" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="447" font-family="Arial, sans-serif" font-size="11" fill="#222">codigo</text>
-					
-
-						<line x1="70" y1="454" x2="315" y2="454" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="469" font-family="Arial, sans-serif" font-size="11" fill="#222">nombre</text>
-					
-				</g>
-			
-
-				<g>
-					<rect x="400" y="380" width="245" height="166" fill="#ffffff" stroke="#333333" stroke-width="1.2"/>
-					<rect x="400" y="380" width="245" height="30" fill="#f5f5f5" stroke="#333333" stroke-width="1.2"/>
-					<text x="522.5" y="400" font-family="Arial, sans-serif" font-size="12" fill="#111" font-weight="700" text-anchor="middle">Visita comercial (M2)</text>
-					
-						<line x1="400" y1="410" x2="645" y2="410" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="425" font-family="Arial, sans-serif" font-size="11" fill="#222">id</text>
-					
-
-						<line x1="400" y1="432" x2="645" y2="432" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="447" font-family="Arial, sans-serif" font-size="11" fill="#222">cliente</text>
-					
-
-						<line x1="400" y1="454" x2="645" y2="454" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="469" font-family="Arial, sans-serif" font-size="11" fill="#222">comercial</text>
-					
-
-						<line x1="400" y1="476" x2="645" y2="476" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="491" font-family="Arial, sans-serif" font-size="11" fill="#222">tipo</text>
-					
-
-						<line x1="400" y1="498" x2="645" y2="498" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="513" font-family="Arial, sans-serif" font-size="11" fill="#222">estado</text>
-					
-
-						<line x1="400" y1="520" x2="645" y2="520" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="535" font-family="Arial, sans-serif" font-size="11" fill="#222">fechaPlanificada</text>
-					
-				</g>
-			
-
-				<g>
-					<rect x="730" y="380" width="245" height="122" fill="#ffffff" stroke="#333333" stroke-width="1.2"/>
-					<rect x="730" y="380" width="245" height="30" fill="#f5f5f5" stroke="#333333" stroke-width="1.2"/>
-					<text x="852.5" y="400" font-family="Arial, sans-serif" font-size="12" fill="#111" font-weight="700" text-anchor="middle">Cliente profesional (M2)</text>
-					
-						<line x1="730" y1="410" x2="975" y2="410" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="425" font-family="Arial, sans-serif" font-size="11" fill="#222">id</text>
-					
-
-						<line x1="730" y1="432" x2="975" y2="432" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="447" font-family="Arial, sans-serif" font-size="11" fill="#222">nombre</text>
-					
-
-						<line x1="730" y1="454" x2="975" y2="454" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="469" font-family="Arial, sans-serif" font-size="11" fill="#222">direccion</text>
-					
-
-						<line x1="730" y1="476" x2="975" y2="476" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="491" font-family="Arial, sans-serif" font-size="11" fill="#222">geolocalizacion</text>
-					
-				</g>
-			
-
-				<g>
-					<rect x="70" y="680" width="245" height="100" fill="#ffffff" stroke="#333333" stroke-width="1.2"/>
-					<rect x="70" y="680" width="245" height="30" fill="#f5f5f5" stroke="#333333" stroke-width="1.2"/>
-					<text x="192.5" y="700" font-family="Arial, sans-serif" font-size="12" fill="#111" font-weight="700" text-anchor="middle">Comercial (M2)</text>
-					
-						<line x1="70" y1="710" x2="315" y2="710" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="725" font-family="Arial, sans-serif" font-size="11" fill="#222">id</text>
-					
-
-						<line x1="70" y1="732" x2="315" y2="732" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="747" font-family="Arial, sans-serif" font-size="11" fill="#222">usuario</text>
-					
-
-						<line x1="70" y1="754" x2="315" y2="754" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="78" y="769" font-family="Arial, sans-serif" font-size="11" fill="#222">zona</text>
-					
-				</g>
-			
-
-				<g>
-					<rect x="400" y="680" width="245" height="122" fill="#ffffff" stroke="#333333" stroke-width="1.2"/>
-					<rect x="400" y="680" width="245" height="30" fill="#f5f5f5" stroke="#333333" stroke-width="1.2"/>
-					<text x="522.5" y="700" font-family="Arial, sans-serif" font-size="12" fill="#111" font-weight="700" text-anchor="middle">Producto (M3)</text>
-					
-						<line x1="400" y1="710" x2="645" y2="710" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="725" font-family="Arial, sans-serif" font-size="11" fill="#222">id</text>
-					
-
-						<line x1="400" y1="732" x2="645" y2="732" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="747" font-family="Arial, sans-serif" font-size="11" fill="#222">nombre</text>
-					
-
-						<line x1="400" y1="754" x2="645" y2="754" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="769" font-family="Arial, sans-serif" font-size="11" fill="#222">referencia</text>
-					
-
-						<line x1="400" y1="776" x2="645" y2="776" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="408" y="791" font-family="Arial, sans-serif" font-size="11" fill="#222">estado</text>
-					
-				</g>
-			
-
-				<g>
-					<rect x="730" y="680" width="245" height="122" fill="#ffffff" stroke="#333333" stroke-width="1.2"/>
-					<rect x="730" y="680" width="245" height="30" fill="#f5f5f5" stroke="#333333" stroke-width="1.2"/>
-					<text x="852.5" y="700" font-family="Arial, sans-serif" font-size="12" fill="#111" font-weight="700" text-anchor="middle">Referencia de color (M3)</text>
-					
-						<line x1="730" y1="710" x2="975" y2="710" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="725" font-family="Arial, sans-serif" font-size="11" fill="#222">id</text>
-					
-
-						<line x1="730" y1="732" x2="975" y2="732" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="747" font-family="Arial, sans-serif" font-size="11" fill="#222">codigo</text>
-					
-
-						<line x1="730" y1="754" x2="975" y2="754" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="769" font-family="Arial, sans-serif" font-size="11" fill="#222">nombre</text>
-					
-
-						<line x1="730" y1="776" x2="975" y2="776" stroke="#d5d5d5" stroke-width="1"/>
-						<text x="738" y="791" font-family="Arial, sans-serif" font-size="11" fill="#222">carta</text>
-					
-				</g>
-			
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080"><style>.h1{font:700 30px Arial,sans-serif;fill:#111827}.subtitle{font:400 15px Arial,sans-serif;fill:#475569}.title{font:700 15px Arial,sans-serif}.row{font:400 13px Arial,sans-serif;fill:#1f2937}.rel{font:700 12px Arial,sans-serif;fill:#334155;paint-order:stroke;stroke:#fff;stroke-width:4px}.uc{font:700 15px Arial,sans-serif;fill:#111827}.actor{font:700 17px Arial,sans-serif;fill:#111827}</style><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker></defs><rect width="1600" height="1080" fill="#fff"/><text x="70" y="62" class="h1">M4 - Pedidos, repartos y pagos</text><text x="70" y="90" class="subtitle">Modelo conceptual actualizado: pedido como cabecera comercial, reparto como unidad logistica y pago como historial economico.</text>
+<g><rect x="590" y="135" width="340" height="241" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="590" y="135" width="340" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="590" y="164" width="340" height="5" fill="#f1f5f9"/><text x="760" y="157" class="title" fill="#334155" text-anchor="middle">Pedido</text><rect x="590" y="169" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="185" class="row">id</text><rect x="590" y="192" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="208" class="row">cliente</text><rect x="590" y="215" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="231" class="row">comercial</text><rect x="590" y="238" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="254" class="row">estado</text><rect x="590" y="261" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="277" class="row">estadoCobro</text><rect x="590" y="284" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="300" class="row">importeTotal</text><rect x="590" y="307" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="323" class="row">metodoEntrega</text><rect x="590" y="330" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="346" class="row">cargoAgencia</text><rect x="590" y="353" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="369" class="row">notas</text></g>
+<g><rect x="75" y="135" width="300" height="126" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="75" y="135" width="300" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="75" y="164" width="300" height="5" fill="#f1f5f9"/><text x="225" y="157" class="title" fill="#334155" text-anchor="middle">Cliente profesional (M2)</text><rect x="75" y="169" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="185" class="row">id</text><rect x="75" y="192" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="208" class="row">nombre</text><rect x="75" y="215" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="231" class="row">direccion</text><rect x="75" y="238" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="254" class="row">geolocalizacion</text></g>
+<g><rect x="75" y="355" width="300" height="126" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="75" y="355" width="300" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="75" y="384" width="300" height="5" fill="#f1f5f9"/><text x="225" y="377" class="title" fill="#334155" text-anchor="middle">Comercial (M2)</text><rect x="75" y="389" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="405" class="row">id</text><rect x="75" y="412" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="428" class="row">usuario</text><rect x="75" y="435" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="451" class="row">zona</text><rect x="75" y="458" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="474" class="row">telefono</text></g>
+<g><rect x="1080" y="135" width="300" height="103" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="1080" y="135" width="300" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="1080" y="164" width="300" height="5" fill="#f1f5f9"/><text x="1230" y="157" class="title" fill="#334155" text-anchor="middle">Estado de pedido</text><rect x="1080" y="169" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="185" class="row">id</text><rect x="1080" y="192" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="208" class="row">codigo</text><rect x="1080" y="215" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="231" class="row">nombre</text></g>
+<g><rect x="1080" y="335" width="300" height="103" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="1080" y="335" width="300" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="1080" y="364" width="300" height="5" fill="#f1f5f9"/><text x="1230" y="357" class="title" fill="#334155" text-anchor="middle">Estado de cobro</text><rect x="1080" y="369" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="385" class="row">id</text><rect x="1080" y="392" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="408" class="row">codigo</text><rect x="1080" y="415" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="431" class="row">nombre</text></g>
+<g><rect x="590" y="430" width="340" height="218" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="590" y="430" width="340" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="590" y="459" width="340" height="5" fill="#f1f5f9"/><text x="760" y="452" class="title" fill="#334155" text-anchor="middle">Linea de pedido</text><rect x="590" y="464" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="480" class="row">id</text><rect x="590" y="487" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="503" class="row">pedido</text><rect x="590" y="510" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="526" class="row">producto</text><rect x="590" y="533" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="549" class="row">referenciaColor</text><rect x="590" y="556" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="572" class="row">cantidad</text><rect x="590" y="579" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="595" class="row">precio</text><rect x="590" y="602" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="618" class="row">descuento</text><rect x="590" y="625" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="641" class="row">totalLinea</text></g>
+<g><rect x="75" y="655" width="300" height="126" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="75" y="655" width="300" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="75" y="684" width="300" height="5" fill="#f1f5f9"/><text x="225" y="677" class="title" fill="#334155" text-anchor="middle">Producto (M3)</text><rect x="75" y="689" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="705" class="row">id</text><rect x="75" y="712" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="728" class="row">nombre</text><rect x="75" y="735" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="751" class="row">referencia</text><rect x="75" y="758" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="774" class="row">estado</text></g>
+<g><rect x="420" y="655" width="300" height="126" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="420" y="655" width="300" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="420" y="684" width="300" height="5" fill="#f1f5f9"/><text x="570" y="677" class="title" fill="#334155" text-anchor="middle">Referencia de color (M3)</text><rect x="420" y="689" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="430" y="705" class="row">id</text><rect x="420" y="712" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="430" y="728" class="row">codigo</text><rect x="420" y="735" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="430" y="751" class="row">nombre</text><rect x="420" y="758" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="430" y="774" class="row">carta</text></g>
+<g><rect x="1080" y="535" width="320" height="218" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="1080" y="535" width="320" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="1080" y="564" width="320" height="5" fill="#f1f5f9"/><text x="1240" y="557" class="title" fill="#334155" text-anchor="middle">Reparto de pedido</text><rect x="1080" y="569" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="585" class="row">id</text><rect x="1080" y="592" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="608" class="row">pedido</text><rect x="1080" y="615" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="631" class="row">comercial</text><rect x="1080" y="638" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="654" class="row">visitaReparto</text><rect x="1080" y="661" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="677" class="row">estado</text><rect x="1080" y="684" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="700" class="row">metodoEntrega</text><rect x="1080" y="707" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="723" class="row">bultos</text><rect x="1080" y="730" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="746" class="row">fechaEntrega</text></g>
+<g><rect x="590" y="790" width="340" height="126" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="590" y="790" width="340" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="590" y="819" width="340" height="5" fill="#f1f5f9"/><text x="760" y="812" class="title" fill="#334155" text-anchor="middle">Linea de reparto</text><rect x="590" y="824" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="840" class="row">id</text><rect x="590" y="847" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="863" class="row">reparto</text><rect x="590" y="870" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="886" class="row">lineaPedido</text><rect x="590" y="893" width="340" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="600" y="909" class="row">cantidadServida</text></g>
+<g><rect x="1080" y="835" width="320" height="172" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="1080" y="835" width="320" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="1080" y="864" width="320" height="5" fill="#f1f5f9"/><text x="1240" y="857" class="title" fill="#334155" text-anchor="middle">Pago de pedido</text><rect x="1080" y="869" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="885" class="row">id</text><rect x="1080" y="892" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="908" class="row">pedido</text><rect x="1080" y="915" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="931" class="row">importe</text><rect x="1080" y="938" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="954" class="row">metodo</text><rect x="1080" y="961" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="977" class="row">fechaPago</text><rect x="1080" y="984" width="320" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1090" y="1000" class="row">usuarioRegistro</text></g>
+<g><rect x="75" y="850" width="300" height="195" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="75" y="850" width="300" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="75" y="879" width="300" height="5" fill="#f1f5f9"/><text x="225" y="872" class="title" fill="#334155" text-anchor="middle">Visita comercial (M2)</text><rect x="75" y="884" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="900" class="row">id</text><rect x="75" y="907" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="923" class="row">cliente</text><rect x="75" y="930" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="946" class="row">comercial</text><rect x="75" y="953" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="969" class="row">tipo</text><rect x="75" y="976" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="992" class="row">estado</text><rect x="75" y="999" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="1015" class="row">llegada</text><rect x="75" y="1022" width="300" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="85" y="1038" class="row">salida</text></g>
+<g><rect x="1425" y="535" width="140" height="57" rx="5" fill="#fff" stroke="#475569" stroke-width="2"/><rect x="1425" y="535" width="140" height="34" rx="5" fill="#f1f5f9" stroke="#475569" stroke-width="2"/><rect x="1425" y="564" width="140" height="5" fill="#f1f5f9"/><text x="1495" y="557" class="title" fill="#334155" text-anchor="middle">Config. M7</text><rect x="1425" y="569" width="140" height="23" fill="#fff" stroke="#d7dde5" stroke-width="1"/><text x="1435" y="585" class="row">cargoAgencia</text></g>
+<path d="M 590 205 L 375 205" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="375" y="198" class="rel" text-anchor="middle">N:1</text>
+<path d="M 590 292 L 375 405" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="375" y="398" class="rel" text-anchor="middle">N:1</text>
+<path d="M 930 205 L 1080 205" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="1080" y="198" class="rel" text-anchor="middle">N:1</text>
+<path d="M 930 292 L 1080 390" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="1080" y="383" class="rel" text-anchor="middle">N:1</text>
+<path d="M 760 342 L 760 430" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="760" y="423" class="rel" text-anchor="middle">1:N</text>
+<path d="M 930 292 L 1080 585" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="1080" y="578" class="rel" text-anchor="middle">1:N</text>
+<path d="M 930 315 L 1080 900" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="1080" y="893" class="rel" text-anchor="middle">1:N</text>
+<path d="M 930 625 L 1080 625" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="1080" y="618" class="rel" text-anchor="middle">N:1</text>
+<path d="M 760 614 L 275 655" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="275" y="648" class="rel" text-anchor="middle">N:1</text>
+<path d="M 760 637 L 570 655" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="570" y="648" class="rel" text-anchor="middle">N:1</text>
+<path d="M 1240 719 L 1240 835" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="1240" y="828" class="rel" text-anchor="middle">1:N</text>
+<path d="M 1080 650 L 930 840 L 930 845" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="930" y="833" class="rel" text-anchor="middle">1:N</text>
+<path d="M 590 850 L 375 900" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="375" y="893" class="rel" text-anchor="middle">N:1</text>
+<path d="M 1400 620 L 1425 585" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><text x="1425" y="578" class="rel" text-anchor="middle">usa</text>
 </svg>

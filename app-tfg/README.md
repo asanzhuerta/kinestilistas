@@ -16,6 +16,13 @@ Aplicación principal de Kinestilistas. Esta carpeta contiene el producto softwa
 - `public/`: imágenes, iconos, fondos y manifest PWA.
 - `scripts/`: scripts de smoke test, carga de imágenes y tareas auxiliares.
 
+## Estado funcional destacado
+
+- `M3` incorpora una consulta de coloración en tres modos: filas por tono principal, cartas desplegables y listado completo de tonos.
+- `M4` diferencia pedido y reparto: un pedido confirmado puede prepararse en uno o varios repartos con bultos manuales, etiqueta propia y validación de entrega por QR.
+- `M4` registra pagos parciales en una tabla propia para conservar historial de cobros y saldo pendiente.
+- `M4/M7` permite elegir entrega por comercial o por agencia; la agencia añade un cargo configurable desde administración y genera una etiqueta diferenciada.
+
 ## Archivos de entrada relevantes
 
 - `auth.ts`: configuración de Auth.js, credenciales, sesiones y trazabilidad de acceso.
