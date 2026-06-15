@@ -34,9 +34,9 @@ const DEFAULT_CLIENT_TIER_POLICY: ClientTierPolicySettings = {
 };
 
 const CONFIG_DESCRIPTIONS: Record<keyof typeof CONFIG_KEYS, string> = {
-	thresholdSilver: "Compra acumulada minima para rango Plata.",
-	thresholdGold: "Compra acumulada minima para rango Oro.",
-	thresholdPlatinum: "Compra acumulada minima para rango Platino.",
+	thresholdSilver: "Compra acumulada mínima para rango Plata.",
+	thresholdGold: "Compra acumulada mínima para rango Oro.",
+	thresholdPlatinum: "Compra acumulada mínima para rango Platino.",
 	recalculationFrequency: "Frecuencia de actualización automática de rangos.",
 	recalculationMonth: "Mes programado para recalcular rangos anualmente.",
 	recalculationDay: "Dia programado para recalcular rangos.",

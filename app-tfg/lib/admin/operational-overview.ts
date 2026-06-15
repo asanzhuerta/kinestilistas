@@ -146,7 +146,7 @@ export async function getAdminOperationalOverview(
 		buildSection(
 			{
 				slug: "rate-limit-settings",
-				title: "Rate limiting global",
+				title: "Limitación global de peticiones",
 				href: "/admin/settings",
 				status:
 					rateLimitPolicies.length === 0
@@ -155,7 +155,7 @@ export async function getAdminOperationalOverview(
 							? "warning"
 							: "ready",
 				description:
-					"Políticas persistidas que protegen login y API frente a abuso operativo sin redesplegar la aplicación.",
+					"Políticas persistidas que protegen el inicio de sesión y la API frente a abuso operativo sin redesplegar la aplicación.",
 				metrics: [
 					{
 						label: "Políticas",

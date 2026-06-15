@@ -153,7 +153,7 @@ export class M7EnterpriseOperations1780610683713 implements MigrationInterface {
 				(
 					'Cloudinary',
 					'storage',
-					'Almacenamiento de imagenes de perfil, catálogo y resultados técnicos.',
+					'Almacenamiento de imágenes de perfil, catálogo y resultados técnicos.',
 					'operational',
 					'{"provider":"Cloudinary","scope":"media"}'::jsonb
 				),

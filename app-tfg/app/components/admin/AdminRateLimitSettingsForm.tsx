@@ -92,7 +92,7 @@ export default function AdminRateLimitSettingsForm() {
 						method: "GET",
 						cache: "no-store",
 						fallbackMessage:
-							"No se pudo cargar la configuración de rate limiting",
+							"No se pudo cargar la configuración de límites de peticiones",
 					},
 				);
 
@@ -107,7 +107,7 @@ export default function AdminRateLimitSettingsForm() {
 					setError(
 						requestError instanceof Error
 							? requestError.message
-							: "No se pudo cargar la configuración de rate limiting",
+							: "No se pudo cargar la configuración de límites de peticiones",
 					);
 				}
 			} finally {
@@ -175,18 +175,18 @@ export default function AdminRateLimitSettingsForm() {
 					},
 					body: JSON.stringify(payload),
 					fallbackMessage:
-						"No se pudo guardar la configuración de rate limiting",
+						"No se pudo guardar la configuración de límites de peticiones",
 				},
 			);
 
 			setPolicies(nextPolicies);
 			setDraftPolicies(nextPolicies.map(mapPolicyToDraft));
-			setSuccess("Configuración de rate limiting guardada correctamente.");
+			setSuccess("Configuración de límites de peticiones guardada correctamente.");
 		} catch (requestError) {
 			setError(
 				requestError instanceof Error
 					? requestError.message
-					: "No se pudo guardar la configuración de rate limiting",
+					: "No se pudo guardar la configuración de límites de peticiones",
 			);
 		} finally {
 			setSaving(false);
@@ -248,7 +248,7 @@ export default function AdminRateLimitSettingsForm() {
 				{loading ? (
 					<section className="glass-card rounded-3xl border border-white/30 bg-white/75 p-6 shadow-xl backdrop-blur">
 						<p className="text-sm text-slate-600">
-							Cargando configuración de rate limiting...
+							Cargando configuración de límites de peticiones...
 						</p>
 					</section>
 				) : null}
@@ -315,7 +315,7 @@ export default function AdminRateLimitSettingsForm() {
 													<span className="block font-medium text-slate-900">
 														Política activa
 													</span>
-													Si la desactivas, no se aplica ningun bloqueo para
+													Si la desactivas, no se aplica ningún bloqueo para
 													este caso.
 												</span>
 											</label>

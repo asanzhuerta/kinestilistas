@@ -131,11 +131,12 @@ export default function AdminClientTierPolicySettingsForm({
 				</div>
 
 				<div className="grid gap-3 md:grid-cols-3">
-					<label className="block">
+					<label htmlFor="client-tier-threshold-silver" className="block">
 						<span className="mb-2 block text-sm font-semibold text-slate-700">
 							Umbral Plata
 						</span>
 						<input
+							id="client-tier-threshold-silver"
 							type="number"
 							min="0"
 							step="0.01"
@@ -146,11 +147,12 @@ export default function AdminClientTierPolicySettingsForm({
 							className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 						/>
 					</label>
-					<label className="block">
+					<label htmlFor="client-tier-threshold-gold" className="block">
 						<span className="mb-2 block text-sm font-semibold text-slate-700">
 							Umbral Oro
 						</span>
 						<input
+							id="client-tier-threshold-gold"
 							type="number"
 							min="0"
 							step="0.01"
@@ -161,11 +163,12 @@ export default function AdminClientTierPolicySettingsForm({
 							className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 						/>
 					</label>
-					<label className="block">
+					<label htmlFor="client-tier-threshold-platinum" className="block">
 						<span className="mb-2 block text-sm font-semibold text-slate-700">
 							Umbral Platino
 						</span>
 						<input
+							id="client-tier-threshold-platinum"
 							type="number"
 							min="0"
 							step="0.01"
@@ -179,11 +182,12 @@ export default function AdminClientTierPolicySettingsForm({
 				</div>
 
 				<div className="grid gap-3 md:grid-cols-3">
-					<label className="block">
+					<label htmlFor="client-tier-frequency" className="block">
 						<span className="mb-2 block text-sm font-semibold text-slate-700">
 							Periodicidad
 						</span>
 						<select
+							id="client-tier-frequency"
 							value={settings.recalculationFrequency}
 							onChange={(event) =>
 								updateField(
@@ -197,11 +201,12 @@ export default function AdminClientTierPolicySettingsForm({
 							<option value="monthly">Mensual</option>
 						</select>
 					</label>
-					<label className="block">
+					<label htmlFor="client-tier-recalculation-month" className="block">
 						<span className="mb-2 block text-sm font-semibold text-slate-700">
 							Mes
 						</span>
 						<input
+							id="client-tier-recalculation-month"
 							type="number"
 							min="1"
 							max="12"
@@ -213,11 +218,12 @@ export default function AdminClientTierPolicySettingsForm({
 							className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition disabled:bg-slate-100 disabled:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 						/>
 					</label>
-					<label className="block">
+					<label htmlFor="client-tier-recalculation-day" className="block">
 						<span className="mb-2 block text-sm font-semibold text-slate-700">
 							Día
 						</span>
 						<input
+							id="client-tier-recalculation-day"
 							type="number"
 							min="1"
 							max="31"

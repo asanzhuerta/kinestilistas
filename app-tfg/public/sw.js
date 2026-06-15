@@ -102,7 +102,7 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("push", (event) => {
   const fallbackPayload = {
     title: "Nuevo aviso",
-    body: "Tienes una nueva notificacion en Kinestilistas.",
+    body: "Tienes una nueva notificación en Kinestilistas.",
     url: "/profile",
   };
   let payload = fallbackPayload;

@@ -135,7 +135,7 @@ export const RATE_LIMIT_POLICY_DESCRIPTORS: Record<
 	DEFAULT_API: {
 		title: "API general",
 		description:
-			"Límite base para rutas API comunes que no tienen una política mas específica.",
+			"Límite base para rutas API comunes que no tienen una política más específica.",
 	},
 	AUTH_API: {
 		title: "Autenticación API",
@@ -148,22 +148,22 @@ export const RATE_LIMIT_POLICY_DESCRIPTORS: Record<
 			"Reduce el abuso del formulario de alta de clientes desde la pantalla pública.",
 	},
 	ADMIN_GENERIC_READ: {
-		title: "Admin lectura",
+		title: "Lectura de administración",
 		description:
 			"Controla las consultas GET de administración fuera del módulo de usuarios.",
 	},
 	ADMIN_GENERIC_WRITE: {
-		title: "Admin escritura",
+		title: "Escritura de administración",
 		description:
 			"Controla altas, cambios y acciones mutables del panel de administración.",
 	},
 	ADMIN_USERS_READ: {
-		title: "Admin usuarios lectura",
+		title: "Lectura de usuarios en administración",
 		description:
 			"Limita el acceso frecuente al listado y detalle de usuarios desde administración.",
 	},
 	ADMIN_USERS_WRITE: {
-		title: "Admin usuarios escritura",
+		title: "Escritura de usuarios en administración",
 		description:
 			"Limita cambios de usuarios, estados, roles y operaciones sensibles relacionadas.",
 	},
@@ -173,12 +173,12 @@ export const RATE_LIMIT_POLICY_DESCRIPTORS: Record<
 			"Evita abusos al subir imágenes de perfil repetidamente en un corto intervalo.",
 	},
 	LOGIN_IP: {
-		title: "Login por IP",
+		title: "Inicio de sesión por IP",
 		description:
 			"Bloquea ataques de fuerza bruta repetidos desde una misma IP.",
 	},
 	LOGIN_IDENTIFIER: {
-		title: "Login por cuenta",
+		title: "Inicio de sesión por cuenta",
 		description:
 			"Bloquea intentos repetidos contra un mismo correo, usuario o teléfono.",
 	},

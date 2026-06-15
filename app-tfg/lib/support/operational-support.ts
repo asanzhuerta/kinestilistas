@@ -113,7 +113,7 @@ export function listSupportCapabilityItems(now = new Date()) {
 						value: MINIMUM_BROWSER_SUPPORT.join(", "),
 					},
 					{
-						label: "Ubicacion",
+						label: "Ubicación",
 						value: "proxy.ts",
 					},
 				],
@@ -214,8 +214,8 @@ export function listSupportCapabilityItems(now = new Date()) {
 						value: "app/components/forms/SafeForm.tsx",
 					},
 					{
-						label: "Ambito",
-						value: "Login, registro y formularios internos",
+						label: "Ámbito",
+						value: "Inicio de sesión, registro y formularios internos",
 					},
 				],
 			},

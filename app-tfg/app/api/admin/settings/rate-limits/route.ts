@@ -34,7 +34,7 @@ export async function GET() {
 		console.error("[admin/settings/rate-limits][GET] error:", error);
 		return jsonFromError(
 			error,
-			"Error al obtener la configuración de rate limiting",
+			"Error al obtener la configuración de límites de peticiones",
 		);
 	}
 }
@@ -61,7 +61,7 @@ export async function PUT(request: Request) {
 		console.error("[admin/settings/rate-limits][PUT] error:", error);
 		return jsonFromError(
 			error,
-			"Error al guardar la configuración de rate limiting",
+			"Error al guardar la configuración de límites de peticiones",
 		);
 	}
 }

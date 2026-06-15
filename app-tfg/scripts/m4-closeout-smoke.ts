@@ -225,7 +225,7 @@ async function main() {
 				lines: templateLines,
 			},
 		);
-		const orderId = createdOrder.id;
+		let orderId = createdOrder.id;
 		createdOrderIds.push(orderId);
 
 		await updateOrderStatusForCommercialUser(candidate.commercialUserId, {
@@ -237,7 +237,7 @@ async function main() {
 		assertCondition(
 			estimateWithoutVisit.status === "no_delivery_today" &&
 				estimateWithoutVisit.estimatedArrivalTime === null,
-			"La ETA del cliente no debería aparecer si el pedido confirmado aún no esta vinculado a un reparto real",
+			"La ETA del cliente no debería aparecer si el pedido confirmado aún no está vinculado a un reparto real",
 		);
 		console.log(
 			`PASS ETA oculta sin reparto vinculado (${candidate.clientName})`,
@@ -301,8 +301,53 @@ async function main() {
 		);
 		console.log("PASS aplazamiento coherente con pedido enlazado y ETA anulada");
 
+		await expectFailure(
+			"visita aplazada bloquea modificaciones",
+			() =>
+				updateCommercialVisit({
+					visitId,
+					commercialId: candidate.commercialUserId,
+					statusId: COMMERCIAL_VISIT_STATUS_IDS.CANCELLED,
+				}),
+			(error) =>
+				error instanceof Error &&
+				String(error.message).includes("visita está aplazada"),
+			"Se ha permitido modificar una visita aplazada",
+		);
+
+		await cleanupTemporaryData([orderId], [visitId]);
+		createdOrderIds.splice(createdOrderIds.indexOf(orderId), 1);
+		createdVisitIds.splice(createdVisitIds.indexOf(visitId), 1);
+
+		const replacementOrder = await createOrderForCommercialUser(
+			candidate.commercialUserId,
+			{
+				clientId: candidate.clientId,
+				notes: `${tag} cancellation baseline`,
+				lines: templateLines,
+			},
+		);
+		orderId = replacementOrder.id;
+		createdOrderIds.push(orderId);
+
+		await updateOrderStatusForCommercialUser(candidate.commercialUserId, {
+			orderId,
+			statusId: ORDER_STATUS_IDS.CONFIRMED,
+		});
+
+		const cancellationVisit = await createCommercialVisit({
+			clientId: candidate.clientId,
+			commercialId: candidate.commercialUserId,
+			scheduledForDate: today,
+			visitTypeId: COMMERCIAL_VISIT_TYPE_IDS.DELIVERY,
+			notes: `${tag} cancellation baseline`,
+			orderIds: [orderId],
+		});
+		const cancellationVisitId = cancellationVisit.id;
+		createdVisitIds.push(cancellationVisitId);
+
 		await updateCommercialVisit({
-			visitId,
+			visitId: cancellationVisitId,
 			commercialId: candidate.commercialUserId,
 			statusId: COMMERCIAL_VISIT_STATUS_IDS.CANCELLED,
 		});
@@ -498,7 +543,7 @@ async function main() {
 			remainingLinkedOrders === 0,
 			"La visita cancelada no debería conservar pedidos enlazados",
 		);
-		console.log("PASS cancelación explicita de pedido coherente");
+		console.log("PASS cancelación explícita de pedido coherente");
 		console.log(
 			"PASS cancelación de pedido vinculado sin dejar reparto activo huerfano",
 		);
@@ -512,7 +557,7 @@ async function main() {
 		console.log(
 			`PASS resumen final visible para ${candidate.clientName} con estado cancelado`,
 		);
-		console.log("OK M4 closeout smoke: 12/12 comprobaciones superadas");
+		console.log("OK M4 closeout smoke: 13/13 comprobaciones superadas");
 	} finally {
 		await cleanupTemporaryData(createdOrderIds, createdVisitIds);
 		const ds = await getDataSource();

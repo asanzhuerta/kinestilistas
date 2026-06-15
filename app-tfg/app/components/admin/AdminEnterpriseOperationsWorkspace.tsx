@@ -46,22 +46,26 @@ const proposalStatusStyles: Record<SupplierOrderProposalStatus, string> = {
 	archived: "border-slate-200 bg-slate-100 text-slate-600",
 };
 
+const enterpriseDateTimeFormatter = new Intl.DateTimeFormat("es-ES", {
+	dateStyle: "short",
+	timeStyle: "short",
+});
+
+const enterpriseMoneyFormatter = new Intl.NumberFormat("es-ES", {
+	style: "currency",
+	currency: "EUR",
+});
+
 function formatDateTime(value: string | null) {
 	if (!value) {
 		return "Sin registros";
 	}
 
-	return new Intl.DateTimeFormat("es-ES", {
-		dateStyle: "short",
-		timeStyle: "short",
-	}).format(new Date(value));
+	return enterpriseDateTimeFormatter.format(new Date(value));
 }
 
 function formatMoney(value: number) {
-	return new Intl.NumberFormat("es-ES", {
-		style: "currency",
-		currency: "EUR",
-	}).format(value);
+	return enterpriseMoneyFormatter.format(value);
 }
 
 function selectedValues(select: HTMLSelectElement) {
@@ -290,7 +294,7 @@ export default function AdminEnterpriseOperationsWorkspace({
 										className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400"
 									>
 										<option value="export">Exportación</option>
-										<option value="import">Importacion</option>
+										<option value="import">Importación</option>
 										<option value="sync">Sincronización</option>
 										<option value="webhook">Webhook</option>
 										<option value="manual">Manual</option>

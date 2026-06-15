@@ -162,7 +162,7 @@ function getIntegrationStatusLabel(status: ExternalIntegrationStatus) {
 
 function getOperationTypeLabel(type: IntegrationOperationType) {
 	const labels: Record<IntegrationOperationType, string> = {
-		import: "Importacion",
+		import: "Importación",
 		export: "Exportación",
 		sync: "Sincronización",
 		webhook: "Webhook",

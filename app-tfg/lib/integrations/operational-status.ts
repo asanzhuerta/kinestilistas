@@ -82,19 +82,19 @@ export function listIntegrationStatusItems(now = new Date()) {
 				operationalUse:
 					"Usado por M1 para perfil, M3 para catálogo/coloración y M5 para imágenes finales de servicios.",
 				fallbackBehavior:
-					"Si las credenciales no estan completas se mantienen las imágenes ya guardadas, pero las rutas de subida no pueden completar nuevas cargas.",
+					"Si las credenciales no están completas se mantienen las imágenes ya guardadas, pero las rutas de subida no pueden completar nuevas cargas.",
 				configuration: [
 					{
-						label: "Cloud name",
+						label: "Nombre de nube",
 						value: envPresence("CLOUDINARY_CLOUD_NAME"),
 					},
 					{
-						label: "API key",
+						label: "Clave API",
 						value: envPresence("CLOUDINARY_API_KEY"),
 						sensitive: true,
 					},
 					{
-						label: "API secret",
+						label: "Secreto API",
 						value: envPresence("CLOUDINARY_API_SECRET"),
 						sensitive: true,
 					},
@@ -145,19 +145,19 @@ export function listIntegrationStatusItems(now = new Date()) {
 						value: geocodingProvider || "nominatim",
 					},
 					{
-						label: "Base URL",
+						label: "URL base",
 						value: geocodingBaseUrl,
 					},
 					{
-						label: "Pais",
+						label: "País",
 						value: envValue("GEOCODING_COUNTRY_NAME", "Espana"),
 					},
 					{
-						label: "Código pais",
+						label: "Código país",
 						value: envValue("GEOCODING_COUNTRY_CODE", "es"),
 					},
 					{
-						label: "Email contacto",
+						label: "Correo de contacto",
 						value: envPresence("GEOCODING_EMAIL"),
 						sensitive: true,
 					},
@@ -180,7 +180,7 @@ export function listIntegrationStatusItems(now = new Date()) {
 					"Si OSRM no responde, el mapa conserva los marcadores y la operativa comercial puede continuar sin trazado calculado.",
 				configuration: [
 					{
-						label: "Base URL",
+						label: "URL base",
 						value: osrmBaseUrl,
 					},
 					{

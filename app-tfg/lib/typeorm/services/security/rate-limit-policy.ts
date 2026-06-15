@@ -189,7 +189,7 @@ export async function updateRateLimitPolicySettings(
 
 	if (!(await hasRateLimitPoliciesTable())) {
 		throw new RateLimitPolicySettingsError(
-			"No existe la tabla de configuración de rate limiting. Ejecuta la migracion pendiente y vuelve a intentarlo.",
+			"No existe la tabla de configuración de límites de peticiones. Ejecuta la migración pendiente y vuelve a intentarlo.",
 			500,
 			"RATE_LIMIT_SETTINGS_TABLE_MISSING",
 		);
@@ -198,7 +198,7 @@ export async function updateRateLimitPolicySettings(
 	const normalizedPolicies = input.policies.map((policyInput) => {
 		if (!isValidRateLimitPolicyName(policyInput.name)) {
 			throw new RateLimitPolicySettingsError(
-				"Se ha recibido una política de rate limiting no valida",
+				"Se ha recibido una política de límites de peticiones no válida",
 				400,
 				"RATE_LIMIT_POLICY_INVALID_NAME",
 			);

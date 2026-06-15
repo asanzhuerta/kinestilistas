@@ -29,7 +29,7 @@ export async function GET() {
 		console.error("[admin/settings/rate-limits/status][GET] error:", error);
 		return jsonFromError(
 			error,
-			"Error al obtener el diagnóstico de rate limiting",
+			"Error al obtener el diagnóstico de límites de peticiones",
 		);
 	}
 }

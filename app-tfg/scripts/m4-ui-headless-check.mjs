@@ -518,7 +518,7 @@ summary.commercialOrdersPaymentSummary = await evaluate(
 			path: location.pathname,
 			hasPendingAndPaid: text.includes('pendientes de cobro') && text.includes('cobrados'),
 			hasOrderPaymentText:
-				text.includes('metodo de cobro') ||
+				text.includes('método de cobro') ||
 				text.includes('cobrado') ||
 				text.includes('pendiente')
 		};
@@ -587,7 +587,7 @@ summary.clientEtaCard = await evaluate(
 				text.includes('pendiente de ruta'),
 			hasEtaMessage:
 				text.includes('no hay reparto planificado para hoy en tu ficha.') ||
-				text.includes('tu pedido esta programado para hoy') ||
+				text.includes('tu pedido está programado para hoy') ||
 				text.includes('la ruta del dia sigue ajustandose')
 		};
 	})()`,
@@ -715,7 +715,7 @@ summary.authRedirect = await evaluate(
 			path: location.pathname,
 			redirectedToLogin:
 				location.pathname === '/login' &&
-				text.includes('iniciar sesion')
+				text.includes('iniciar sesión')
 		};
 	})()`,
 	true,
