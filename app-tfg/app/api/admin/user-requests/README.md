@@ -4,4 +4,4 @@ Endpoints de solicitudes de alta.
 
 ## Función
 
-Consultar, aprobar o rechazar solicitudes publicas de acceso.
+Consultar, aprobar o rechazar solicitudes públicas de acceso.

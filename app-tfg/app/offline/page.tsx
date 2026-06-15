@@ -30,7 +30,7 @@ export default function OfflinePage() {
 						href="/login"
 						className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/80 px-6 py-3 text-sm font-black uppercase tracking-[0.12em] text-slate-950 transition hover:bg-white"
 					>
-						Ir al login
+						Ir al inicio de sesión
 					</Link>
 				</div>
 			</section>

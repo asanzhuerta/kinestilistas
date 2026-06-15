@@ -12,8 +12,11 @@ type Props = {
 
 // Página de confirmación para la desactivacion de un usuario.
 export default async function RemoveUserPage({ params }: Props) {
-	const [session, { id }] = await Promise.all([requireAdminSession(), params]);
-	const user = await getUserById(id);
+	const { id } = await params;
+	const [session, user] = await Promise.all([
+		requireAdminSession(),
+		getUserById(id),
+	]);
 
 	if (!user) {
 		notFound();
@@ -30,7 +33,7 @@ export default async function RemoveUserPage({ params }: Props) {
 						Desactivar usuario
 					</h1>
 					<p className="mt-2 text-sm text-white/80">
-						Esta accion no elimina el usuario. Solo cambia su estado a{" "}
+						Esta acción no elimina el usuario. Solo cambia su estado a{" "}
 						<strong>inactivo</strong> para impedir su acceso al sistema.
 					</p>
 				</div>

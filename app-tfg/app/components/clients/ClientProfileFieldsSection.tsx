@@ -36,6 +36,36 @@ type TextFieldConfig = {
 	spanClass?: string;
 };
 
+const CLIENT_PROFILE_TEXT_FIELDS: TextFieldConfig[] = [
+	{
+		field: "client_name",
+		id: "client-name",
+		label: "Nombre del establecimiento",
+	},
+	{
+		field: "contact_name",
+		id: "client-contact-name",
+		label: "Persona de contacto",
+	},
+	{ field: "tax_id", id: "client-tax-id", label: "Identificador fiscal" },
+	{ field: "address", id: "client-address", label: "Dirección" },
+	{ field: "city", id: "client-city", label: "Ciudad" },
+	{ field: "postal_code", id: "client-postal-code", label: "Código postal" },
+	{ field: "province", id: "client-province", label: "Provincia / zona" },
+	{
+		field: "visit_window_start_time",
+		id: "client-visit-window-start",
+		label: "Inicio visitas",
+		type: "time",
+	},
+	{
+		field: "visit_window_end_time",
+		id: "client-visit-window-end",
+		label: "Fin visitas",
+		type: "time",
+	},
+];
+
 function formatCoordinate(value: string) {
 	return value || "-";
 }
@@ -67,35 +97,7 @@ export default function ClientProfileFieldsSection({
 		"mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400";
 	const labelClass =
 		"text-xs font-semibold uppercase tracking-wide text-slate-500";
-	const fields: TextFieldConfig[] = [
-		{
-			field: "client_name",
-			id: "client-name",
-			label: "Nombre del establecimiento",
-		},
-		{
-			field: "contact_name",
-			id: "client-contact-name",
-			label: "Persona de contacto",
-		},
-		{ field: "tax_id", id: "client-tax-id", label: "Identificador fiscal" },
-		{ field: "address", id: "client-address", label: "Dirección" },
-		{ field: "city", id: "client-city", label: "Ciudad" },
-		{ field: "postal_code", id: "client-postal-code", label: "Código postal" },
-		{ field: "province", id: "client-province", label: "Provincia / zona" },
-		{
-			field: "visit_window_start_time",
-			id: "client-visit-window-start",
-			label: "Inicio visitas",
-			type: "time",
-		},
-		{
-			field: "visit_window_end_time",
-			id: "client-visit-window-end",
-			label: "Fin visitas",
-			type: "time",
-		},
-	];
+	const fields = CLIENT_PROFILE_TEXT_FIELDS;
 
 	function renderField(config: TextFieldConfig) {
 		const value = String(formData[config.field] ?? "");

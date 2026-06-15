@@ -48,8 +48,10 @@ export type EntityTableItem = {
 	subtitle: string;
 	href?: string | null;
 	imageUrl?: string | null;
+	imageAlt?: string | null;
 	secondaryImageUrl?: string | null;
 	secondaryImageLabel?: string | null;
+	secondaryImageAlt?: string | null;
 	secondaryBadge?: EntityTableBadge | null;
 	category?: string | null;
 	status?: string | null;

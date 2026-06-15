@@ -115,7 +115,7 @@ export default function RequestsActions({
 				</h2>
 
 				<p className="mt-2 text-sm text-emerald-700">
-					Se creara el usuario definitivo en el sistema con los datos de esta
+					Se creará el usuario definitivo en el sistema con los datos de esta
 					solicitud.
 				</p>
 

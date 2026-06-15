@@ -9,22 +9,23 @@ type Props = {
 	settingsHref?: string | null;
 };
 
+async function handleLogout() {
+	try {
+		await fetch("/api/auth/logout", {
+			method: "POST",
+		});
+	} catch (error) {
+		console.error("[logout] error llamando a la API:", error);
+	}
+
+	await signOut({ redirect: false });
+	window.location.href = "/login";
+}
+
 export default function BottomNav(params: { props?: Props }) {
 	const { LandingPage, settingsHref } = params.props || {};
 	const landingPageUrl = LandingPage || "/";
 	const showSettings = Boolean(settingsHref);
-	const handleLogout = async () => {
-		try {
-			await fetch("/api/auth/logout", {
-				method: "POST",
-			});
-		} catch (error) {
-			console.error("[logout] error llamando a la API:", error);
-		}
-
-		await signOut({ redirect: false });
-		window.location.href = "/login";
-	};
 
 	return (
 		<footer className="glass-header fixed inset-x-0 bottom-0 z-50 border-t border-white/20 px-4 py-3 backdrop-blur-md">

@@ -22,7 +22,7 @@ type Props = {
 	config?: EntityTableConfig;
 };
 
-// Devuelve las clases visuales del boton según el tipo de accion.
+// Devuelve las clases visuales del botón según el tipo de acción.
 function getActionClasses(variant?: "primary" | "secondary" | "warning") {
 	if (variant === "warning") {
 		return "bg-amber-100 text-amber-700 hover:bg-amber-200";
@@ -168,7 +168,6 @@ function EntityCard({
 							<span
 								key={`${item.id}-${badge.label}`}
 								className={`inline-flex max-w-full rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none ${badge.className ?? "bg-slate-100 text-slate-700"}`}
-								title={badge.label}
 							>
 								<span className="truncate">{badge.label}</span>
 							</span>
@@ -238,6 +237,7 @@ function EntityCard({
 							<UserAvatar
 								name={item.title}
 								imageUrl={item.imageUrl}
+								imageAlt={item.imageAlt ?? `Imagen de ${item.title}`}
 								size="xl"
 								shape="soft-square"
 								imageFit="contain"
@@ -257,6 +257,10 @@ function EntityCard({
 										<UserAvatar
 											name={item.secondaryImageLabel ?? item.title}
 											imageUrl={item.secondaryImageUrl}
+											imageAlt={
+												item.secondaryImageAlt ??
+												`Imagen de ${item.secondaryImageLabel ?? item.title} asociada a ${item.title}`
+											}
 											size="xl"
 											shape="soft-square"
 											imageFit="contain"
@@ -271,8 +275,7 @@ function EntityCard({
 
 								{item.secondaryBadge ? (
 									<span
-										className={`inline-flex max-w-full justify-center rounded-full px-2.5 py-1 text-center text-[10px] font-black uppercase leading-tight tracking-[0.08em] shadow-sm backdrop-blur-md ${item.secondaryBadge.className ?? "border border-slate-200 bg-white/90 text-slate-700"}`}
-										title={item.secondaryBadge.label}
+										className={`inline-flex max-w-full justify-center rounded-full px-2.5 py-1 text-center text-[11px] font-black uppercase leading-tight tracking-[0.08em] shadow-sm backdrop-blur-md ${item.secondaryBadge.className ?? "border border-slate-200 bg-white/90 text-slate-700"}`}
 									>
 										{item.secondaryBadge.label}
 									</span>
@@ -297,9 +300,9 @@ function EntityCard({
 				</div>
 
 				<div className="flex flex-1 flex-col px-1 pt-4">
-					<p className="text-xl font-black leading-[1.05] tracking-[-0.03em] text-slate-950 sm:text-2xl">
+					<h3 className="text-xl font-black leading-[1.05] tracking-[-0.03em] text-slate-950 sm:text-2xl">
 						{item.title}
-					</p>
+					</h3>
 					{hasSubtitle ? (
 						<p className="mt-2 text-sm leading-relaxed text-slate-600">
 							{item.subtitle}

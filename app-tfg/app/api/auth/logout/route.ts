@@ -21,6 +21,6 @@ export async function POST() {
 		return NextResponse.json({ ok: true });
 	} catch (error) {
 		console.error("[logout] error:", error);
-		return NextResponse.json({ message: "Error en logout" }, { status: 500 });
+		return NextResponse.json({ message: "Error al cerrar sesión" }, { status: 500 });
 	}
 }

@@ -31,7 +31,7 @@ export async function logoutUserSession(input: LogoutUserSessionInput) {
 		]);
 
 		if (!logoutEventType || !successResultType) {
-			throw new Error("No se pudieron resolver los catálogos de logout");
+			throw new Error("No se pudieron resolver los catálogos de cierre de sesión");
 		}
 
 		await accessLogRepo
