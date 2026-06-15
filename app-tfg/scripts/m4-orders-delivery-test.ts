@@ -9,6 +9,7 @@ import { getDataSource } from "@/lib/typeorm/data-source";
 import { ClientCommercialAssignment } from "@/lib/typeorm/entities/ClientCommercialAssignment";
 import { CommercialVisit } from "@/lib/typeorm/entities/CommercialVisit";
 import { Order } from "@/lib/typeorm/entities/Order";
+import { OrderDelivery } from "@/lib/typeorm/entities/OrderDelivery";
 import {
 	createCommercialVisit,
 	updateCommercialVisit,
@@ -19,6 +20,11 @@ import {
 	listOrdersByClientId,
 	updateOrderStatusForCommercialUser,
 } from "@/lib/typeorm/services/orders/order";
+import {
+	getOrderDeliveryForCommercialUser,
+	listOrderDeliveriesForCommercialUser,
+	prepareOrderDeliveryForCommercialUser,
+} from "@/lib/typeorm/services/orders/order-delivery";
 
 type CandidateContext = {
 	clientId: string;
@@ -286,20 +292,20 @@ async function main() {
 			orderId,
 		);
 		assertCondition(
-			orderAfterPostpone.order.delivery_visit_id === visitId &&
+			orderAfterPostpone.order.delivery_visit_id === null &&
 				orderAfterPostpone.order.status_id === ORDER_STATUS_IDS.CONFIRMED,
-			"Aplazar un reparto no debería romper el enlace del pedido ni cambiar su estado confirmado",
+			"Aplazar un reparto deberia liberar el pedido sin cambiar su estado confirmado",
 		);
 
 		const estimateAfterPostpone = await getClientDeliveryEstimate(
 			candidate.clientId,
 		);
 		assertCondition(
-			estimateAfterPostpone.status === "outside_visit_window" &&
+			estimateAfterPostpone.status === "no_delivery_today" &&
 				estimateAfterPostpone.estimatedArrivalTime === null,
 			"Un reparto aplazado no debería seguir mostrando una ETA exacta al cliente",
 		);
-		console.log("PASS aplazamiento coherente con pedido enlazado y ETA anulada");
+		console.log("PASS aplazamiento libera pedido y anula ETA");
 
 		await expectFailure(
 			"visita aplazada bloquea modificaciones",
@@ -318,6 +324,142 @@ async function main() {
 		await cleanupTemporaryData([orderId], [visitId]);
 		createdOrderIds.splice(createdOrderIds.indexOf(orderId), 1);
 		createdVisitIds.splice(createdVisitIds.indexOf(visitId), 1);
+
+		const deliveryOrder = await createOrderForCommercialUser(
+			candidate.commercialUserId,
+			{
+				clientId: candidate.clientId,
+				notes: `${tag} prepared delivery release`,
+				lines: templateLines,
+			},
+		);
+		createdOrderIds.push(deliveryOrder.id);
+
+		await updateOrderStatusForCommercialUser(candidate.commercialUserId, {
+			orderId: deliveryOrder.id,
+			statusId: ORDER_STATUS_IDS.CONFIRMED,
+		});
+
+		const deliveryOrderDetail = await getOrderDetailForCommercialUser(
+			candidate.commercialUserId,
+			deliveryOrder.id,
+		);
+		const preparedDelivery = await prepareOrderDeliveryForCommercialUser(
+			candidate.commercialUserId,
+			{
+				orderId: deliveryOrder.id,
+				packageCount: 1,
+				notes: `${tag} prepared delivery release`,
+				lines: deliveryOrderDetail.order.lines.map((line) => ({
+					orderLineId: line.id,
+					quantity: line.quantity,
+				})),
+			},
+		);
+
+		const deliveryVisit = await createCommercialVisit({
+			clientId: candidate.clientId,
+			commercialId: candidate.commercialUserId,
+			scheduledForDate: today,
+			visitTypeId: COMMERCIAL_VISIT_TYPE_IDS.DELIVERY,
+			notes: `${tag} prepared delivery release`,
+			deliveryIds: [preparedDelivery.id],
+		});
+		createdVisitIds.push(deliveryVisit.id);
+
+		const deliveryAfterLink = await getOrderDeliveryForCommercialUser(
+			candidate.commercialUserId,
+			preparedDelivery.id,
+		);
+		assertCondition(
+			deliveryAfterLink.delivery_visit_id === deliveryVisit.id &&
+				deliveryAfterLink.status === "planned",
+			"El reparto preparado deberia quedar planificado al vincularlo a una visita",
+		);
+
+		await updateCommercialVisit({
+			visitId: deliveryVisit.id,
+			commercialId: candidate.commercialUserId,
+			statusId: COMMERCIAL_VISIT_STATUS_IDS.POSTPONED,
+		});
+
+		const deliveryAfterPostpone = await getOrderDeliveryForCommercialUser(
+			candidate.commercialUserId,
+			preparedDelivery.id,
+		);
+		assertCondition(
+			deliveryAfterPostpone.delivery_visit_id === null &&
+				deliveryAfterPostpone.status === "prepared",
+			"Aplazar una visita de reparto deberia liberar el reparto preparado",
+		);
+
+		const staleAssignmentDs = await getDataSource();
+		await staleAssignmentDs.getRepository(OrderDelivery).update(
+			{ id: preparedDelivery.id },
+			{
+				delivery_visit_id: deliveryVisit.id,
+				status: "planned",
+			},
+		);
+
+		const pendingDeliveries = await listOrderDeliveriesForCommercialUser(
+			candidate.commercialUserId,
+			{
+				clientId: candidate.clientId,
+				fulfillmentMethod: "commercial",
+				status: "prepared",
+			},
+		);
+		assertCondition(
+			pendingDeliveries.some(
+				(delivery) =>
+					delivery.id === preparedDelivery.id &&
+					delivery.delivery_visit_id === null,
+			),
+			"El reparto liberado deberia volver a aparecer como preparado",
+		);
+
+		const deliveryAfterStaleCleanup = await getOrderDeliveryForCommercialUser(
+			candidate.commercialUserId,
+			preparedDelivery.id,
+		);
+		assertCondition(
+			deliveryAfterStaleCleanup.delivery_visit_id === null &&
+				deliveryAfterStaleCleanup.status === "prepared",
+			"Consultar repartos preparados deberia sanear asignaciones antiguas a visitas aplazadas",
+		);
+
+		const relocatedDeliveryVisit = await createCommercialVisit({
+			clientId: candidate.clientId,
+			commercialId: candidate.commercialUserId,
+			scheduledForDate: today,
+			visitTypeId: COMMERCIAL_VISIT_TYPE_IDS.DELIVERY,
+			notes: `${tag} prepared delivery relocated`,
+			deliveryIds: [preparedDelivery.id],
+		});
+		createdVisitIds.push(relocatedDeliveryVisit.id);
+
+		const deliveryAfterRelocate = await getOrderDeliveryForCommercialUser(
+			candidate.commercialUserId,
+			preparedDelivery.id,
+		);
+		assertCondition(
+			deliveryAfterRelocate.delivery_visit_id === relocatedDeliveryVisit.id &&
+				deliveryAfterRelocate.status === "planned",
+			"El reparto liberado deberia poder reubicarse en una nueva visita",
+		);
+		console.log("PASS aplazamiento libera y permite reubicar reparto preparado");
+
+		await cleanupTemporaryData(
+			[deliveryOrder.id],
+			[deliveryVisit.id, relocatedDeliveryVisit.id],
+		);
+		createdOrderIds.splice(createdOrderIds.indexOf(deliveryOrder.id), 1);
+		createdVisitIds.splice(createdVisitIds.indexOf(deliveryVisit.id), 1);
+		createdVisitIds.splice(
+			createdVisitIds.indexOf(relocatedDeliveryVisit.id),
+			1,
+		);
 
 		const replacementOrder = await createOrderForCommercialUser(
 			candidate.commercialUserId,
@@ -557,7 +699,7 @@ async function main() {
 		console.log(
 			`PASS resumen final visible para ${candidate.clientName} con estado cancelado`,
 		);
-		console.log("OK M4 orders delivery test: 13/13 comprobaciones superadas");
+		console.log("OK M4 orders delivery test: 14/14 comprobaciones superadas");
 	} finally {
 		await cleanupTemporaryData(createdOrderIds, createdVisitIds);
 		const ds = await getDataSource();

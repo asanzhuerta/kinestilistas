@@ -24,6 +24,8 @@ import {
 	listAvailableOrderDeliveriesForVisit,
 	loadOrderDeliveriesByIdsForVisitValidation,
 	mapOrderDeliveryToSummary,
+	releaseDeliveryAssignmentsForVisits,
+	releasePostponedDeliveryAssignmentsForCommercial,
 	syncOrderDeliveredStatusFromDeliveries,
 } from "@/lib/typeorm/services/orders/order-delivery";
 import { getActiveAssignmentByCommercialAndClient } from "@/lib/typeorm/services/commercial/client-commercial-assignment";
@@ -525,29 +527,31 @@ export async function autoPostponeExpiredPlannedVisitsByCommercial(
 		})
 		.map((visit) => visit.id);
 
-	if (expiredVisitIds.length === 0) {
-		return 0;
-	}
-
 	await ds.transaction(async (manager) => {
-		await manager
-			.getRepository(CommercialVisit)
-			.createQueryBuilder()
-			.update(CommercialVisit)
-			.set({
-				status_id: COMMERCIAL_VISIT_STATUS_IDS.POSTPONED,
-			})
-			.where("id IN (:...visitIds)", {
-				visitIds: expiredVisitIds,
-			})
-			.execute();
+		if (expiredVisitIds.length > 0) {
+			await manager
+				.getRepository(CommercialVisit)
+				.createQueryBuilder()
+				.update(CommercialVisit)
+				.set({
+					status_id: COMMERCIAL_VISIT_STATUS_IDS.POSTPONED,
+				})
+				.where("id IN (:...visitIds)", {
+					visitIds: expiredVisitIds,
+				})
+				.execute();
+		}
 
-		await notifyCommercialVisitsAutoPostponed(manager, {
-			commercialUserId: commercialId,
-			visits: candidateVisits.filter((visit) =>
-				expiredVisitIds.includes(visit.id),
-			),
-		});
+		await releasePostponedDeliveryAssignmentsForCommercial(manager, commercialId);
+
+		if (expiredVisitIds.length > 0) {
+			await notifyCommercialVisitsAutoPostponed(manager, {
+				commercialUserId: commercialId,
+				visits: candidateVisits.filter((visit) =>
+					expiredVisitIds.includes(visit.id),
+				),
+			});
+		}
 	});
 
 	return expiredVisitIds.length;
@@ -1532,36 +1536,10 @@ export async function updateCommercialVisit(input: UpdateCommercialVisitInput) {
 
 		if (
 			nextVisitTypeId === COMMERCIAL_VISIT_TYPE_IDS.DELIVERY &&
-			nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.CANCELLED
+			(nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.POSTPONED ||
+				nextStatusId === COMMERCIAL_VISIT_STATUS_IDS.CANCELLED)
 		) {
-			await deliveryRepo
-				.createQueryBuilder()
-				.update(OrderDelivery)
-				.set({
-					delivery_visit_id: null,
-					status: "prepared",
-				})
-				.where("delivery_visit_id = :visitId", {
-					visitId: visit.id,
-				})
-				.andWhere("status = :plannedStatus", {
-					plannedStatus: "planned",
-				})
-				.execute();
-
-			await orderRepo
-				.createQueryBuilder()
-				.update(Order)
-				.set({
-					delivery_visit_id: null,
-				})
-				.where("delivery_visit_id = :visitId", {
-					visitId: visit.id,
-				})
-				.andWhere("status_id = :confirmedStatusId", {
-					confirmedStatusId: ORDER_STATUS_IDS.CONFIRMED,
-				})
-				.execute();
+			await releaseDeliveryAssignmentsForVisits(manager, [visit.id]);
 		}
 
 		if (

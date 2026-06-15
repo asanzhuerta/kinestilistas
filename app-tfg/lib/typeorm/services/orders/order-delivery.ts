@@ -11,6 +11,7 @@ import type {
 } from "@/lib/contracts/order";
 import { getDataSource } from "@/lib/typeorm/data-source";
 import { ClientCommercialAssignment } from "@/lib/typeorm/entities/ClientCommercialAssignment";
+import { CommercialVisit } from "@/lib/typeorm/entities/CommercialVisit";
 import { Order } from "@/lib/typeorm/entities/Order";
 import { OrderDelivery } from "@/lib/typeorm/entities/OrderDelivery";
 import { OrderDeliveryLine } from "@/lib/typeorm/entities/OrderDeliveryLine";
@@ -118,6 +119,93 @@ function createOrderDeliveryBaseQuery(repo: Repository<OrderDelivery>) {
 		.leftJoinAndSelect("orderLine.product", "product")
 		.leftJoinAndSelect("product.productLine", "productLine")
 		.leftJoinAndSelect("orderLine.colorReference", "colorReference");
+}
+
+export async function releaseDeliveryAssignmentsForVisits(
+	manager: EntityManager,
+	visitIds: string[],
+) {
+	const normalizedVisitIds = Array.from(
+		new Set(
+			visitIds
+				.map((visitId) => String(visitId ?? "").trim())
+				.filter(Boolean),
+		),
+	);
+
+	if (normalizedVisitIds.length === 0) {
+		return {
+			deliveryCount: 0,
+			orderCount: 0,
+		};
+	}
+
+	const deliveryResult = await manager
+		.getRepository(OrderDelivery)
+		.createQueryBuilder()
+		.update(OrderDelivery)
+		.set({
+			delivery_visit_id: null,
+			status: "prepared",
+		})
+		.where("delivery_visit_id IN (:...visitIds)", {
+			visitIds: normalizedVisitIds,
+		})
+		.andWhere("status IN (:...releasableStatuses)", {
+			releasableStatuses: ["prepared", "planned"],
+		})
+		.execute();
+
+	const orderResult = await manager
+		.getRepository(Order)
+		.createQueryBuilder()
+		.update(Order)
+		.set({
+			delivery_visit_id: null,
+		})
+		.where("delivery_visit_id IN (:...visitIds)", {
+			visitIds: normalizedVisitIds,
+		})
+		.andWhere("status_id = :confirmedStatusId", {
+			confirmedStatusId: ORDER_STATUS_IDS.CONFIRMED,
+		})
+		.execute();
+
+	return {
+		deliveryCount: deliveryResult.affected ?? 0,
+		orderCount: orderResult.affected ?? 0,
+	};
+}
+
+export async function releasePostponedDeliveryAssignmentsForCommercial(
+	manager: EntityManager,
+	commercialId: string,
+) {
+	const normalizedCommercialId = String(commercialId ?? "").trim();
+
+	if (!normalizedCommercialId) {
+		return {
+			deliveryCount: 0,
+			orderCount: 0,
+		};
+	}
+
+	const visits = await manager
+		.getRepository(CommercialVisit)
+		.createQueryBuilder("visit")
+		.select("visit.id", "id")
+		.where("visit.commercial_id = :commercialId", {
+			commercialId: normalizedCommercialId,
+		})
+		.andWhere("visit.status_id = :postponedStatusId", {
+			postponedStatusId: COMMERCIAL_VISIT_STATUS_IDS.POSTPONED,
+		})
+		.getRawMany<{ id: string }>();
+
+	return releaseDeliveryAssignmentsForVisits(
+		manager,
+		visits.map((visit) => visit.id),
+	);
 }
 
 function mapDeliveryLineToSummary(line: OrderDeliveryLine): OrderDeliveryLineSummary {
@@ -427,6 +515,9 @@ export async function listOrderDeliveriesForCommercialUser(
 ) {
 	const commercial = await requireCommercialByUserId(userId);
 	const ds = await getDataSource();
+
+	await releasePostponedDeliveryAssignmentsForCommercial(ds.manager, commercial.id);
+
 	const query = createOrderDeliveryBaseQuery(ds.getRepository(OrderDelivery))
 		.innerJoin(
 			ClientCommercialAssignment,
