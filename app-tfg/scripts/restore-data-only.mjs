@@ -55,11 +55,116 @@ function ensureRestoreConfirmed() {
 	}
 }
 
+function splitSqlList(value) {
+	const items = [];
+	let current = "";
+	let inString = false;
+
+	for (let index = 0; index < value.length; index += 1) {
+		const character = value[index];
+		const nextCharacter = value[index + 1];
+
+		if (character === "'") {
+			current += character;
+
+			if (inString && nextCharacter === "'") {
+				current += nextCharacter;
+				index += 1;
+				continue;
+			}
+
+			inString = !inString;
+			continue;
+		}
+
+		if (character === "," && !inString) {
+			items.push(current.trim());
+			current = "";
+			continue;
+		}
+
+		current += character;
+	}
+
+	if (current.trim()) {
+		items.push(current.trim());
+	}
+
+	return items;
+}
+
+function normalizeColumnName(value) {
+	return value.trim().replace(/^"|"$/g, "").replaceAll('""', '"');
+}
+
+function rewriteProductSubcategoryInsert(line, parentUpdates) {
+	const match = line.match(
+		/^INSERT INTO "product_subcategories" \((.+)\) VALUES \((.+)\);$/,
+	);
+
+	if (!match) {
+		return line;
+	}
+
+	const columns = splitSqlList(match[1]).map(normalizeColumnName);
+	const values = splitSqlList(match[2]);
+	const idIndex = columns.indexOf("id");
+	const parentIndex = columns.indexOf("parent_subcategory_id");
+
+	if (idIndex < 0 || parentIndex < 0) {
+		return line;
+	}
+
+	const parentValue = values[parentIndex];
+
+	if (!parentValue || parentValue.toUpperCase() === "NULL") {
+		return line;
+	}
+
+	const idValue = values[idIndex];
+	values[parentIndex] = "NULL";
+	parentUpdates.push(
+		`UPDATE "product_subcategories" SET "parent_subcategory_id" = ${parentValue} WHERE "id" = ${idValue};`,
+	);
+
+	return `INSERT INTO "product_subcategories" (${match[1]}) VALUES (${values.join(", ")});`;
+}
+
+function findCommitLineIndex(lines) {
+	for (let index = lines.length - 1; index >= 0; index -= 1) {
+		if (/^\s*COMMIT\s*;/i.test(lines[index])) {
+			return index;
+		}
+	}
+
+	return -1;
+}
+
 function sanitizeManagedPostgresSql(sql) {
-	return sql
+	const parentUpdates = [];
+	const lines = sql
 		.split(/\r?\n/)
 		.filter((line) => !/^\s*SET\s+session_replication_role\s*=/i.test(line))
-		.join("\n");
+		.map((line) => rewriteProductSubcategoryInsert(line, parentUpdates));
+
+	if (parentUpdates.length === 0) {
+		return lines.join("\n");
+	}
+
+	const commitLineIndex = findCommitLineIndex(lines);
+	const updateLines = [
+		"",
+		"-- Restaurar jerarquia de subcategorias tras insertar todas las filas.",
+		...parentUpdates,
+	];
+
+	if (commitLineIndex >= 0) {
+		lines.splice(commitLineIndex, 0, ...updateLines);
+	} else {
+		lines.push(...updateLines);
+	}
+
+	return lines.join("\n");
 }
 
 async function main() {
