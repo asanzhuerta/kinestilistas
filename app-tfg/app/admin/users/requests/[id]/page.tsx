@@ -18,8 +18,11 @@ type Props = {
 export default async function ReviewSolicitudPage({ params }: Props) {
 	// CONTROL DE ACCESO Y PARÁMETROS
 	// Resolvemos la sesión administrativa y el parámetro dinámico en paralelo.
-	const [{ id }] = await Promise.all([params, requireAdminSession()]);
-	const solicitud = await getUserRequestById(id);
+	const { id } = await params;
+	const [, solicitud] = await Promise.all([
+		requireAdminSession(),
+		getUserRequestById(id),
+	]);
 
 	// Si la solicitud no existe, se muestra la página de "No encontrado".
 	if (!solicitud) {

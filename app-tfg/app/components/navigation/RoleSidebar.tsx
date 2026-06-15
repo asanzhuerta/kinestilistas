@@ -126,6 +126,19 @@ function isActiveHref(pathname: string, href: string) {
 	return pathname.startsWith(`${href}/`);
 }
 
+async function handleLogout() {
+	try {
+		await fetch("/api/auth/logout", {
+			method: "POST",
+		});
+	} catch (error) {
+		console.error("[logout] error llamando a la API:", error);
+	}
+
+	await signOut({ redirect: false });
+	window.location.href = "/login";
+}
+
 export default function RoleSidebar({
 	role,
 	userName,
@@ -146,12 +159,18 @@ export default function RoleSidebar({
 			clientTierBadge &&
 			String(clientTierBadge.code).trim().toLowerCase() !== "none",
 	);
-	const activeHref =
-		sections
-			.flatMap((section) => section.items)
-			.filter((item) => isActiveHref(pathname, item.href))
-			.toSorted((left, right) => right.href.length - left.href.length)[0]
-			?.href ?? null;
+	let activeHref: string | null = null;
+
+	for (const section of sections) {
+		for (const item of section.items) {
+			if (
+				isActiveHref(pathname, item.href) &&
+				(!activeHref || item.href.length > activeHref.length)
+			) {
+				activeHref = item.href;
+			}
+		}
+	}
 	const sidebarStyle = {
 		"--role-sidebar-width": isExpanded ? "18rem" : "5rem",
 		"--sidebar-motion-duration": `${MOBILE_SIDEBAR_ANIMATION_MS}ms`,
@@ -198,19 +217,6 @@ export default function RoleSidebar({
 			setIsMobileMounted(false);
 			closeTimeoutRef.current = null;
 		}, MOBILE_SIDEBAR_ANIMATION_MS);
-	};
-
-	const handleLogout = async () => {
-		try {
-			await fetch("/api/auth/logout", {
-				method: "POST",
-			});
-		} catch (error) {
-			console.error("[logout] error llamando a la API:", error);
-		}
-
-		await signOut({ redirect: false });
-		window.location.href = "/login";
 	};
 
 	return (
@@ -352,7 +358,7 @@ export default function RoleSidebar({
 								</p>
 								{showClientTierBadge && clientTierBadge ? (
 									<span
-										className="relative inline-flex shrink-0 overflow-hidden rounded-full border px-2 py-0.5 text-[0.58rem] font-black uppercase leading-none tracking-[0.12em]"
+										className="relative inline-flex shrink-0 overflow-hidden rounded-full border px-2 py-0.5 text-xs font-black uppercase leading-none tracking-[0.12em]"
 										style={getClientTierBadgeStyle(clientTierBadge.code)}
 										title={`Rango ${clientTierBadge.name}`}
 									>

@@ -21,15 +21,17 @@ type Props = {
 	showRejectionReason?: boolean;
 };
 
+const solicitudDateFormatter = new Intl.DateTimeFormat("es-ES", {
+	timeZone: "Europe/Madrid",
+	day: "2-digit",
+	month: "2-digit",
+	year: "numeric",
+	hour: "2-digit",
+	minute: "2-digit",
+});
+
 function formatFecha(fecha: string | Date) {
-	return new Intl.DateTimeFormat("es-ES", {
-		timeZone: "Europe/Madrid",
-		day: "2-digit",
-		month: "2-digit",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	}).format(new Date(fecha));
+	return solicitudDateFormatter.format(new Date(fecha));
 }
 
 export default function SolicitudReviewCard({

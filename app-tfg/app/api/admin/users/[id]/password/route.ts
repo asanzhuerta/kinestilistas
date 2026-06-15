@@ -12,7 +12,7 @@ import { changeUserPassword } from "@/lib/typeorm/services/users/password";
 
 // PATCH /api/admin/users/[id]/password
 // PATCH /api/admin/users/[id]/password
-// Cambia la contraseña de un usuario desde administración y registra la accion.
+// Cambia la contraseña de un usuario desde administración y registra la acción.
 export async function PATCH(request: Request, context: RouteContext) {
 	const user = await requireRoleUser("admin");
 

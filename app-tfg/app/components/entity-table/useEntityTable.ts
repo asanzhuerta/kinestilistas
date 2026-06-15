@@ -77,7 +77,7 @@ function persistState(
 			JSON.stringify(state),
 		);
 	} catch {
-		// Si el almacenamiento del navegador no esta disponible, la tabla sigue funcionando.
+		// Si el almacenamiento del navegador no está disponible, la tabla sigue funcionando.
 	}
 }
 
@@ -175,6 +175,12 @@ function matchesSelectedValue(
 	return (item.filterValues?.[filterKey] ?? null) === selectedValue;
 }
 
+function sortSpanishValues(values: Iterable<string>) {
+	return Array.from(values).toSorted((a, b) =>
+		a.localeCompare(b, "es", { sensitivity: "base" }),
+	);
+}
+
 function getAvailableExtraFilterOptions(input: {
 	items: EntityTableItem[];
 	filterKey: string;
@@ -203,13 +209,17 @@ function getAvailableExtraFilterOptions(input: {
 		}),
 	);
 
-	return [
-		...new Set(
-			scopedItems
-				.map((item) => item.filterValues?.[input.filterKey])
-				.filter(Boolean) as string[],
-		),
-	].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+	const optionValues = new Set<string>();
+
+	for (const item of scopedItems) {
+		const optionValue = item.filterValues?.[input.filterKey];
+
+		if (optionValue) {
+			optionValues.add(optionValue);
+		}
+	}
+
+	return sortSpanishValues(optionValues);
 }
 
 export function useEntityTable(
@@ -303,22 +313,32 @@ export function useEntityTable(
 	}, [config, persistenceKey]);
 
 	const categories = useMemo(
-		() =>
-			[
-				...new Set(
-					items.map((item) => item.category).filter(Boolean) as string[],
-				),
-			].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" })),
+		() => {
+			const categoryValues = new Set<string>();
+
+			for (const item of items) {
+				if (item.category) {
+					categoryValues.add(item.category);
+				}
+			}
+
+			return sortSpanishValues(categoryValues);
+		},
 		[items],
 	);
 
 	const statuses = useMemo(
-		() =>
-			[
-				...new Set(
-					items.map((item) => item.status).filter(Boolean) as string[],
-				),
-			].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" })),
+		() => {
+			const statusValues = new Set<string>();
+
+			for (const item of items) {
+				if (item.status) {
+					statusValues.add(item.status);
+				}
+			}
+
+			return sortSpanishValues(statusValues);
+		},
 		[items],
 	);
 
@@ -350,7 +370,9 @@ export function useEntityTable(
 
 			const selectedValue = nextExtraFilterValues[filter.key] ?? "todos";
 
-			if (selectedValue !== "todos" && !options.includes(selectedValue)) {
+			const availableOptions = new Set(options);
+
+			if (selectedValue !== "todos" && !availableOptions.has(selectedValue)) {
 				nextExtraFilterValues[filter.key] = "todos";
 			}
 		}

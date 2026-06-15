@@ -19,9 +19,13 @@ export default async function RequestsPage() {
 
 	// TRANSFORMACIÓN DE DATOS
 	// Adapta las solicitudes pendientes al formato visual reutilizable.
-	const items = rawRequests
-		.filter((request) => request.status.code === "pending")
-		.map(mapRequestToEntityTableItem);
+	const items: ReturnType<typeof mapRequestToEntityTableItem>[] = [];
+
+	for (const request of rawRequests) {
+		if (request.status.code === "pending") {
+			items.push(mapRequestToEntityTableItem(request));
+		}
+	}
 
 	// RENDER
 	return (

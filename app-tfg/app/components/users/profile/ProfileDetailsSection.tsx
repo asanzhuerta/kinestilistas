@@ -23,6 +23,18 @@ type Props = {
 	compact?: boolean;
 };
 
+function getEditableRoleOptions(roles: CatalogOption[]) {
+	const editableRoles: CatalogOption[] = [];
+
+	for (const role of roles) {
+		if (role.name !== "Administrador") {
+			editableRoles.push(role);
+		}
+	}
+
+	return editableRoles;
+}
+
 export default function ProfileDetailsSection({
 	formData,
 	isEditableMode,
@@ -40,6 +52,7 @@ export default function ProfileDetailsSection({
 		: "rounded-xl bg-slate-50 p-4";
 	const inputClass =
 		"mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400";
+	const editableRoleOptions = getEditableRoleOptions(roles);
 
 	return (
 		<div
@@ -97,13 +110,11 @@ export default function ProfileDetailsSection({
 						onChange={onChange("roleId")}
 						className={inputClass}
 					>
-						{roles
-							.filter((role) => role.name !== "Administrador")
-							.map((role) => (
-								<option key={role.id} value={role.id}>
-									{role.name}
-								</option>
-							))}
+						{editableRoleOptions.map((role) => (
+							<option key={role.id} value={role.id}>
+								{role.name}
+							</option>
+						))}
 					</select>
 				</div>
 			) : null}
@@ -119,7 +130,7 @@ export default function ProfileDetailsSection({
 
 			<div className={cardClass}>
 				<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-					Ultimo login
+					Último acceso
 				</p>
 				<p className="mt-1 text-sm text-slate-800">
 					{lastLoginAt ? formatDate(lastLoginAt) : "-"}

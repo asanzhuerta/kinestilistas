@@ -47,6 +47,14 @@ const variantConfig: Record<
 	},
 };
 
+const skeletonLineWidthClassNames = [
+	"w-11/12",
+	"w-3/4",
+	"w-1/2",
+	"w-2/3",
+	"w-5/6",
+];
+
 function SkeletonLine({ widthClassName }: { widthClassName: string }) {
 	return (
 		<div
@@ -65,8 +73,6 @@ function SkeletonCard({
 	lineCount: number;
 	cardClassName: string;
 }) {
-	const widths = ["w-11/12", "w-3/4", "w-1/2", "w-2/3", "w-5/6"];
-
 	return (
 		<article
 			className={`rounded-[1.75rem] border border-white/45 bg-white/78 p-5 shadow-xl shadow-slate-950/5 backdrop-blur ${cardClassName}`}
@@ -80,7 +86,11 @@ function SkeletonCard({
 					{Array.from({ length: lineCount }).map((_, lineIndex) => (
 						<SkeletonLine
 							key={`${index}-${lineIndex}`}
-							widthClassName={widths[(index + lineIndex) % widths.length]}
+							widthClassName={
+								skeletonLineWidthClassNames[
+									(index + lineIndex) % skeletonLineWidthClassNames.length
+								]
+							}
 						/>
 					))}
 				</div>

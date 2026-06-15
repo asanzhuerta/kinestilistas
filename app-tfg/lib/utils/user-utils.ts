@@ -35,7 +35,7 @@ export const sortableFields: { key: SortField; label: string }[] = [
 	{ key: "status", label: "Estado" },
 	{ key: "profile_image_url", label: "Imagen" },
 	{ key: "created_at", label: "Fecha de alta" },
-	{ key: "last_login_at", label: "Último login" },
+	{ key: "last_login_at", label: "Último acceso" },
 ];
 
 type DateLike = Date | string | null | undefined;

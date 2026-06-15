@@ -10,11 +10,11 @@ export default async function NotFoundPage() {
 			<div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-md">
 				<div className="mb-4">
 					<p className="text-6xl font-bold text-slate-900">404</p>
-					<p className="mt-2 text-sm text-slate-500">Pagina no encontrada</p>
+					<p className="mt-2 text-sm text-slate-500">Página no encontrada</p>
 				</div>
 
 				<p className="text-sm text-slate-600">
-					La pagina que estas buscando no existe, ha sido movida o no tienes
+					La página que estás buscando no existe, ha sido movida o no tienes
 					acceso.
 				</p>
 

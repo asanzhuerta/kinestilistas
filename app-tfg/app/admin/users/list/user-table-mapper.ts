@@ -54,7 +54,7 @@ export function mapUserToEntityTableItem(user: ObjectLiteral): EntityTableItem {
 				value: formatDateShort(typedUser.created_at.toISOString()),
 			},
 			{
-				label: "Login",
+				label: "Último acceso",
 				value: formatDateShort(
 					typedUser.last_login_at
 						? typedUser.last_login_at.toISOString()
