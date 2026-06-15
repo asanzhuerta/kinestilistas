@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation";
 import SafeForm from "@/app/components/forms/SafeForm";
 import { ApiClientError, requestJson } from "@/lib/api/client";
 import type { UploadProfileImageResponse } from "@/lib/contracts/user-profile";
+import {
+	getCloudinaryAttachmentDownloadUrl,
+	isPdfResourceUrl,
+	sanitizeDownloadFileName,
+} from "@/lib/cloudinary-url";
 import CatalogImageUploadField from "./CatalogImageUploadField";
 import type { FieldDescriptor, FormValue } from "./catalog-admin-types";
 
@@ -22,6 +27,16 @@ type Props = {
 	showHeader?: boolean;
 	editPathPattern?: string;
 	createRedirectToEdit?: boolean;
+};
+
+type UploadCatalogResourceResponse = {
+	message: string;
+	url: string;
+	downloadUrl?: string;
+	publicId: string;
+	name: string;
+	mimeType: string;
+	kind: "image" | "pdf";
 };
 
 function getFieldStringValue(value: FormValue | undefined) {
@@ -186,6 +201,56 @@ export default function CatalogAdminForm({
 		}
 	}
 
+	async function handleResourceFileUpload(field: FieldDescriptor, file: File) {
+		setErrorMessage("");
+		setUploadingFieldName(field.name);
+		setImageStatusMessages((current) => ({
+			...current,
+			[field.name]: "Subiendo recurso a Cloudinary...",
+		}));
+
+		try {
+			const formData = new FormData();
+			formData.append("file", file);
+
+			const previousUrl = getFieldStringValue(formValues[field.name]);
+
+			if (previousUrl) {
+				formData.append("previousUrl", previousUrl);
+			}
+
+			const payload = await requestJson<UploadCatalogResourceResponse>(
+				field.uploadEndpoint ?? "/api/admin/catalog/upload-resource",
+				{
+					method: "POST",
+					body: formData,
+					fallbackMessage: "No se pudo subir el recurso",
+				},
+			);
+
+			setFormValues((current) => ({
+				...current,
+				[field.name]: payload.url,
+			}));
+			setImageStatusMessages((current) => ({
+				...current,
+				[field.name]: payload.message || "Recurso subido correctamente",
+			}));
+		} catch (error) {
+			const message =
+				error instanceof ApiClientError
+					? error.message
+					: "No se pudo subir el recurso";
+
+			setImageStatusMessages((current) => ({
+				...current,
+				[field.name]: message,
+			}));
+		} finally {
+			setUploadingFieldName(null);
+		}
+	}
+
 	function handleClearImage(fieldName: string) {
 		setFormValues((current) => ({
 			...current,
@@ -193,7 +258,18 @@ export default function CatalogAdminForm({
 		}));
 		setImageStatusMessages((current) => ({
 			...current,
-			[fieldName]: "La imagen se quitara cuando guardes el registro.",
+			[fieldName]: "La imagen se quitará cuando guardes el registro.",
+		}));
+	}
+
+	function handleClearFile(fieldName: string) {
+		setFormValues((current) => ({
+			...current,
+			[fieldName]: "",
+		}));
+		setImageStatusMessages((current) => ({
+			...current,
+			[fieldName]: "El recurso se quitará cuando guardes el registro.",
 		}));
 	}
 
@@ -297,7 +373,9 @@ export default function CatalogAdminForm({
 					{fields.map((field) => {
 						const currentValue = formValues[field.name];
 						const isFullWidth =
-							field.type === "textarea" || field.type === "image";
+							field.type === "textarea" ||
+							field.type === "image" ||
+							field.type === "file";
 
 						return (
 							<div
@@ -357,6 +435,93 @@ export default function CatalogAdminForm({
 									/>
 								) : null}
 
+								{field.type === "file" ? (
+									<div className="mt-2 space-y-3">
+										<input
+											id={field.name}
+											type="text"
+											required={field.required}
+											placeholder={field.placeholder}
+											value={getFieldStringValue(currentValue)}
+											onChange={(event) =>
+												handleTextFieldChange(field.name, event.target.value)
+											}
+											className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
+										/>
+										<div className="flex flex-wrap items-center gap-2">
+											<label className="cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
+												{uploadingFieldName === field.name
+													? "Subiendo..."
+													: "Subir a Cloudinary"}
+												<input
+													type="file"
+													accept={field.accept}
+													disabled={uploadingFieldName === field.name}
+													onChange={(event) => {
+														const file = event.target.files?.[0];
+														event.target.value = "";
+
+														if (file) {
+															void handleResourceFileUpload(field, file);
+														}
+													}}
+													className="sr-only"
+												/>
+											</label>
+											{getFieldStringValue(currentValue) ? (
+												<>
+													<a
+														href={
+															isPdfResourceUrl(getFieldStringValue(currentValue))
+																? getCloudinaryAttachmentDownloadUrl(
+																		getFieldStringValue(currentValue),
+																		`${getFieldStringValue(formValues.title)}.pdf`,
+																	)
+																: getFieldStringValue(currentValue)
+														}
+														target={
+															isPdfResourceUrl(getFieldStringValue(currentValue))
+																? undefined
+																: "_blank"
+														}
+														rel={
+															isPdfResourceUrl(getFieldStringValue(currentValue))
+																? undefined
+																: "noreferrer"
+														}
+														download={
+															isPdfResourceUrl(getFieldStringValue(currentValue))
+																? sanitizeDownloadFileName(
+																		`${getFieldStringValue(formValues.title)}.pdf`,
+																		"recurso.pdf",
+																		{ ensurePdfExtension: true },
+																	)
+																: undefined
+														}
+														className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+													>
+														{isPdfResourceUrl(getFieldStringValue(currentValue))
+															? "Descargar PDF"
+															: "Abrir recurso"}
+													</a>
+													<button
+														type="button"
+														onClick={() => handleClearFile(field.name)}
+														className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+													>
+														Quitar
+													</button>
+												</>
+											) : null}
+										</div>
+										{imageStatusMessages[field.name] ? (
+											<p className="text-xs font-medium text-slate-500">
+												{imageStatusMessages[field.name]}
+											</p>
+										) : null}
+									</div>
+								) : null}
+
 								{field.type === "select" ? (
 									<select
 										id={field.name}
@@ -367,7 +532,7 @@ export default function CatalogAdminForm({
 										}
 										className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400"
 									>
-										<option value="">Selecciona una opcion</option>
+										<option value="">Selecciona una opción</option>
 										{getFilteredOptions(field, formValues).map((option) => (
 											<option key={option.value} value={option.value}>
 												{option.label}

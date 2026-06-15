@@ -173,7 +173,7 @@ function normalizeServiceDate(value: string | null | undefined) {
 
 	if (Number.isNaN(parsed.getTime())) {
 		throw new SalonTechnicalServiceError(
-			"La fecha del servicio no es valida",
+			"La fecha del servicio no es válida",
 			400,
 			"SALON_SERVICE_DATE_INVALID",
 		);

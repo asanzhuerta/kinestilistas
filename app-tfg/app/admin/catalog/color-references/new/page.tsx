@@ -14,8 +14,10 @@ type Props = {
 };
 
 export default async function NewColorReferencePage({ searchParams }: Props) {
-	const colorCharts = await listColorCharts();
-	const resolvedSearchParams = await searchParams;
+	const [colorCharts, resolvedSearchParams] = await Promise.all([
+		listColorCharts(),
+		searchParams,
+	]);
 	const initialValues = getColorReferenceInitialValues();
 	const initialColorChartId = getSingleSearchParamValue(
 		resolvedSearchParams?.colorChartId,

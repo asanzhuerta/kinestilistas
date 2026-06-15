@@ -55,7 +55,7 @@ async function ensureValidParentSubcategory(input: {
 	while (currentParentId) {
 		if (currentParentId === input.currentSubcategoryId) {
 			throw new CatalogServiceError(
-				"No se puede crear una jerarquia circular entre subcategorías",
+				"No se puede crear una jerarquía circular entre subcategorías",
 				400,
 				"PRODUCT_SUBCATEGORY_CYCLIC_PARENT",
 			);

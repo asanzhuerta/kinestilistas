@@ -1,4 +1,6 @@
+import { randomUUID } from "node:crypto";
 import { v2 as cloudinary } from "cloudinary";
+import { sanitizeDownloadFileName } from "@/lib/cloudinary-url";
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -36,6 +38,10 @@ export const CLOUDINARY_PROMOTION_ATTACHMENTS_FOLDER =
 	process.env.CLOUDINARY_PROMOTION_ATTACHMENTS_FOLDER ||
 	"kinestilistas/promotion-attachments";
 
+export const CLOUDINARY_CATALOG_DOCUMENTS_FOLDER =
+	process.env.CLOUDINARY_CATALOG_DOCUMENTS_FOLDER ||
+	"kinestilistas/catalog-documents";
+
 // ============================================================================
 // HELPERS REUTILIZABLES
 // ============================================================================
@@ -69,11 +75,55 @@ export async function uploadPromotionImage(base64File: string) {
 	});
 }
 
-export async function uploadPromotionDocument(base64File: string) {
-	return cloudinary.uploader.upload(base64File, {
-		folder: CLOUDINARY_PROMOTION_ATTACHMENTS_FOLDER,
-		resource_type: "raw",
+function buildRawPdfPublicId(fileName: string | null | undefined) {
+	const safeName = sanitizeDownloadFileName(fileName, "documento.pdf", {
+		ensurePdfExtension: true,
 	});
+	const baseName = safeName.replace(/\.pdf$/i, "");
+	const suffix = randomUUID().slice(0, 8);
+
+	return `${baseName}-${suffix}.pdf`;
+}
+
+async function uploadCloudinaryPdfDocument(
+	base64File: string,
+	folder: string,
+	fileName: string | null | undefined,
+) {
+	const safeName = sanitizeDownloadFileName(fileName, "documento.pdf", {
+		ensurePdfExtension: true,
+	});
+
+	return cloudinary.uploader.upload(base64File, {
+		folder,
+		resource_type: "raw",
+		public_id: buildRawPdfPublicId(fileName),
+		filename_override: safeName,
+		use_filename: false,
+		unique_filename: false,
+	});
+}
+
+export async function uploadPromotionDocument(
+	base64File: string,
+	fileName?: string | null,
+) {
+	return uploadCloudinaryPdfDocument(
+		base64File,
+		CLOUDINARY_PROMOTION_ATTACHMENTS_FOLDER,
+		fileName,
+	);
+}
+
+export async function uploadCatalogDocument(
+	base64File: string,
+	fileName?: string | null,
+) {
+	return uploadCloudinaryPdfDocument(
+		base64File,
+		CLOUDINARY_CATALOG_DOCUMENTS_FOLDER,
+		fileName,
+	);
 }
 
 // Elimina una imagen de Cloudinary por public_id
@@ -116,7 +166,18 @@ export async function deleteReplacedCloudinaryImage(
 }
 
 // Extrae el public_id desde una URL de Cloudinary
-export function extractPublicIdFromUrl(url: string | null | undefined) {
+function isCloudinaryTransformationSegment(part: string) {
+	return (
+		part.startsWith("fl_") ||
+		part.includes(",") ||
+		/^(c|f|q|w|h|e|g|r|x|y|a|b|bo|co|dpr|so|eo|du|pg)_/.test(part)
+	);
+}
+
+export function extractPublicIdFromUrl(
+	url: string | null | undefined,
+	options: { keepExtension?: boolean } = {},
+) {
 	if (!url) return null;
 
 	try {
@@ -133,6 +194,13 @@ export function extractPublicIdFromUrl(url: string | null | undefined) {
 
 		const publicIdParts = parts.slice(uploadIndex + 1);
 
+		while (
+			publicIdParts.length > 0 &&
+			isCloudinaryTransformationSegment(publicIdParts[0])
+		) {
+			publicIdParts.shift();
+		}
+
 		// Quita versión tipo v12345
 		if (publicIdParts[0]?.match(/^v\d+$/)) {
 			publicIdParts.shift();
@@ -141,6 +209,10 @@ export function extractPublicIdFromUrl(url: string | null | undefined) {
 		if (publicIdParts.length === 0) return null;
 
 		const joinedPath = publicIdParts.join("/");
+
+		if (options.keepExtension) {
+			return joinedPath;
+		}
 
 		// Quita extensión
 		return joinedPath.replace(/\.[^/.]+$/, "");

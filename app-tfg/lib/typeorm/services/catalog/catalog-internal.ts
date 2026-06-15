@@ -107,7 +107,7 @@ export function rethrowCatalogPersistenceError(
 
 	if (driverError?.code === "23503") {
 		throw new CatalogServiceError(
-			"Alguna de las relaciones indicadas no es valida",
+			"Alguna de las relaciones indicadas no es válida",
 			400,
 			"INVALID_CATALOG_RELATION",
 		);

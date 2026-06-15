@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 		const previousImageUrl = String(formData.get("previousImageUrl") ?? "").trim();
 
 		if (!(file instanceof File)) {
-			return badRequestError("No se ha enviado ningun archivo", "FILE_REQUIRED");
+			return badRequestError("No se ha enviado ningún archivo", "FILE_REQUIRED");
 		}
 
 		if (!file.type.startsWith("image/")) {

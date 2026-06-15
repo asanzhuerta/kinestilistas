@@ -10,12 +10,15 @@ export default async function CommercialCatalogProductPage({
 }: {
 	params: Promise<{ productId: string }>;
 }) {
-	const session = await requireCommercialSession();
-	const commercial = await requireCommercialByUserId(session.user.id);
-	const { productId } = await params;
+	const [session, { productId }] = await Promise.all([
+		requireCommercialSession(),
+		params,
+	]);
 	const [detail, clients] = await Promise.all([
 		getActiveCatalogProductDetail(productId),
-		listClientsByCommercialId(commercial.id),
+		requireCommercialByUserId(session.user.id).then((commercial) =>
+			listClientsByCommercialId(commercial.id),
+		),
 	]);
 
 	if (!detail) {

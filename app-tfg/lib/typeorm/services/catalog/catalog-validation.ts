@@ -144,7 +144,7 @@ function normalizeOptionalCloudinaryImageField(
 	}
 
 	if (!validator(normalized)) {
-		throw new CatalogValidationError(`${fieldName} no es valida`, 400, code);
+		throw new CatalogValidationError(`${fieldName} no es válida`, 400, code);
 	}
 
 	return normalized;
@@ -491,7 +491,7 @@ export function normalizeSupportResourceWriteInput(
 			input.title !== undefined || options.required
 				? normalizeRequiredTextField(
 						input.title,
-						"El titulo del recurso",
+						"El título del recurso",
 						"SUPPORT_RESOURCE_TITLE_REQUIRED",
 				  )
 				: undefined,
@@ -506,7 +506,7 @@ export function normalizeSupportResourceWriteInput(
 			input.resourceUrl !== undefined || options.required
 				? normalizeRequiredTextField(
 						input.resourceUrl,
-						"La ubicacion del recurso",
+						"La ubicación del recurso",
 						"SUPPORT_RESOURCE_URL_REQUIRED",
 				  )
 				: undefined,

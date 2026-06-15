@@ -8,9 +8,11 @@ export default async function ClientCatalogProductPage({
 }: {
 	params: Promise<{ productId: string }>;
 }) {
-	await requireClientSession();
 	const { productId } = await params;
-	const detail = await getActiveCatalogProductDetail(productId);
+	const [, detail] = await Promise.all([
+		requireClientSession(),
+		getActiveCatalogProductDetail(productId),
+	]);
 
 	if (!detail) {
 		notFound();

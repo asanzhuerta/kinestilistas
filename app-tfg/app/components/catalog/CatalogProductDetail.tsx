@@ -3,6 +3,11 @@ import Link from "next/link";
 import H1Title from "@/app/components/H1Title";
 import ProductOrderBox from "@/app/components/catalog/ProductOrderBox";
 import { getVisibleProductReference } from "@/lib/catalog/product-reference";
+import {
+	getCloudinaryAttachmentDownloadUrl,
+	isPdfResourceUrl,
+	sanitizeDownloadFileName,
+} from "@/lib/cloudinary-url";
 import { formatDateTime } from "@/lib/utils/user-utils";
 import type { listColorCharts } from "@/lib/typeorm/services/catalog/color-chart";
 import type { listColorReferences } from "@/lib/typeorm/services/catalog/color-chart";
@@ -116,32 +121,49 @@ function SupportResourcesPanel({
 				</div>
 			) : (
 				<div className="mt-4 space-y-3">
-					{supportResources.map((resource) => (
-						<a
-							key={resource.id}
-							href={resource.resourceUrl}
-							target="_blank"
-							rel="noreferrer"
-							className="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-						>
-							<div className="flex flex-wrap gap-2">
-								<span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-									{resource.resourceTypeName || "Recurso"}
-								</span>
-								<span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-									{resource.scopeLabel}
-								</span>
-							</div>
+					{supportResources.map((resource) => {
+						const isPdf = isPdfResourceUrl(resource.resourceUrl);
+						const downloadName = sanitizeDownloadFileName(
+							`${resource.title}.pdf`,
+							"recurso.pdf",
+							{ ensurePdfExtension: true },
+						);
+						const href = isPdf
+							? getCloudinaryAttachmentDownloadUrl(
+									resource.resourceUrl,
+									downloadName,
+								)
+							: resource.resourceUrl;
 
-							<h4 className="mt-3 text-base font-semibold text-slate-900">
-								{resource.title}
-							</h4>
+						return (
+							<a
+								key={resource.id}
+								href={href}
+								target={isPdf ? undefined : "_blank"}
+								rel={isPdf ? undefined : "noreferrer"}
+								download={isPdf ? downloadName : undefined}
+								className="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+							>
+								<div className="flex flex-wrap gap-2">
+									<span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+										{resource.resourceTypeName || "Recurso"}
+									</span>
+									<span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+										{resource.scopeLabel}
+									</span>
+								</div>
 
-							<p className="mt-2 text-sm leading-6 text-slate-600">
-								{resource.description || "Abrir recurso externo"}
-							</p>
-						</a>
-					))}
+								<h4 className="mt-3 text-base font-semibold text-slate-900">
+									{resource.title}
+								</h4>
+
+								<p className="mt-2 text-sm leading-6 text-slate-600">
+									{resource.description ||
+										(isPdf ? "Descargar PDF" : "Abrir recurso externo")}
+								</p>
+							</a>
+						);
+					})}
 				</div>
 			)}
 		</section>

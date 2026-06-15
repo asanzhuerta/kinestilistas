@@ -343,7 +343,7 @@ export function getProductSubcategoryFields(
 			})),
 			filterByFieldName: "productLineId",
 			helpText:
-				"Opcional. Si esta subcategoría depende de otra dentro de la misma línea, indicalo aqui.",
+				"Opcional. Si esta subcategoría depende de otra dentro de la misma línea, indícalo aquí.",
 		},
 		{
 			name: "displayOrder",
@@ -482,7 +482,7 @@ export function getSupportResourceFields(input: {
 	return [
 		{
 			name: "title",
-			label: "Titulo",
+			label: "Título",
 			type: "text",
 			required: true,
 			placeholder: "Ficha técnica oxidante 20 vol",
@@ -498,10 +498,14 @@ export function getSupportResourceFields(input: {
 		},
 		{
 			name: "resourceUrl",
-			label: "URL del recurso",
-			type: "text",
+			label: "Archivo o URL del recurso",
+			type: "file",
 			required: true,
 			placeholder: "https://...",
+			accept: "application/pdf,image/*",
+			uploadEndpoint: "/api/admin/catalog/upload-resource",
+			helpText:
+				"Puedes subir un PDF o una imagen a Cloudinary, o pegar una URL externa.",
 		},
 		{
 			name: "productId",

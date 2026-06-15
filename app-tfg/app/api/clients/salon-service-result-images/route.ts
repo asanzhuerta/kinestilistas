@@ -86,7 +86,7 @@ export async function DELETE(request: Request) {
 
 		if (!isValidCloudinaryImageUrl(imageUrl)) {
 			return badRequestError(
-				"La imagen indicada no es valida",
+				"La imagen indicada no es válida",
 				"IMAGE_URL_INVALID",
 			);
 		}

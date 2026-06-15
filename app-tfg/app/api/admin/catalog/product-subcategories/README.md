@@ -4,4 +4,4 @@ CRUD de subcategorías.
 
 ## Función
 
-Gestionar clasificacion interna de productos por línea.
+Gestionar clasificación interna de productos por línea.

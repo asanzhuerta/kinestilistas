@@ -23,13 +23,17 @@ function normalizeCategoryKey(value: string | null | undefined) {
 export function buildCategoryBadgeClassMap(
 	categoryNames: Array<string | null | undefined>,
 ) {
-	const uniqueCategoryKeys = Array.from(
-		new Set(
-			categoryNames
-				.map((categoryName) => normalizeCategoryKey(categoryName))
-				.filter(Boolean),
-		),
-	).sort((left, right) =>
+	const uniqueCategoryKeySet = new Set<string>();
+
+	for (const categoryName of categoryNames) {
+		const categoryKey = normalizeCategoryKey(categoryName);
+
+		if (categoryKey) {
+			uniqueCategoryKeySet.add(categoryKey);
+		}
+	}
+
+	const uniqueCategoryKeys = Array.from(uniqueCategoryKeySet).toSorted((left, right) =>
 		left.localeCompare(right, "es", { sensitivity: "base" }),
 	);
 

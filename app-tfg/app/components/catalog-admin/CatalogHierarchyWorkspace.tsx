@@ -58,8 +58,8 @@ type Props = {
 function sortProductSubcategoryTree(
 	nodes: ProductSubcategoryTreeNode[],
 ): ProductSubcategoryTreeNode[] {
-	return [...nodes]
-		.sort((left, right) => {
+	return nodes
+		.toSorted((left, right) => {
 			if (left.display_order !== right.display_order) {
 				return left.display_order - right.display_order;
 			}
@@ -100,6 +100,105 @@ function buildProductSubcategoryTree(
 	return sortProductSubcategoryTree(roots);
 }
 
+function appendSearchValue(values: string[], value: string | null | undefined) {
+	if (value) {
+		values.push(value);
+	}
+}
+
+function buildProductCategorySearchText(
+	productCategory: ProductCategoryRow,
+	categoryLines: ProductLineRow[],
+	categorySubcategories: ProductSubcategoryRow[],
+) {
+	const searchValues: string[] = [];
+
+	appendSearchValue(searchValues, productCategory.name);
+	appendSearchValue(searchValues, productCategory.description);
+
+	for (const productLine of categoryLines) {
+		appendSearchValue(searchValues, productLine.name);
+		appendSearchValue(searchValues, productLine.description);
+	}
+
+	for (const productSubcategory of categorySubcategories) {
+		appendSearchValue(searchValues, productSubcategory.name);
+		appendSearchValue(searchValues, productSubcategory.description);
+	}
+
+	return searchValues.join(" ");
+}
+
+function ProductSubcategoryTree({
+	productCategory,
+	productLine,
+	nodes,
+	level = 0,
+}: {
+	productCategory: ProductCategoryRow;
+	productLine: ProductLineRow;
+	nodes: ProductSubcategoryTreeNode[];
+	level?: number;
+}) {
+	return (
+		<div className="space-y-3">
+			{nodes.map((productSubcategory) => (
+				<div
+					key={productSubcategory.id}
+					className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+					style={level > 0 ? { marginLeft: `${level * 18}px` } : undefined}
+				>
+					<div className="flex items-start gap-3">
+						<div className="min-w-0 flex-1">
+							<div className="flex flex-wrap items-start justify-between gap-3">
+								<div className="min-w-0">
+									<div className="flex flex-wrap items-center gap-2">
+										<Link
+											href={buildAdminProductsHref({
+												category: productCategory.name,
+												productLine: productLine.name,
+												subcategory: productSubcategory.name,
+											})}
+											className="text-sm font-semibold text-slate-800 transition hover:text-slate-950"
+										>
+											{productSubcategory.name}
+										</Link>
+										{productSubcategory.children.length > 0 ? (
+											<span className="rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+												{productSubcategory.children.length} hijas
+											</span>
+										) : null}
+									</div>
+								</div>
+
+								<div className="flex flex-wrap gap-2">
+									<Link
+										href={`/admin/catalog/product-subcategories/${productSubcategory.id}/edit`}
+										className="rounded-md bg-slate-100 px-2.5 py-1.5 text-[11px] font-medium text-slate-700 transition hover:bg-slate-200"
+									>
+										Editar
+									</Link>
+								</div>
+							</div>
+
+							{productSubcategory.children.length > 0 ? (
+								<div className="mt-3 border-l border-slate-200 pl-3">
+									<ProductSubcategoryTree
+										productCategory={productCategory}
+										productLine={productLine}
+										nodes={productSubcategory.children}
+										level={level + 1}
+									/>
+								</div>
+							) : null}
+						</div>
+					</div>
+				</div>
+			))}
+		</div>
+	);
+}
+
 function buildProductCategoryItems(
 	productCategories: ProductCategoryRow[],
 	productLines: ProductLineRow[],
@@ -123,20 +222,11 @@ function buildProductCategoryItems(
 			primaryDate: String(9999 - productCategory.display_order).padStart(4, "0"),
 			badges: [],
 			fields: [],
-			searchText: [
-				productCategory.name,
-				productCategory.description,
-				...categoryLines.flatMap((productLine) => [
-					productLine.name,
-					productLine.description,
-				]),
-				...categorySubcategories.flatMap((productSubcategory) => [
-					productSubcategory.name,
-					productSubcategory.description,
-				]),
-			]
-				.filter(Boolean)
-				.join(" "),
+			searchText: buildProductCategorySearchText(
+				productCategory,
+				categoryLines,
+				categorySubcategories,
+			),
 		};
 	});
 }
@@ -194,9 +284,19 @@ export default function CatalogHierarchyWorkspace({
 			),
 		[productCategories],
 	);
-	const filteredCategories = table.filteredAndSortedItems
-		.map((item) => productCategoriesById.get(item.id))
-		.filter(Boolean) as ProductCategoryRow[];
+	const filteredCategories = useMemo(() => {
+		const nextCategories: ProductCategoryRow[] = [];
+
+		for (const item of table.filteredAndSortedItems) {
+			const productCategory = productCategoriesById.get(item.id);
+
+			if (productCategory) {
+				nextCategories.push(productCategory);
+			}
+		}
+
+		return nextCategories;
+	}, [productCategoriesById, table.filteredAndSortedItems]);
 	const subcategoryTreesByLineId = useMemo(() => {
 		const groupedSubcategories = productSubcategories.reduce<
 			Map<string, ProductSubcategoryRow[]>
@@ -222,71 +322,6 @@ export default function CatalogHierarchyWorkspace({
 	function toggleLine(categoryId: string, lineId: string) {
 		setExpandedCategoryId(categoryId);
 		setExpandedLineId((current) => (current === lineId ? null : lineId));
-	}
-
-	function renderSubcategoryNodes(
-		productCategory: ProductCategoryRow,
-		productLine: ProductLineRow,
-		nodes: ProductSubcategoryTreeNode[],
-		level = 0,
-	) {
-		return (
-			<div className="space-y-3">
-				{nodes.map((productSubcategory) => (
-					<div
-						key={productSubcategory.id}
-						className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
-						style={level > 0 ? { marginLeft: `${level * 18}px` } : undefined}
-					>
-						<div className="flex items-start gap-3">
-							<div className="min-w-0 flex-1">
-								<div className="flex flex-wrap items-start justify-between gap-3">
-									<div className="min-w-0">
-										<div className="flex flex-wrap items-center gap-2">
-											<Link
-												href={buildAdminProductsHref({
-													category: productCategory.name,
-													productLine: productLine.name,
-													subcategory: productSubcategory.name,
-												})}
-												className="text-sm font-semibold text-slate-800 transition hover:text-slate-950"
-											>
-												{productSubcategory.name}
-											</Link>
-										{productSubcategory.children.length > 0 ? (
-												<span className="rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
-													{productSubcategory.children.length} hijas
-												</span>
-											) : null}
-										</div>
-									</div>
-
-									<div className="flex flex-wrap gap-2">
-										<Link
-											href={`/admin/catalog/product-subcategories/${productSubcategory.id}/edit`}
-											className="rounded-md bg-slate-100 px-2.5 py-1.5 text-[11px] font-medium text-slate-700 transition hover:bg-slate-200"
-										>
-											Editar
-										</Link>
-									</div>
-								</div>
-
-								{productSubcategory.children.length > 0 ? (
-									<div className="mt-3 border-l border-slate-200 pl-3">
-										{renderSubcategoryNodes(
-											productCategory,
-											productLine,
-											productSubcategory.children,
-											level + 1,
-										)}
-									</div>
-								) : null}
-							</div>
-						</div>
-					</div>
-				))}
-			</div>
-		);
 	}
 
 	return (
@@ -511,11 +546,11 @@ export default function CatalogHierarchyWorkspace({
 
 														{isLineExpanded && subcategoryTree.length > 0 ? (
 															<div className="border-t border-slate-200 bg-slate-50/80 p-4">
-																{renderSubcategoryNodes(
-																	productCategory,
-																	productLine,
-																	subcategoryTree,
-																)}
+																<ProductSubcategoryTree
+																	productCategory={productCategory}
+																	productLine={productLine}
+																	nodes={subcategoryTree}
+																/>
 															</div>
 														) : null}
 													</div>

@@ -389,9 +389,19 @@ export default function ColorChartsExplorer({
 		() => new Map(items.map((item) => [item.id, item])),
 		[items],
 	);
-	const filteredLineItems = table.filteredAndSortedItems
-		.map((item) => lineItemById.get(item.id))
-		.filter(Boolean) as EntityTableItem[];
+	const filteredLineItems = useMemo(() => {
+		const nextLineItems: EntityTableItem[] = [];
+
+		for (const item of table.filteredAndSortedItems) {
+			const lineItem = lineItemById.get(item.id);
+
+			if (lineItem) {
+				nextLineItems.push(lineItem);
+			}
+		}
+
+		return nextLineItems;
+	}, [lineItemById, table.filteredAndSortedItems]);
 	const filteredLineIds = new Set(filteredLineItems.map((item) => item.id));
 	const filteredChartGroups = Array.from(chartGroupsByLineId.entries())
 		.filter(([productLineId]) => filteredLineIds.has(productLineId))

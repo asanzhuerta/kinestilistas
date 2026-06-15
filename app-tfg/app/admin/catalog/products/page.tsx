@@ -19,8 +19,15 @@ function mapProductToItem(
 		title: product.name,
 		subtitle: product.description || "",
 		imageUrl: product.image_url,
+		imageAlt: product.reference
+			? `Imagen de ${product.name} (${product.reference})`
+			: `Imagen de ${product.name}`,
 		secondaryImageUrl: product.productLine?.image_url ?? null,
 		secondaryImageLabel: product.productLine?.name ?? null,
+		secondaryImageAlt:
+			product.productLine?.name && product.reference
+				? `Imagen de ${product.productLine.name} asociada a ${product.name} (${product.reference})`
+				: null,
 		secondaryBadge: product.productSubcategory?.name
 			? {
 					label: product.productSubcategory.name,

@@ -71,6 +71,29 @@ const inputClassName =
 
 const textareaClassName = `${inputClassName} min-h-28 resize-y`;
 
+async function cleanupTransientResultImages(images: EditableResultImage[]) {
+	const transientImages = images.filter((image) => !image.persisted);
+
+	await Promise.allSettled(
+		transientImages.map((image) =>
+			requestJson<DeleteSalonResultImageResponse>(
+				"/api/clients/salon-service-result-images",
+				{
+					method: "DELETE",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						imageUrl: image.imageUrl,
+					}),
+					fallbackMessage:
+						"No se ha podido limpiar una imagen temporal del resultado",
+				},
+			).catch(() => null),
+		),
+	);
+}
+
 function createEmptyProductUsage(localId = `usage-${Date.now()}`): EditableProductUsage {
 	return {
 		localId,
@@ -279,29 +302,6 @@ export default function SalonClientDetailView({
 			resetTechnicalEmailDraft();
 		}
 	}, [detail.services, technicalEmailDraftServiceId]);
-
-	async function cleanupTransientResultImages(images: EditableResultImage[]) {
-		const transientImages = images.filter((image) => !image.persisted);
-
-		await Promise.allSettled(
-			transientImages.map((image) =>
-				requestJson<DeleteSalonResultImageResponse>(
-					"/api/clients/salon-service-result-images",
-					{
-						method: "DELETE",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({
-							imageUrl: image.imageUrl,
-						}),
-						fallbackMessage:
-							"No se ha podido limpiar una imagen temporal del resultado",
-					},
-				).catch(() => null),
-			),
-		);
-	}
 
 	function resetServiceForm(options: { cleanupTransient?: boolean } = {}) {
 		if (options.cleanupTransient !== false) {
@@ -605,7 +605,7 @@ export default function SalonClientDetailView({
 
 	async function handleDeleteTemplate(template: SalonServiceTemplateSummary) {
 		const confirmed = window.confirm(
-			`Se eliminara la plantilla "${template.name}". Esta accion no se puede deshacer.`,
+			`Se eliminará la plantilla "${template.name}". Esta acción no se puede deshacer.`,
 		);
 
 		if (!confirmed) {
@@ -894,9 +894,9 @@ export default function SalonClientDetailView({
 
 	async function handleDeleteService(service: SalonServiceSummary) {
 		const confirmed = window.confirm(
-			`Se eliminara el servicio "${service.service_type}" del ${formatDateShort(
+			`Se eliminará el servicio "${service.service_type}" del ${formatDateShort(
 				service.service_date,
-			)}. Esta accion no se puede deshacer.`,
+			)}. Esta acción no se puede deshacer.`,
 		);
 
 		if (!confirmed) {
@@ -1373,7 +1373,7 @@ export default function SalonClientDetailView({
 
 							{editingServiceId ? (
 								<div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
-									Estas editando un servicio ya registrado. Al guardar, se
+									Estás editando un servicio ya registrado. Al guardar, se
 									actualizara también la sugerencia de producto asociada al
 									historial.
 								</div>

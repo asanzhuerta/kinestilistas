@@ -14,8 +14,10 @@ type Props = {
 };
 
 export default async function NewProductLinePage({ searchParams }: Props) {
-	const productCategories = await listProductCategories();
-	const resolvedSearchParams = await searchParams;
+	const [productCategories, resolvedSearchParams] = await Promise.all([
+		listProductCategories(),
+		searchParams,
+	]);
 	const initialValues = getProductLineInitialValues();
 	const initialProductCategoryId = getSingleSearchParamValue(
 		resolvedSearchParams?.productCategoryId,

@@ -48,7 +48,7 @@ export async function PATCH(request: Request) {
 		if (!isValidCloudinaryImageUrl(profileImageUrl)) {
 			return NextResponse.json(
 				{
-					message: "La URL de la imagen de perfil no es valida",
+					message: "La URL de la imagen de perfil no es válida",
 					code: "INVALID_PROFILE_IMAGE_URL",
 				},
 				{ status: 400 },

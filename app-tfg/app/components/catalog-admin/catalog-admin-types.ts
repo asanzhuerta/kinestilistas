@@ -15,7 +15,8 @@ export type FieldType =
 	| "number"
 	| "select"
 	| "checkbox"
-	| "image";
+	| "image"
+	| "file";
 
 export type FormValue = string | boolean;
 
@@ -30,4 +31,6 @@ export type FieldDescriptor = {
 	filterByFieldName?: string;
 	step?: string;
 	min?: number;
+	accept?: string;
+	uploadEndpoint?: string;
 };

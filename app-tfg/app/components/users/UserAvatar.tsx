@@ -15,6 +15,7 @@ type UserAvatarProps = {
 	imageBackgroundClass?: string;
 	imageSizes?: string;
 	imageIntrinsicPixels?: number;
+	imageAlt?: string;
 	className?: string;
 };
 
@@ -59,6 +60,7 @@ export default function UserAvatar({
 	imageBackgroundClass = "bg-white",
 	imageSizes,
 	imageIntrinsicPixels,
+	imageAlt,
 	className = "",
 }: UserAvatarProps) {
 	const userInitial = getUserInitial(name);
@@ -126,7 +128,7 @@ export default function UserAvatar({
 			{shouldShowImage ? (
 				<Image
 					src={imageUrl ?? ""}
-					alt="Foto de perfil"
+					alt={imageAlt ?? "Foto de perfil"}
 					width={requestedImagePixels}
 					height={requestedImagePixels}
 					sizes={imageSizes ?? `${avatarSize.pixels}px`}
