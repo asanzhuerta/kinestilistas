@@ -101,6 +101,8 @@ La aplicación mantiene además una capa de utilidades compartidas para reducir 
 
 En despliegues Netlify, el proxy global de Next.js se conserva como `app-tfg/proxy.hosting.ts` pero no se activa como `proxy.ts` por incompatibilidad del runtime Edge con Next.js 16. El rate limiting queda aplicado dentro de los Route Handlers mediante `app-tfg/lib/api/server.ts`, y en un hosting compatible puede reactivarse el proxy renombrando `proxy.hosting.ts` a `proxy.ts`.
 
+El resumen transversal de los ultimos cambios de consolidacion queda recogido en `app-tfg/RECENT_CHANGES.md`. Ese documento resume limpieza estructural, decisiones de despliegue, ajustes de seguridad, correcciones de rutas comerciales y mejoras de experiencia movil.
+
 ## Autor
 
 Alejandro Sanz Huerta

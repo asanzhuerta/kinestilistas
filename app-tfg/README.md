@@ -59,3 +59,12 @@ npm run catalog:upload-product-images -- --dry-run
 
 - Las migraciones se crean con `npm run migration:create`.
 - El puerto local esperado para desarrollo es `3000`.
+- El resumen consolidado de los ultimos cambios tecnicos y funcionales vive en `RECENT_CHANGES.md`.
+
+## Cambios recientes a tener presentes
+
+- Demo desplegable en `Netlify + Neon`, manteniendo `proxy.hosting.ts` en el repositorio y rate limiting activo en Route Handlers por incompatibilidad del runtime Edge de Netlify con `proxy.ts` en este proyecto.
+- Limpieza de codigo en comunicaciones, pedidos y salon mediante extraccion de hooks, paneles y utilidades compartidas.
+- Regla de negocio: aplazar una visita de reparto libera sus repartos para poder reasignarlos.
+- Correccion de modales largos en movil mediante el patron `app-modal-overlay` + `app-modal-scroll-panel`.
+- Correccion de ETA de rutas comerciales: ahora se prioriza la duracion real por carretera via OSRM, y Google Maps navega hacia la visita actual sin contaminar el resultado con el regreso automatico al origen.

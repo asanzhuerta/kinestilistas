@@ -15,7 +15,9 @@ Desde el punto de vista del despliegue, la aplicación no separa frontend y back
 
 En el despliegue de demostración sobre \texttt{Netlify} se mantiene una adaptación específica: el proxy global de \texttt{Next.js} se conserva en el repositorio como \texttt{app-tfg/proxy.hosting.ts}, pero no se publica con el nombre activo \texttt{proxy.ts}. La razón es una incompatibilidad observada entre el runtime Edge de \texttt{Netlify} y \texttt{Next.js 16}, que provocaba el error \texttt{nextHandler is not a function}. Para no perder seguridad en la demostración, el rate limiting se aplica también dentro de los \textit{Route Handlers} mediante \texttt{enforceApiRateLimit(request)}, mientras que la protección de sesión y rol permanece en layouts y endpoints de servidor. En un hosting compatible con el proxy de \texttt{Next.js}, basta con renombrar \texttt{proxy.hosting.ts} a \texttt{proxy.ts} para reactivar esa capa previa.
 
-\textcolor{red}{Revisar precisión: validar si realmente se quiere defender este despliegue como producción equivalente o solo como arquitectura de referencia.} La Figura~\ref{fig:physical-deployment} resume esta arquitectura física de referencia, válida tanto para el entorno local de desarrollo como para un despliegue de producción equivalente con base de datos gestionada.
+En la demostración publicada se ha utilizado la combinación \texttt{Netlify + Neon + Cloudinary}. En este escenario resulta conveniente distinguir entre dos usos de la base de datos: para el tiempo de ejecución web, \texttt{Netlify} utiliza la cadena pooled de \texttt{Neon} como \texttt{DATABASE\_URL}; para migraciones manuales, restauración de datos o scripts locales puede emplearse una conexión directa equivalente si el proveedor la ofrece. Esta separación evita penalizar la capa web y reduce incidencias en tareas operativas puntuales.
+
+La Figura~\ref{fig:physical-deployment} resume esta arquitectura física de referencia, válida tanto para el entorno local de desarrollo como para el despliegue de demostración con base de datos gestionada.
 
 \begin{figure}[H]
     \centering
@@ -33,7 +35,7 @@ En desarrollo local, \texttt{PostgreSQL} se levanta habitualmente con \texttt{Do
 \subsubsection*{Infraestructura mínima}
 
 \begin{itemize}
-    \item Un entorno capaz de ejecutar \texttt{Node.js 20} o superior.
+    \item Un entorno capaz de ejecutar \texttt{Node.js 20} o superior; para la demo desplegada se ha fijado \texttt{Node.js 22}.
     \item Una instancia accesible de \texttt{PostgreSQL}.
     \item Acceso a las variables de entorno de la aplicación.
     \item Conexión saliente HTTPS hacia los servicios externos utilizados.
@@ -104,6 +106,28 @@ GEOCODING_COUNTRY_NAME=Espana
 GEOCODING_EMAIL=
 GEOCODING_USER_AGENT=KinestilistasTFG/1.0
 NEXT_PUBLIC_OSRM_BASE_URL=https://router.project-osrm.org
+\end{lstlisting}
+
+Para una demo equivalente a la publicada en \texttt{Netlify}, la configuración práctica queda resumida en:
+
+\begin{lstlisting}[language=bash]
+DATABASE_URL=postgresql://<cadena-pooled-de-neon>
+NODE_VERSION=22
+AUTH_SECRET=<valor-seguro>
+AUTH_TRUST_HOST=true
+AUTH_URL=https://<tu-site>.netlify.app
+NEXTAUTH_URL=https://<tu-site>.netlify.app
+APP_BASE_URL=https://<tu-site>.netlify.app
+NEXT_PUBLIC_APP_URL=https://<tu-site>.netlify.app
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+\end{lstlisting}
+
+Si se quiere forzar una URL distinta para el calculo servidor de duraciones de ruta, puede añadirse ademas:
+
+\begin{lstlisting}[language=bash]
+OSRM_BASE_URL=https://router.project-osrm.org
 \end{lstlisting}
 
 La puesta en marcha local de referencia queda:

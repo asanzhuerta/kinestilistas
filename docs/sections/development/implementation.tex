@@ -49,6 +49,8 @@ En la capa cliente se ha centralizado el patrón de llamadas HTTP en \path{lib/a
 
 También se han dividido pantallas extensas en piezas más pequeñas. En comunicaciones, el \textit{workspace} administrativo separa formularios, listas, resumen, API cliente y hook de orquestación. En pedidos, la carga remota del borrador y las mutaciones principales se han extraído de la vista principal. En el módulo de salón, el detalle se organiza por paneles de ficha, formulario de servicio, historial y plantillas. Esta estructura reduce el acoplamiento entre presentación, estado y reglas de negocio, y facilita que futuras ampliaciones se incorporen sobre puntos de extensión más acotados.
 
+Como ajuste transversal de usabilidad, los modales largos comparten ahora un patrón desplazable para móvil basado en un \textit{overlay} con scroll vertical y panel con altura máxima acotada. Esta decisión evita que formularios extensos de visitas o detalle queden bloqueados en pantallas pequeñas y deja el comportamiento documentado como parte de la consolidación final.
+
 \input{./sections/development/implementation/apiroutes.tex}
 
 \subsection{Implementación del módulo M1}
@@ -59,7 +61,7 @@ Las piezas más relevantes son las siguientes:
 
 \begin{itemize}
     \item autenticación mediante proveedor de credenciales de \texttt{Auth.js}, con sesión \texttt{JWT};
-    \item control de acceso por rol en \texttt{proxy.ts}, que protege las rutas \path{/admin}, \path{/commercials} y \path{/clients};
+    \item control de acceso por rol en la capa previa de navegación, preservada como \texttt{proxy.hosting.ts} para despliegues compatibles y reproducida en la demo mediante layouts protegidos y validaciones de servidor sobre las rutas \path{/admin}, \path{/commercials} y \path{/clients};
     \item navegación lateral desplegable por rol mediante \texttt{RoleSidebar}, disponible en escritorio y móvil, con logo de la aplicación, rol visible y sustitución de la navegación inferior en los \textit{layouts} protegidos;
     \item registro de solicitudes de alta y gestión administrativa de estados de cuenta;
     \item registro de eventos de acceso y trazabilidad de sesiones exitosas o fallidas;
@@ -86,6 +88,8 @@ Actualmente ya están implementados:
 \end{itemize}
 
 La lógica temporal de rutas y estimaciones no reside en la capa visual, sino que se centraliza en \path{lib/commercial/daily-route-planning.ts}. Esta decisión permite reutilizar el mismo cálculo tanto en el panel comercial como en la tarjeta de ETA que visualiza el cliente.
+
+En la revisión final se ha corregido además un desajuste importante entre la ETA operativa y la navegación externa. La duración entre paradas ya no depende solo de una velocidad aproximada sobre distancia en línea recta, sino que prioriza tiempos reales por carretera mediante \texttt{OSRM}. Si el servicio no responde, se conserva un \textit{fallback} local por distancia aproximada para no bloquear la operativa. Del mismo modo, el acceso rápido a \texttt{Google Maps} navega hacia la visita actual sin contaminar la ETA mostrada con el posible regreso automático al punto de salida al cierre de la jornada.
 
 \subsection{Implementación del módulo M3}
 
@@ -118,6 +122,7 @@ Actualmente ya están implementados:
     \item registro manual de bultos por reparto, porque el número de paquetes físicos depende de la preparación real del distribuidor y no del número de productos;
     \item generación de etiqueta PDF por reparto: QR para entregas comerciales y marca \texttt{AGENCIA} para entregas delegadas en agencia;
     \item vinculación de repartos comerciales a visitas de tipo \texttt{delivery}, con cierre mediante escáner continuo de cámara en un modal de pantalla completa, fallback manual y transición del pedido a \texttt{delivered} solo cuando todos sus repartos están completados;
+    \item liberación automática de los repartos asociados cuando una visita de entrega queda aplazada, para permitir su reasignación posterior sin dejar pedidos bloqueados;
     \item configuración administrativa del cargo de agencia, aplicada al total del pedido cuando el cliente o el comercial seleccionan esa modalidad de entrega;
     \item flujo de cobro mediante historial de pagos parciales o totales, con registro de importe, método, fecha, notas y usuario que realiza la acción, y cálculo de saldo pendiente;
     \item consulta de ETA para cliente solo cuando existe una visita de reparto válida y alineada con un reparto comercial pendiente.
