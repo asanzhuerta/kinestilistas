@@ -1,51 +1,47 @@
-El aseguramiento de calidad del proyecto se ha planteado como un conjunto de actividades orientadas a garantizar que el sistema desarrollado sea comprensible, mantenible, funcional y coherente con los requisitos definidos. Estas actividades se han aplicado tanto al software como a la documentación generada.
+El aseguramiento de calidad del proyecto se ha abordado como un conjunto de prácticas técnicas y documentales orientadas a conseguir un sistema mantenible, comprensible, verificable y coherente con los requisitos definidos. Dado que se trata de una aplicación web \textit{full-stack} desarrollada de forma iterativa, la calidad no se ha concentrado únicamente en una fase final, sino que se ha revisado de forma progresiva durante el análisis, el diseño, la construcción, las pruebas, el despliegue de demostración y la elaboración de la memoria.
 
-\subsection{Objetivos de calidad}
+Como marco general, se han tomado como referencia las características de calidad recogidas por ISO/IEC 25010, especialmente mantenibilidad, seguridad, adecuación funcional, compatibilidad, usabilidad y fiabilidad \citep{iso25010}. A partir de esta referencia, el proyecto ha concretado sus controles de calidad en las siguientes prácticas.
 
-Los principales objetivos de calidad considerados durante el desarrollo han sido los siguientes:
+\textbf{Principios de \textit{Clean Code}:} Durante el desarrollo se han aplicado criterios inspirados en \textit{Clean Code} \citep{martin2008cleancode}, priorizando nombres descriptivos, funciones con responsabilidades acotadas, reducción de duplicidades y organización clara del código. Esta práctica ha sido especialmente relevante en servicios de dominio, validaciones de entrada, contratos compartidos, utilidades de catálogo, pedidos, visitas, comunicaciones y operaciones administrativas. El objetivo ha sido facilitar la comprensión del sistema y reducir el coste de introducir cambios posteriores.
 
-\begin{itemize}
-    \item Garantizar que el sistema responde a las necesidades principales identificadas durante la captura de requisitos.
-    \item Mantener una estructura de código clara y preparada para futuras ampliaciones.
-    \item Asegurar que la autenticación, la gestión de usuarios y el control de roles funcionan correctamente.
-    \item Favorecer la mantenibilidad mediante una organización modular del código y de la documentación.
-    \item Comprobar que la aplicación puede ejecutarse en el entorno local definido.
-    \item Revisar que la memoria no contenga texto de plantilla, marcadores pendientes, figuras sin referencia o inconsistencias entre capítulos.
-\end{itemize}
+\textbf{Separación de responsabilidades y arquitectura mantenible:} La aplicación no se ha planteado como una arquitectura hexagonal estricta, pero sí ha seguido una separación práctica de responsabilidades inspirada en los principios de \textit{Clean Architecture} \citep{martin2017cleanarchitecture}. La interfaz se organiza mediante rutas y componentes de \textit{Next.js}; la frontera de servidor se apoya en \textit{Route Handlers}; la lógica de negocio se concentra en servicios reutilizables; y la persistencia se gestiona mediante entidades, repositorios y migraciones de \textit{TypeORM}. Esta organización reduce el acoplamiento entre interfaz, reglas de negocio y base de datos, y facilita la validación independiente de partes críticas del sistema.
 
-\subsection{Prácticas aplicadas}
+\textbf{Tipado, análisis estático y construcción reproducible:} El proyecto utiliza \textit{TypeScript} como mecanismo de prevención temprana de errores en contratos, componentes y servicios \citep{typescriptdocs2026}. Además, se emplea \textit{ESLint} para detectar patrones problemáticos y mantener una estructura de código consistente \citep{eslintdocs2026}. La construcción completa con \texttt{npm run build} permite comprobar que la aplicación puede compilarse correctamente con \textit{Next.js}, incluyendo rutas, componentes de servidor, componentes de cliente, configuración de imágenes y dependencias externas.
 
-Durante el desarrollo se han aplicado diferentes prácticas de calidad:
+\textbf{Testing y validación progresiva:} La validación del sistema combina comprobaciones automáticas, pruebas funcionales por bloques de negocio y revisiones manuales de flujos críticos. Aunque la versión actual no incorpora todavía una batería formal de pruebas unitarias con un \textit{runner} dedicado, sí dispone de scripts específicos para comprobar servicios, persistencia, migraciones, permisos, rutas, operaciones de pedido, comunicaciones, auditoría, \textit{rate limiting} y preparación de datos de demostración. Esta estrategia permite detectar regresiones tras cada cambio relevante y aporta evidencias repetibles sobre el comportamiento del sistema.
 
-\begin{itemize}
-    \item \textbf{Revisión incremental del código:} los cambios se han incorporado de forma progresiva, revisando su efecto sobre el funcionamiento general del sistema.
-    \item \textbf{Validación manual de flujos principales:} se han comprobado los procesos básicos de acceso, autenticación, navegación y administración inicial.
-    \item \textbf{Separación de responsabilidades:} la aplicación se ha organizado en componentes, rutas, lógica de servidor y acceso a datos.
-    \item \textbf{Uso de control de versiones:} se ha mantenido un historial de cambios que permite recuperar estados anteriores y revisar la evolución del proyecto.
-    \item \textbf{Documentación técnica:} se han documentado los pasos necesarios para preparar el entorno y continuar el desarrollo del sistema.
-    \item \textbf{Revisión de la memoria:} se ha comprobado la coherencia entre objetivos, requisitos, diseño, construcción y pruebas.
-\end{itemize}
+\textbf{Calidad de interfaz, accesibilidad y experiencia de uso:} Además de las comprobaciones funcionales, se han utilizado herramientas auxiliares como \textit{React Doctor} para revisar patrones de mantenibilidad y rendimiento en componentes React \citep{reactdoctor2026}, y \textit{WAVE} como apoyo a la revisión de accesibilidad web \citep{wavewebaim2026}. Estas comprobaciones no sustituyen una auditoría profesional completa de accesibilidad, pero ayudan a detectar problemas comunes y a reforzar la consistencia de la interfaz en escritorio y móvil.
 
-\subsection{Verificación y validación}
+\subsection{Verificación, validación y control de calidad}
 
-La verificación se ha centrado en comprobar que los artefactos generados se ajustan a lo definido en las fases anteriores del proyecto. En este sentido, se han revisado los requisitos, los modelos, la estructura del código y las pruebas realizadas.
+Durante el desarrollo se han aplicado varias actividades de verificación, validación y control de calidad con el objetivo de comprobar que el producto construido se mantiene alineado con el alcance definido.
 
-La validación se ha orientado a comprobar que el sistema resulta adecuado para el problema planteado. Para ello, se ha contrastado el funcionamiento de la aplicación con los objetivos del proyecto y con las necesidades detectadas en la actividad del distribuidor.
+\textbf{Revisión de código:} Al tratarse de un desarrollo individual, no se han realizado revisiones cruzadas formales entre varios desarrolladores. En su lugar, se ha aplicado una revisión incremental después de cada cambio relevante, comprobando legibilidad, coherencia con la arquitectura existente, ausencia de duplicidades evidentes, mantenimiento de permisos por rol y compatibilidad con los flujos ya validados. Esta revisión ha permitido corregir problemas de organización interna, consolidar servicios reutilizables y evitar que la documentación quedase desalineada respecto al estado real del repositorio.
 
-\subsection{Criterios de aceptación}
+\textbf{Comprobaciones estáticas:} Antes de considerar estable una versión, se ejecutan comprobaciones de tipado, análisis estático y construcción:
 
-Una funcionalidad se considera aceptada cuando cumple los siguientes criterios:
+\begin{lstlisting}[language=bash]
+npm run typecheck
+npm run lint
+npm run build
+\end{lstlisting}
 
-\begin{itemize}
-    \item Está alineada con un requisito o necesidad identificada en el análisis.
-    \item Puede ejecutarse correctamente en el entorno local del proyecto.
-    \item No impide el funcionamiento de otros flujos previamente validados.
-    \item Mantiene una estructura de código coherente con la organización general del sistema.
-    \item Está documentada, al menos de forma básica, en la memoria o en los anexos correspondientes.
-\end{itemize}
+Estas comprobaciones permiten detectar errores de tipos, importaciones incorrectas, problemas de configuración, fallos de compilación y usos no válidos de componentes o APIs del framework.
 
-\subsection{Acciones correctoras}
+\textbf{Pruebas funcionales y de integración:} Los flujos principales se validan mediante scripts específicos que ejercitan servicios de negocio, persistencia, migraciones y reglas de acceso. Entre los comandos utilizados se encuentran:
 
-Cuando durante el desarrollo se ha detectado un error, inconsistencia o desviación respecto al alcance previsto, se han aplicado acciones correctoras. Estas acciones han consistido principalmente en revisar el código afectado, ajustar la documentación, reducir el alcance de funcionalidades no esenciales o replantear decisiones técnicas para mantener la viabilidad del proyecto.
+\begin{lstlisting}[language=bash]
+npm run test:business
+npm run test:modules
+npm run test:all
+\end{lstlisting}
 
-De este modo, el aseguramiento de calidad no se ha limitado a una fase final, sino que se ha aplicado de forma continua durante el desarrollo del Trabajo Fin de Grado.
+El comando \texttt{npm run test:all} agrupa la comprobación estática, la ejecución de migraciones, las pruebas funcionales por áreas del sistema y las comprobaciones auxiliares de calidad de interfaz. De este modo, se obtiene una señal amplia sobre el estado técnico del proyecto antes de continuar con nuevas iteraciones.
+
+\textbf{Pruebas de sistema y validación manual:} Además de los scripts automáticos, se han realizado validaciones manuales sobre los recorridos de administrador, comercial y cliente profesional. Estas comprobaciones incluyen autenticación, autorización por rol, navegación protegida, gestión de usuarios, clientes, visitas, rutas, catálogo, pedidos, pagos parciales, comunicaciones, promociones, formaciones, notificaciones, auditoría y operaciones de despliegue. La validación manual resulta necesaria porque algunos aspectos de experiencia de usuario, claridad visual, comportamiento responsive y adecuación al proceso real del distribuidor no pueden evaluarse completamente mediante scripts.
+
+\textbf{Criterios de aceptación y rechazo:} Una funcionalidad se considera aceptada cuando cumple los requisitos asociados, supera las comprobaciones estáticas, no rompe flujos ya validados, mantiene la estructura técnica del proyecto, respeta los permisos definidos por rol y queda reflejada en la documentación correspondiente cuando afecta al alcance, al diseño, a la construcción o a las pruebas. Si alguno de estos puntos no se cumple, la funcionalidad se considera pendiente de ajuste antes de formar parte de una versión estable.
+
+\textbf{Procedimientos correctivos y preventivos:} Cuando se detecta una desviación, error o inconsistencia, se aplican acciones correctoras sobre el código, la configuración, los datos de prueba o la documentación. Además, se revisa la causa del problema para evitar su repetición en iteraciones posteriores. Ejemplos de estas acciones han sido la adaptación del despliegue a \textit{Netlify}, la reubicación del \textit{rate limiting} en \textit{Route Handlers}, la consolidación de pruebas por áreas funcionales, la corrección de rutas comerciales y la actualización de la memoria conforme evolucionaba el proyecto.
+
+Con estas prácticas, el aseguramiento de calidad del proyecto busca garantizar que el sistema entregado sea funcional dentro del alcance definido, mantenible para futuras ampliaciones y suficientemente verificable para justificar las decisiones tomadas durante el desarrollo del \textit{Trabajo Fin de Grado}.

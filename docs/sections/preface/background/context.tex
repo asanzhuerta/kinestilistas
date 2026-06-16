@@ -1,68 +1,58 @@
 \subsection{Situación actual y problemática}
 
-El presente proyecto se desarrolla en el contexto de la actividad comercial de un distribuidor de productos capilares profesionales que trabaja principalmente con peluquerías como clientes. La información relativa a los procesos actuales y a las problemáticas existentes ha sido obtenida a partir del proceso de captación de requisitos descrito en la Sección~\ref{sec:RequirementsCaptureMethodology}.
+El presente proyecto se desarrolla en el contexto de la \textbf{actividad comercial} de un distribuidor de productos capilares profesionales que trabaja principalmente con \textbf{peluquerías como clientes}. La información relativa a los procesos actuales y a las problemáticas existentes ha sido obtenida a partir del proceso de \textit{captación de requisitos} descrito en la Sección~\ref{sec:RequirementsCaptureMethodology}.
 
-A partir de dicho proceso se han identificado una serie de limitaciones que afectan tanto a la operativa diaria como a la gestión de la información del negocio, justificando la necesidad de desarrollar una solución informática integrada.
+A partir de dicho proceso se han identificado una serie de limitaciones que afectan tanto a la \textbf{operativa diaria} como a la \textbf{gestión de la información del negocio}, justificando la necesidad de desarrollar una \textit{solución informática integrada}.
 
-\subsubsection{Complejidad operativa en la gestión de actividades}
+\noindent\textbf{Complejidad operativa en la gestión de actividades.} En la situación actual, el distribuidor asume de forma directa la mayor parte de las tareas asociadas al \textbf{ciclo completo de venta y distribución de productos}. Estas actividades pueden agruparse en tres grandes bloques:
 
-En la situación actual, el distribuidor asume de forma directa la mayor parte de las tareas asociadas al ciclo completo de venta y distribución de productos. Estas actividades pueden agruparse en tres grandes bloques:
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=1.2cm, itemsep=0.3em, topsep=0.25em]
+  \item \textbf{Tareas logísticas:}
+  \begin{itemize}[topsep=0.1em, itemsep=0.05em]
+    \item Gestión de pedidos a la marca fabricante.
+    \item Recepción de mercancía.
+    \item Preparación y carga de pedidos en el vehículo de reparto.
+    \item Entrega directa de los productos a los establecimientos clientes.
+  \end{itemize}
 
-\textbf{Tareas logísticas:}
-\begin{itemize}
-  \item Gestión de pedidos a la marca fabricante.
-  \item Recepción de mercancía.
-  \item Preparación y carga de pedidos en el vehículo de reparto.
-  \item Entrega directa de los productos a los establecimientos clientes.
+  \item \textbf{Tareas comerciales:}
+  \begin{itemize}[topsep=0.1em, itemsep=0.05em]
+    \item Realización de visitas periódicas a las peluquerías clientes.
+    \item Asesoramiento técnico sobre el uso de los productos.
+    \item Organización de formaciones dirigidas a profesionales del sector.
+  \end{itemize}
+
+  \item \textbf{Tareas administrativas:}
+  \begin{itemize}[topsep=0.1em, itemsep=0.05em]
+    \item Registro de cobros parciales o totales realizados a los clientes.
+    \item Control de deudas pendientes.
+    \item Gestión y seguimiento de albaranes.
+    \item Elaboración de informes o partes diarios de actividad.
+  \end{itemize}
+\end{enumerate}
+
+La coexistencia de estas actividades, con diferente naturaleza y nivel de detalle, introduce una \textbf{elevada complejidad operativa} que dificulta la gestión eficiente del negocio.
+
+\noindent\textbf{Fragmentación del sistema de información.} Las actividades descritas se apoyan actualmente en diversas herramientas informáticas independientes:
+
+\begin{itemize}[topsep=0.2em, itemsep=0.1em]
+  \item Hojas de cálculo en \textit{Microsoft Excel} para el seguimiento de información comercial.
+  \item Bases de datos locales desarrolladas en \textit{Microsoft Access} para la gestión de expediciones y listados de reparto.
+  \item El software de facturación \textit{Factusol} para la emisión de facturas y el control de cobros.
+  \item Materiales formativos y documentación técnica proporcionados por la marca a través de su \textit{plataforma corporativa}.
 \end{itemize}
 
-\textbf{Tareas comerciales:}
-\begin{itemize}
-  \item Realización de visitas periódicas a las peluquerías clientes.
-  \item Asesoramiento técnico sobre el uso de los productos.
-  \item Organización de formaciones dirigidas a profesionales del sector.
-\end{itemize}
+La utilización de múltiples sistemas no integrados provoca una \textbf{fragmentación de la información}, dificultando su acceso, actualización y consistencia. La necesidad de consultar distintas fuentes de datos y mantener sincronizada la información incrementa la \textbf{carga de trabajo} y el \textbf{riesgo de inconsistencias}.
 
-\textbf{Tareas administrativas:}
-\begin{itemize}
-  \item Registro de cobros parciales o totales realizados a los clientes.
-  \item Control de deudas pendientes.
-  \item Gestión y seguimiento de albaranes.
-  \item Elaboración de informes o partes diarios de actividad.
-\end{itemize}
+\noindent\textbf{Dependencia de procesos manuales.} Una parte significativa de las tareas se realiza de forma manual, incluyendo el registro de información durante las visitas comerciales, la elaboración de partes de trabajo o el seguimiento de pedidos y cobros. Esta dependencia de \textbf{procesos manuales} no solo incrementa el tiempo dedicado a tareas administrativas, sino que también introduce un mayor \textbf{riesgo de errores} y dificulta la trazabilidad de la información.
 
-La coexistencia de estas actividades, con diferente naturaleza y nivel de detalle, introduce una elevada complejidad operativa que dificulta la gestión eficiente del negocio.
+\noindent\textbf{Limitaciones organizativas y de escalabilidad.} La ausencia de una \textbf{plataforma centralizada} dificulta la delegación de tareas y la incorporación de nuevos comerciales. Gran parte del conocimiento operativo se encuentra distribuido en herramientas personales o procedimientos informales, lo que limita la \textit{escalabilidad del negocio} y puede afectar a la continuidad de la actividad.
 
-\subsubsection{Fragmentación del sistema de información}
+\noindent\textbf{Interacción limitada con los clientes.} Las peluquerías clientes no disponen de herramientas digitales específicas que faciliten su interacción con el distribuidor. La mayoría de las gestiones se realizan mediante comunicación directa, lo que reduce la eficiencia del proceso y limita las posibilidades de ofrecer \textbf{servicios digitales de valor añadido}.
 
-Las actividades descritas se apoyan actualmente en diversas herramientas informáticas independientes:
+\noindent\textbf{Carencias desde el punto de vista de los sistemas de información.} Más allá de las limitaciones operativas, el sistema actual presenta deficiencias relevantes desde la perspectiva de los sistemas de información. En particular, se observa:
 
-\begin{itemize}
-  \item Hojas de cálculo en Microsoft Excel para el seguimiento de información comercial.
-  \item Bases de datos locales desarrolladas en Microsoft Access para la gestión de expediciones y listados de reparto.
-  \item El software de facturación Factusol para la emisión de facturas y el control de cobros.
-  \item Materiales formativos y documentación técnica proporcionados por la marca a través de su plataforma corporativa.
-\end{itemize}
-
-La utilización de múltiples sistemas no integrados provoca una fragmentación de la información, dificultando su acceso, actualización y consistencia. La necesidad de consultar distintas fuentes de datos y mantener sincronizada la información incrementa la carga de trabajo y el riesgo de inconsistencias.
-
-\subsubsection{Dependencia de procesos manuales}
-
-Una parte significativa de las tareas se realiza de forma manual, incluyendo el registro de información durante las visitas comerciales, la elaboración de partes de trabajo o el seguimiento de pedidos y cobros. Esta dependencia de procesos manuales no solo incrementa el tiempo dedicado a tareas administrativas, sino que también introduce un mayor riesgo de errores y dificulta la trazabilidad de la información.
-
-\subsubsection{Limitaciones organizativas y de escalabilidad}
-
-La ausencia de una plataforma centralizada dificulta la delegación de tareas y la incorporación de nuevos comerciales. Gran parte del conocimiento operativo se encuentra distribuido en herramientas personales o procedimientos informales, lo que limita la escalabilidad del negocio y puede afectar a la continuidad de la actividad.
-
-\subsubsection{Interacción limitada con los clientes}
-
-Las peluquerías clientes no disponen de herramientas digitales específicas que faciliten su interacción con el distribuidor. La mayoría de las gestiones se realizan mediante comunicación directa, lo que reduce la eficiencia del proceso y limita las posibilidades de ofrecer servicios digitales de valor añadido.
-
-\subsubsection{Carencias desde el punto de vista de los sistemas de información}
-
-Más allá de las limitaciones operativas, el sistema actual presenta deficiencias relevantes desde la perspectiva de los sistemas de información. En particular, se observa:
-
-\begin{itemize}
+\begin{itemize}[topsep=0.2em, itemsep=0.1em]
   \item Ausencia de mecanismos estructurados de control de acceso y gestión de usuarios.
   \item Falta de trazabilidad sobre las acciones realizadas en el sistema.
   \item Inexistencia de un modelo de datos centralizado y consistente.
@@ -71,11 +61,9 @@ Más allá de las limitaciones operativas, el sistema actual presenta deficienci
 
 Estas carencias no solo afectan al funcionamiento diario, sino que también limitan la evolución del sistema hacia soluciones más avanzadas basadas en la digitalización y el tratamiento de datos.
 
-\subsubsection{Necesidad de una solución integrada}
+\noindent\textbf{Necesidad de una solución integrada.} En conjunto, la actividad del distribuidor puede entenderse como un \textbf{flujo continuo} que abarca desde la generación de pedidos hasta su entrega y gestión administrativa, incluyendo además actividades comerciales de asesoramiento y fidelización de clientes.
 
-En conjunto, la actividad del distribuidor puede entenderse como un flujo continuo que abarca desde la generación de pedidos hasta su entrega y gestión administrativa, incluyendo además actividades comerciales de asesoramiento y fidelización de clientes.
-
-La combinación de procesos manuales, herramientas no integradas y carencias en la gestión de la información pone de manifiesto la necesidad de una solución que permita centralizar los datos, estructurar los procesos y proporcionar una base sólida para la evolución futura del sistema.
+La combinación de \textbf{procesos manuales}, \textbf{herramientas no integradas} y carencias en la gestión de la información pone de manifiesto la necesidad de una solución que permita \textit{centralizar los datos}, \textit{estructurar los procesos} y proporcionar una base sólida para la evolución futura del sistema.
 
 \subsection{Modelado del proceso de negocio actual}
 

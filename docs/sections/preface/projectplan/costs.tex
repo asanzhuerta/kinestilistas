@@ -1,151 +1,100 @@
 \subsection{Estimación del coste de desarrollo}
 
-Para estimar el coste de desarrollo del sistema se ha realizado una planificación basada en las diferentes fases habituales del ciclo de vida del software: análisis de requisitos, diseño del sistema, desarrollo, pruebas y documentación. Este enfoque se corresponde con los modelos clásicos de ingeniería del software descritos en la literatura académica \cite[Chap.~2, pp.~27--37]{sommerville}.
+La estimación económica del desarrollo parte de las fases principales del ciclo de vida del \textit{software}, siguiendo la división habitual entre análisis, diseño, construcción, pruebas y documentación \cite[Chap.~2, pp.~27--37]{sommerville}. Para evitar duplicar la planificación ya descrita, la Tabla~\ref{tabla_coste_desarrollo} utiliza únicamente el esfuerzo aproximado por fase y la tarifa horaria considerada.
 
-Dado que el proyecto ha sido desarrollado en el contexto de un Trabajo Fin de Grado por un único desarrollador, se ha considerado una estimación de costes basada en el salario medio de un desarrollador web en España. Según datos recopilados por la plataforma de empleo Indeed, el salario medio por hora para este perfil profesional se sitúa aproximadamente en \textbf{15,88~\euro/hora} \cite{indeed2024salarios}.
-
-A partir de esta tarifa media y de la estimación de horas necesarias para cada fase del proyecto, se obtiene el coste total de desarrollo que se muestra en la Tabla~\ref{tabla_coste_desarrollo}.
+Como referencia salarial se ha tomado el salario medio de un desarrollador web en España publicado por Talent.com, que sitúa la media en 32.500~\euro{} anuales o 16,67~\euro/hora \citep{talent2026desarrolladorweb}. Con esta tarifa y un esfuerzo total de 400 horas, el coste de desarrollo asciende a 6.668,00~\euro.
 
 \begin{table}[H]
 \centering
 \small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.18}
 \caption{Estimación de costes de desarrollo del sistema}
 \label{tabla_coste_desarrollo}
-\begin{tabularx}{\textwidth}{|L{2.8cm}|Y|c|c|c|}
+\begin{tabularx}{\textwidth}{|Y|>{\centering\arraybackslash}p{1.6cm}|>{\centering\arraybackslash}p{2.1cm}|>{\centering\arraybackslash}p{2.2cm}|}
 \hline
-\textbf{Fase del proyecto} & \textbf{Descripción} & \textbf{Horas} & \textbf{\euro/hora} & \textbf{Coste (\euro)} \\ \hline
-
-Análisis de requisitos &
-Reuniones con el cliente, estudio del problema, definición de funcionalidades y documentación inicial &
-30 & 15,88 & 476,40 \\ \hline
-
-Diseño de arquitectura &
-Definición de arquitectura del sistema, elección de tecnologías y diseño general del sistema &
-25 & 15,88 & 397,00 \\ \hline
-
-Diseño de base de datos &
-Modelado de datos, diseño de tablas, relaciones y optimización inicial &
-20 & 15,88 & 317,60 \\ \hline
-
-Diseño de interfaz (UI/UX) &
-Diseño de pantallas, estructura de navegación y experiencia de usuario &
-30 & 15,88 & 476,40 \\ \hline
-
-Desarrollo backend &
-Implementación de lógica de negocio, APIs, autenticación, gestión de pedidos y usuarios &
-90 & 15,88 & 1429,20 \\ \hline
-
-Desarrollo frontend &
-Implementación de la interfaz web, integración con APIs y diseño responsive &
-100 & 15,88 & 1588,00 \\ \hline
-
-Integración de servicios externos &
-Integración con APIs externas como servicios de mapas u otras herramientas &
-20 & 15,88 & 317,60 \\ \hline
-
-Pruebas y validación &
-Testing funcional, detección de errores y validación del sistema &
-40 & 15,88 & 635,20 \\ \hline
-
-Documentación del proyecto &
-Elaboración de documentación técnica y memoria del proyecto &
-35 & 15,88 & 555,80 \\ \hline
-
-\textbf{Total desarrollo} & & \textbf{390} & & \textbf{6193,20} \\ \hline
-
+\textbf{Fase del proyecto} & \textbf{Horas} & \textbf{Tarifa (\euro/h)} & \textbf{Coste (\euro)} \\ \hline
+Análisis de requisitos & 32 & 16,67 & 533,44 \\ \hline
+Diseño de arquitectura & 27 & 16,67 & 450,09 \\ \hline
+Diseño de base de datos & 20 & 16,67 & 333,40 \\ \hline
+Diseño de interfaz \textit{UI/UX} & 28 & 16,67 & 466,76 \\ \hline
+Desarrollo \textit{backend} & 95 & 16,67 & 1.583,65 \\ \hline
+Desarrollo \textit{frontend} & 102 & 16,67 & 1.700,34 \\ \hline
+Integración de servicios externos & 12 & 16,67 & 200,04 \\ \hline
+Pruebas y validación & 36 & 16,67 & 600,12 \\ \hline
+Documentación del proyecto & 48 & 16,67 & 800,16 \\ \hline
+\textbf{Total desarrollo} & \textbf{400} & & \textbf{6.668,00} \\ \hline
 \end{tabularx}
 \end{table}
 
 \subsection{Costes de infraestructura}
 
-Además del coste de desarrollo, un sistema software requiere una infraestructura mínima para su despliegue y funcionamiento. En el caso de aplicaciones web modernas, esta infraestructura suele estar compuesta por un servidor de alojamiento, una base de datos gestionada, un dominio web y posibles servicios externos o APIs.
+La infraestructura de operación se ha estimado a partir de los servicios necesarios para desplegar la aplicación y de las integraciones externas contempladas en la arquitectura. Los precios en dólares se han convertido a euros usando el tipo de referencia del Banco Central Europeo publicado el 16 de junio de 2026, donde 1~\euro{} equivale a 1,1594~USD \citep{ecb2026usdeur}. Los importes se redondean a dos decimales y no incluyen impuestos indirectos ni variaciones futuras de tarifa.
 
-Actualmente existen múltiples plataformas cloud que permiten desplegar aplicaciones web con costes reducidos, especialmente para proyectos de pequeña y mediana escala. Servicios como Vercel, Render o Railway ofrecen planes que oscilan entre los 10 y 25 euros mensuales dependiendo del consumo de recursos \cite{vercelpricing2024}.
-
-Por otra parte, las bases de datos gestionadas basadas en PostgreSQL, como Supabase o Neon, permiten operar con costes similares en proyectos de baja carga. Asimismo, el registro de dominios web suele tener un coste aproximado de entre 10 y 15 euros anuales dependiendo del proveedor \cite{namecheap2024domain}.
-
-Teniendo en cuenta estos valores de mercado, se ha realizado una estimación del coste anual de infraestructura necesaria para el funcionamiento del sistema, la cual se presenta en la Tabla~\ref{tabla_coste_infraestructura}.
+La Tabla~\ref{tabla_coste_infraestructura} diferencia entre servicios con coste anual directo y servicios con plan gratuito suficiente para una primera puesta en producción. En estos últimos casos el coste se considera nulo en la estimación base, aunque se documenta el posible salto a planes de pago si el volumen de uso crece.
 
 \begin{table}[H]
 \centering
 \small
-\caption{Costes de infraestructura del sistema}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.22}
+\caption{Costes de infraestructura y servicios externos}
 \label{tabla_coste_infraestructura}
-\begin{tabularx}{\textwidth}{|L{4cm}|Y|c|}
+\begin{tabularx}{\textwidth}{|L{3.2cm}|Y|>{\centering\arraybackslash}p{2.3cm}|}
 \hline
-\textbf{Concepto} & \textbf{Descripción} & \textbf{Coste anual (\euro)} \\ \hline
-
-Servidor / Hosting &
-Alojamiento del backend y frontend de la aplicación &
-180 \\ \hline
-
-Base de datos &
-Servicio gestionado de base de datos PostgreSQL &
-120 \\ \hline
-
-Dominio web &
-Registro y renovación anual del dominio de la aplicación &
-12 \\ \hline
-
-APIs externas &
-Servicios externos utilizados por la aplicación como APIs de mapas u otros servicios &
-150 \\ \hline
-
-\textbf{Total infraestructura anual} & & \textbf{462} \\ \hline
-
+\textbf{Concepto} & \textbf{Plan o criterio considerado} & \textbf{Coste anual (\euro)} \\ \hline
+Alojamiento web & \textit{Netlify Pro}, con coste de 20~USD/mes. Se toma como referencia para una operación inicial con despliegue productivo, variables compartidas, mayor margen de créditos y soporte de equipo \citep{netlifypricing2026,ecb2026usdeur}. & 207,00 \\ \hline
+Base de datos & \textit{Neon Launch}, con gasto típico oficial de 15~USD/mes para carga intermitente y 1~GB de almacenamiento. Encaja como hipótesis de \textit{PostgreSQL} gestionado para una producción inicial de baja carga \citep{neonpricing2026,ecb2026usdeur}. & 155,25 \\ \hline
+Dominio web & Renovación anual de un dominio \textit{.com} en Namecheap, con precio oficial de 18,48~USD/año \citep{namecheap2026domain,ecb2026usdeur}. & 15,94 \\ \hline
+Imágenes y archivos & \textit{Cloudinary Free}, con 25 créditos mensuales. El coste base es 0~\euro, aunque el plan \textit{Plus} pasa a 99~USD/mes si el catálogo o el consumo de ancho de banda lo requieren \citep{cloudinarypricing2026}. & 0,00 \\ \hline
+Códigos QR & \textit{QuickChart Community}, con coste de 0~\euro/mes. El plan \textit{Professional} se sitúa en 39~\euro/mes si se necesitan más límites o rendimiento dedicado \citep{quickchartpricing2026}. & 0,00 \\ \hline
+Correo transaccional & \textit{Brevo Free}, con 300 envíos diarios. Es suficiente para un uso inicial de notificaciones por SMTP; si se superase el límite, habría que pasar a un plan de pago \citep{brevofree2026}. & 0,00 \\ \hline
+Geocodificación y rutas & Uso de \textit{Nominatim} y del servidor público de \textit{OSRM}. No tienen coste directo en esta estimación, pero sus políticas limitan el uso intensivo y recomiendan proveedor externo o instancia propia para cargas mayores \citep{nominatimpolicy2026,osrmpolicy2026}. & 0,00 \\ \hline
+Notificaciones \textit{Web Push} & Uso de claves VAPID y servicios \textit{push} del navegador, sin proveedor de pago específico en la arquitectura actual \citep{rfc8292}. & 0,00 \\ \hline
+\textbf{Total infraestructura anual} & & \textbf{378,19} \\ \hline
 \end{tabularx}
 \end{table}
 
 \subsection{Costes de mantenimiento}
 
-Una vez desarrollado el sistema, es necesario considerar los costes asociados al mantenimiento del software. El mantenimiento incluye tareas como la corrección de errores, actualizaciones de seguridad, adaptación a cambios en los servicios externos utilizados por la aplicación y pequeñas mejoras funcionales.
+Una vez desplegado el sistema, es necesario considerar tareas de mantenimiento correctivo, actualizaciones de seguridad, adaptación a cambios de servicios externos y pequeñas mejoras funcionales. En ingeniería del \textit{software} es habitual estimar el mantenimiento como un porcentaje del coste inicial de desarrollo; Pressman y Maxim señalan que el mantenimiento puede representar una parte relevante del coste total del ciclo de vida del sistema \citep{pressman2014software}.
 
-En ingeniería del software es habitual estimar el coste de mantenimiento anual como un porcentaje del coste inicial de desarrollo. Diversos estudios indican que el mantenimiento de software puede representar entre el 10\% y el 20\% del coste de desarrollo anual dependiendo de la complejidad del sistema \cite{pressman2014software}.
-
-Para este proyecto se ha considerado un valor intermedio del \textbf{15\% del coste de desarrollo}, lo cual proporciona una estimación razonable del esfuerzo necesario para mantener el sistema operativo y actualizado. El desglose del coste anual de mantenimiento se presenta en la Tabla~\ref{tabla_coste_mantenimiento}.
+Para este proyecto se mantiene una estimación del 15\% del coste de desarrollo. Este porcentaje proporciona una hipótesis prudente para un sistema académico que puede seguir evolucionando, pero que todavía no opera con un equipo dedicado de soporte.
 
 \begin{table}[H]
 \centering
 \small
-\caption{Costes de mantenimiento del sistema}
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.18}
+\caption{Costes anuales de mantenimiento y operación}
 \label{tabla_coste_mantenimiento}
-\begin{tabularx}{\textwidth}{|L{4.4cm}|Y|c|}
+\begin{tabularx}{\textwidth}{|Y|>{\centering\arraybackslash}p{2.8cm}|}
 \hline
-\textbf{Concepto} & \textbf{Descripción} & \textbf{Coste anual (\euro)} \\ \hline
-
-Mantenimiento del sistema &
-Corrección de errores, actualizaciones, mejoras y soporte técnico &
-928,98 \\ \hline
-
-Infraestructura &
-Coste anual de servidor, base de datos, dominio y APIs &
-462 \\ \hline
-
-\textbf{Coste anual total de operación} & & \textbf{1390,98} \\ \hline
-
+\textbf{Concepto} & \textbf{Coste anual (\euro)} \\ \hline
+Mantenimiento del sistema & 1.000,20 \\ \hline
+Infraestructura y servicios externos & 378,19 \\ \hline
+\textbf{Coste anual total de operación} & \textbf{1.378,39} \\ \hline
 \end{tabularx}
 \end{table}
 
 \subsection{Coste total del proyecto}
 
-En base a las estimaciones realizadas, el coste total del proyecto durante su primer año de funcionamiento asciende a aproximadamente \textbf{7.584,18~\euro}. Este coste incluye el desarrollo inicial del sistema, la infraestructura necesaria para su despliegue y el mantenimiento del software. A partir del segundo año, el coste de operación se reduce a aproximadamente 1.390,98~\euro anuales, correspondientes principalmente al mantenimiento del sistema y a los costes de infraestructura. El desglose completo de los costes se resume en la Tabla~\ref{tabla_coste_total}.
+El coste estimado del primer año incluye el desarrollo inicial, la infraestructura necesaria para desplegar la aplicación y el mantenimiento previsto durante el primer ciclo de operación. A partir del segundo año, el coste se reduce al mantenimiento y a la infraestructura, siempre que no se superen los límites gratuitos de los servicios externos considerados.
 
 \begin{table}[H]
 \centering
 \small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.18}
 \caption{Resumen económico del proyecto}
 \label{tabla_coste_total}
-\begin{tabularx}{\textwidth}{|Y|c|}
+\begin{tabularx}{\textwidth}{|Y|>{\centering\arraybackslash}p{2.8cm}|}
 \hline
 \textbf{Concepto} & \textbf{Coste (\euro)} \\ \hline
-
-Desarrollo inicial del sistema & 6193,20 \\ \hline
-
-Infraestructura primer año & 462 \\ \hline
-
-Mantenimiento primer año & 928,98 \\ \hline
-
-\textbf{Coste total estimado primer año} & \textbf{7584,18} \\ \hline
-
+Desarrollo inicial del sistema & 6.668,00 \\ \hline
+Infraestructura primer año & 378,19 \\ \hline
+Mantenimiento primer año & 1.000,20 \\ \hline
+\textbf{Coste total estimado primer año} & \textbf{8.046,39} \\ \hline
+\textbf{Coste anual estimado desde el segundo año} & \textbf{1.378,39} \\ \hline
 \end{tabularx}
 \end{table}

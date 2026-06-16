@@ -10,6 +10,9 @@ Interfaz de programación de aplicaciones que permite la comunicación entre dis
 \item[\textbf{Aplicación web progresiva}]
 Aplicación web diseñada para ofrecer una experiencia similar a la de una aplicación móvil, permitiendo su acceso desde navegador, adaptación a distintos dispositivos e instalación en determinados sistemas mediante tecnologías PWA.
 
+\item[\textbf{App Router}]
+Modelo de organización de rutas utilizado por \texttt{Next.js}, en el que las páginas, layouts, estados de carga y rutas de API se estructuran a partir del sistema de carpetas de la aplicación.
+
 \item[\textbf{Autenticación}]
 Proceso mediante el cual el sistema comprueba la identidad de un usuario, normalmente a partir de credenciales como correo electrónico y contraseña.
 
@@ -22,14 +25,32 @@ Registro y consulta de eventos relevantes del sistema, como accesos, cierres de 
 \item[\textbf{Base de datos}]
 Sistema organizado de almacenamiento de información que permite registrar, consultar, modificar y relacionar los datos utilizados por la aplicación.
 
+\item[\textbf{Carta de color}]
+Recurso técnico-comercial que agrupa referencias cromáticas de una línea de coloración, permitiendo consultar tonos, familias de color y productos asociados.
+
+\item[\textbf{Catálogo técnico-comercial}]
+Conjunto organizado de productos, categorías, líneas, subcategorías, recursos de apoyo y referencias técnicas utilizado tanto para la venta como para el asesoramiento profesional.
+
 \item[\textbf{Cliente profesional}]
 Peluquería o profesional del sector capilar que mantiene una relación comercial con el distribuidor y utiliza el sistema para consultar información, realizar pedidos o acceder a herramientas digitales.
+
+\item[\textbf{Cloudinary}]
+Servicio externo de almacenamiento y gestión de recursos multimedia utilizado en el proyecto para alojar imágenes asociadas a usuarios, catálogo o resultados técnicos.
 
 \item[\textbf{Comercial}]
 Usuario encargado de realizar visitas a clientes, registrar actividad comercial, gestionar pedidos y apoyar la relación entre el distribuidor y las peluquerías profesionales.
 
+\item[\textbf{Comunicación multicanal}]
+Estrategia de comunicación que permite entregar avisos, promociones, formaciones o recordatorios mediante distintos canales, manteniendo la notificación interna como punto de referencia dentro de la aplicación.
+
 \item[\textbf{Distribuidor}]
 Usuario principal del sistema, responsable de la gestión comercial, logística y administrativa de la distribución de productos capilares profesionales.
+
+\item[\textbf{Docker Compose}]
+Herramienta que permite definir y levantar servicios de infraestructura mediante un fichero de configuración. En el proyecto se utiliza para preparar el entorno local de base de datos.
+
+\item[\textbf{ERP}]
+Siglas de \textit{Enterprise Resource Planning}. Hace referencia a sistemas de gestión empresarial que integran procesos como facturación, inventario, contabilidad, compras o ventas.
 
 \item[\textbf{ETA}]
 Siglas de \textit{Estimated Time of Arrival}. En el proyecto se utiliza para representar una estimación de llegada asociada a rutas comerciales o visitas de reparto.
@@ -40,11 +61,32 @@ Software de facturación empleado en el contexto actual del distribuidor para ta
 \item[\textbf{Ficha técnica del salón}]
 Registro interno asociado a un cliente final de una peluquería profesional, que permite documentar servicios realizados, fórmulas, productos utilizados, tonalidades, notas técnicas e imágenes del resultado.
 
+\item[\textbf{Formación}]
+Actividad o contenido informativo publicado por el distribuidor para comunicar sesiones, materiales o eventos de interés a comerciales y clientes profesionales.
+
+\item[\textbf{Full-stack}]
+Tipo de desarrollo que abarca tanto la parte de interfaz de usuario como la lógica de servidor, acceso a datos, API y persistencia de la aplicación.
+
 \item[\textbf{Geocodificación}]
 Proceso mediante el cual una dirección postal se transforma en coordenadas geográficas para poder mostrar clientes en mapa, calcular rutas o estimar desplazamientos.
 
+\item[\textbf{Migración de base de datos}]
+Fichero o proceso versionado que describe cambios en el esquema de la base de datos, permitiendo crear, modificar o actualizar tablas y relaciones de forma reproducible.
+
 \item[\textbf{Next.js}]
 Framework de desarrollo web basado en React que permite construir aplicaciones web modernas con funcionalidades de frontend y backend dentro de un mismo proyecto.
+
+\item[\textbf{Notificación interna}]
+Aviso persistido dentro de la aplicación que permite comunicar eventos, promociones, formaciones o recordatorios a usuarios concretos sin depender necesariamente de canales externos.
+
+\item[\textbf{OpenStreetMap}]
+Proyecto colaborativo de cartografía utilizado como base para servicios relacionados con mapas, direcciones y geolocalización.
+
+\item[\textbf{ORM}]
+Acrónimo de \textit{Object-Relational Mapping}. Técnica que permite trabajar con entidades del dominio desde el código y traducirlas a tablas, columnas y relaciones de una base de datos relacional.
+
+\item[\textbf{OSRM}]
+Motor de cálculo de rutas basado en datos cartográficos, utilizado para obtener recorridos, geometrías o estimaciones de desplazamiento.
 
 \item[\textbf{Pedido}]
 Solicitud de productos realizada por una peluquería profesional o registrada por un comercial, que debe ser gestionada por el distribuidor hasta su preparación, entrega y posible facturación.
@@ -55,14 +97,23 @@ Establecimiento o profesional del sector de la peluquería que actúa como clien
 \item[\textbf{PostgreSQL}]
 Sistema gestor de bases de datos relacional utilizado para almacenar de forma estructurada la información principal del sistema.
 
+\item[\textbf{Promoción}]
+Acción comercial configurada por el distribuidor para comunicar ofertas, descuentos, regalos promocionales o campañas específicas a determinados clientes o segmentos.
+
 \item[\textbf{PWA}]
 Acrónimo de \textit{Progressive Web Application}. Hace referencia a una aplicación web progresiva, capaz de ofrecer características propias de aplicaciones instalables y adaptadas a dispositivos móviles.
 
 \item[\textbf{QR}]
 Código bidimensional utilizado en el proyecto como mecanismo de validación de entrega de pedidos vinculados a una visita de reparto.
 
+\item[\textbf{QuickChart}]
+Servicio externo utilizado para generar representaciones gráficas, como códigos QR, a partir de parámetros enviados desde la aplicación.
+
 \item[\textbf{Rate limiting}]
 Técnica de seguridad que limita el número de peticiones permitidas en un intervalo de tiempo, reduciendo el riesgo de abuso en formularios, autenticación o API sensibles.
+
+\item[\textbf{Route Handler}]
+Mecanismo de \texttt{Next.js} para definir rutas HTTP dentro de la aplicación, permitiendo implementar operaciones de API como consultas, altas, modificaciones o eliminaciones.
 
 \item[\textbf{Rol de usuario}]
 Categoría asignada a un usuario del sistema que determina sus permisos y las funcionalidades a las que puede acceder, como administrador, comercial o cliente profesional.
@@ -76,10 +127,22 @@ Agrupación de clientes profesionales utilizada para dirigir promociones, avisos
 \item[\textbf{Service worker}]
 Script ejecutado por el navegador en segundo plano que permite incorporar capacidades propias de una aplicación web progresiva, como instalación básica o gestión de recursos.
 
+\item[\textbf{SMTP}]
+Siglas de \textit{Simple Mail Transfer Protocol}. Protocolo utilizado para el envío de correos electrónicos desde servicios o aplicaciones configuradas con un servidor de correo.
+
 \item[\textbf{Sistema de información}]
 Conjunto de datos, procesos, personas y herramientas tecnológicas que permiten gestionar información relevante para una organización o actividad concreta.
 
+\item[\textbf{Tonalidad}]
+Referencia cromática asociada a productos de coloración, utilizada para identificar tonos, familias de color o resultados técnicos dentro del catálogo y las fichas del salón.
+
 \item[\textbf{Trazabilidad}]
 Capacidad de registrar y consultar las acciones realizadas dentro del sistema, permitiendo conocer el origen, evolución y estado de la información gestionada.
+
+\item[\textbf{TypeORM}]
+ORM utilizado en el proyecto para definir entidades, acceder a la base de datos y gestionar migraciones sobre \texttt{PostgreSQL}.
+
+\item[\textbf{Web Push}]
+Tecnología que permite enviar notificaciones desde una aplicación web al dispositivo del usuario cuando el navegador y los permisos concedidos lo permiten.
 
 \end{description}

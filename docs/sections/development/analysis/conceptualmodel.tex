@@ -6,102 +6,118 @@ Los diagramas de esta sección abstraen el modelo físico de base de datos: se m
 
 El módulo \texttt{M1} modela el acceso al sistema, el alta controlada de usuarios y la trazabilidad de sesiones y acciones administrativas. La Figura~\ref{fig:mcd-m1} recoge las entidades principales de este bloque.
 
-\begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{./figures/UML/MCD/M1_MCD_conceptual.png}
+    \makebox[\linewidth][c]{%
+        \rotatebox{90}{%
+            \includegraphics[width=0.78\textheight,height=0.95\linewidth,keepaspectratio]{./figures/UML/MCD/M1_MCD_conceptual.png}%
+        }%
+    }
     \caption{Modelo conceptual de datos del módulo M1: acceso, usuarios y auditoría}
     \label{fig:mcd-m1}
 \end{figure}
-\end{landscape}
 
 \subsection{Modelo conceptual de datos M2}
 
 El módulo \texttt{M2} recoge la información necesaria para gestionar clientes profesionales, comerciales, asignaciones, visitas y rutas. La Figura~\ref{fig:mcd-m2} muestra la estructura conceptual de este módulo.
 
-\begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{./figures/UML/MCD/M2_MCD_conceptual.png}
+    \makebox[\linewidth][c]{%
+        \rotatebox{90}{%
+            \includegraphics[width=0.78\textheight,height=0.95\linewidth,keepaspectratio]{./figures/UML/MCD/M2_MCD_conceptual.png}%
+        }%
+    }
     \caption{Modelo conceptual de datos del módulo M2: clientes, comerciales, visitas y rutas}
     \label{fig:mcd-m2}
 \end{figure}
-\end{landscape}
 
 \subsection{Modelo conceptual de datos M3}
 
 El módulo \texttt{M3} representa el catálogo de productos, sus estructuras de clasificación, recursos de apoyo y cartas de color. La Figura~\ref{fig:mcd-m3} muestra las entidades y relaciones de este ámbito.
 
-\begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{./figures/UML/MCD/M3_MCD_conceptual.png}
+    \makebox[\linewidth][c]{%
+        \rotatebox{90}{%
+            \includegraphics[width=0.78\textheight,height=0.95\linewidth,keepaspectratio]{./figures/UML/MCD/M3_MCD_conceptual.png}%
+        }%
+    }
     \caption{Modelo conceptual de datos del módulo M3: catálogo, productos y coloración}
     \label{fig:mcd-m3}
 \end{figure}
-\end{landscape}
 
 \subsection{Modelo conceptual de datos M4}
 
 El módulo \texttt{M4} integra la gestión de pedidos, líneas, estados, preparación de repartos, validación de entrega y pagos asociados. En el modelo actual el pedido actúa como cabecera comercial, mientras que cada reparto representa una unidad logística independiente con bultos manuales, líneas servidas y etiqueta propia. La Figura~\ref{fig:mcd-m4} sintetiza este modelo conceptual actualizado.
 
-\begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{./figures/UML/MCD/M4_MCD_conceptual.png}
+    \makebox[\linewidth][c]{%
+        \rotatebox{90}{%
+            \includegraphics[width=0.78\textheight,height=0.95\linewidth,keepaspectratio]{./figures/UML/MCD/M4_MCD_conceptual.png}%
+        }%
+    }
     \caption{Modelo conceptual de datos del módulo M4: pedidos, reparto y cobro}
     \label{fig:mcd-m4}
 \end{figure}
-\end{landscape}
 
 \subsection{Modelo conceptual de datos M5}
 
 El módulo \texttt{M5} modela la gestión técnica del salón: clientes finales, servicios realizados, fichas técnicas, productos utilizados, plantillas, imágenes y correos técnicos. La Figura~\ref{fig:mcd-m5} presenta las entidades principales de esta gestión.
 
-\begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{./figures/UML/MCD/M5_MCD_conceptual.png}
+    \makebox[\linewidth][c]{%
+        \rotatebox{90}{%
+            \includegraphics[width=0.78\textheight,height=0.95\linewidth,keepaspectratio]{./figures/UML/MCD/M5_MCD_conceptual.png}%
+        }%
+    }
     \caption{Modelo conceptual de datos del módulo M5: gestión técnica del salón}
     \label{fig:mcd-m5}
 \end{figure}
-\end{landscape}
 
 \subsection{Modelo conceptual de datos M6}
 
 El módulo \texttt{M6} concentra promociones, tipos de promoción, segmentos de cliente, notificaciones, recordatorios, formaciones, inscripciones y soporte Web Push. La Figura~\ref{fig:mcd-m6} recoge su estructura conceptual. En la implementación actual, la entidad de promoción se ha ampliado con adjuntos comerciales, tipo estructurado de descuento, porcentaje, umbral de volumen y regalo asociado; la política de recálculo de rangos se guarda como configuración transversal del módulo \texttt{M7}.
 
-\begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{./figures/UML/MCD/M6_MCD_conceptual.png}
+    \makebox[\linewidth][c]{%
+        \rotatebox{90}{%
+            \includegraphics[width=0.78\textheight,height=0.95\linewidth,keepaspectratio]{./figures/UML/MCD/M6_MCD_conceptual.png}%
+        }%
+    }
     \caption{Modelo conceptual de datos del módulo M6: comunicaciones, promociones y formación}
     \label{fig:mcd-m6}
 \end{figure}
-\end{landscape}
 
 \subsection{Modelo conceptual de datos M7}
 
 El módulo \texttt{M7} cubre la administración técnica, las configuraciones transversales, las políticas de limitación, las integraciones externas y las propuestas de pedido a proveedor. La Figura~\ref{fig:mcd-m7} muestra el modelo conceptual de este bloque transversal.
 
-\begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{./figures/UML/MCD/M7_MCD_conceptual.png}
+    \makebox[\linewidth][c]{%
+        \rotatebox{90}{%
+            \includegraphics[width=0.78\textheight,height=0.95\linewidth,keepaspectratio]{./figures/UML/MCD/M7_MCD_conceptual.png}%
+        }%
+    }
     \caption{Modelo conceptual de datos del módulo M7: administración técnica e integraciones}
     \label{fig:mcd-m7}
 \end{figure}
-\end{landscape}
 
 \subsection{\textcolor{red}{Modelo conceptual de datos M8}}
 
 \textcolor{red}{El módulo \texttt{M8} representa funcionalidades previstas para evolución futura, como recomendación inteligente, simulación de coloración, reconocimiento de productos y reserva online. La Figura~\ref{fig:mcd-m8} deja identificadas sus necesidades de información, aunque no forma parte del alcance implementado principal.}
 
-\begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth,height=0.82\textheight,keepaspectratio]{./figures/UML/MCD/M8_MCD_conceptual.png}
+    \makebox[\linewidth][c]{%
+        \rotatebox{90}{%
+            \includegraphics[width=0.78\textheight,height=0.95\linewidth,keepaspectratio]{./figures/UML/MCD/M8_MCD_conceptual.png}%
+        }%
+    }
     \caption{\textcolor{red}{Modelo conceptual de datos del módulo M8: funcionalidades inteligentes previstas}}
     \label{fig:mcd-m8}
 \end{figure}
-\end{landscape}

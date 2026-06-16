@@ -1,55 +1,43 @@
-La gestión de la configuración tiene como objetivo controlar la evolución del proyecto, mantener la trazabilidad de los cambios realizados y facilitar la reproducción del entorno de desarrollo. En este proyecto, dicha gestión se ha aplicado principalmente sobre el código fuente, los scripts de base de datos, la configuración del entorno y la documentación.
+Para el control de versiones del código fuente y la gestión de la configuración del proyecto se ha utilizado \textbf{Git} como herramienta principal, apoyándose en \textbf{GitHub} como repositorio remoto central. Esta decisión permite mantener un histórico de cambios sobre la aplicación, la documentación, los scripts de apoyo, las migraciones de base de datos y los ficheros de configuración necesarios para reproducir el trabajo.
 
 \subsection{Control de versiones}
 
-El proyecto se ha gestionado mediante \textbf{Git} como sistema de control de versiones. Esta herramienta permite registrar los cambios realizados sobre el código fuente y la documentación, recuperar versiones anteriores y mantener un historial ordenado de la evolución del trabajo.
+Git permite registrar de forma estructurada los cambios realizados durante el desarrollo. Cada modificación queda asociada a un commit, lo que facilita identificar cuándo se introdujo una funcionalidad, una corrección, un ajuste de configuración o una actualización documental. El uso de mensajes descriptivos en los commits ayuda a reconocer el objetivo de cada cambio y a valorar su impacto sobre el resto del sistema.
 
-El uso de control de versiones resulta especialmente importante en un proyecto de estas características, ya que permite diferenciar cambios funcionales, correcciones, ajustes de configuración y modificaciones en la documentación.
+En este proyecto, al tratarse de un desarrollo individual, no se ha aplicado un flujo complejo de ramas. La rama principal \texttt{master} actúa como referencia integrada del trabajo, tanto para el código fuente como para la memoria académica. Aun así, el uso de Git mantiene la posibilidad de comparar estados, revisar diferencias entre versiones y recuperar un punto anterior si una modificación introduce un error.
 
-\subsection{Repositorio del proyecto}
+\subsection{Gestión de cambios}
 
-El código fuente y los recursos asociados se han organizado en un repositorio remoto, utilizado como copia de seguridad y como punto central para la evolución del proyecto. La estructura del repositorio separa los distintos elementos del sistema, incluyendo aplicación, configuración, scripts de base de datos, recursos públicos y documentación.
+Cada cambio relevante se ha tratado como una unidad de trabajo concreta. Antes de considerarlo consolidado, se revisa que la modificación sea coherente con el alcance del proyecto, que no contradiga requisitos o decisiones ya documentadas y que no introduzca dependencias innecesarias respecto a otras partes del sistema.
 
-De forma general, el repositorio se organiza en torno a los siguientes tipos de contenido:
+Esta gestión resulta especialmente útil en un proyecto iterativo, donde algunas decisiones técnicas se han ajustado conforme avanzaba la implementación. El histórico de Git permite conservar la trazabilidad de estas decisiones y diferenciar entre cambios funcionales, correcciones, ajustes de despliegue, modificaciones de documentación y revisiones de configuración.
 
-\begin{itemize}
-    \item Código fuente de la aplicación web.
-    \item Componentes de interfaz y lógica de presentación.
-    \item Rutas y lógica de servidor.
-    \item Scripts de inicialización o migración de base de datos.
-    \item Recursos estáticos de la aplicación.
-    \item Archivos de configuración del entorno.
-    \item Documentación técnica y memoria del Trabajo Fin de Grado.
-\end{itemize}
+\subsection{Alcance de la configuración versionada}
 
-\subsection{Estrategia de ramas}
+El repositorio no controla únicamente el código fuente de la aplicación. También se versionan la documentación en \LaTeX{}, las migraciones de \textit{TypeORM}, los scripts auxiliares y los ficheros de configuración necesarios para construir y ejecutar el sistema. De este modo, se mantiene un conjunto de artefactos suficiente para revisar el proyecto, reproducirlo y continuar su desarrollo sin depender de información externa no documentada.
 
-Al tratarse de un proyecto individual, se ha seguido una estrategia de ramas sencilla. La rama principal se utiliza para mantener una versión estable del proyecto, mientras que los cambios de desarrollo se realizan de forma controlada antes de integrarse en dicha rama.
+Quedan fuera del control de versiones las dependencias instaladas, salidas de compilación, cachés, copias temporales, resultados locales de ejecución y ficheros con credenciales o valores sensibles de entorno. Estos elementos se excluyen porque pueden reconstruirse o porque pertenecen a la configuración privada de cada entorno.
 
-La estrategia seguida puede resumirse de la siguiente forma:
+\subsection{Migraciones de base de datos}
 
-\begin{itemize}
-    \item \textbf{Rama principal:} contiene las versiones estables del sistema y los cambios consolidados.
-    \item \textbf{Cambios de desarrollo:} se realizan en iteraciones pequeñas, procurando que cada conjunto de cambios responda a una funcionalidad, corrección o mejora concreta.
-    \item \textbf{Revisión antes de integración:} antes de consolidar cambios, se comprueba que la aplicación compila y que los flujos principales siguen funcionando.
-\end{itemize}
+La evolución del esquema de datos se mantiene mediante migraciones de \textit{TypeORM} \citep{typeormmigrations2026}. Estas migraciones forman parte de la gestión de configuración porque documentan los cambios aplicados sobre la estructura de la base de datos y permiten reconstruirla en un entorno nuevo sin depender de operaciones manuales.
 
-\subsection{Gestión de versiones y entregas}
+En el estado actual del proyecto existen 48 migraciones versionadas. Su ejecución se realiza mediante el comando:
 
-Las versiones del proyecto se han gestionado de acuerdo con los principales hitos del Trabajo Fin de Grado. Cada versión relevante agrupa cambios funcionales o documentales significativos, como la preparación del entorno, la implementación de autenticación, la definición de roles o la consolidación de la memoria.
+\begin{lstlisting}[language=bash]
+npm run migration:run
+\end{lstlisting}
 
-Para las entregas finales se consideran especialmente importantes los siguientes elementos:
+Este mecanismo separa la evolución de la estructura de datos de los datos concretos de cada entorno, manteniendo trazabilidad sobre el modelo persistente y reduciendo el riesgo de inconsistencias entre desarrollo, demostración y futuras instalaciones.
 
-\begin{itemize}
-    \item Estado estable del código fuente.
-    \item Scripts de base de datos necesarios para reproducir el sistema.
-    \item Archivos de configuración documentados.
-    \item Memoria en formato PDF.
-    \item Manual del desarrollador y manual de usuario.
-\end{itemize}
+\subsection{Configuración sensible}
 
-\subsection{Gestión de configuración sensible}
+Las credenciales, cadenas de conexión, claves privadas y valores específicos de cada entorno no se almacenan directamente en el repositorio. Estos datos se gestionan mediante variables de entorno y ficheros locales excluidos del control de versiones, de forma que la misma base de código pueda ejecutarse en desarrollo, demostración o futuros entornos sin exponer información sensible.
 
-Los datos sensibles, como claves secretas, credenciales o variables de entorno, no deben almacenarse directamente en el repositorio. Para ello, se utilizan archivos de entorno excluidos del control de versiones y se documentan las variables necesarias mediante ejemplos o descripciónes en la documentación técnica.
+Esta separación entre código y configuración evita publicar secretos junto al proyecto y permite adaptar el sistema a distintos entornos modificando únicamente sus valores de configuración externos. Además, reduce el riesgo de que claves de servicios externos, conexiones a base de datos o parámetros privados queden incorporados accidentalmente al histórico del repositorio.
 
-Esta estrategia reduce el riesgo de exposición de información sensible y facilita que el sistema pueda desplegarse en distintos entornos ajustando únicamente la configuración correspondiente.
+\subsection{Versiones estables}
+
+Durante el desarrollo académico no se ha establecido una política formal de releases etiquetadas en GitHub. La versión estable de referencia se ha mantenido en la rama \texttt{master}, actualizada de forma incremental conforme se consolidaban funcionalidades, correcciones y cambios documentales.
+
+En una evolución posterior del proyecto, si el sistema pasara a mantenerse como producto reutilizable o desplegado en varios entornos, sería recomendable incorporar etiquetas o releases para identificar versiones cerradas. En el alcance actual del \textit{Trabajo Fin de Grado}, el control mediante commits y rama integrada resulta suficiente para conservar la trazabilidad del desarrollo realizado.
