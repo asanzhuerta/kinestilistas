@@ -60,6 +60,7 @@ type MadridClock = {
 
 export type CommercialDailyRoutePlan = {
 	waypoints: RoutePoint[];
+	endPoint: RoutePoint | null;
 	timingSummary: CommercialRouteTimingSummary;
 	totalAssignedClients: number;
 	mappedClients: number;
@@ -138,6 +139,24 @@ function estimateTravelMinutes(distanceKm: number) {
 		3,
 		Math.round((distanceKm / APPROX_TRAVEL_SPEED_KMH) * 60),
 	);
+}
+
+function resolveTravelMinutes(input: {
+	distanceKm: number;
+	legIndex: number;
+	legTravelMinutes?: number[] | null;
+}) {
+	const routeTravelMinutes = input.legTravelMinutes?.[input.legIndex];
+
+	if (
+		typeof routeTravelMinutes === "number" &&
+		Number.isFinite(routeTravelMinutes) &&
+		routeTravelMinutes >= 0
+	) {
+		return Math.round(routeTravelMinutes);
+	}
+
+	return estimateTravelMinutes(input.distanceKm);
 }
 
 function getVisitDurationMinutes(
@@ -373,6 +392,8 @@ export function buildCommercialDailyRoutePlan(input: {
 	commercial: RoutePlanningCommercial;
 	visits: RoutePlanningVisit[];
 	startPoint: RoutePoint | null;
+	endPoint?: RoutePoint | null;
+	legTravelMinutes?: number[] | null;
 	date?: Date;
 }) {
 	const now = getCurrentMadridClock(input.date);
@@ -399,6 +420,7 @@ export function buildCommercialDailyRoutePlan(input: {
 	let pastWindowStopsCount = 0;
 	let currentMinutes = plannedStartMinutes;
 	let previousPoint = input.startPoint;
+	let nextLegIndex = 0;
 
 	const waypoints: RoutePoint[] = orderedStops.map((stop, index) => {
 		let approxDistanceKmFromPrevious = 0;
@@ -407,9 +429,12 @@ export function buildCommercialDailyRoutePlan(input: {
 		if (previousPoint) {
 			const fromPoint = previousPoint;
 			approxDistanceKmFromPrevious = distanceBetween(fromPoint, stop.point);
-			approxTravelMinutesFromPrevious = estimateTravelMinutes(
-				approxDistanceKmFromPrevious,
-			);
+			approxTravelMinutesFromPrevious = resolveTravelMinutes({
+				distanceKm: approxDistanceKmFromPrevious,
+				legIndex: nextLegIndex,
+				legTravelMinutes: input.legTravelMinutes,
+			});
+			nextLegIndex += 1;
 			totalTravelMinutes += approxTravelMinutesFromPrevious;
 			currentMinutes += approxTravelMinutesFromPrevious;
 		}
@@ -463,6 +488,29 @@ export function buildCommercialDailyRoutePlan(input: {
 		};
 	});
 
+	let endPoint = input.endPoint ?? null;
+
+	if (endPoint && previousPoint) {
+		const approxDistanceKmFromPrevious = distanceBetween(previousPoint, endPoint);
+		const approxTravelMinutesFromPrevious = resolveTravelMinutes({
+			distanceKm: approxDistanceKmFromPrevious,
+			legIndex: nextLegIndex,
+			legTravelMinutes: input.legTravelMinutes,
+		});
+
+		totalTravelMinutes += approxTravelMinutesFromPrevious;
+		currentMinutes += approxTravelMinutesFromPrevious;
+
+		endPoint = {
+			...endPoint,
+			estimatedArrivalTime: formatMinutesAsTimeLabel(currentMinutes),
+			approxDistanceKmFromPrevious: roundToOneDecimal(
+				approxDistanceKmFromPrevious,
+			),
+			approxTravelMinutesFromPrevious,
+		};
+	}
+
 	const timingSummary = buildTimingSummary({
 		commercial: input.commercial,
 		visits: input.visits,
@@ -474,6 +522,7 @@ export function buildCommercialDailyRoutePlan(input: {
 
 	const result: CommercialDailyRoutePlan = {
 		waypoints,
+		endPoint,
 		timingSummary,
 		totalAssignedClients: groupedStops.length,
 		mappedClients: waypoints.length,

@@ -154,10 +154,10 @@ function getStartIcon() {
 	});
 }
 
-function getEndIcon() {
+function getEndIcon(point: RoutePoint) {
 	return buildMarkerIcon({
 		label: "F",
-		subLabel: null,
+		subLabel: point.estimatedArrivalTime ?? null,
 		tone: "slate",
 	});
 }
@@ -301,6 +301,14 @@ export default function LeafletRouteMap({
 											</span>
 										</p>
 									) : null}
+									{point.estimatedDepartureTime ? (
+										<p className="text-slate-700">
+											Salida estimada:{" "}
+											<span className="font-medium">
+												{point.estimatedDepartureTime}
+											</span>
+										</p>
+									) : null}
 									{point.visitWindowStartTime && point.visitWindowEndTime ? (
 										<p className="text-slate-600">
 											Franja: {formatTimeLabel(point.visitWindowStartTime)} -{" "}
@@ -326,12 +334,23 @@ export default function LeafletRouteMap({
 					))}
 
 					{endPoint ? (
-						<Marker position={[endPoint.lat, endPoint.lng]} icon={getEndIcon()}>
+						<Marker
+							position={[endPoint.lat, endPoint.lng]}
+							icon={getEndIcon(endPoint)}
+						>
 							<Popup>
 								<div className="space-y-1 text-sm">
 									<p className="font-semibold text-slate-900">
 										{endPoint.label}
 									</p>
+									{endPoint.estimatedArrivalTime ? (
+										<p className="text-slate-700">
+											Llegada aprox:{" "}
+											<span className="font-medium">
+												{endPoint.estimatedArrivalTime}
+											</span>
+										</p>
+									) : null}
 									{endPoint.description ? (
 										<p className="text-slate-600">{endPoint.description}</p>
 									) : null}

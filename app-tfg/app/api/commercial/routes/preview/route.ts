@@ -16,6 +16,10 @@ import {
 	parseCoordinate,
 	type RoutePlanningVisit,
 } from "@/lib/commercial/daily-route-planning";
+import {
+	buildRouteTravelPoints,
+	loadRouteLegTravelMinutes,
+} from "@/lib/commercial/route-travel-time";
 import type { CommercialRoutePreviewResponse } from "@/lib/contracts/commercial-route";
 import { COMMERCIAL_VISIT_STATUS_IDS } from "@/lib/typeorm/constants/catalog-ids";
 import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/commercial";
@@ -70,15 +74,31 @@ export async function GET(request: Request) {
 			dateTo,
 		})) as RoutePlanningVisit[];
 
-		const routePlan = buildCommercialDailyRoutePlan({
+		let routePlan = buildCommercialDailyRoutePlan({
 			commercial,
 			visits,
 			startPoint,
+			endPoint,
 		});
+		const legTravelMinutes = await loadRouteLegTravelMinutes(
+			buildRouteTravelPoints(startPoint, routePlan.waypoints, endPoint),
+		);
+
+		if (legTravelMinutes) {
+			routePlan = buildCommercialDailyRoutePlan({
+				commercial,
+				visits,
+				startPoint,
+				endPoint,
+				legTravelMinutes,
+			});
+		}
+
+		const previewEndPoint = routePlan.endPoint ?? endPoint;
 
 		const response: CommercialRoutePreviewResponse = {
 			startPoint,
-			endPoint,
+			endPoint: previewEndPoint,
 			waypoints: routePlan.waypoints,
 			totalAssignedClients: routePlan.totalAssignedClients,
 			mappedClients: routePlan.mappedClients,

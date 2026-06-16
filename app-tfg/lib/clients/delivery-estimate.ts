@@ -6,6 +6,10 @@ import {
 	type RoutePlanningVisit,
 } from "@/lib/commercial/daily-route-planning";
 import {
+	buildRouteTravelPoints,
+	loadRouteLegTravelMinutes,
+} from "@/lib/commercial/route-travel-time";
+import {
 	COMMERCIAL_VISIT_STATUS_IDS,
 	COMMERCIAL_VISIT_TYPE_IDS,
 } from "@/lib/typeorm/constants/catalog-ids";
@@ -113,12 +117,25 @@ export async function getClientDeliveryEstimate(
 				}
 			: null;
 
-	const routePlan = buildCommercialDailyRoutePlan({
+	let routePlan = buildCommercialDailyRoutePlan({
 		commercial,
 		visits: plannedVisits,
 		startPoint,
 		date: options.date,
 	});
+	const legTravelMinutes = await loadRouteLegTravelMinutes(
+		buildRouteTravelPoints(startPoint, routePlan.waypoints),
+	);
+
+	if (legTravelMinutes) {
+		routePlan = buildCommercialDailyRoutePlan({
+			commercial,
+			visits: plannedVisits,
+			startPoint,
+			legTravelMinutes,
+			date: options.date,
+		});
+	}
 
 	const clientWaypoint =
 		routePlan.waypoints.find((point) => point.id === clientId) ?? null;

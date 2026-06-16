@@ -2,6 +2,9 @@ import {
 	buildRoutePreviewEndPoint,
 	buildRoutePreviewStartPoint,
 } from "@/lib/commercial/route-preview-points";
+import { buildCommercialDailyRoutePlan } from "@/lib/commercial/daily-route-planning";
+import { COMMERCIAL_VISIT_TYPE_IDS } from "@/lib/typeorm/constants/catalog-ids";
+import { buildGoogleMapsDirectionsUrl } from "@/app/components/maps/google-maps-url";
 
 function assertCondition(condition: unknown, message: string): asserts condition {
 	if (!condition) {
@@ -77,6 +80,49 @@ function main() {
 	assertEqual(returnEnd.endPoint.lat, fallbackStart.startPoint.lat, "El regreso conserva latitud de salida");
 	assertEqual(returnEnd.endPoint.lng, fallbackStart.startPoint.lng, "El regreso conserva longitud de salida");
 	assertEqual(returnEnd.hasConfiguredEndPoint, true, "Debe conservar la senal de fin configurado disponible");
+
+	const routePlan = buildCommercialDailyRoutePlan({
+		commercial: {
+			workday_start_time: "09:00:00",
+			workday_end_time: "18:00:00",
+			delivery_visit_duration_minutes: 10,
+			routine_visit_duration_minutes: 35,
+		},
+		visits: [
+			{
+				id: "visit-delivery",
+				visit_type_id: COMMERCIAL_VISIT_TYPE_IDS.DELIVERY,
+				client: {
+					id: "client-barbate",
+					name: "Salon Barbate",
+					address: "C. Guadalquivir, 11",
+					city: "Barbate",
+					lat: 36.1919,
+					lng: -5.9214,
+				},
+			},
+		],
+		startPoint: fallbackStart.startPoint,
+		endPoint: returnEnd.endPoint,
+		legTravelMinutes: [50, 49],
+		date: new Date("2026-06-16T09:05:00+02:00"),
+	});
+
+	assertEqual(routePlan.waypoints[0]?.estimatedArrivalTime, "09:55", "La ETA del cliente usa solo el tramo de ida real");
+	assertEqual(routePlan.waypoints[0]?.estimatedDepartureTime, "10:05", "La salida del cliente suma la duracion configurada de visita");
+	assertEqual(routePlan.endPoint?.estimatedArrivalTime, "10:54", "La ETA final suma visita y tramo de regreso");
+	assertEqual(routePlan.timingSummary.approxTravelMinutes, 99, "El resumen suma ida y regreso reales");
+	assertEqual(routePlan.timingSummary.totalCommittedRouteMinutes, 109, "El tiempo comprometido suma trayectos y visita");
+
+	const googleMapsUrl = buildGoogleMapsDirectionsUrl(
+		fallbackStart.startPoint,
+		routePlan.waypoints,
+		returnEnd.endPoint,
+	);
+	const googleMapsParams = new URL(googleMapsUrl).searchParams;
+
+	assertEqual(googleMapsParams.get("destination"), "36.1919,-5.9214", "Google Maps debe navegar al cliente, no al regreso automatico");
+	assertEqual(googleMapsParams.has("waypoints"), false, "Una unica visita no debe quedar como waypoint intermedio si el regreso es automatico");
 
 	console.log("M2 route points test OK");
 }

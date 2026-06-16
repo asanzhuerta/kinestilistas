@@ -63,10 +63,9 @@ export function listIntegrationStatusItems(now = new Date()) {
 	const geocodingProviderSupported =
 		!geocodingProvider ||
 		normalizeText(geocodingProvider).toLowerCase() === "nominatim";
-	const osrmBaseUrl = envValue(
-		"NEXT_PUBLIC_OSRM_BASE_URL",
-		"https://router.project-osrm.org",
-	);
+	const osrmBaseUrl =
+		normalizeText(process.env.OSRM_BASE_URL) ||
+		envValue("NEXT_PUBLIC_OSRM_BASE_URL", "https://router.project-osrm.org");
 	const quickChartBaseUrl = "https://quickchart.io/qr";
 
 	return [
@@ -173,15 +172,23 @@ export function listIntegrationStatusItems(now = new Date()) {
 				category: "Rutas comerciales",
 				status: isValidUrl(osrmBaseUrl) ? "operational" : "degraded",
 				description:
-					"Calcula la geometria de rutas visibles en mapa a partir de los puntos comerciales planificados.",
+					"Calcula la geometria y duracion real de rutas a partir de los puntos comerciales planificados.",
 				operationalUse:
-					"Usado por M2 en la previsualización de rutas comerciales y mapas de visitas.",
+					"Usado por M2 en la previsualizacion de rutas comerciales, ETA de visitas y mapas.",
 				fallbackBehavior:
-					"Si OSRM no responde, el mapa conserva los marcadores y la operativa comercial puede continuar sin trazado calculado.",
+					"Si OSRM no responde, el mapa conserva los marcadores y la operativa comercial usa una estimacion local por distancia.",
 				configuration: [
 					{
 						label: "URL base",
 						value: osrmBaseUrl,
+					},
+					{
+						label: "Variable servidor",
+						value: envPresence("OSRM_BASE_URL"),
+					},
+					{
+						label: "Variable publica",
+						value: envPresence("NEXT_PUBLIC_OSRM_BASE_URL"),
 					},
 					{
 						label: "Modo",

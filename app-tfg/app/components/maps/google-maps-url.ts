@@ -10,10 +10,11 @@ export function buildGoogleMapsDirectionsUrl(
 	waypoints: RoutePoint[],
 	endPoint: RoutePoint | null,
 ) {
+	const navigationEndPoint = endPoint?.id === "route-end-return" ? null : endPoint;
 	const points = [
 		...(startPoint ? [startPoint] : []),
 		...waypoints,
-		...(endPoint ? [endPoint] : []),
+		...(navigationEndPoint ? [navigationEndPoint] : []),
 	];
 
 	if (points.length < 2) {
