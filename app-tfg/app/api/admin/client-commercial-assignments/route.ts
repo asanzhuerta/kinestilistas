@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	getRequestSearchParams,
 	jsonFromError,
@@ -20,6 +21,11 @@ import {
 // GET /api/admin/client-commercial-assignments?commercialId=...
 // Consulta asignaciones activas o históricas entre clientes y comerciales según el filtro indicado.
 export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {
@@ -51,6 +57,11 @@ export async function GET(request: Request) {
 // POST /api/admin/client-commercial-assignments
 // Crea o reasigna la vinculación entre un cliente y un comercial desde administración.
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

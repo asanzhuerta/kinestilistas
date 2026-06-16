@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	getRequestSearchParams,
 	jsonFromError,
 	requireRoleUser,
@@ -23,6 +24,11 @@ import { listCommercialVisitsByCommercial } from "@/lib/typeorm/services/commerc
 // GET /api/commercial/routes/preview?startLat=&startLng=
 // Calcula una vista previa de la ruta diaria del comercial con orden, ETA y resumen temporal.
 export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

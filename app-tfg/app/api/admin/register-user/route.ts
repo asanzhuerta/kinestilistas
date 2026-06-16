@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	jsonFromError,
 	readJsonBody,
@@ -14,6 +15,11 @@ import { registerUserByAdmin } from "@/lib/typeorm/services/users/user";
 // POST /api/admin/register-user
 // Registra manualmente un nuevo usuario desde administración con el rol indicado.
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

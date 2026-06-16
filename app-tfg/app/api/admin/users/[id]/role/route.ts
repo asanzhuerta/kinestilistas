@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	jsonFromError,
 	readJsonBody,
@@ -15,6 +16,11 @@ import { updateUserRole } from "@/lib/typeorm/services/users/role";
 // PATCH /api/admin/users/[id]/role
 // Cambia el rol de un usuario desde administración y registra la auditoría correspondiente.
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

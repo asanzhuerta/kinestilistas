@@ -34,8 +34,9 @@ Aplicación principal de Kinestilistas. Esta carpeta contiene el producto softwa
 ## Archivos de entrada relevantes
 
 - `auth.ts`: configuración de Auth.js, credenciales, sesiones y trazabilidad de acceso.
+- `proxy.hosting.ts`: proxy de seguridad preparado para despliegues Next.js compatibles. Si el hosting soporta correctamente `proxy.ts`, puede renombrarse para reactivar rate limiting previo, compatibilidad de navegador y redirecciones por sesión/rol antes de llegar a la app.
 - Protección de rutas: los layouts de `/admin`, `/commercials` y `/clients` validan la sesión en servidor mediante `requireAdminSession`, `requireCommercialSession` y `requireClientSession`; las APIs privadas validan rol con `requireRoleUser`.
-- Netlify: no se mantiene `proxy.ts` activo porque el runtime de Netlify para Next.js 16 genera una Edge Function incompatible en este despliegue (`nextHandler is not a function`). Para la demo, la protección principal queda en layouts y route handlers de servidor.
+- Netlify: no se publica un `proxy.ts` activo porque el runtime de Netlify para Next.js 16 genera una Edge Function incompatible en este despliegue (`nextHandler is not a function`). Para la demo, el rate limiting se ejecuta dentro de cada Route Handler con `enforceApiRateLimit`, y la protección de sesión/rol queda en layouts y endpoints de servidor.
 - `next.config.ts`: configuración de Next.js.
 - `package.json`: scripts, dependencias y comandos de desarrollo.
 - `tsconfig.typeorm.json`: configuración TypeScript específica para TypeORM y migraciones.

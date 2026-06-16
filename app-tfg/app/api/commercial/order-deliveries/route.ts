@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	getRequestSearchParams,
 	jsonFromError,
 	logApiError,
@@ -16,6 +17,11 @@ import {
 } from "@/lib/typeorm/services/orders/order-delivery";
 
 export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {
@@ -60,6 +66,11 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

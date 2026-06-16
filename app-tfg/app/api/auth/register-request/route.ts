@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createRegisterRequest } from "@/lib/typeorm/services/users/request";
+import { enforceApiRateLimit } from "@/lib/api/server";
 
 type RegisterRequestBody = {
 	email?: string;
@@ -13,6 +14,11 @@ type RegisterRequestBody = {
 // POST /api/auth/register-request
 // Registra una nueva solicitud de alta pendiente de revisión administrativa.
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	try {
 		const body = (await request.json()) as RegisterRequestBody;
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	forbiddenError,
 	getSessionUser,
 	unauthorizedError,
@@ -11,7 +12,12 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await getSessionUser();
 
 	if (!user) {

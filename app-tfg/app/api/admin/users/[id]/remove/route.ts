@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	requireRoleUser,
 	unauthorizedError,
 } from "@/lib/api/server";
@@ -11,6 +12,11 @@ import { deactivateUser } from "@/lib/typeorm/services/users/user";
 // POST /api/admin/users/[id]/remove
 // Desactiva un usuario desde administración aplicando las validaciones de seguridad del sistema.
 export async function POST(request: Request, { params }: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	requireRoleUser,
 	unauthorizedError,
@@ -9,7 +10,12 @@ import {
 	listSupportResourceTypes,
 } from "@/lib/typeorm/services/catalog/lookups";
 
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

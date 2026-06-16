@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	notFoundError,
 	requireRoleUser,
@@ -10,7 +11,12 @@ import { getUserRequestById } from "@/lib/typeorm/services/users/request";
 
 // GET /api/admin/user-requests/[id]
 // Obtiene el detalle completo de una solicitud de registro concreta.
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

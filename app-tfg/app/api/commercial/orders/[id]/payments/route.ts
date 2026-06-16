@@ -3,6 +3,7 @@ import type { RouteContext } from "@/lib/contracts/api";
 import type { RegisterOrderPaymentBody } from "@/lib/contracts/order";
 import { buildRegisterOrderPaymentInput } from "@/lib/contracts/order";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	logApiError,
 	readJsonBody,
@@ -12,6 +13,11 @@ import {
 import { registerOrderPaymentForCommercialUser } from "@/lib/typeorm/services/orders/order";
 
 export async function POST(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

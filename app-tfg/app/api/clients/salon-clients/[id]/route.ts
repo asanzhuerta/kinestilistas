@@ -5,6 +5,7 @@ import {
 	type UpdateSalonClientBody,
 } from "@/lib/contracts/salon";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	readJsonBody,
 	requireRoleUser,
@@ -15,7 +16,12 @@ import {
 	updateSalonClientForClientUser,
 } from "@/lib/typeorm/services/salon/salon-client";
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {
@@ -33,6 +39,11 @@ export async function GET(_: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {

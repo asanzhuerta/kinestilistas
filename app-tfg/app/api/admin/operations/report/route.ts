@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { buildAdminOperationalReport } from "@/lib/admin/operational-report";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	requireRoleUser,
 	unauthorizedError,
 } from "@/lib/api/server";
 
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

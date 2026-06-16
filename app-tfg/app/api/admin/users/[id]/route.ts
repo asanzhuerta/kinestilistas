@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	notFoundError,
 	readJsonBody,
@@ -18,6 +19,11 @@ import { updateUser } from "@/lib/typeorm/services/users/user";
 // PATCH /api/admin/users/[id]
 // Actualiza los datos generales de un usuario y, si aplica, su perfil de cliente asociado.
 export async function PATCH(request: Request, { params }: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const sessionUser = await requireRoleUser("admin");
 
 	if (!sessionUser) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	requireRoleUser,
 	unauthorizedError,
@@ -12,10 +13,12 @@ type ServiceTechnicalEmailRouteContext = RouteContext<{
 	serviceId: string;
 }>;
 
-export async function GET(
-	_: Request,
-	context: ServiceTechnicalEmailRouteContext,
-) {
+export async function GET(request: Request, context: ServiceTechnicalEmailRouteContext,) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	forbiddenError,
 	jsonFromError,
 	notFoundError,
@@ -13,7 +14,12 @@ import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/com
 
 // GET /api/commercial/clients/[id]
 // Obtiene el detalle operativo de un cliente concreto dentro de la cartera del comercial autenticado.
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

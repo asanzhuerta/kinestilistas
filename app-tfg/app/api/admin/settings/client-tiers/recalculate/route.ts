@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	requireRoleUser,
 	unauthorizedError,
 } from "@/lib/api/server";
 import { recalculateClientTiersByPolicy } from "@/lib/typeorm/services/clients/client-tier-settings";
 
-export async function POST() {
+export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

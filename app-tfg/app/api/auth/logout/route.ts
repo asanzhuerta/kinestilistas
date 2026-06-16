@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { logoutUserSession } from "@/lib/typeorm/services/auth/logout-user-session";
+import { enforceApiRateLimit } from "@/lib/api/server";
 
 // POST /api/auth/logout
 // Cierra la sesión actual y marca como revocada la sesión persistida del usuario.
-export async function POST() {
+export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	try {
 		const session = await auth();
 

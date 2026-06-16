@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	forbiddenError,
 	getSessionUser,
 	jsonFromError,
@@ -13,7 +14,12 @@ import {
 	listRemindersForUser,
 } from "@/lib/typeorm/services/communications/communications";
 
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await getSessionUser();
 
 	if (!user) {
@@ -35,6 +41,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await getSessionUser();
 
 	if (!user) {

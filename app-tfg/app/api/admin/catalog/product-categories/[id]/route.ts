@@ -5,6 +5,7 @@ import {
 	buildAdminUpsertProductCategoryInput,
 } from "@/lib/contracts/product-catalog";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	notFoundError,
 	readJsonBody,
@@ -16,7 +17,12 @@ import {
 	updateProductCategory,
 } from "@/lib/typeorm/services/catalog/product-category";
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {
@@ -39,6 +45,11 @@ export async function GET(_: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

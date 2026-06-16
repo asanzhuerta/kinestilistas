@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	jsonFromError,
 	logApiError,
@@ -12,6 +13,11 @@ import { buildAddClientDraftOrderLineInput } from "@/lib/contracts/order";
 import { addLineToDraftForClientUser } from "@/lib/typeorm/services/orders/order";
 
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {

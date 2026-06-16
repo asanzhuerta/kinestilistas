@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	notFoundError,
 	readJsonBody,
@@ -16,7 +17,12 @@ function isTechnicalRateLimitSettingsEnabled() {
 	return process.env.ADMIN_RATE_LIMIT_SETTINGS_ENABLED === "true";
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	if (!isTechnicalRateLimitSettingsEnabled()) {
 		return notFoundError("Configuración técnica no disponible");
 	}
@@ -40,6 +46,11 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	if (!isTechnicalRateLimitSettingsEnabled()) {
 		return notFoundError("Configuración técnica no disponible");
 	}

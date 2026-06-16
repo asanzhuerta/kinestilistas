@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	getRequestSearchParams,
 	jsonFromError,
@@ -16,6 +17,11 @@ import {
 // GET /api/admin/commercial-visits?clientId=123
 // Lista visitas comerciales de administración con filtros opcionales por cliente y metadatos relacionados.
 export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {
@@ -42,6 +48,11 @@ export async function GET(request: Request) {
 // POST /api/admin/commercial-visits
 // Crea una visita comercial desde administración para el comercial y cliente indicados.
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

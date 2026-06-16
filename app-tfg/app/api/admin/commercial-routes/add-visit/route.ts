@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	jsonFromError,
 	readJsonBody,
@@ -15,6 +16,11 @@ import { addVisitToRoute } from "@/lib/typeorm/services/commercial/commercial-ro
 // POST /api/admin/commercial-routes/add-visit
 // Anade una visita existente a una ruta comercial persistida en la posicion indicada.
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

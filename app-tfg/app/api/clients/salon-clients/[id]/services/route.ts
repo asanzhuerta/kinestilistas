@@ -5,6 +5,7 @@ import {
 	type CreateSalonServiceBody,
 } from "@/lib/contracts/salon";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	readJsonBody,
 	requireRoleUser,
@@ -13,6 +14,11 @@ import {
 import { createSalonServiceForClientUser } from "@/lib/typeorm/services/salon/salon-client";
 
 export async function POST(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	getSessionUser,
 	notFoundError,
@@ -15,6 +16,11 @@ import { User } from "@/lib/typeorm/entities/User";
 // POST /api/profile/upload-image
 // Sube una nueva imagen de perfil a Cloudinary y devuelve la URL resultante.
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const sessionUser = await getSessionUser();
 
 	if (!sessionUser?.id) {

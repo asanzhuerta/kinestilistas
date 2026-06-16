@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRateLimitDiagnostics } from "@/lib/admin/rate-limit-diagnostics";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	notFoundError,
 	requireRoleUser,
@@ -11,7 +12,12 @@ function isTechnicalRateLimitSettingsEnabled() {
 	return process.env.ADMIN_RATE_LIMIT_SETTINGS_ENABLED === "true";
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	if (!isTechnicalRateLimitSettingsEnabled()) {
 		return notFoundError("Configuración técnica no disponible");
 	}

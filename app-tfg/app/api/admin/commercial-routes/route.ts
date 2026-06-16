@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	jsonFromError,
 	readJsonBody,
@@ -15,6 +16,11 @@ import { createCommercialRoute } from "@/lib/typeorm/services/commercial/commerc
 // POST /api/admin/commercial-routes
 // Crea una nueva ruta comercial persistida para un comercial y una fecha concretos.
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

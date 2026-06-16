@@ -4,9 +4,11 @@ Utilidades para Route Handlers y respuestas de servidor.
 
 ## Función
 
-Centralizar control de acceso, manejo de errores, parseo de peticiones y respuestas comunes.
+Centralizar control de acceso, rate limiting, manejo de errores, parseo de peticiones y respuestas comunes.
 
 Los endpoints comparten patrones de seguridad y validación. Esta carpeta evita repetirlos en cada ruta API.
+
+`server.ts` expone `enforceApiRateLimit(request)`, que resuelve la política aplicable según ruta y método y devuelve una respuesta `429` cuando corresponde. Los Route Handlers la ejecutan de forma explícita para no depender de middleware Edge en despliegues como Netlify.
 
 ## Cliente HTTP interno
 

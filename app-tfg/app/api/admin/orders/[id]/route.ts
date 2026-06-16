@@ -3,6 +3,7 @@ import type { RouteContext } from "@/lib/contracts/api";
 import type { UpdateOrderStatusBody } from "@/lib/contracts/order";
 import { buildUpdateOrderStatusInput } from "@/lib/contracts/order";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	readJsonBody,
 	requireRoleUser,
@@ -13,7 +14,12 @@ import {
 	updateOrderStatusForAdmin,
 } from "@/lib/typeorm/services/orders/order";
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {
@@ -31,6 +37,11 @@ export async function GET(_: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import type { SessionLike } from "@/lib/contracts/api";
+import {
+	applyRateLimit,
+	createRateLimitExceededResponse,
+	getClientIpFromHeaders,
+	resolveApiRateLimitPolicy,
+	resolveRateLimitIdentifier,
+} from "@/lib/security/rate-limit";
 import { parsePositiveIntegerValue } from "@/lib/utils/validation";
 
 export type SessionUser = NonNullable<NonNullable<SessionLike>["user"]>;
@@ -43,6 +50,40 @@ export function badRequestError(message: string, code?: string) {
 
 export function getRequestSearchParams(request: Request) {
 	return new URL(request.url).searchParams;
+}
+
+export async function enforceApiRateLimit(
+	request: Request,
+	user?: SessionUser | null,
+) {
+	const method = request.method.toUpperCase();
+
+	if (method === "OPTIONS" || method === "HEAD") {
+		return null;
+	}
+
+	const pathname = new URL(request.url).pathname;
+	const policy = resolveApiRateLimitPolicy(pathname, method);
+
+	if (!policy?.enabled) {
+		return null;
+	}
+
+	const rateLimitUser =
+		user ?? (policy.scope === "user_or_ip" ? await getSessionUser() : null);
+	const ipAddress = getClientIpFromHeaders(request.headers);
+	const identifier = resolveRateLimitIdentifier(policy, {
+		ipAddress,
+		userId: rateLimitUser?.id ?? null,
+		email: rateLimitUser?.email ?? null,
+	});
+	const rateLimitResult = applyRateLimit(policy, identifier);
+
+	if (!rateLimitResult.success) {
+		return createRateLimitExceededResponse(policy, rateLimitResult);
+	}
+
+	return null;
 }
 
 export function parsePositiveInteger(

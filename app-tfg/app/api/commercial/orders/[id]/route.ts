@@ -5,6 +5,7 @@ import {
 	buildUpdateOrderStatusInput,
 } from "@/lib/contracts/order";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	logApiError,
 	readJsonBody,
@@ -16,7 +17,12 @@ import {
 	updateOrderStatusForCommercialUser,
 } from "@/lib/typeorm/services/orders/order";
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {
@@ -34,6 +40,11 @@ export async function GET(_: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

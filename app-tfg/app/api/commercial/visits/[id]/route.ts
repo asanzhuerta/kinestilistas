@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import type { UpdateCommercialVisitBody } from "@/lib/contracts/commercial-visit";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	notFoundError,
 	readJsonBody,
@@ -16,7 +17,12 @@ import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/com
 
 // GET /api/commercial/visits/[id]
 // Obtiene el detalle de una visita concreta perteneciente al comercial autenticado.
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {
@@ -42,6 +48,11 @@ export async function GET(_: Request, context: RouteContext) {
 // PATCH /api/commercial/visits/[id]
 // Actualiza el estado o los datos editables de una visita concreta del comercial autenticado.
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

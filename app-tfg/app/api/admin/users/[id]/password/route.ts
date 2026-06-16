@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	jsonFromError,
 	readJsonBody,
@@ -14,6 +15,11 @@ import { changeUserPassword } from "@/lib/typeorm/services/users/password";
 // PATCH /api/admin/users/[id]/password
 // Cambia la contraseña de un usuario desde administración y registra la acción.
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

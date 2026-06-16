@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	getOptionalNumberParam,
 	getRequestSearchParams,
@@ -18,6 +19,11 @@ import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/com
 // GET /api/commercial/visits?clientId=&statusId=&visitTypeId=&dateFrom=&dateTo=
 // Lista las visitas del comercial autenticado aplicando filtros opcionales de cliente, estado, tipo y fechas.
 export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {
@@ -50,6 +56,11 @@ export async function GET(request: Request) {
 // POST /api/commercial/visits
 // Crea una nueva visita comercial en la agenda del comercial autenticado.
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

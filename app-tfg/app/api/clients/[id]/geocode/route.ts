@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { canUpdateClient } from "@/lib/api/client-access";
 import {
+	enforceApiRateLimit,
 	badRequestError,
 	jsonFromError,
 	notFoundError,
@@ -14,6 +15,11 @@ import { getClientById } from "@/lib/typeorm/services/commercial/client";
 // GET /api/clients/[id]/geocode?q=address
 // Busca coordenadas sugeridas para una dirección del cliente antes de guardarla en su ficha.
 export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	try {
 		const session = (await auth()) as SessionLike;
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	readJsonBody,
 	requireRoleUser,
@@ -13,7 +14,12 @@ import {
 
 // GET /api/commercial/profile
 // Obtiene la configuración operativa del comercial autenticado.
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {
@@ -32,6 +38,11 @@ export async function GET() {
 // PATCH /api/commercial/profile
 // Actualiza la configuración de jornada, duraciones y puntos de ruta del comercial autenticado.
 export async function PATCH(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

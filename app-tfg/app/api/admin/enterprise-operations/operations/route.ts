@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	readJsonBody,
 	requireRoleUser,
@@ -9,6 +10,11 @@ import type { CreateIntegrationOperationBody } from "@/lib/contracts/enterprise-
 import { createIntegrationOperation } from "@/lib/typeorm/services/admin/enterprise-operations";
 
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

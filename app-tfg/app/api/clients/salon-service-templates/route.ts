@@ -4,6 +4,7 @@ import {
 	type CreateSalonServiceTemplateBody,
 } from "@/lib/contracts/salon";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	readJsonBody,
 	requireRoleUser,
@@ -14,7 +15,12 @@ import {
 	listSalonServiceTemplatesForClientUser,
 } from "@/lib/typeorm/services/salon/salon-service-template";
 
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {
@@ -31,6 +37,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {

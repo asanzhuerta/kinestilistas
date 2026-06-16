@@ -1,5 +1,6 @@
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	logApiError,
 	requireRoleUser,
@@ -10,7 +11,12 @@ import { getOrderDetailForCommercialUser } from "@/lib/typeorm/services/orders/o
 
 export const runtime = "nodejs";
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

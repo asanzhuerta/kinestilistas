@@ -99,6 +99,8 @@ Cada carpeta versionada relevante incluye un `README.md` propio para explicar su
 
 La aplicación mantiene además una capa de utilidades compartidas para reducir duplicidades: `app-tfg/lib/utils/` concentra formato de fechas, dinero, CSV, búsqueda y validaciones base; `app-tfg/lib/api/client.ts` centraliza las llamadas JSON desde cliente; y `app-tfg/app/components/ui/` agrupa piezas visuales transversales como mensajes de feedback y estilos comunes de formulario.
 
+En despliegues Netlify, el proxy global de Next.js se conserva como `app-tfg/proxy.hosting.ts` pero no se activa como `proxy.ts` por incompatibilidad del runtime Edge con Next.js 16. El rate limiting queda aplicado dentro de los Route Handlers mediante `app-tfg/lib/api/server.ts`, y en un hosting compatible puede reactivarse el proxy renombrando `proxy.hosting.ts` a `proxy.ts`.
+
 ## Autor
 
 Alejandro Sanz Huerta

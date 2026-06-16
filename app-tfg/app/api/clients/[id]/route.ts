@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";import { canReadClient, canUpdateClient } from "@/lib/api/client-access";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	notFoundError,
 	readJsonBody,
@@ -18,7 +19,12 @@ import {
 
 // GET /api/clients/[id]
 // Obtiene la ficha de un cliente concreto si el usuario autenticado tiene acceso a ella.
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	try {
 		const session = (await auth()) as SessionLike;
 		const { id } = await context.params;
@@ -47,6 +53,11 @@ export async function GET(_: Request, context: RouteContext) {
 // PATCH /api/clients/[id]
 // Actualiza los datos editables de un cliente concreto respetando las reglas de acceso.
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	try {
 		const session = (await auth()) as SessionLike;
 		const { id } = await context.params;

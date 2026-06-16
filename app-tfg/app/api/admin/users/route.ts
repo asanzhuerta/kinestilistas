@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	getRequestSearchParams,
 	jsonFromError,
 	parsePositiveInteger,
@@ -17,6 +18,11 @@ import {
 // GET /api/admin/users
 // Lista usuarios del sistema, con soporte opcional de paginación y búsqueda.
 export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {
@@ -53,6 +59,11 @@ export async function GET(request: Request) {
 // POST /api/admin/users
 // Crea un nuevo usuario directamente desde administración usando un roleId explicito.
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

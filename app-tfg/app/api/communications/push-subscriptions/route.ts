@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	forbiddenError,
 	getSessionUser,
 	jsonFromError,
@@ -20,6 +21,11 @@ function canManagePushSubscriptions(role: string) {
 }
 
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await getSessionUser();
 
 	if (!user) {
@@ -54,6 +60,11 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await getSessionUser();
 
 	if (!user) {

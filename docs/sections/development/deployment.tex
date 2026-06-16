@@ -13,6 +13,8 @@ La arquitectura física realmente necesaria para ejecutar la aplicación puede r
 
 Desde el punto de vista del despliegue, la aplicación no separa frontend y backend en productos distintos. La misma instancia de \texttt{Next.js} sirve la interfaz web, resuelve los \textit{Route Handlers}, aplica autenticación, rate limiting y control de acceso, y coordina la lectura y escritura sobre la base de datos.
 
+En el despliegue de demostración sobre \texttt{Netlify} se mantiene una adaptación específica: el proxy global de \texttt{Next.js} se conserva en el repositorio como \texttt{app-tfg/proxy.hosting.ts}, pero no se publica con el nombre activo \texttt{proxy.ts}. La razón es una incompatibilidad observada entre el runtime Edge de \texttt{Netlify} y \texttt{Next.js 16}, que provocaba el error \texttt{nextHandler is not a function}. Para no perder seguridad en la demostración, el rate limiting se aplica también dentro de los \textit{Route Handlers} mediante \texttt{enforceApiRateLimit(request)}, mientras que la protección de sesión y rol permanece en layouts y endpoints de servidor. En un hosting compatible con el proxy de \texttt{Next.js}, basta con renombrar \texttt{proxy.hosting.ts} a \texttt{proxy.ts} para reactivar esa capa previa.
+
 \textcolor{red}{Revisar precisión: validar si realmente se quiere defender este despliegue como producción equivalente o solo como arquitectura de referencia.} La Figura~\ref{fig:physical-deployment} resume esta arquitectura física de referencia, válida tanto para el entorno local de desarrollo como para un despliegue de producción equivalente con base de datos gestionada.
 
 \begin{figure}[H]

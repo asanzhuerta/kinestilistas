@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	forbiddenError,
 	getSessionUser,
 	jsonFromError,
@@ -8,7 +9,12 @@ import {
 } from "@/lib/api/server";
 import { markNotificationRead } from "@/lib/typeorm/services/communications/communications";
 
-export async function PATCH(_: Request, context: RouteContext) {
+export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await getSessionUser();
 
 	if (!user) {

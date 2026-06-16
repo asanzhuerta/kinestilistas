@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	requireRoleUser,
 	unauthorizedError,
@@ -9,7 +10,12 @@ import { requireCommercialByUserId } from "@/lib/typeorm/services/commercial/com
 
 // GET /api/commercial/clients
 // Lista los clientes actualmente asignados al comercial autenticado.
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("commercial");
 
 	if (!user) {

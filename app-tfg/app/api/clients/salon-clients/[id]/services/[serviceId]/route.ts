@@ -5,6 +5,7 @@ import {
 	type UpdateSalonServiceBody,
 } from "@/lib/contracts/salon";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	readJsonBody,
 	requireRoleUser,
@@ -21,6 +22,11 @@ type ServiceRouteContext = RouteContext<{
 }>;
 
 export async function PATCH(request: Request, context: ServiceRouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {
@@ -45,7 +51,12 @@ export async function PATCH(request: Request, context: ServiceRouteContext) {
 	}
 }
 
-export async function DELETE(_: Request, context: ServiceRouteContext) {
+export async function DELETE(request: Request, context: ServiceRouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	readJsonBody,
 	requireRoleUser,
@@ -12,6 +13,11 @@ import { approveUserRequest } from "@/lib/typeorm/services/users/request";
 // POST /api/admin/user-requests/[id]/approve
 // Aprueba una solicitud de registro y crea el usuario definitivo, con comercial opcional para clientes.
 export async function POST(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

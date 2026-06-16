@@ -3,6 +3,7 @@ import type { RouteContext } from "@/lib/contracts/api";
 import type { AdminUpsertProductLineBody } from "@/lib/contracts/product-catalog";
 import { buildAdminUpsertProductLineInput } from "@/lib/contracts/product-catalog";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	notFoundError,
 	readJsonBody,
@@ -14,7 +15,12 @@ import {
 	updateProductLine,
 } from "@/lib/typeorm/services/catalog/product-line";
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {
@@ -37,6 +43,11 @@ export async function GET(_: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

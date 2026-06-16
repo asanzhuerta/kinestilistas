@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	getSessionUser,
 	jsonError,
 	readJsonBody,
@@ -24,6 +25,11 @@ import {
 // PATCH /api/profile
 // Actualiza los datos del perfil del usuario autenticado y, si es cliente, su ficha asociada.
 export async function PATCH(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const sessionUser = await getSessionUser();
 
 	if (!sessionUser) {

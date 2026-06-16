@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	requireRoleUser,
 	unauthorizedError,
@@ -8,7 +9,12 @@ import { listUserRequests } from "@/lib/typeorm/services/users/request";
 
 // GET /api/admin/user-requests
 // Lista las solicitudes de registro pendientes o históricas para su revisión administrativa.
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	forbiddenError,
 	getSessionUser,
 	jsonFromError,
@@ -11,6 +12,11 @@ import type { UpsertAppReminderBody } from "@/lib/contracts/communications";
 import { updateReminderStatus } from "@/lib/typeorm/services/communications/communications";
 
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await getSessionUser();
 
 	if (!user) {

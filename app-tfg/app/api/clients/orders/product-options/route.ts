@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	logApiError,
 	requireRoleUser,
@@ -7,7 +8,12 @@ import {
 } from "@/lib/api/server";
 import { listOrderProductOptionsForClientUser } from "@/lib/typeorm/services/orders/order";
 
-export async function GET() {
+export async function GET(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {

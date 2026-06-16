@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import type { UpdateCommercialVisitBody } from "@/lib/contracts/commercial-visit";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	notFoundError,
 	readJsonBody,
@@ -16,7 +17,12 @@ import {
 
 // GET /api/admin/commercial-visits/[id]
 // Obtiene el detalle de una visita comercial concreta desde el panel de administración.
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const [user, { id }] = await Promise.all([
 		requireRoleUser("admin"),
 		context.params,
@@ -43,6 +49,11 @@ export async function GET(_: Request, context: RouteContext) {
 // PATCH /api/admin/commercial-visits/[id]
 // Actualiza una visita comercial concreta desde administración.
 export async function PATCH(request: Request, context: RouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("admin");
 
 	if (!user) {

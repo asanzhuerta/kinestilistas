@@ -2,10 +2,16 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getPasswordValidationMessage } from "@/lib/utils/password-utils";
 import { changeUserPassword } from "@/lib/typeorm/services/users/password";
+import { enforceApiRateLimit } from "@/lib/api/server";
 
 // POST /api/account/change-password
 // Cambia la contraseña del usuario autenticado
 export async function POST(request: Request) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const session = await auth();
 
 	if (!session?.user?.id) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { RouteContext } from "@/lib/contracts/api";
 import {
+	enforceApiRateLimit,
 	jsonFromError,
 	requireRoleUser,
 	unauthorizedError,
@@ -11,7 +12,12 @@ type TemplateRouteContext = RouteContext<{
 	templateId: string;
 }>;
 
-export async function DELETE(_: Request, context: TemplateRouteContext) {
+export async function DELETE(request: Request, context: TemplateRouteContext) {
+	const rateLimitResponse = await enforceApiRateLimit(request);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const user = await requireRoleUser("client");
 
 	if (!user) {
