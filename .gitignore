@@ -1,6 +1,16 @@
 /db/
 /examples/
 /backups/
+
+# Informe de auditoría con vulnerabilidades abiertas: solo local.
+project-docs/AUDIT_REPORT.md
+
+# Material de la defensa exportado y figuras derivadas solo para diapositivas.
+/output/
+docs/figures/Arquitectura/*-slide-readable.*
+
+# Utilidades locales de diagnóstico que no forman parte del producto.
+app-tfg/scripts/find-test-user-passwords.ts
 app-tfg/TFG_STATUS_MASTER_PLAN.md
 
 # Artefactos locales de Codex y sesiones de navegador/headless.

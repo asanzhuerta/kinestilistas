@@ -1,0 +1,152 @@
+La \textbf{planificación del proyecto} se estructura teniendo en cuenta las fases principales del \textbf{ciclo de vida del software} y la naturaleza académica del \textit{Trabajo Fin de Grado}. Al tratarse de un proyecto realizado por un \textbf{único desarrollador}, la planificación combina actividades de análisis, diseño, construcción, pruebas y documentación, distribuidas a lo largo del periodo de realización del trabajo.
+
+\subsection{Calendario general}
+
+El calendario se presenta por meses, ya que el proyecto se desarrolla como un \textit{Trabajo Fin de Grado} individual y las actividades no se ejecutan como tareas aisladas de corta duración, sino como fases de \textbf{análisis}, \textbf{diseño}, \textbf{construcción}, \textbf{validación} y \textbf{documentación} que se solapan parcialmente. Esta granularidad permite reflejar la evolución prevista del trabajo sin introducir una falsa precisión diaria que no se corresponde con la \textbf{naturaleza incremental} del proyecto.
+
+El proyecto se organizará en \textbf{fases sucesivas}, aunque con cierto solapamiento entre actividades. En particular, la documentación se actualizará de forma progresiva conforme avancen el análisis, el diseño y la construcción del sistema. La Tabla~\ref{tab:project-plan-schedule} resume esta \textbf{planificación general}.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Planificación general del proyecto}
+    \label{tab:project-plan-schedule}
+    \begin{tabularx}{\textwidth}{|L{3.5cm}|L{2.8cm}|Y|}
+        \hline
+        \rowcolor{black!8}
+        \textbf{Fase} & \textbf{Periodo aproximado} & \textbf{Actividades principales} \\
+        \hline
+        \textbf{Inicio y definición del proyecto} & Febrero de 2026 & Definición inicial del problema, contacto con el tutor, delimitación del alcance y preparación de la toma de requisitos. \\
+        \hline
+        \textbf{Captura de requisitos} & Marzo de 2026 & Reunión con el cliente, análisis de la situación actual, identificación de procesos, problemas y necesidades funcionales. \\
+        \hline
+        \textbf{Análisis del sistema} & Marzo - abril de 2026 & Definición de objetivos, requisitos funcionales, no funcionales, requisitos de información, reglas de negocio y división modular. \\
+        \hline
+        \textbf{Diseño del sistema} & Abril de 2026 & Diseño de arquitectura, diseño conceptual y físico de datos, diseño de interfaz y organización técnica de la solución. \\
+        \hline
+        \textbf{Construcción} & Abril - mayo de 2026 & Preparación del entorno, implementación de la base funcional, autenticación, roles, usuarios y estructura inicial de la aplicación. \\
+        \hline
+        \textbf{Pruebas y validación} & Mayo de 2026 & Validación manual de funcionalidades, comprobaciones de ejecución, revisión de flujos principales y pruebas en distintos dispositivos. \\
+        \hline
+        \textbf{Documentación y cierre} & Mayo - junio de 2026 & Redacción de la memoria, anexos, manual del desarrollador, manual de usuario, revisión final y preparación de la entrega. \\
+        \hline
+    \end{tabularx}
+\end{table}
+\subsection{Diagrama de Gantt}
+
+La Figura~\ref{fig:project-plan-gantt} muestra una representación temporal resumida de las principales fases del proyecto. El \textit{Diagrama de Gantt} refleja la \textbf{naturaleza incremental} del trabajo, en la que algunas tareas, especialmente la \textbf{documentación}, se desarrollarán de forma paralela a las fases técnicas.
+
+\begin{figure}[htbp]
+    \centering
+    \footnotesize
+
+    \begin{ganttchart}[
+            hgrid,
+            vgrid,
+            x unit=0.85cm,
+            y unit title=0.65cm,
+            y unit chart=0.72cm,
+            title height=1,
+            bar height=0.45,
+            milestone height=0.45,
+            title label font=\footnotesize\bfseries,
+            bar label font=\footnotesize,
+            milestone label font=\footnotesize,
+            bar/.append style={
+                draw=black,
+                fill=white
+            },
+            milestone/.append style={
+                draw=black,
+                fill=black
+            },
+            bar label node/.append style={
+                text width=4.2cm,
+                align=right,
+                anchor=east,
+                xshift=-0.15cm
+            },
+            milestone label node/.append style={
+                text width=4.2cm,
+                align=right,
+                anchor=east,
+                xshift=-0.15cm
+            }
+        ]{1}{10}
+
+        \gantttitle{2026}{10} \\
+        \gantttitle{Feb}{2}
+        \gantttitle{Mar}{2}
+        \gantttitle{Abr}{2}
+        \gantttitle{May}{2}
+        \gantttitle{Jun}{2} \\
+
+        \ganttbar{Inicio y definición}{1}{2} \\
+        \ganttbar{Captura de requisitos}{3}{4} \\
+        \ganttbar{Análisis del sistema}{3}{6} \\
+        \ganttbar{Diseño del sistema}{5}{6} \\
+        \ganttbar{Construcción}{5}{8} \\
+        \ganttbar{Pruebas y validación}{7}{8} \\
+        \ganttbar{Documentación y cierre}{7}{10} \\
+        \ganttmilestone{Entrega final}{9}
+
+    \end{ganttchart}
+
+    \caption{Diagrama de Gantt resumido del proyecto}
+    \label{fig:project-plan-gantt}
+\end{figure}
+
+\subsection{Hitos principales}
+
+Los hitos principales del proyecto se definen de la siguiente manera:
+
+\begin{itemize}
+    \item \textbf{Aceptación y definición inicial} del \textit{Trabajo Fin de Grado}.
+    \item \textbf{Realización de la reunión de toma de requisitos} con el cliente.
+    \item \textbf{Definición de la división modular} del sistema.
+    \item \textbf{Elección del marco tecnológico principal}.
+    \item \textbf{Diseño de la arquitectura y del modelo de datos}.
+    \item \textbf{Implementación de la base funcional} de la aplicación.
+    \item \textbf{Validación de los flujos principales} construidos.
+    \item \textbf{Finalización de la memoria} y preparación de los entregables.
+\end{itemize}
+
+\subsection{Estimación de esfuerzo por actividad}
+
+La Tabla~\ref{tab:project-plan-effort} recoge una \textbf{estimación aproximada} del esfuerzo previsto para las principales actividades del proyecto. Dado que el desarrollo se realizará de forma individual, estos valores se utilizarán como referencia para distribuir el trabajo, priorizar las tareas críticas y mantener el alcance dentro de un volumen asumible para un \textit{Trabajo Fin de Grado}.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \setlength{\tabcolsep}{4pt}
+    \caption{Estimación de esfuerzo previsto por actividad}
+    \label{tab:project-plan-effort}
+    \begin{tabularx}{\textwidth}{|Y|>{\centering\arraybackslash}p{2.6cm}|}
+        \hline
+        \rowcolor{black!8}
+        \textbf{Actividad} & \textbf{Horas previstas} \\
+        \hline
+        Análisis de requisitos & 32 \\
+        \hline
+        Diseño de arquitectura & 27 \\
+        \hline
+        Diseño de base de datos & 20 \\
+        \hline
+        Diseño de interfaz & 28 \\
+        \hline
+        Desarrollo \textit{backend} & 95 \\
+        \hline
+        Desarrollo \textit{frontend} & 102 \\
+        \hline
+        Integración de servicios externos & 12 \\
+        \hline
+        Pruebas y validación & 36 \\
+        \hline
+        Documentación del proyecto & 48 \\
+        \hline
+        \textbf{Total} & \textbf{400} \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+La estimación reserva una parte importante del esfuerzo a la \textbf{construcción de la base funcional del sistema} y a la \textbf{documentación académica}. Las integraciones externas se tratarán de forma prudente, priorizando aquellas necesarias para validar la arquitectura y dejando como \textit{líneas de trabajo futuro} las que requieran configuración empresarial, credenciales definitivas o un volumen de pruebas superior al alcance del \textit{Trabajo Fin de Grado}.

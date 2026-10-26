@@ -1,0 +1,46 @@
+% Formato del título de capítulos y secciones
+% \titleformat{\chapter}[block]{\titlerule[0.8pt]\normalfont\huge\bfseries}{\thechapter.}{.5em}{\Huge}[{\titlerule[0.8pt]}]
+% \titlespacing*{\chapter}{0pt}{-19pt}{25pt}
+% \titleformat{\section}[block]{\normalfont\Large\bfseries}{\thesection.}{.5em}{\Large}
+
+\titleformat{\chapter}[block]{\normalfont\huge\bfseries}{\thechapter.}{.5em}{\Huge}[{\titlerule[0.8pt]}]
+\titlespacing*{\chapter}{0pt}{-19pt}{25pt}
+\titleformat{\section}[block]{\normalfont\Large\bfseries}{\thesection.}{.5em}{\Large}
+
+\raggedbottom
+\setlength{\emergencystretch}{3em}
+% Las tablas técnicas incluyen rutas y entidades largas; estos ajustes evitan ruido de Underfull inocuo.
+\hbadness=10000
+\vbadness=10000
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+\makeatletter
+\renewcommand{\es@scroman}[1]{#1}
+\makeatother
+\pdfsuppresswarningpagegroup=1
+
+% Formato del código fuente con lstlisting
+\lstset{
+  basicstyle=\ttfamily,
+  breaklines=true,
+}
+
+% Márgenes
+\geometry{
+    a4paper,
+    margin=2.75cm
+}
+
+% Límite de profundidad del índice
+\setcounter{tocdepth}{2}
+
+% Indentación de párrafos
+\setlength{\parindent}{1cm}
+
+\renewcommand{\lstlistingname}{Extracto de código}
+\renewcommand*{\lstlistlistingname}{Índice de extractos de código}
+
+%------------ Caption encima de las tablas
+\DeclareCaptionLabelSeparator*{spaced}{\\[1.5ex]}
+\captionsetup[table]{textfont=it,format=plain,justification=justified,
+  singlelinecheck=false,labelsep=spaced,position=top,skip=8pt}

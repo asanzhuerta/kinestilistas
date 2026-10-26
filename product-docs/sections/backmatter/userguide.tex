@@ -1,0 +1,164 @@
+Las instrucciones de uso del \textit{software} se detallan a continuación. Este manual se dirige al \textbf{usuario final} y describe únicamente las funcionalidades que forman parte del alcance operativo actual de la aplicación.
+
+\section{Introducción}
+
+KinEstilistas es una \textbf{aplicación web} para coordinar la relación entre un distribuidor de producto capilar profesional, su equipo comercial y sus clientes salón. En la versión actual el sistema cubre de forma efectiva la gestión de acceso y usuarios del módulo \texttt{M1}, la operativa comercial y de clientes del módulo \texttt{M2}, el catálogo y la coloración del módulo \texttt{M3}, el flujo de pedidos, preparación de repartos, entrega por comercial o agencia y pagos parciales del módulo \texttt{M4}, el seguimiento técnico interno del salón del módulo \texttt{M5}, las comunicaciones internas y multicanal, promociones, formaciones y descuentos del módulo \texttt{M6}, y la administración transversal de auditoría, avisos configurables, cargo de agencia y base técnica de integraciones del módulo \texttt{M7}.
+
+La aplicación diferencia tres perfiles de uso:
+
+\begin{itemize}
+    \item \textbf{Rol \texttt{admin}}.
+    \item \textbf{Rol \texttt{commercial}}.
+    \item \textbf{Rol \texttt{client}}.
+\end{itemize}
+
+\section{Instalación}
+
+Para el uso habitual del sistema desplegado solo se requiere:
+
+\begin{itemize}
+    \item \textbf{Navegador moderno compatible}.
+    \item \textbf{Credenciales válidas} o una solicitud de alta aprobada.
+\end{itemize}
+
+El sistema redirige automáticamente a una página informativa si detecta un navegador por debajo del soporte mínimo definido en el proyecto.
+
+Si se desea ejecutar la aplicación en local para evaluación, deben seguirse los pasos técnicos descritos en la guía de desarrollador: levantar \texttt{PostgreSQL} con \texttt{Docker}, configurar variables de entorno, ejecutar migraciones e iniciar \texttt{Next.js}.
+
+\section{Uso del sistema}
+
+En esta sección se explican los \textbf{flujos principales de uso} de la aplicación, comenzando por el acceso inicial y continuando con las operaciones disponibles para cada perfil.
+
+\subsection{Acceso inicial}
+
+\begin{enumerate}
+    \item \textbf{Acceso con cuenta existente}: el usuario accede a \texttt{/login}.
+    \item \textbf{Solicitud de alta}: si todavía no está dado de alta, utiliza \texttt{/register}.
+    \item \textbf{Redirección por rol}: tras autenticarse correctamente, el sistema redirige al panel correspondiente.
+\end{enumerate}
+
+En el flujo de \textbf{autenticación}, el sistema distingue entre credenciales incorrectas y bloqueos temporales por demasiados intentos, de modo que el usuario recibe un mensaje específico cuando el acceso queda temporalmente limitado.
+
+Una vez dentro de la aplicación, cada rol dispone de una barra lateral izquierda con las opciones disponibles para su perfil. En escritorio la barra se muestra como panel lateral, identifica el rol activo mediante los textos \textit{PROFESIONAL}, \textit{COMERCIAL} o \textit{ADMINISTRADOR}, e incorpora el logo de la aplicación. La barra puede plegarse para dejar solo los iconos y sustituye a la antigua navegación inferior. En móvil se abre desde el botón \textit{Menú}, se cierra al elegir una opción o al pulsar fuera del panel, y mantiene las mismas rutas principales que la versión de escritorio.
+
+En el área de cliente, la misma barra lateral muestra junto al nombre del salón el badge del rango comercial asignado: \textit{Plata}, \textit{Oro} o \textit{Platino}. Este indicador permite reconocer de forma rápida el nivel comercial activo sin tener que abrir el perfil.
+
+\subsection{Uso como administrador}
+
+El \textbf{panel de administración} concentra actualmente seis áreas principales:
+
+\begin{itemize}
+    \item \textbf{Gestión de usuarios}: revisión de solicitudes, alta manual de cuentas, consulta de usuarios y cambio de estado o rol.
+    \item \textbf{Gestión de clientes}: consulta de clientes y asignaciones entre clientes y comerciales.
+    \item \textbf{Gestión de catálogo}: administración de categorías, líneas, subcategorías, productos, recursos de apoyo, cartas de color y referencias cromáticas.
+    \item \textbf{Gestión global de pedidos}: consulta del historial global y detalle completo de cada pedido.
+    \item \textbf{Comunicaciones, promociones y formaciones}: creación de avisos segmentados, publicación de promociones con adjuntos, configuración de descuentos, rangos comerciales y gestión de eventos formativos.
+    \item \textbf{Auditoría y configuración}: consulta de accesos y acciones administrativas, exportación \texttt{CSV} de trazabilidad, configuración de canales de avisos automáticos, cargo de agencia y política de rangos.
+\end{itemize}
+
+Las operaciones más habituales para este rol son:
+
+\begin{enumerate}
+    \item \textbf{Revisar} solicitudes de registro pendientes;
+    \item \textbf{Aprobar, denegar, activar o bloquear} cuentas;
+    \item \textbf{Crear usuarios} desde administración;
+    \item \textbf{Acceder al detalle de cliente} para revisar sus datos;
+    \item \textbf{Asignar o reasignar} clientes a un comercial;
+    \item \textbf{Mantener} la estructura del catálogo y sus productos asociados;
+    \item \textbf{Administrar} cartas de color y referencias visuales por línea comercial;
+    \item \textbf{Publicar} comunicaciones internas, activar canales externos disponibles y gestionar promociones o formaciones;
+    \item \textbf{Consultar la vista de auditoría} en \texttt{/admin/audit}, incluyendo accesos recientes, acciones administrativas, resumen de sesiones activas y exportación \texttt{CSV} de registros de trazabilidad;
+    \item \textbf{Configurar} desde \texttt{/admin/settings} los canales adicionales de avisos automáticos y el cargo de entrega por agencia;
+    \item \textbf{Ajustar} los umbrales de rangos comerciales y ejecutar el recálculo manual cuando proceda;
+    \item \textbf{Revisar} el estado completo de un pedido, sus repartos, sus etiquetas y el historial de pagos.
+\end{enumerate}
+
+\subsection{Uso como comercial}
+
+El \textbf{panel comercial} muestra una tarjeta principal de ruta diaria y varios accesos operativos de los módulos \texttt{M2}, \texttt{M3} y \texttt{M4}.
+
+Los flujos disponibles son:
+
+\begin{enumerate}
+    \item \textbf{Consultar la ruta del día}, con clientes mapeados, tiempos aproximados y margen restante;
+    \item \textbf{Acceder al listado de clientes asignados};
+    \item \textbf{Abrir la ficha de un cliente} para consultar su información operativa;
+    \item \textbf{Consultar, crear, filtrar y actualizar} visitas comerciales;
+    \item \textbf{Revisar avisos} de visitas aplazadas automáticamente y abrir su reubicación cuando sea necesario;
+    \item \textbf{Ajustar la jornada base}, los puntos de salida y la duración estimada de visitas en \texttt{/commercials/settings};
+    \item \textbf{Abrir \texttt{/commercials/routes}} para visualizar la ruta en una vista dedicada;
+    \item \textbf{Acceder al catálogo} de productos activos con filtros por categoría, línea y subcategoría;
+    \item \textbf{Consultar fichas de producto} con información técnica, recursos asociados y vínculos a coloración;
+    \item \textbf{Explorar coloración} por filas de tono principal, por cartas o por todos los tonos, y abrir el detalle del tono con el producto asociado cuando exista;
+    \item \textbf{Preparar borradores de pedido} y confirmarlos para clientes asignados, con búsqueda de producto, vista previa económica de descuentos y elección de entrega por comercial o agencia;
+    \item \textbf{Consultar el listado de pedidos} del área comercial;
+    \item \textbf{Preparar repartos} a partir de pedidos confirmados, seleccionando productos y cantidades, registrando bultos manuales y descargando la etiqueta;
+    \item \textbf{Revisar repartos preparados} sin visita asignada y crear visitas de reparto cuando sea necesario;
+    \item \textbf{Gestionar visitas rutinarias y de reparto}, vincular repartos preparados, terminar visitas sin entrega asociada y completar repartos comerciales con validación \textit{QR};
+    \item \textbf{Registrar pagos parciales o totales} de pedidos ya entregados desde el detalle del pedido comercial.
+\end{enumerate}
+
+En el detalle de una visita de reparto, la confirmación de entrega se apoya en un flujo específico de \textit{QR}. El comercial puede abrir el escáner en un modal centrado y de pantalla completa; la cámara permanece activa leyendo de forma continua hasta detectar el código del reparto. Si el navegador o el dispositivo no permiten una lectura fiable, se conserva la introducción manual como alternativa. Solo cuando el sistema dispone de todos los \textit{QR} requeridos para los repartos vinculados habilita la confirmación final de la entrega.
+
+La información de ruta se apoya en la geolocalización del dispositivo cuando está disponible. Si el navegador no concede permiso, el sistema intenta utilizar el punto de salida guardado para el comercial.
+
+\subsection{Uso como cliente}
+
+En la versión actual el \textbf{área cliente} se centra en las siguientes capacidades reales:
+
+\begin{itemize}
+    \item \textbf{Consultar} la tarjeta de estimación de reparto del día;
+    \item \textbf{Consultar} el catálogo de productos activos;
+    \item \textbf{Explorar} la sección de coloración y sus cartas disponibles;
+    \item \textbf{Gestionar} su propio historial de pedidos;
+    \item \textbf{Gestionar} fichas técnicas internas de clientes del salón y registrar sus servicios;
+    \item \textbf{Consultar} promociones activas según su rango comercial;
+    \item \textbf{Consultar} formaciones publicadas e inscribirse o cancelar la inscripción;
+    \item \textbf{Revisar} avisos internos, notificaciones y recordatorios personales;
+    \item \textbf{Consultar y editar} su perfil.
+\end{itemize}
+
+La tarjeta de reparto indica, cuando existe una visita de entrega planificada:
+
+\begin{itemize}
+    \item \textbf{Hora aproximada de llegada}.
+    \item \textbf{Orden previsto} dentro de la ruta.
+    \item \textbf{Franja de visita} registrada.
+    \item \textbf{Comercial asignado}.
+    \item \textbf{Estado de la previsión}.
+\end{itemize}
+
+Si no existe reparto para ese día, o si la visita ha quedado fuera de la franja horaria permitida, el sistema lo comunica expresamente.
+
+Desde \texttt{/clients/orders}, el cliente puede consultar pedidos en distintos estados, abrir su detalle y seguir la trazabilidad de reparto y pagos. Al preparar un pedido, cada línea permite buscar el producto por texto además de usar el desplegable de referencias, muestra la imagen del producto junto a la selección para reducir errores de captura y permite elegir si la entrega la realizará el comercial o una agencia. Si se elige agencia, el pedido incorpora el cargo configurado por administración. Desde el catálogo, puede navegar por productos activos, aplicar filtros y abrir la ficha completa de cada referencia. Esa ficha reúne \textbf{información técnica}, recursos de apoyo y, cuando corresponde, accesos directos a cartas de color relacionadas.
+
+Desde la pantalla de avisos, clientes y comerciales pueden activar las notificaciones del dispositivo mediante \textit{Web Push} si el navegador lo permite y la aplicación está correctamente configurada. Al activar este canal, las comunicaciones seleccionadas por administración pueden llegar también como notificación del sistema en el dispositivo. La misma pantalla permite gestionar recordatorios personales. El canal interno de avisos se mantiene siempre disponible aunque el correo o la notificación \textit{push} no estén configurados.
+
+En \texttt{/profile}, el sistema muestra el rango comercial asignado al salón: \textit{Plata}, \textit{Oro} o \textit{Platino}. El rango \textit{Plata} actúa como nivel base para todos los clientes profesionales que todavía no tengan una categoría superior asignada. Los rangos son jerárquicos: un cliente \textit{Oro} puede beneficiarse también de promociones \textit{Plata}, y un cliente \textit{Platino} puede beneficiarse de promociones \textit{Oro} y \textit{Plata}. Este badge resume las ventajas asociadas al segmento y enlaza con las promociones activas disponibles para el cliente, mientras que el panel inicial de cliente prioriza la información operativa de reparto. Las promociones pueden incluir descuento directo, descuento por volumen de compra o regalo promocional, y pueden mostrarse con imagen o documento adjunto cuando administración lo haya incorporado.
+
+Desde \texttt{/clients/salon-clients}, el cliente profesional puede crear fichas de clientes finales del salón, revisar su historial técnico y abrir el detalle de cada una. En dicho detalle puede actualizar la ficha base, registrar nuevos servicios con fecha, tipo de tratamiento, resumen del resultado, fórmula, notas técnicas y productos utilizados, seleccionar la tonalidad concreta cuando un tinte o producto de coloración enlaza referencias cromáticas, subir varias imágenes del resultado final, guardar plantillas reutilizables a partir del formulario actual, aplicar esas plantillas para acelerar nuevos registros, editar o eliminar servicios ya existentes y filtrar el historial por texto, tipo o fecha. Quedan además visibles las sugerencias de producto derivadas del historial acumulado y, para cada servicio, un borrador técnico editable de correo que puede copiarse o abrirse en el gestor de correo del dispositivo.
+
+\subsection{Perfil y datos personales}
+
+Todos los roles pueden acceder a \texttt{/profile} para editar sus \textbf{datos personales}. Desde esta pantalla es posible:
+
+\begin{itemize}
+    \item \textbf{Modificar} nombre, correo, empresa y teléfono;
+    \item \textbf{Subir o reemplazar} la imagen de perfil, que también se muestra en la navegación lateral;
+    \item \textbf{Cambiar la contraseña} cumpliendo las reglas de validación;
+    \item \textbf{Editar la ficha del cliente}, cuando aplica, y confirmar la ubicación exacta del establecimiento sobre mapa.
+\end{itemize}
+
+En escritorio, la vista de perfil se organiza como un panel compacto para consultar de un vistazo la identidad, datos principales, contraseña, acciones y, cuando aplica, la ficha profesional del cliente. En dispositivos pequeños se conserva una composición vertical para priorizar la lectura y la edición segura de cada bloque.
+
+\subsection{Observaciones sobre el alcance actual}
+
+El alcance actual deja algunas líneas como \textbf{evolución futura}, aunque los módulos \texttt{M1} a \texttt{M7} ya disponen de funcionalidad operativa. En particular:
+
+\begin{itemize}
+    \item \textbf{Previsualización de ruta}: existe tanto en el panel comercial principal como en una página independiente de rutas;
+    \item \textbf{Catálogo y coloración}: forman parte del alcance operativo de comerciales y clientes;
+    \item \textbf{Pedidos, repartos y pagos}: el flujo de pedidos, preparación de repartos, entrega comercial o por agencia y pagos parciales ya está operativo;
+    \item \textbf{Módulo de salón}: ya dispone de un bloque operativo de fichas técnicas, historial con mantenimiento posterior, tonos e imágenes finales por servicio, plantillas reutilizables y borradores técnicos de correo, aunque el envío real y otras automatizaciones siguen pendientes;
+    \item \textbf{Comunicaciones y promociones}: promociones, formaciones, avisos internos, correo \textit{SMTP}, \textit{Web Push} y descuentos promocionales sobre pedidos forman parte del alcance operativo actual; quedan para iteraciones futuras \textit{WhatsApp}, otros canales externos y automatizaciones más avanzadas.
+\end{itemize}

@@ -1,0 +1,190 @@
+A continuación se recogen las instrucciones necesarias para \textbf{evolucionar el \textit{software}}. Este manual está dirigido a desarrolladores que necesiten extender o modificar la aplicación sin perder coherencia con la arquitectura y el alcance actual del proyecto.
+
+\section{Introducción}
+
+El proyecto se desarrolla en un \textbf{único repositorio} con dos bloques claramente diferenciados:
+
+\begin{itemize}
+    \item \textbf{Directorio \texttt{app-tfg/}}: contiene la aplicación \textit{full-stack}.
+    \item \textbf{Directorio \texttt{docs/}}: contiene la memoria técnica.
+\end{itemize}
+
+El estado actual del desarrollo cubre de forma operativa los módulos \texttt{M1} a \texttt{M7}. Por tanto, cualquier cambio debería respetar especialmente la compatibilidad con los flujos de autenticación, perfiles, clientes, visitas, rutas, catálogo, coloración, pedidos, repartos, etiquetas, pagos parciales, seguimiento técnico del salón, comunicaciones internas y multicanal, promociones, formaciones, auditoría, configuración administrativa visible y registro técnico de integraciones o propuestas a proveedor. El módulo \texttt{M8} se mantiene como \textbf{trabajo futuro documentado}, no como funcionalidad entregada.
+
+%\section{Requisitos de desarrollo}
+\input{./sections/backmatter/developerguide/requirements}
+
+\section{Consideraciones generales sobre el desarrollo}
+
+En esta sección se recogen \textbf{criterios prácticos} para mantener la coherencia del código cuando se incorporen cambios, desde la organización de carpetas hasta la validación de seguridad, persistencia e integraciones.
+
+\subsection{Organización del código}
+
+La estructura recomendada para incorporar cambios es la siguiente:
+
+\begin{itemize}
+    \item \textbf{Carpeta \texttt{app/}}: páginas, \textit{layouts} y componentes de entrada por rol.
+    \item \textbf{Carpeta \texttt{app/api/}}: \textit{endpoints} internos y \textit{Route Handlers}.
+    \item \textbf{Carpeta \texttt{app/components/}}: interfaz reutilizable.
+    \item \textbf{Carpeta \texttt{app/hooks/api/}}: consumo cliente de \textit{endpoints}.
+    \item \textbf{Carpeta \texttt{lib/contracts/}}: contratos compartidos entre servidor y cliente.
+    \item \textbf{Carpeta \texttt{lib/commercial/}}: lógica de cálculo del dominio comercial y de rutas.
+    \item \textbf{Carpeta \texttt{lib/clients/}}: lectura de \textit{ETA} y resumen de reparto para cliente.
+    \item \textbf{Carpeta \texttt{lib/orders/}}: soporte transversal del dominio de pedidos, incluyendo \textit{QR}.
+    \item \textbf{Carpeta \texttt{lib/notifications/}}: envío de notificaciones internas, correo \textit{SMTP} y entrega \textit{Web Push}.
+    \item \textbf{Carpeta \texttt{lib/geocoding/}}: resolución de direcciones y normalización geográfica.
+    \item \textbf{Carpeta \texttt{lib/cache/}}: utilidades de \textit{cache} selectiva para reducir llamadas repetidas a servicios externos.
+    \item \textbf{Carpeta \texttt{lib/security/}}: políticas de \textit{rate limiting} y utilidades de seguridad transversal.
+    \item \textbf{Carpetas \texttt{lib/integrations/}, \texttt{lib/support/} y \texttt{lib/admin/}}: inventarios técnicos, diagnóstico de \textit{rate limiting}, exportación de auditoría, informe operativo y resumen interno de \texttt{M7}.
+    \item \textbf{Carpeta \texttt{lib/typeorm/services/}}: acceso a datos y lógica persistente.
+    \item \textbf{Carpeta \texttt{lib/typeorm/services/communications/}}: reglas persistentes de comunicaciones, promociones, formaciones, recordatorios y rangos comerciales.
+    \item \textbf{Carpeta \texttt{migrations/typeorm/}}: migraciones versionadas de base de datos.
+\end{itemize}
+
+Cuando se añada una nueva capacidad, conviene mantener la misma secuencia conceptual:
+
+\begin{enumerate}
+    \item \textbf{Definir o ampliar} el contrato de datos en \texttt{lib/contracts/};
+    \item \textbf{Implementar} la lógica de negocio en \texttt{lib/};
+    \item \textbf{Exponerla} mediante un \textit{Route Handler} en \texttt{app/api/};
+    \item \textbf{Consumirla} desde un \textit{hook} o una página del cliente;
+    \item \textbf{Validar} el flujo completo con el rol correspondiente.
+\end{enumerate}
+
+\subsection{Autenticación, roles y seguridad}
+
+Los puntos de entrada más sensibles se apoyan en la \textbf{autenticación compartida}, la \textbf{protección por rol} de las rutas y la \textbf{validación de servidor}:
+
+\begin{itemize}
+    \item \textbf{Archivo \texttt{auth.ts}}: autenticación con credenciales, sesión, validación persistida y trazabilidad de accesos.
+    \item \textbf{Archivo \texttt{proxy.hosting.ts}}: control previo de acceso por rol, compatibilidad mínima de navegador y \textit{rate limiting} sobre la \textit{API} cuando el proveedor de despliegue permite activar el \textit{proxy} de \texttt{Next.js} con el nombre \texttt{proxy.ts}.
+    \item \textbf{\textit{Layouts} protegidos, \textit{Route Handlers} y servicios de servidor}: protección efectiva utilizada en la demo sobre \texttt{Netlify}, incluyendo llamadas explícitas a \texttt{enforceApiRateLimit(request)} en \textit{endpoints} sensibles.
+\end{itemize}
+
+Si se incorpora una nueva ruta privada o un nuevo endpoint sensible, debe revisarse su encaje en estos puntos. Esto evita que aparezcan flujos accesibles sin protección o inconsistencias entre la navegación y la autorización real.
+
+Además, las políticas de \textit{rate limiting} ya no son completamente estáticas: una parte de su configuración puede persistirse en base de datos y diagnosticarse mediante servicios internos. Aun así, esa modificación no se expone al administrador ordinario. Los \textit{endpoints} de ajuste técnico quedan desactivados salvo que se habilite expresamente \texttt{ADMIN\_RATE\_LIMIT\_SETTINGS\_ENABLED=true} en el entorno de ejecución.
+
+Las rutas \path{/admin/integrations}, \path{/admin/support}, \path{/admin/operations} y \path{/admin/enterprise-operations} se mantienen redirigidas fuera del flujo de administración. Sus servicios siguen existiendo para \textit{scripts}, validación y futuras integraciones, pero no deben tratarse como pantallas finales de negocio.
+
+La futura integración empresarial con \textit{Factusol} y automatizaciones externas debe tratarse como evolución del sistema, no como una funcionalidad ordinaria ya entregada. Si se aborda, el punto de partida técnico será \path{lib/integrations/factusol-n8n.ts} y los servicios persistentes de \path{lib/typeorm/services/admin/enterprise-operations.ts}. La idea es evitar nombres mágicos y dejar claro qué parte pertenece al conector y qué parte sigue siendo dominio interno de pedidos.
+
+\subsection{Persistencia y migraciones}
+
+La base de datos se gestiona con \texttt{TypeORM}. Las entidades viven en \path{lib/typeorm/entities/} y la evolución del esquema en \path{migrations/typeorm/}.
+
+Las pautas recomendadas son:
+
+\begin{itemize}
+    \item \textbf{No modificar manualmente} la base de datos fuera del sistema de migraciones;
+    \item \textbf{Mantener separados} los servicios de lectura y escritura en \path{lib/typeorm/services/};
+    \item \textbf{Versionar} cualquier nuevo cambio estructural mediante una migración específica;
+    \item \textbf{Conservar la trazabilidad} entre requisito funcional, entidad y migración.
+\end{itemize}
+
+Actualmente el modelo persistente ya incluye usuarios, auditoría, clientes, comerciales, asignaciones, visitas, rutas, catálogo, coloración, pedidos, líneas de pedido, repartos, líneas de reparto, pagos de pedido, estados de negocio, fichas técnicas de salón, servicios, plantillas, imágenes de resultado, sugerencias de producto, comunicaciones internas, recordatorios, promociones, rangos comerciales, formaciones, suscripciones \textit{Web Push}, cargo de agencia configurable, sobrescrituras técnicas de \textit{rate limiting}, configuraciones de sistema, integraciones externas, operaciones de integración y propuestas de pedido a proveedor. No conviene documentar nuevas entidades como implementadas si no existen realmente en esta capa.
+
+\subsection{Integraciones externas}
+
+El proyecto ya interactúa con varios \textbf{servicios externos}:
+
+\begin{itemize}
+    \item \textbf{\texttt{Cloudinary}}: imágenes de perfil, catálogo, resultados de salón, adjuntos de promociones y documentos de apoyo del catálogo;
+    \item \textbf{\texttt{Nominatim}}: geocodificación de direcciones;
+    \item \textbf{\texttt{OSRM}}: geometría de rutas;
+    \item \textbf{\texttt{QuickChart}}: representación del \textit{QR} de reparto;
+    \item \textbf{Correo \textit{SMTP} transaccional}: notificaciones cuando se configuran \texttt{SMTP\_HOST}, \texttt{SMTP\_PORT}, \texttt{SMTP\_SECURE}, \texttt{SMTP\_USER}, \texttt{SMTP\_PASSWORD} o \texttt{SMTP\_PASS}, y \texttt{SMTP\_FROM} o \texttt{MAIL\_FROM};
+    \item \textbf{\textit{Web Push}}: envío mediante claves \textit{VAPID} \path{VAPID_PUBLIC_KEY}, \path{VAPID_PRIVATE_KEY} y \path{VAPID_SUBJECT};
+    \item \textbf{Navegador del usuario}: geolocalización actual y lectura continua de \textit{QR} mediante cámara.
+\end{itemize}
+
+Al tocar estas integraciones conviene mantener siempre una ruta de degradación razonable. El código actual ya contempla varios ejemplos: avatar con \textit{fallback}, punto de salida guardado si no hay geolocalización actual, \textit{ETA} anulada si el reparto no es coherente, lectura manual del \textit{QR} cuando el dispositivo no ofrece soporte suficiente, etiqueta de agencia sin \textit{QR} comercial y conservación de la notificación interna aunque \textit{SMTP}, \textit{VAPID} o una suscripción \textit{push} no estén disponibles.
+
+En promociones debe conservarse la regla de negocio vigente: los rangos comerciales se tratan de forma jerárquica, de modo que \textit{Oro} hereda promociones \textit{Plata} y \textit{Platino} hereda promociones \textit{Oro} y \textit{Plata}. Además, no se acumulan varias promociones económicas en una misma línea de pedido; el servicio selecciona una única promoción aplicable según mayor descuento, especificidad y caducidad. Los tipos actuales son descuento porcentual, descuento porcentual por volumen y producto/regalo promocional. El descuento por volumen se evalúa con el subtotal bruto del pedido antes de aplicar descuentos, y el regalo promocional se registra como condición visible sin modificar el total económico.
+
+\subsection{Validación de cambios}
+
+Antes de entregar cambios se recomienda ejecutar como mínimo:
+
+\begin{lstlisting}[language=bash]
+npm run typecheck
+npm run lint
+npm run build
+npm run migration:run
+\end{lstlisting}
+
+Para una validación completa del estado actual, debe ejecutarse:
+
+\begin{lstlisting}[language=bash]
+npm run test:static
+npm run test:modules
+npm run test:all
+npm run quality:ui
+\end{lstlisting}
+
+Si el cambio afecta a un módulo concreto, puede acotarse la comprobación con \path{test:m1-m3:foundation}, \path{test:m2:route-points}, \path{test:m4}, \path{test:m4:ui}, \path{test:m5}, \path{test:m6} o \path{test:m7}, según corresponda.
+
+Las \textbf{baterías específicas} disponibles actualmente se organizan así:
+
+\begin{itemize}
+    \item \textbf{Comprobaciones \path{test:m1-m3:foundation} y \path{test:m2:route-points}}: validación base de acceso, clientes, catálogo inicial, visitas y puntos de ruta.
+    \item \textbf{Comprobaciones \path{test:m4}, \path{test:m4:orders-delivery}, \path{test:m4:payments}, \path{test:m4:ui} y \path{test:m4:full}}: pedidos, preparación de repartos, etiquetas, pagos y revisión de interfaz del módulo.
+    \item \textbf{Comprobaciones \path{test:m5}, \path{test:m5:technical-email}, \path{test:m5:service-templates} y \path{test:m5:visual-results}}: fichas técnicas de salón, plantillas, borrador técnico e imágenes finales.
+    \item \textbf{Comprobaciones \path{test:m6}, \path{test:m6:communications}, \path{test:m6:promotions} y \path{test:m6:client-tiers}}: comunicaciones, promociones, formaciones, recordatorios, descuentos y rangos comerciales.
+    \item \textbf{Comprobación \path{test:m7}}: inventario de integraciones, soporte, operación, auditoría, \textit{rate limiting}, informe operativo y registro empresarial persistente.
+    \item \textbf{Comprobaciones \path{quality:react-doctor}, \path{quality:wave} y \path{quality:ui}}: comprobaciones auxiliares de calidad de interfaz y accesibilidad.
+\end{itemize}
+
+Además, debe comprobarse manualmente el flujo afectado usando el rol correcto. Los recorridos más sensibles hoy son:
+
+\begin{itemize}
+    \item \textbf{\textit{Login}, \textit{logout} y redirecciones por rol};
+    \item \textbf{Alta y revisión de solicitudes};
+    \item \textbf{Edición de perfil y cambio de contraseña};
+    \item \textbf{Clientes, geolocalización y asignaciones};
+    \item \textbf{Visitas, ruta diaria, aplazamientos automáticos, avisos de reubicación y \textit{ETA} para cliente};
+    \item \textbf{Mantenimiento de catálogo y coloración};
+    \item \textbf{Pedidos, preparación de repartos, entrega con \textit{QR} o agencia y pagos parciales};
+    \item \textbf{Fichas técnicas de salón, plantillas, imágenes finales y borradores técnicos};
+    \item \textbf{Promociones, formaciones, \texttt{deliveryChannels}, suscripción \textit{Web Push} y degradación a notificación interna};
+    \item \textbf{Auditoría, exportación \texttt{CSV}, configuración visible de avisos y cargo de agencia}.
+\end{itemize}
+
+\subsection{Evolución técnica recomendada}
+
+La arquitectura actual es suficiente para el alcance implementado, pero existen tres mejoras claras de medio plazo:
+
+\begin{itemize}
+    \item \textbf{Agrupación por \textit{feature}} en las áreas comercial, catálogo y pedidos para reducir dispersión entre \textit{hooks}, contratos, servicios y componentes;
+    \item \textbf{Automatización de pruebas} unitarias formales, pruebas de carga y pruebas de interfaz con un \textit{framework} dedicado;
+    \item \textbf{Capa \textit{PWA} y observabilidad operativa} antes de abordar módulos funcionales de mayor volumen.
+\end{itemize}
+
+\section{Instrucciones para construcción}
+
+La \textbf{secuencia de construcción local} recomendada es la siguiente:
+
+\begin{enumerate}
+    \item \textbf{Levantar \texttt{PostgreSQL} con \texttt{Docker}} desde la raíz del repositorio;
+    \item \textbf{Instalar dependencias} dentro de \texttt{app-tfg/};
+    \item \textbf{Definir \texttt{DATABASE\_URL} y \texttt{AUTH\_SECRET}} en \texttt{.env.local};
+    \item \textbf{Ejecutar las migraciones};
+    \item \textbf{Arrancar el servidor de desarrollo} o generar una compilación de producción.
+\end{enumerate}
+
+Comandos principales:
+
+\begin{lstlisting}[language=bash]
+docker compose up -d
+cd app-tfg
+npm install
+npm run migration:run
+npm run dev
+\end{lstlisting}
+
+Para una comprobación equivalente a producción:
+
+\begin{lstlisting}[language=bash]
+npm run build
+npm run start
+\end{lstlisting}

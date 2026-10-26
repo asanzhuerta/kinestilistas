@@ -1,0 +1,129 @@
+\section{Requisitos funcionales}
+\label{sec:FunctionalRequirements}
+
+A continuación, la Tabla~\ref{tab:functional-requirements-executive} presenta el catálogo de requisitos funcionales en formato ejecutivo. Los requisitos mantienen identificadores únicos para facilitar su trazabilidad, siguiendo las recomendaciones de identificación y seguimiento propuestas por ISO/IEC/IEEE 29148 \cite{ieee29148}. La versión extensa empleada durante el desarrollo se conserva en el repositorio como copia de apoyo.
+
+{\scriptsize
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.10}
+\newcommand{\RFModuleHeader}[1]{%
+\hline
+\rowcolor{black!8}
+\multicolumn{4}{|>{\raggedright\arraybackslash}p{0.94\linewidth}|}{\textbf{#1}}\\
+\hline
+}
+\tablecaption{Catálogo ejecutivo de requisitos funcionales agrupado por módulos\label{tab:functional-requirements-executive}}
+\tablefirsthead{%
+\hline
+\textbf{ID} & \textbf{Módulo} & \textbf{Actores} & \textbf{Requisito funcional sintetizado} \\
+ \hline}
+\tablehead{%
+\hline
+\textbf{ID} & \textbf{Módulo} & \textbf{Actores} & \textbf{Requisito funcional sintetizado} \\
+\hline}
+\begin{supertabular}{|>{\raggedright\arraybackslash}p{0.085\linewidth}|>{\raggedright\arraybackslash}p{0.205\linewidth}|>{\raggedright\arraybackslash}p{0.18\linewidth}|>{\raggedright\arraybackslash}p{0.43\linewidth}|}
+\RFModuleHeader{M1. Acceso, alta y seguridad de cuentas}
+\texttt{RF-M1-01} & Acceso y alta & Cliente, administrador & Registrar solicitudes de alta y permitir la creación directa de cuentas, manteniendo revisión administrativa, aprobación, rechazo, activación, desactivación y trazabilidad de la gestión. \\
+\hline
+\texttt{RF-M1-02} & Acceso y alta & Todos los roles & Autenticar usuarios mediante credenciales seguras, permitir solo cuentas activas y autorizadas, limitar intentos abusivos y registrar accesos correctos y fallidos. \\
+\hline
+\texttt{RF-M1-03} & Acceso y alta & Administrador & Gestionar roles de administrador, comercial y cliente profesional, restringiendo navegación, pantallas y operaciones según el rol autenticado. \\
+\hline
+\texttt{RF-M1-04} & Acceso y alta & Administrador & Aplicar condiciones de autorización comercial sobre cuentas profesionales y conservar el estado operativo de cada usuario junto con su historial administrativo. \\
+\hline
+\texttt{RF-M1-05} & Acceso y alta & Todos los roles & Crear, mantener y cerrar sesiones de usuario, impidiendo la reutilización de sesiones expiradas o revocadas. \\
+\hline
+\texttt{RF-M1-06} & Acceso y alta & Todos los roles & Permitir consulta y edición del perfil propio, imagen, datos de contacto y cambio de credenciales conforme a las políticas de seguridad. \\
+\hline
+\RFModuleHeader{M2. Clientes profesionales, comerciales y rutas}
+\texttt{RF-M2-01} & Clientes y comerciales & Administrador & Registrar clientes profesionales, actualizar su información operativa, asignarlos o reasignarlos a comerciales y conservar la trazabilidad de esas asignaciones. \\
+\hline
+\texttt{RF-M2-02} & Clientes y comerciales & Comercial, cliente & Consultar la ficha operativa del cliente con datos de contacto, localización, observaciones, asignación comercial y contexto de planificación. \\
+\hline
+\texttt{RF-M2-03} & Clientes y comerciales & Comercial, cliente & Planificar, registrar, completar, aplazar o cancelar visitas comerciales, notificando cambios relevantes y respetando la ventana horaria del cliente. \\
+\hline
+\texttt{RF-M2-04} & Clientes y comerciales & Comercial & Previsualizar y ordenar rutas comerciales diarias con geolocalización, estimación de tiempos y secuencia de visitas. \\
+\hline
+\texttt{RF-M2-05} & Clientes y comerciales & Comercial, cliente & Configurar la jornada diaria del comercial y mostrar al cliente una estimación de llegada cuando exista una visita de reparto real vinculada. \\
+\hline
+\RFModuleHeader{M3. Catálogo, productos y coloración}
+\texttt{RF-M3-01} & Catálogo & Cliente, comercial & Consultar el catálogo activo de productos con información comercial, técnica e imagen asociada. \\
+\hline
+\texttt{RF-M3-02} & Catálogo & Cliente, comercial & Filtrar y buscar productos por categoría, línea, subcategoría, referencia, nombre y estado de disponibilidad. \\
+\hline
+\texttt{RF-M3-03} & Catálogo & Cliente, comercial & Visualizar cartas de color y referencias cromáticas asociadas a productos y líneas comerciales, incluyendo vista por filas de tono principal, vista por cartas y detalle de tono con producto asociado cuando exista. \\
+\hline
+\texttt{RF-M3-04} & Catálogo & Administrador & Mantener productos, categorías, líneas, subcategorías, recursos de apoyo, cartas de color y referencias desde administración. \\
+\hline
+\RFModuleHeader{M4. Pedidos, reparto y cobro}
+\texttt{RF-M4-01} & Pedidos y reparto & Cliente, comercial & Crear, editar, confirmar, cancelar y consultar pedidos, manteniendo líneas, productos, referencias de color, imágenes de apoyo, descuentos visibles, método de entrega y estados coherentes. \\
+\hline
+\texttt{RF-M4-02} & Pedidos y reparto & Comercial, cliente & Preparar uno o varios repartos a partir de pedidos confirmados, seleccionando líneas y cantidades, registrando bultos manuales, generando etiqueta logística y vinculando los repartos comerciales a visitas de entrega. \\
+\hline
+\texttt{RF-M4-03} & Pedidos y reparto & Comercial, administrador & Validar entregas de repartos comerciales mediante QR escaneado o introducción manual y sincronizar el estado logístico con la visita y el pedido cuando todos sus repartos estén completados. \\
+\hline
+\texttt{RF-M4-04} & Pedidos y reparto & Cliente, comercial, administrador & Permitir elegir entre entrega por comercial o por agencia, aplicando en el segundo caso un cargo configurable y generando una etiqueta diferenciada sin QR de reparto comercial. \\
+\hline
+\texttt{RF-M4-05} & Pedidos y reparto & Comercial, administrador & Registrar pagos parciales o totales de pedidos entregados, conservando importe, método, fecha, notas, usuario responsable, historial de pagos y saldo pendiente. \\
+\hline
+\texttt{RF-M4-06} & Pedidos y reparto & Administrador, comercial, cliente & Consultar la trazabilidad cruzada de pedidos, repartos, etiquetas, entregas y cobros desde las vistas correspondientes a cada rol. \\
+\hline
+\RFModuleHeader{M5. Gestión técnica del salón}
+\texttt{RF-M5-01} & Salón & Cliente profesional & Gestionar fichas de clientes finales del salón con datos de contacto, observaciones e historial asociado. \\
+\hline
+\texttt{RF-M5-02} & Salón & Cliente profesional & Registrar servicios realizados a clientes del salón con fecha, descripción, resultado y relación con la ficha correspondiente. \\
+\hline
+\texttt{RF-M5-03} & Salón & Cliente profesional & Registrar información técnica de tratamientos, fórmulas, tonalidades, tiempos, productos usados y observaciones profesionales. \\
+\hline
+\texttt{RF-M5-04} & Salón & Cliente profesional & Consultar el historial técnico de cada cliente del salón, filtrando servicios, tratamientos y resultados previos. \\
+\hline
+\texttt{RF-M5-05} & Salón & Cliente profesional & Registrar y consultar productos utilizados en servicios para facilitar seguimiento técnico y reposición. \\
+\hline
+\texttt{RF-M5-06} & Salón & Cliente profesional & Proponer sugerencias de productos a partir del historial de tratamientos y necesidades detectadas. \\
+\hline
+\texttt{RF-M5-07} & Salón & Cliente profesional & Gestionar plantillas reutilizables e imágenes del resultado final de los servicios. \\
+\hline
+\texttt{RF-M5-08} & Salón & Cliente profesional & Generar borradores de correo técnico a partir de la ficha del servicio para contactar con el cliente final. \\
+\hline
+\RFModuleHeader{M6. Comunicaciones, promociones y formación}
+\texttt{RF-M6-01} & Comunicaciones & Administrador, cliente, comercial & Crear, editar, publicar, retirar y consultar promociones comerciales segmentadas por rol, vigencia, producto o cliente, incluyendo adjuntos, descuentos porcentuales, descuentos por volumen y regalos promocionales. \\
+\hline
+\texttt{RF-M6-02} & Comunicaciones & Administrador, cliente & Gestionar segmentos o categorías jerárquicas de clientes, configurar umbrales de compra para Plata, Oro y Platino, recalcular rangos según compra acumulada del periodo y aplicar promociones por pertenencia heredada, resolviendo como máximo una promoción económica por línea de pedido. \\
+\hline
+\texttt{RF-M6-03} & Comunicaciones & Administrador, todos los roles & Emitir notificaciones internas, correos, recordatorios y avisos Web Push asociados a eventos relevantes del sistema. \\
+\hline
+\texttt{RF-M6-04} & Comunicaciones & Administrador, cliente, comercial & Publicar formaciones, mostrar su disponibilidad y permitir la inscripción o cancelación por parte de usuarios autorizados. \\
+\hline
+\RFModuleHeader{M7. Administración transversal}
+\texttt{RF-M7-01} & Administración técnica & Administrador & Agrupar las funciones administrativas reales: usuarios, clientes, catálogo, comunicaciones, pedidos, auditoría, ajustes de avisos automáticos, cargo por agencia y política de umbrales de rangos. \\
+\hline
+\texttt{RF-M7-02} & Administración técnica & Administrador & Consultar información útil para la gestión diaria sin convertir los diagnósticos técnicos internos en pantallas de uso ordinario. \\
+\hline
+\texttt{RF-M7-03} & Administración técnica & Administrador & Mantener configuraciones y servicios auxiliares transversales reutilizables por otros módulos. \\
+\hline
+\texttt{RF-M7-04} & Administración técnica & Administrador & Gestionar parámetros comunes del sistema, incluyendo canales de aviso, importes configurables, umbrales comerciales, estados auxiliares y criterios operativos compartidos. \\
+\hline
+\texttt{RF-M7-05} & Administración técnica & Administrador & Generar propuestas internas de pedido a proveedor a partir de productos activos, criterios de reposición y datos operativos disponibles en la aplicación. \\
+\hline
+\texttt{RF-M7-06} & Administración técnica & Administrador & Consultar y exportar auditoría de accesos, acciones administrativas y eventos relevantes en formato trazable. \\
+\hline
+\texttt{RF-M7-07} & Administración técnica & Equipo técnico & Aplicar y diagnosticar internamente políticas globales de rate limiting sobre acceso y APIs sensibles, reservando su modificación a operación técnica. \\
+\hline
+\texttt{RF-M7-08} & Administración técnica & Administrador, cliente & Ofrecer soporte transversal de compatibilidad, PWA, navegador no soportado e instalación, manteniendo la comprobación detallada de servicios auxiliares como infraestructura interna. \\
+\hline
+\RFModuleHeader{M8. Funcionalidades futuras}
+\texttt{RF-M8-01} & Funcionalidades futuras & Cliente profesional & Proponer tratamientos mediante un asistente inteligente basado en diagnóstico con capilógrafo, información técnica, historial y contexto del cliente del salón. \\
+\hline
+\texttt{RF-M8-02} & Funcionalidades futuras & Cliente profesional & Simular estilos o coloraciones mediante la cámara del móvil o imágenes capturadas para apoyar decisiones técnicas futuras. \\
+\hline
+\texttt{RF-M8-03} & Funcionalidades futuras & Cliente profesional, comercial & Reconocer productos mediante cámara o imagen para consulta, pedido o soporte operativo. \\
+\hline
+\texttt{RF-M8-04} & Funcionalidades futuras & Cliente final, cliente profesional & Gestionar reservas online de clientes finales vinculadas a salones profesionales. \\
+\hline
+\texttt{RF-M8-05} & Funcionalidades futuras & Todos los roles & Ofrecer un asistente virtual tipo chatbot para resolver dudas sobre la aplicación, el catálogo, los tratamientos capilares y los procesos comerciales. \\
+\hline
+\texttt{RF-M8-06} & Funcionalidades futuras & Administrador & Automatizar servicios externos como Factusol mediante flujos con n8n o APIs equivalentes para sincronizar datos y generar documentación comercial futura. \\
+\hline
+\end{supertabular}
+}

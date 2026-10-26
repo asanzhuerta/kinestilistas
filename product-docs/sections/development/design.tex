@@ -1,0 +1,46 @@
+En este capítulo se recoge el \textbf{diseño técnico del sistema} a partir de las decisiones realmente adoptadas durante el desarrollo. La documentación se centra en la \textbf{arquitectura lógica}, el \textbf{marco tecnológico de diseño}, la \textbf{configuración de la aplicación}, el \textbf{diseño físico de datos} y los criterios de interfaz que permiten entender cómo se materializan los requisitos en una solución ejecutable.
+
+\section{Arquitectura del Sistema}
+\label{sec:SystemArchitecture}
+\input{./sections/development/design/systemarchitecture.tex}
+
+\section{Parametrización y configuración del sistema}
+
+El proyecto no parte de un software empresarial preexistente que deba parametrizarse, sino de una aplicación desarrollada a medida. Por tanto, la configuración se entiende como el conjunto de decisiones que permiten ejecutar la misma base de código en desarrollo local, demostración o producción sin alterar la lógica de negocio.
+
+Desde el punto de vista del diseño, la parametrización se agrupa en cinco familias:
+
+\begin{itemize}
+    \item \textbf{Entorno de ejecución}: conexión a base de datos, URL pública de la aplicación y parámetros necesarios para construir redirecciones o enlaces externos.
+    \item \textbf{Seguridad y sesión}: secreto de autenticación, control por rol, rutas protegidas y políticas transversales de acceso.
+    \item \textbf{Integraciones auxiliares}: credenciales o \textit{endpoints} para almacenamiento multimedia, geocodificación, rutas, representación de \textit{QR} y canales externos.
+    \item \textbf{Políticas operativas}: límites de uso, protección frente a abuso y ajustes técnicos que no forman parte de la administración ordinaria del negocio.
+    \item \textbf{Soporte \textit{PWA}}: parámetros necesarios para activar la experiencia instalable y los avisos de dispositivo.
+\end{itemize}
+
+El detalle operativo de variables, credenciales y pasos de activación se reserva para las instrucciones de despliegue y la guía de desarrollo, de modo que este capítulo mantiene la explicación en el nivel de diseño.
+
+\section{Diseño Físico de Datos}
+\label{sec:storageDesign}
+
+El \textbf{diseño físico de datos} traduce las necesidades de información del sistema a una estructura relacional versionada mediante migraciones. La aplicación utiliza \texttt{PostgreSQL} como \textbf{fuente de verdad} para los datos transaccionales y delega en servicios externos aquellos activos que no conviene almacenar como binarios en la base de datos.
+
+\input{./sections/development/design/systemarchitecture/storagedesign.tex}
+
+\section{Diseño de la Interfaz de Usuario}
+
+El \textbf{diseño de interfaz} se ha planteado como una interfaz web \textit{responsive} orientada a uso operativo diario. No se busca una interfaz genérica de administración, sino una \textbf{experiencia diferenciada por rol} que reduzca fricción en las tareas más frecuentes de cada usuario.
+
+Los criterios principales aplicados son:
+
+\begin{itemize}
+    \item \textbf{Separación por rol}: administrador, comercial y cliente profesional acceden a espacios de trabajo distintos, con navegación y acciones acordes a sus responsabilidades.
+    \item \textbf{Prioridad móvil}: las pantallas de comercial y cliente se han diseñado para funcionar correctamente en dispositivos pequeños, ya que muchas operaciones se realizan durante visitas, repartos o atención en salón.
+    \item \textbf{Jerarquía por tarjetas}: los paneles principales utilizan tarjetas de resumen, bloques plegables y estados visuales para presentar información compleja sin saturar la pantalla.
+    \item \textbf{Acciones contextualizadas}: las operaciones sensibles, como confirmar un pedido, cerrar una visita de reparto o marcar un cobro, aparecen asociadas al detalle correspondiente y no como acciones globales descontextualizadas.
+    \item \textbf{Modales bloqueantes de alcance completo}: las acciones que requieren atención inmediata, como lectura \textit{QR} o revisión de bultos de pedido, se muestran sobre una capa fija de pantalla completa para evitar que el usuario tenga que desplazarse por la página hasta encontrar el diálogo.
+    \item \textbf{\textit{Feedback} explícito}: formularios, subidas de imagen, validaciones \textit{QR} y cambios de estado muestran mensajes de carga, error o confirmación para reducir ambigüedad.
+    \item \textbf{Reutilización visual}: botones, formularios, tablas, insignias de estado, tarjetas y componentes de mapa mantienen patrones comunes entre módulos para facilitar el aprendizaje.
+\end{itemize}
+
+En la Sección~\ref{sec:uiModel} se presenta el modelo de navegación, los \textit{wireframes} de baja fidelidad y los \textit{mockups} empleados como apoyo visual. Las capturas reales de ejecución se reservan para el ámbito de pruebas o evidencias, evitando mezclar validación funcional con diseño de interfaz.

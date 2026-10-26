@@ -1,0 +1,336 @@
+En este capítulo se resume la \textbf{estrategia de validación} aplicada sobre la versión actual del sistema. Las pruebas aquí descritas desarrollan las evidencias asociadas a los criterios generales de verificación, validación y control de calidad definidos en la Sección~\ref{subsec:quality-verification-validation}. La verificación se organiza combinando \textbf{comprobaciones automáticas de regresión} con \textbf{validaciones funcionales} manuales y asistidas sobre los flujos críticos de los módulos \texttt{M1} a \texttt{M7}.
+
+\section{Estrategia}
+
+La estrategia de pruebas seguida persigue dos \textbf{objetivos complementarios}:
+
+\begin{itemize}
+    \item Detectar \textbf{regresiones técnicas} rápidas después de cada cambio relevante mediante comprobaciones automáticas;
+    \item Confirmar de forma funcional que los \textbf{recorridos visibles para cada rol} continúan funcionando de acuerdo con el alcance operativo implementado.
+\end{itemize}
+
+Las regresiones técnicas se evalúan repitiendo siempre la misma \textbf{secuencia base}:
+
+\begin{enumerate}
+    \item \textbf{Comprobación estática de tipos} con \texttt{TypeScript};
+    \item \textbf{Análisis estático de código} con \texttt{ESLint};
+    \item \textbf{Construcción completa de producción} con \texttt{Next.js};
+    \item \textbf{Prueba funcional automatizada} de \texttt{M4} sobre servicios y persistencia;
+    \item \textbf{Pasada visual hidratada} de \texttt{M4} sobre rutas críticas por rol;
+    \item Comprobación puntual de \texttt{M5} creando una \textbf{ficha técnica temporal}, registrando un servicio con tonalidad e imágenes finales, generando su borrador técnico de correo, creando una plantilla reutilizable y limpiando el dato generado;
+    \item Comprobación puntual de \texttt{M6} validando migración, carga de pantallas de comunicación, \textbf{visibilidad de promociones activas}, aplicación de descuentos promocionales en pedidos, notificaciones segmentadas, recordatorios e inscripción a formaciones publicadas;
+    \item Comprobación puntual de \texttt{M7} sobre auditoría, exportación \texttt{CSV}, inventarios técnicos, soporte \textit{PWA}, diagnóstico de \textit{rate limiting}, informe operativo e integraciones empresariales preparadas.
+\end{enumerate}
+
+Esta rutina ofrece una \textbf{señal rápida} sobre errores de tipado, problemas de compilación, importaciones rotas, uso incorrecto de componentes de servidor o cliente, fallos en rutas dinámicas y desviaciones funcionales del \textbf{flujo de pedidos, reparto y cobro}.
+
+\section{Pruebas Unitarias}
+
+En la versión actual no se ha incorporado todavía una batería formal de pruebas unitarias con un \textit{runner} dedicado. Aun así, parte de la validación de bajo nivel se apoya en tres mecanismos que reducen errores locales antes de integrar cambios:
+
+\begin{itemize}
+    \item El \textbf{tipado estricto} de \texttt{TypeScript} sobre contratos, componentes y servicios;
+    \item La \textbf{centralización de reglas de negocio} en servicios de dominio de usuarios, operativa comercial, catálogo y pedidos;
+    \item Las validaciones normalizadas de entrada antes de persistir cambios, lo que limita estados inconsistentes en operaciones de administración, catálogo, reparto, cobro y seguimiento técnico del salón.
+\end{itemize}
+
+La ausencia de una \textit{suite} unitaria completa sigue siendo una \textbf{mejora pendiente}, pero la separación actual de servicios facilita su incorporación futura.
+
+\section{Pruebas de Integración}
+
+Las pruebas de integración se centran en comprobar la interacción entre \textbf{interfaz}, \textit{Route Handlers}, \textbf{autenticación}, \textbf{persistencia} y servicios externos. En esta línea resultan especialmente relevantes los siguientes puntos:
+
+\begin{itemize}
+    \item Autenticación con \texttt{Auth.js} y \textbf{control de acceso por rol} en la capa previa de navegación, ya sea mediante \texttt{proxy.hosting.ts} activado como \texttt{proxy.ts} en \textit{hosting} compatible o mediante \textit{layouts} protegidos y validaciones de servidor en la demo desplegada;
+    \item Coordinación entre \textbf{formularios administrativos} y servicios \texttt{TypeORM} para usuarios, clientes, visitas, catálogo, pedidos, seguimiento técnico del salón y comunicaciones internas;
+    \item Coordinación entre el \textbf{centro administrativo de comunicaciones}, las \textit{APIs} de \texttt{M6}, los servicios de pedido y las vistas cliente/comercial de promociones, formaciones, avisos y recordatorios;
+    \item Integración con \texttt{Nominatim} y \texttt{OSRM} para \textbf{geocodificación y cálculo de rutas} del módulo \texttt{M2};
+    \item Integración con \texttt{Cloudinary} para \textbf{subida, reemplazo y validación de imágenes} de perfil, catálogo, resultados de salón, adjuntos de promociones y documentos de apoyo;
+    \item Integración con \texttt{QuickChart} para representar el \textit{QR} operativo de cada reparto comercial dentro del flujo de entrega de \texttt{M4};
+    \item Integración opcional con \textit{SMTP} mediante \texttt{Nodemailer} y con \textit{Web Push} mediante \textit{VAPID}, manteniendo la \textbf{notificación interna} como canal persistente cuando no existe configuración externa.
+\end{itemize}
+
+Estas comprobaciones se realizan principalmente a través de la propia aplicación en \textbf{entorno local}, verificando que una acción iniciada desde la interfaz produce el efecto esperado en la \textit{API} y en la base de datos.
+
+\section{Pruebas de Sistema}
+
+Las pruebas de sistema agrupan la evidencia técnica y funcional obtenida sobre la aplicación completa. Para evitar separar artificialmente las comprobaciones automáticas de los recorridos funcionales, esta sección se organiza en tres bloques: evidencia de ejecución, validación por módulos y trazabilidad entre requisitos, implementación y pruebas.
+
+\subsection{Evidencia automatizada de ejecución}
+
+La \textbf{evidencia automatizada} disponible para el estado actual del repositorio se ha obtenido ejecutando una batería de comandos sobre la aplicación \texttt{app-tfg/}. Para facilitar su lectura, la Tabla~\ref{tab:test-command-groups} agrupa dichos comandos por finalidad y módulo afectado.
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.16}
+    \caption{Comandos utilizados en la validación automatizada}
+    \label{tab:test-command-groups}
+    \begin{tabularx}{\linewidth}{|p{0.24\linewidth}|X|}
+        \hline
+        \rowcolor{black!8}\textbf{Bloque} & \textbf{Comandos ejecutados} \\
+        \hline
+        \textbf{Validación base} & \texttt{npm run typecheck}, \texttt{npm run lint}, \texttt{npm run build} y \texttt{npm run migration:run}. \\
+        \hline
+        \textbf{Baterías globales} & \texttt{npm run test:static}, \texttt{npm run test:business}, \texttt{npm run test:modules} y \texttt{npm run test:all}. \\
+        \hline
+        \textbf{Calidad \textit{UI}} & \texttt{npm run quality:react-doctor}, \texttt{npm run quality:wave} y \texttt{npm run quality:ui}. \\
+        \hline
+        \textbf{\texttt{M1}--\texttt{M3}} & \texttt{npm run test:m1-m3:foundation} y \texttt{npm run test:m2:route-points}. \\
+        \hline
+        \textbf{\texttt{M4}} & \texttt{npm run test:m4}, \texttt{npm run test:m4:orders-delivery}, \texttt{npm run test:m4:payments}, \texttt{npm run test:m4:ui} y \texttt{npm run test:m4:full}. \\
+        \hline
+        \textbf{\texttt{M5}} & \texttt{npm run test:m5}, \texttt{npm run test:m5:technical-email}, \texttt{npm run test:m5:service-templates} y \texttt{npm run test:m5:visual-results}. \\
+        \hline
+        \textbf{\texttt{M6}} & \texttt{npm run test:m6:communications}, \texttt{npm run test:m6:promotions}, \texttt{npm run test:m6:client-tiers} y \texttt{npm run test:m6}. \\
+        \hline
+        \textbf{\texttt{M7}} & \texttt{npm run test:m7:integrations}, \texttt{npm run test:m7:support}, \texttt{npm run test:m7:operations}, \texttt{npm run test:m7:audit-export}, \texttt{npm run test:m7:rate-limits}, \texttt{npm run test:m7:operations-report}, \texttt{npm run test:m7:enterprise-operations} y \texttt{npm run test:m7}. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+El resultado de esta validación es \textbf{satisfactorio}: la comprobación de tipos, el análisis estático, la construcción completa de producción y la aplicación de migraciones finalizan sin errores. El comando \texttt{npm run test:static} agrupa las comprobaciones estáticas, \texttt{npm run test:modules} encadena la batería funcional por módulos y \texttt{npm run test:all} ejecuta la \textbf{validación completa}, incluyendo migraciones, módulos y auxiliares de calidad \textit{UI}. La última pasada de cierre se ha ejecutado el \textbf{18 de junio de 2026} sobre \texttt{PostgreSQL} local levantado mediante \texttt{docker compose up -d}, finalizando con \textbf{\texttt{22} comprobaciones superadas} en \texttt{270.4 s}.
+
+La Figura~\ref{fig:testing-console-evidence} muestra la captura de consola utilizada como evidencia visual de la ejecución completa de la batería automatizada.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/pruebas.png}
+    \caption{Evidencia de ejecución de la batería automatizada de pruebas}
+    \label{fig:testing-console-evidence}
+\end{figure}
+
+La Tabla~\ref{tab:test-run-summary} resume el resultado de dicha ejecución por bloques de validación, separando comprobaciones estáticas, base de datos, módulos funcionales y calidad de interfaz.
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.16}
+    \caption{Resumen de la ejecución completa de pruebas}
+    \label{tab:test-run-summary}
+    \begin{tabularx}{\linewidth}{|p{0.23\linewidth}|X|p{0.18\linewidth}|}
+        \hline
+        \rowcolor{black!8}\textbf{Bloque} & \textbf{Comprobaciones incluidas} & \textbf{Resultado} \\
+        \hline
+        \textbf{Estáticas} & \texttt{typecheck}, \texttt{lint} y \texttt{build}. & \textbf{Superado} \\
+        \hline
+        \textbf{Base de datos} & \texttt{migration:run}, sin migraciones pendientes tras preparar el esquema. & \textbf{Superado} \\
+        \hline
+        \textbf{Módulos \texttt{M1}--\texttt{M3}} & Alta, solicitud, autenticación, cambio de contraseña, cliente, asignación, visita, ruta y estructura mínima de catálogo. & \textbf{\texttt{11/11}} \\
+        \hline
+        \textbf{Módulo \texttt{M4}} & Pedidos, repartos, \textit{ETA}, cancelaciones, entrega mediante \textit{QR} y pagos parciales. & \textbf{Superado} \\
+        \hline
+        \textbf{Módulo \texttt{M5}} & Correo técnico, plantillas reutilizables y resultados visuales de salón. & \textbf{Superado} \\
+        \hline
+        \textbf{Módulo \texttt{M6}} & Comunicaciones, promociones, descuentos y rangos de cliente. & \textbf{Superado} \\
+        \hline
+        \textbf{Módulo \texttt{M7}} & Integraciones técnicas, soporte, operación, auditoría, \textit{rate limiting}, informe operativo y operación empresarial preparada. & \textbf{Superado} \\
+        \hline
+        \textbf{Calidad \textit{UI}} & \texttt{React Doctor} sin incidencias y generación controlada del informe/\textit{checklist} \texttt{WAVE}. & \textbf{Superado} \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Validación funcional por módulos}
+
+La validación funcional se ha organizado siguiendo los módulos definidos en el análisis. De este modo, cada bloque recoge qué recorridos se han comprobado, qué scripts los respaldan y qué revisiones manuales complementan la evidencia automatizada.
+
+\subsubsection{M1--M3: acceso, clientes, catálogo y rutas}
+
+La cobertura funcional de los módulos iniciales se concentra en:
+
+\begin{itemize}
+    \item \texttt{M1}: registro de solicitud de alta, autenticación con credenciales, navegación protegida por rol, edición de perfil y cambio de contraseña;
+    \item \texttt{M2}: administración de clientes, asignación comercial-cliente, geolocalización confirmada, creación y seguimiento de visitas, aplazamientos automáticos, avisos de reubicación, configuración diaria del comercial y cálculo de \textit{ETA} para cliente;
+    \item \texttt{M3}: mantenimiento del catálogo desde administración, consulta de productos activos, filtrado por categorías y líneas, fichas técnicas, recursos de apoyo, cartas de color, filas de tonos y detalle de tono con producto asociado.
+\end{itemize}
+
+Para estos módulos se ha incorporado \texttt{npm run test:m1-m3:foundation}, una \textbf{comprobación específica} que crea datos temporales y los elimina al finalizar. La prueba valida \texttt{M1}, \texttt{M2} y \texttt{M3} con \textbf{\texttt{11/11} comprobaciones satisfactorias}: alta directa de comercial, solicitud pública de alta, aprobación de cliente, autenticación por credenciales, cambio de contraseña, ficha de cliente con geodatos, asignación comercial-cliente, visita, ruta y estructura mínima de catálogo con categoría, línea, subcategoría jerárquica y producto.
+
+La prueba \texttt{npm run test:m2:route-points} valida de forma aislada la selección de puntos de inicio y fin de ruta comercial dentro de la \textbf{ruta crítica de negocio}, incluyendo la separación entre \textit{ETA} de visita y regreso de jornada, la suma de la duración configurada de parada y la construcción correcta del enlace de \texttt{Google Maps} sin introducir el regreso automático como destino inmediato.
+
+\subsubsection{M4: pedidos, repartos y cobros}
+
+La cobertura funcional de \texttt{M4} se centra en borradores de pedido en cliente y comercial, búsqueda de producto en líneas, elección de entrega comercial o agencia, confirmación y cancelación coherente, preparación de repartos con líneas y bultos manuales, etiqueta \textit{QR} o agencia, visita rutinaria finalizable, visita de entrega con validación \textit{QR}, paso a \texttt{delivered} al completar todos los repartos, pagos parciales y trazabilidad cruzada desde administración.
+
+El \textbf{cierre técnico de \texttt{M4}} queda reforzado por dos evidencias:
+
+\begin{itemize}
+    \item Una \textbf{prueba funcional automatizada} de servicios y persistencia, que cubre el flujo principal de pedidos, reparto y cobro y finaliza con \textbf{\texttt{19/19}} comprobaciones satisfactorias en la batería principal y \textbf{\texttt{12/12}} en la pasada complementaria;
+    \item Una \textbf{verificación visual hidratada} sobre cliente, comercial y administrador, reutilizable para comprobar bandeja de reparto, detalle de visita, cobros, \textit{ETA} del cliente, detalle administrativo y gestión de errores de sesión o de carga.
+\end{itemize}
+
+En este módulo, la \textbf{regresión funcional más sensible} consiste en comprobar que el mismo pedido se mantiene coherente al pasar por tres contextos distintos: cliente, comercial y administrador. Por ello, cualquier cambio en entidades, serializadores, servicios de pedido o lógica de visitas de reparto debe revalidarse en esos tres recorridos.
+
+Como \textbf{comprobación manual adicional de consolidación \textit{UI}}, se ha verificado en móvil que los formularios largos presentados en modal mantienen \textit{scroll} vertical suficiente para alcanzar acciones de confirmación y cierre. Este control resulta relevante en el detalle y creación de visitas, donde la combinación de \textit{selects}, listados de repartos y campos de notas podía desbordar el alto útil de pantalla.
+
+\subsubsection{M5: gestión técnica del salón}
+
+La cobertura funcional de \texttt{M5} incluye alta de clientes del salón, edición de ficha base, registro, edición y borrado de servicios con ficha técnica, selección de tonalidades de color, galería de imágenes finales, plantillas reutilizables, filtrado del historial, uso de productos, sugerencias derivadas y generación de borradores técnicos editables con persistencia real sobre la base de datos.
+
+Como \textbf{validación manual adicional}, se ha ejecutado una pasada completa en navegador local sobre \path{/clients/salon-clients}: autenticación como cliente, alta de ficha técnica, guardado y aplicación de plantilla con tonalidad \texttt{BLUE GUMMY}, subida real de imagen final a \texttt{Cloudinary}, registro de servicio, filtros de historial, generación de correo técnico, edición del servicio, retirada de imagen, borrado del servicio, borrado de plantilla, comprobación \textit{responsive} móvil y control de acceso sin sesión, con administrador, con comercial y con un segundo cliente temporal. La pasada \textbf{no registra errores de consola}, excepciones de ejecución, fallos de red bloqueantes ni errores HTTP inesperados.
+
+\subsubsection{M6: comunicaciones, promociones y formaciones}
+
+La cobertura funcional de \texttt{M6} agrupa gestión de promociones, segmentos y formaciones, visualización de rango comercial del cliente, visibilidad de promociones activas por rol, aplicación de una única promoción por línea sobre borradores y pedidos, inscripción a formaciones publicadas, notificaciones internas segmentadas, correo \textit{SMTP}, \textit{Web Push} y recordatorios personales.
+
+La \textbf{validación automatizada} ha incluido la aplicación correcta de la migración \texttt{039}, la carga de las rutas de comunicación en entorno de producción local, la visualización de una promoción activa temporal desde los roles cliente y comercial, la aplicación de descuentos porcentuales activos sobre borradores y pedidos cuando coinciden cliente, segmento, producto o línea comercial, la visualización del rango comercial del cliente en su perfil, la consulta de formaciones publicadas, la revisión de avisos internos pendientes y la inscripción real a una formación publicada temporal.
+
+El cierre del módulo se apoya en tres scripts:
+
+\begin{itemize}
+    \item Comprobación \texttt{npm run test:m6:communications}: crea un segmento temporal, edita sus datos, asigna un cliente, publica una promoción segmentada, comprueba visibilidad por rol, valida que las notificaciones internas respetan el segmento, archiva la promoción, publica una formación, registra y cancela una inscripción, crea y actualiza un recordatorio y elimina todos los datos temporales generados;
+    \item Comprobación \texttt{npm run test:m6:promotions}: crea una promoción temporal de descuento vinculada a cliente y producto, comprueba que el descuento se aplica en el borrador comercial y que el pedido final conserva el porcentaje, el total de línea y el total del pedido, eliminando después la promoción y el pedido generados;
+    \item Comprobación \texttt{npm run test:m6:client-tiers}: valida que todos los clientes tienen un rango comercial base, que el servicio del \textit{badge} reconoce el rango \textit{Platino}, conserva los segmentos asignados y expone ventajas comerciales sin dejar asignaciones temporales en base de datos.
+\end{itemize}
+
+Las últimas \textbf{revisiones funcionales} cubren además la herencia de promociones por jerarquía \textit{Plata}/\textit{Oro}/\textit{Platino}, la presentación del \textit{badge} de rango en la barra lateral del cliente, la búsqueda de producto en líneas de pedido y la actualización del texto de activación de notificaciones del dispositivo. El script \texttt{npm run test:m6} encadena las tres comprobaciones para repetir la \textbf{validación completa del módulo} antes de iniciar nuevas iteraciones.
+
+Como \textbf{comprobación visual adicional}, se ha iniciado sesión con usuarios reales de prueba de los tres perfiles y se han cargado \path{/admin/communications}, \path{/clients}, \path{/profile}, \path{/clients/promotions}, \path{/clients/trainings}, \path{/clients/notifications}, \path{/commercials/promotions} y \path{/commercials/trainings} en producción local. La \textbf{revisión de permisos} ha comprobado que las \textit{APIs} administrativas devuelven \texttt{401} sin sesión o con usuario no administrador, que el administrador accede correctamente al centro de segmentos con \texttt{200}, que el administrador queda bloqueado en las \textit{APIs} de comunicación de usuario con \texttt{403}, y que cliente y comercial acceden a promociones, formaciones y notificaciones con \texttt{200}. También se ha validado desde la interfaz el borrado con confirmación \textit{inline} de una promoción, una formación y un segmento temporales, verificando posteriormente que la base de datos no conservaba esos registros. \textbf{No se observaron errores de consola ni fallos de carga} en las páginas comprobadas.
+
+La creación visual de recordatorios queda cubierta por tipado, \textit{API}, \textit{build} y prueba de servicio, aunque durante la comprobación manual el navegador integrado no permitió escribir en determinados formularios por una limitación de su \textit{clipboard} virtual.
+
+\subsubsection{M7: administración transversal}
+
+La cobertura funcional de \texttt{M7} incluye consulta administrativa de auditoría, exportación \texttt{CSV} de accesos y acciones administrativas, configuración visible de canales de avisos automáticos, diagnóstico técnico de \textit{rate limiting}, inventarios internos de integraciones y soporte, informe operativo técnico, registro persistente de integraciones empresariales, operaciones de intercambio y propuestas de pedido a proveedor.
+
+La validación del módulo se divide en siete incrementos técnicos:
+
+\begin{itemize}
+    \item \textbf{Inventario técnico de integraciones}: \texttt{npm run test:m7:integrations} valida que existen las integraciones esperadas, que no hay identificadores duplicados, que cada elemento expone estado, configuración, uso operativo y degradación prevista, y que el resumen agregado es coherente;
+    \item \textbf{Inventario de soporte técnico y compatibilidad}: \texttt{npm run test:m7:support} valida navegador compatible, manifiesto \textit{PWA}, \textit{service worker}, formularios seguros ante hidratación, evidencias operativas y degradación prevista;
+    \item \textbf{Resumen técnico de operación transversal}: \texttt{npm run test:m7:operations} valida los bloques de auditoría, \textit{rate limiting}, integraciones, soporte técnico y operación empresarial, manteniendo esta información fuera de la navegación principal;
+    \item \textbf{Exportación de auditoría}: \texttt{npm run test:m7:audit-export} comprueba los ficheros \texttt{CSV} de accesos y acciones administrativas, incluyendo cabeceras, tipo de contenido y nombres de archivo;
+    \item \textbf{Diagnóstico agregado de \textit{rate limiting}}: \texttt{npm run test:m7:rate-limits} valida políticas, límites efectivos, valores por defecto y estado operativo, dejando los \textit{endpoints} de edición desactivados salvo activación expresa mediante entorno técnico;
+    \item \textbf{Informe operativo}: \texttt{npm run test:m7:operations-report} comprueba que el informe contiene cabecera, cinco bloques transversales y métricas suficientes por sección;
+    \item \textbf{Registro empresarial persistente}: \texttt{npm run test:m7:enterprise-operations} valida configuraciones e integraciones persistidas, registro de operación de integración y generación de una propuesta de pedido a proveedor con líneas calculadas a partir de productos activos.
+\end{itemize}
+
+El script \texttt{npm run test:m7} encadena estas comprobaciones para repetir la \textbf{validación completa del módulo}. Como \textbf{cierre funcional}, se ha ejecutado una pasada completa con \texttt{npm run test:m7}, \texttt{npm run typecheck}, \texttt{npm run lint}, \texttt{npm run build}, \texttt{npm run migration:run} y la compilación \LaTeX{} de la memoria. La revisión manual en producción local se centra en las pantallas finales que sí quedan en el flujo de administración: \path{/admin/audit} y \path{/admin/settings}. Las rutas de soporte, integraciones y operación transversal se mantienen redirigidas fuera de la navegación ordinaria, mientras que sus servicios siguen cubiertos por scripts de validación. Además, se han comprobado los \textit{endpoints} administrativos principales sin sesión, confirmando respuesta \texttt{401}, y \textbf{no se han observado errores de consola} en las pantallas revisadas.
+
+\subsection{Calidad de interfaz y comprobaciones transversales}
+
+Como revisión complementaria de \textbf{calidad React}, se ha ejecutado \texttt{npm run quality:react-doctor} sobre el directorio \path{app/}. La primera pasada detectó patrones de rendimiento y mantenibilidad no bloqueantes: formateadores \texttt{Intl} reconstruidos durante el renderizado, cadenas \texttt{filter().map()} con doble iteración, funciones puras declaradas dentro de componentes, copias de arrays antes de ordenar y un formulario cliente que dependía de \texttt{preventDefault}. Las correcciones aplicadas consistieron en mover constantes y funciones puras a ámbito de módulo, sustituir cadenas de arrays por recorridos únicos o \texttt{toSorted}, reutilizar \textit{helpers} de parseo y pasar el registro de pago a una acción explícita de botón. La pasada final de \texttt{React Doctor} \textbf{no registra incidencias}.
+
+Una \textbf{mejora técnica} asociada a esta fase de pruebas ha consistido en desacoplar la construcción de \texttt{Next.js} de fuentes remotas, de modo que \texttt{npm run build} ya no depende de descargar \texttt{Geist} desde \texttt{next/font/google} para completarse en local.
+
+Como \textbf{comprobación transversal adicional de cierre}, se ha ejecutado un barrido ampliado en navegador \textit{headless} sobre 68 rutas, pantallas dinámicas, redirecciones por rol y consultas de \textit{API} de los módulos \texttt{M1} a \texttt{M5}: autenticación, registro público, sesión, redirección de rutas protegidas, restricciones de acceso por rol, perfil, cambio de contraseña, panel de cliente, administración de clientes y asignaciones, detalle de cliente, operativa comercial, visitas, rutas, catálogo, formularios administrativos, coloración, detalles de productos y cartas de color, pedidos, cobros y fichas técnicas del salón. El resultado ha sido \textbf{\texttt{68/68} comprobaciones satisfactorias}, desglosadas en \texttt{M1 12/12}, \texttt{M2 19/19}, \texttt{M3 24/24}, \texttt{M4 9/9} y \texttt{M5 4/4}, sin errores de consola, excepciones de ejecución, fallos de red bloqueantes ni errores HTTP inesperados.
+
+Como \textbf{comprobación no funcional adicional}, se ha incorporado una validación de calidad \textit{UI} compuesta por \texttt{React Doctor} y una preparación de revisión \texttt{WAVE}. En la pasada final, \texttt{React Doctor} no registra incidencias sobre el directorio \path{app/}. Por su parte, \texttt{quality:wave} genera el informe técnico \path{app-tfg/.codex-artifacts/wave-audit.json}; cuando el \textit{dev tunnel} configurado no está accesible, la auditoría remota queda marcada como \texttt{skipped} y no bloquea la batería de pruebas. Por tanto, la evidencia actual de \texttt{WAVE} debe entenderse como una \textbf{\textit{checklist} técnica reproducible} para revisión manual, no como una auditoría experta completa con resultados definitivos de accesibilidad.
+
+\subsection{Trazabilidad entre módulos y evidencias}
+
+Las Tablas~\ref{tab:test-traceability-m1-m3}, \ref{tab:test-traceability-m4-m5} y \ref{tab:test-traceability-m6-m7} relacionan \textbf{requisitos funcionales representativos} con elementos verificables de la implementación. Su finalidad es dejar constancia de que cada flujo documentado se apoya en pantallas, rutas \textit{API}, entidades persistentes y pruebas ejecutables, evitando que la memoria quede únicamente como una descripción narrativa del sistema.
+
+\begin{table}[H]
+    \caption{Trazabilidad técnica entre requisitos, implementación y evidencias de prueba (M1--M3)}
+    \label{tab:test-traceability-m1-m3}
+    \centering
+    {\scriptsize
+    \setlength{\parskip}{0pt}
+    \setlength{\tabcolsep}{2pt}
+    \renewcommand{\arraystretch}{1.14}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.145\textwidth}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+        \hline
+        \rowcolor{black!8}\textbf{Requisito / módulo} & \textbf{Pantallas y \textit{API}} & \textbf{Datos verificados} & \textbf{Prueba y evidencia} \\
+        \hline
+        \texttt{RF-M1-01} / \texttt{M1} & \path{/register}, \path{/admin/users/requests/[id]} y \path{/admin/users/register}. \textit{API}: \path{/api/auth/register-request}, \path{/api/admin/user-requests/[id]/approve} y \path{/api/admin/register-user}. & Solicitudes, usuarios, perfiles cliente/comercial, asignaciones y trazabilidad administrativa. & \texttt{test:m1-m3:foundation}: alta directa de comercial, solicitud pública de cliente y aprobación con asignación comercial. Resultado: \texttt{11/11}. \\
+        \hline
+        \texttt{RF-M1-02}, \texttt{RF-M1-06} / \texttt{M1} & \path{/login}, \path{/profile} y \path{/profile/change-password}. \textit{API}: \path{/api/auth/[...nextauth]}, \path{/api/profile} y \path{/api/account/change-password}. & Usuario activo, contraseña cifrada, sesión y logs de acceso/gestión. & \texttt{test:m1-m3:foundation}: autenticación local por credenciales y cambio de contraseña persistido. \\
+        \hline
+        \texttt{RF-M2-01}, \texttt{RF-M2-02} / \texttt{M2} & \path{/admin/clients}, \path{/admin/clients/assignments} y \path{/commercials/clients/[id]}. \textit{API} de clientes y asignaciones. & Ficha de cliente, geodatos, franja horaria, comercial asignado y segmentos comerciales. & \texttt{test:m1-m3:foundation}: ficha de cliente con geodatos y asignación comercial-cliente consultable. \\
+        \hline
+        \texttt{RF-M2-03}--\texttt{RF-M2-05} / \texttt{M2} & \path{/commercials/visits}, \path{/commercials/routes} y \path{/commercials/settings}. \textit{API} de visitas, perfil comercial y previsualización de rutas. & Visitas comerciales, rutas diarias, orden de parada, duración configurada y avisos operativos. & \texttt{test:m1-m3:foundation} y \texttt{test:m2:route-points}: visita visible por rol, ruta ordenada y separación entre \textit{ETA} y regreso de jornada. \\
+        \hline
+        \texttt{RF-M3-01}, \texttt{RF-M3-02}, \texttt{RF-M3-04} / \texttt{M3} & \path{/admin/catalog/products}, \path{/clients/catalog} y \path{/commercials/catalog}. \textit{API} de categorías, líneas, subcategorías y productos. & Jerarquía de catálogo, producto activo, estado comercial y relaciones de clasificación. & \texttt{test:m1-m3:foundation}: catálogo con categoría, línea, jerarquía y producto. Captura de catálogo en Figura~\ref{fig:implementation-m3-catalog}. \\
+        \hline
+        \texttt{RF-M3-03} / \texttt{M3} & \path{/clients/coloration}, \path{/clients/coloration/[colorChartId]}, \path{/clients/coloration/tones/[id]} y rutas equivalentes de comercial. & Cartas de color, referencias cromáticas y producto asociado. & Barrido visual hidratado, \texttt{typecheck} y \texttt{build} sobre vistas de coloración y detalle de tono. \\
+        \hline
+    \end{tabularx}
+    }
+\end{table}
+
+\begin{table}[H]
+    \caption{Trazabilidad técnica entre requisitos, implementación y evidencias de prueba (M4--M5)}
+    \label{tab:test-traceability-m4-m5}
+    \centering
+    {\scriptsize
+    \setlength{\parskip}{0pt}
+    \setlength{\tabcolsep}{2pt}
+    \renewcommand{\arraystretch}{1.14}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.145\textwidth}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+        \hline
+        \rowcolor{black!8}\textbf{Requisito / módulo} & \textbf{Pantallas y \textit{API}} & \textbf{Datos verificados} & \textbf{Prueba y evidencia} \\
+        \hline
+        \texttt{RF-M4-01}, \texttt{RF-M4-04} / \texttt{M4} & \path{/clients/orders}, \path{/commercials/orders} y \path{/admin/orders/[id]}. \textit{API} de pedidos por rol y ajustes de cargo de agencia. & Pedido, líneas, estados, productos, tonos y configuración de agencia. & \texttt{test:m4:orders-delivery}: pedido por rol, modalidad comercial/agencia y trazabilidad. Captura en Figura~\ref{fig:implementation-m4-orders}. \\
+        \hline
+        \texttt{RF-M4-02}, \texttt{RF-M4-03} / \texttt{M4} & \path{/commercials/orders/preparation}, \path{/commercials/visits/[id]} y \path{/api/clients/delivery-estimate}. & Repartos, líneas de reparto, visitas de entrega y notificaciones asociadas. & \texttt{test:m4:orders-delivery}: preparación, \textit{QR}/agencia, vinculación a visita, aplazamiento y cierre coherente. Resultado: \texttt{14/14}. \\
+        \hline
+        \texttt{RF-M4-05}, \texttt{RF-M4-06} / \texttt{M4} & \path{/commercials/orders/[id]} y \path{/admin/orders/[id]}. \textit{API} de pagos de pedido por rol. & Pagos, estado de cobro, acumulado pagado y saldo pendiente. & \texttt{test:m4:payments}: entrega mediante \textit{QR}, cobros parciales y rechazo de cobro sobre pedido pagado. \\
+        \hline
+        \texttt{RF-M5-01}, \texttt{RF-M5-02}, \texttt{RF-M5-07} / \texttt{M5} & \path{/clients/salon-clients} y \path{/clients/salon-clients/[id]}. \textit{API} de fichas, servicios, plantillas e imágenes finales. & Clientes de salón, servicios, plantillas, resultados visuales y productos usados. & \texttt{test:m5:service-templates} y \texttt{test:m5:visual-results}: ficha, servicio, plantilla e imagen final temporal. Captura en Figura~\ref{fig:implementation-m5-salon}. \\
+        \hline
+        \texttt{RF-M5-03}, \texttt{RF-M5-08} / \texttt{M5} & \path{/clients/salon-clients/[id]} y endpoint de borrador técnico de correo. & Servicios, ficha técnica del servicio y referencias cromáticas usadas. & \texttt{test:m5:technical-email}: ficha técnica con tonalidad y borrador técnico generado. \\
+        \hline
+    \end{tabularx}
+    }
+\end{table}
+
+\begin{table}[H]
+    \caption{Trazabilidad técnica entre requisitos, implementación y evidencias de prueba (M6--M7)}
+    \label{tab:test-traceability-m6-m7}
+    \centering
+    {\scriptsize
+    \setlength{\parskip}{0pt}
+    \setlength{\tabcolsep}{2pt}
+    \renewcommand{\arraystretch}{1.14}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.145\textwidth}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+        \hline
+        \rowcolor{black!8}\textbf{Requisito / módulo} & \textbf{Pantallas y \textit{API}} & \textbf{Datos verificados} & \textbf{Prueba y evidencia} \\
+        \hline
+        \texttt{RF-M6-01}, \texttt{RF-M6-02} / \texttt{M6} & \path{/admin/communications}, \path{/clients/promotions}, \path{/commercials/promotions} y ajustes de rangos. & Promociones, tipos de descuento, segmentos, asignaciones, configuración de rangos y notificaciones. & \texttt{test:m6:communications}, \texttt{test:m6:promotions} y \texttt{test:m6:client-tiers}: visibilidad, descuento aplicado y \textit{badge} de rango. Captura en Figura~\ref{fig:implementation-m6-communications}. \\
+        \hline
+        \texttt{RF-M6-03}, \texttt{RF-M6-04} / \texttt{M6} & \path{/clients/notifications}, \path{/clients/trainings} y \path{/commercials/trainings}. \textit{API} de notificaciones, recordatorios, formaciones e inscripción. & Notificaciones, recordatorios, formaciones e inscripciones. & \texttt{test:m6:communications}: formación publicada, inscripción/cancelación y recordatorio temporal. \\
+        \hline
+        \texttt{RF-M7-01}, \texttt{RF-M7-06} / \texttt{M7} & \path{/admin/audit}, \path{/admin/settings}, \path{/api/admin/audit/export} y configuración de avisos. & Logs de acceso, acciones administrativas y canales de aviso. & \texttt{test:m7:audit-export}: generación de \texttt{CSV}. Captura de configuración en Figura~\ref{fig:implementation-m7-settings}. \\
+        \hline
+        \texttt{RF-M7-03}--\texttt{RF-M7-05} / \texttt{M7} & Servicios internos y \textit{API} de integraciones, operaciones empresariales y propuestas a proveedor. & Configuraciones, integraciones, operaciones y propuestas a proveedor. & \texttt{test:m7:integrations} y \texttt{test:m7:enterprise-operations}: inventario técnico, operación de integración y propuesta a proveedor. \\
+        \hline
+        \texttt{RF-M7-07}, \texttt{RF-M7-08} / \texttt{M7} & \path{/admin/settings}, \path{/unsupported-browser} y \textit{API} de diagnóstico de \textit{rate limiting}/soporte. & Políticas de \textit{rate limiting}, manifiesto \textit{PWA}, \textit{service worker} y compatibilidad mínima. & \texttt{test:m7:rate-limits}, \texttt{test:m7:support}, \texttt{React Doctor} e informe/\textit{checklist} \texttt{WAVE}. \\
+        \hline
+    \end{tabularx}
+    }
+\end{table}
+
+\subsection{Pruebas No Funcionales}
+
+En el estado actual del proyecto, las \textbf{comprobaciones no funcionales} se concentran en:
+
+\begin{itemize}
+    \item \textbf{Seguridad básica de acceso} mediante autenticación y autorización por roles;
+    \item \textbf{Robustez de compilación y tipado} de toda la aplicación;
+    \item \textbf{Validación básica de errores} de sesión y de carga en rutas críticas de \texttt{M4};
+    \item \textbf{Compatibilidad mínima de navegador} a través de la ruta informativa para clientes no soportados;
+    \item Validación de tamaño, tipo y procedencia de imágenes y documentos subidos a \texttt{Cloudinary};
+    \item Generación de \textit{checklist} e informe técnico \texttt{WAVE} para revisión manual de accesibilidad cuando la \textit{URL} pública de pruebas está disponible;
+    \item Revisión de la capa \textit{PWA}: manifiesto, \textit{service worker}, pantalla \textit{offline} segura y comportamiento de \textit{Web Push};
+    \item Degradación controlada de comunicaciones cuando faltan credenciales \textit{SMTP}, claves \textit{VAPID} o suscripciones \textit{push} de usuario.
+\end{itemize}
+
+No se ha abordado todavía una campaña específica de \textbf{rendimiento}, \textbf{carga} o pruebas automatizadas de interfaz con un \textit{framework} dedicado, por lo que estas áreas permanecen como \textbf{trabajo de mejora futura}.
+
+\section{Pruebas de Aceptación}
+
+La \textbf{aceptación de la versión actual del sistema} se interpreta como la disponibilidad integrada y estable de los módulos \texttt{M1} a \texttt{M7}. En términos prácticos, esto implica que:
+
+\begin{itemize}
+    \item El \textbf{administrador} puede gestionar usuarios, clientes, catálogo, pedidos globales, centro interno de comunicaciones, auditoría, ajustes funcionales y exportación de trazabilidad;
+    \item El \textbf{comercial} puede consultar su operativa diaria, el catálogo, sus pedidos, los repartos asociados, el historial de pagos parciales, promociones, formaciones y avisos;
+    \item El \textbf{cliente} puede consultar su previsión de reparto, su perfil, el catálogo, la coloración, el historial de pedidos, promociones, formaciones y avisos;
+    \item El \textbf{cliente profesional} puede además mantener fichas técnicas de salón, registrar servicios con tonos e imágenes finales, reutilizar plantillas técnicas y preparar borradores técnicos editables por servicio;
+    \item El flujo \texttt{pedido} $\rightarrow$ \texttt{preparación de repartos} $\rightarrow$ \texttt{entrega} $\rightarrow$ \texttt{pagos} queda \textbf{cerrado y trazable} en la implementación actual;
+    \item El núcleo de comunicación interna \texttt{promoción} $\rightarrow$ \texttt{publicación} $\rightarrow$ \texttt{consulta por rol}, \texttt{promoción} $\rightarrow$ \texttt{pedido} $\rightarrow$ \texttt{descuento aplicado} y \texttt{formación} $\rightarrow$ \texttt{publicación} $\rightarrow$ \texttt{inscripción} queda \textbf{operativo} dentro de la aplicación;
+    \item Las \textbf{capacidades transversales de \texttt{M7}}, aunque varias queden fuera de la navegación ordinaria, están disponibles como soporte técnico, auditoría, configuración, exportación, diagnóstico e integraciones empresariales preparadas.
+\end{itemize}
+
+Con este \textbf{umbral cubierto}, el siguiente salto funcional razonable del proyecto no pasa por completar el núcleo operativo, sino por ampliar el dominio económico hacia \textbf{facturación}, \textbf{albaranes definitivos}, \textbf{conciliación avanzada} e integración real con \textit{ERP} si el proyecto lo requiere.

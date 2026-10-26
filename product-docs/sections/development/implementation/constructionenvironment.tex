@@ -1,0 +1,99 @@
+En esta sección se describe el \textbf{entorno de construcción} realmente utilizado para poner en marcha la aplicación, ejecutar sus migraciones y validar técnicamente el resultado.
+
+Las decisiones tecnológicas de diseño, la capa \textit{PWA}, los estados de carga, la optimización de imágenes y la \textit{cache} selectiva se documentan en la Sección~\ref{sec:SystemArchitecture}. En este apartado se mantiene únicamente la información necesaria para \textbf{reproducir el entorno de construcción}, \textbf{ejecutar la aplicación} y \textbf{validar técnicamente el resultado}.
+
+\subsection{Herramientas de trabajo}
+
+Durante el desarrollo del proyecto se han utilizado principalmente:
+
+\begin{itemize}
+    \item \texttt{Visual Studio Code} como entorno de edición.
+    \item \texttt{Git} y \texttt{GitHub} para control de versiones.
+    \item \texttt{Docker Desktop} para levantar PostgreSQL en local \citep{dockerdocs2026}.
+    \item \texttt{Port Forwarding} de \texttt{Visual Studio Code}, apoyado en \texttt{Microsoft Dev Tunnels}, para pruebas desde dispositivos externos \citep{vscodeportforwarding2026,microsoftdevtunnelsfaq2026}.
+    \item \texttt{MiKTeX} y \texttt{latexmk} para compilar la memoria técnica.
+\end{itemize}
+
+En fases anteriores del desarrollo también se utilizó \texttt{Cloudflare Tunnel} para exponer la aplicación local \citep{cloudflaretunnel2026}. La preferencia actual por la solución integrada en \texttt{Visual Studio Code} se debe a que reduce fricción operativa, no requiere una herramienta adicional, no introduce un coste extra dentro del flujo normal de desarrollo y permite conservar URLs estables al reutilizar el mismo túnel, algo especialmente cómodo para las pruebas repetidas de instalación y uso de la \textit{PWA} en móvil.
+
+\subsection{Arranque del entorno local}
+
+La puesta en marcha del proyecto en una máquina de desarrollo sigue la secuencia mostrada a continuación:
+
+\begin{enumerate}
+    \item Clonar el repositorio.
+    \item Levantar el servicio PostgreSQL definido en \texttt{docker-compose.yml}.
+    \item Instalar dependencias dentro de \texttt{app-tfg/}.
+    \item Configurar las variables de entorno.
+    \item Ejecutar las migraciones de \texttt{TypeORM}.
+    \item Iniciar el servidor de desarrollo de \texttt{Next.js}.
+\end{enumerate}
+
+Los comandos principales son los siguientes:
+
+\begin{lstlisting}[language=bash]
+git clone https://github.com/asanzhuerta/kinestilistas.git kinestilistas-tfg
+cd kinestilistas-tfg
+docker compose up -d
+cd app-tfg
+npm install
+npm run migration:run
+npm run dev
+\end{lstlisting}
+
+\subsection{Variables de entorno}
+
+La aplicación requiere al menos las siguientes variables:
+
+\begin{lstlisting}[language=bash]
+DATABASE_URL=postgres://kin:kin@localhost:5432/kin
+AUTH_SECRET=valor-seguro
+\end{lstlisting}
+
+Existen además variables opcionales asociadas a integraciones concretas:
+
+\begin{itemize}
+    \item \texttt{CLOUDINARY\_*}: necesarias para la subida de imágenes de perfil, catálogo, resultados de salón, adjuntos de promociones y documentos de catálogo. Las carpetas pueden separarse mediante:
+    \begin{itemize}[nosep]
+        \item \texttt{CLOUDINARY\_PROFILE\_IMAGES\_FOLDER};
+        \item \texttt{CLOUDINARY\_CATALOG\_IMAGES\_FOLDER};
+        \item \texttt{CLOUDINARY\_SALON\_RESULT\_IMAGES\_FOLDER};
+        \item \texttt{CLOUDINARY\_PROMOTION\_ATTACHMENTS\_FOLDER};
+        \item \texttt{CLOUDINARY\_CATALOG\_DOCUMENTS\_FOLDER}.
+    \end{itemize}
+    \item \texttt{GEOCODING\_*}: permiten personalizar el proveedor y el comportamiento de geocodificación.
+    \item \texttt{OSRM\_BASE\_URL} y \texttt{NEXT\_PUBLIC\_OSRM\_BASE\_URL}: permiten sustituir la URL de servidor o la URL pública del motor de rutas.
+    \item \texttt{SMTP\_HOST}, \texttt{SMTP\_PORT}, \texttt{SMTP\_SECURE}, \texttt{SMTP\_USER}, \texttt{SMTP\_PASSWORD} o \texttt{SMTP\_PASS}, y \texttt{SMTP\_FROM} o \texttt{MAIL\_FROM}: habilitan correo transaccional para comunicaciones.
+    \item \texttt{VAPID\_PUBLIC\_KEY}, \texttt{VAPID\_PRIVATE\_KEY} y \texttt{VAPID\_SUBJECT}: habilitan notificaciones \textit{Web Push}.
+    \item \texttt{AUTH\_URL}, \texttt{NEXTAUTH\_URL}, \texttt{APP\_BASE\_URL} y \texttt{NEXT\_PUBLIC\_APP\_URL}: fijan URLs de referencia para autenticación, redirecciones y enlaces generados.
+    \item \texttt{ADMIN\_RATE\_LIMIT\_SETTINGS\_ENABLED}: permite activar rutas técnicas de consulta o ajuste de \textit{rate limiting}; por defecto permanecen deshabilitadas.
+\end{itemize}
+
+\subsection{Validación técnica disponible}
+
+La validación automatizada actualmente consolidada en el proyecto se apoya en una batería general y en scripts específicos por módulo:
+
+\begin{lstlisting}[language=bash]
+npm run typecheck
+npm run lint
+npm run build
+npm run test:static
+npm run migration:run
+npm run test:modules
+npm run test:all
+npm run quality:ui
+\end{lstlisting}
+
+Cuando se necesita comprobar un módulo concreto se pueden ejecutar las pasadas parciales:
+
+\begin{lstlisting}[language=bash]
+npm run test:m1-m3:foundation
+npm run test:m2:route-points
+npm run test:m4
+npm run test:m4:ui
+npm run test:m5
+npm run test:m6
+npm run test:m7
+\end{lstlisting}
+
+Junto a estas comprobaciones se realiza verificación manual por rol, especialmente sobre login, perfil, clientes, visitas, catálogo, pedidos, reparto, cobro, historial técnico de salón, comunicaciones, promociones, formaciones, notificaciones, auditoría y ajustes transversales. Los scripts específicos permiten repetir los flujos más sensibles sin depender únicamente de una revisión visual.

@@ -1,0 +1,190 @@
+En esta sección se documenta el \textbf{diseño arquitectónico del sistema}, entendido como la forma en que se organizan sus responsabilidades, sus fronteras internas, sus dependencias externas y sus relaciones con el resto de modelos de análisis. Para ordenar la explicación se toma como guía el estándar \textbf{IEEE 1016}, orientado a la descripción del diseño de software, y el enfoque de \textbf{vistas arquitectónicas} recogido por \textbf{ISO/IEC/IEEE 42010} \citep{ieee1016,iso42010}. Estas referencias se utilizan como criterio de documentación, no como una metodología formal adicional.
+
+El capítulo de implementación se reserva para explicar cómo se materializa este diseño en código, rutas, servicios, migraciones y procedimientos de ejecución. En este apartado las tecnologías se mencionan desde el punto de vista de \textbf{diseño de la solución}: qué responsabilidad cumplen, qué frontera ayudan a definir y por qué encajan en la arquitectura adoptada.
+
+Las vistas seleccionadas para describir la arquitectura son las siguientes:
+
+\begin{itemize}
+    \item \textbf{Vista de contexto}: identifica los actores principales y los servicios externos con los que la aplicación se relaciona.
+    \item \textbf{Vista lógica}: muestra los bloques de responsabilidad que colaboran dentro de la solución.
+    \item \textbf{Vista de implementación interna}: resume la organización principal del código y sus dependencias internas.
+    \item \textbf{Vista de datos}: se concreta en el diseño físico de datos de la Sección~\ref{sec:storageDesign}.
+    \item \textbf{Vista de comportamiento}: se apoya en el modelo de comportamiento de la Sección~\ref{sec:behaviorModel}, donde se representan flujos de acceso, pedido, reparto y cobro.
+    \item \textbf{Vista física}: queda desarrollada en el capítulo de despliegue, donde se describe la relación entre entorno local, entorno de demostración, base de datos y servicios externos.
+\end{itemize}
+
+\subsection{Marco tecnológico de diseño}
+
+La selección tecnológica se presenta como un conjunto de decisiones de diseño, no como un inventario aislado de herramientas. La Tabla~\ref{tab:design-technologies-summary} resume qué responsabilidad arquitectónica asume cada tecnología y con qué criterio se incorpora al proyecto.
+
+\begin{table}[H]
+\caption{Resumen de responsabilidades de las tecnologías de diseño}
+\label{tab:design-technologies-summary}
+\centering
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.10}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.36\linewidth}|>{\raggedright\arraybackslash}p{0.34\linewidth}|}
+\hline
+\rowcolor{black!8}
+\textbf{Tecnología} & \textbf{Responsabilidad en el diseño} & \textbf{Criterio de uso en el proyecto} \\
+\hline
+\texttt{Next.js 16} \citep{nextjsdocs2026,nextjsroutehandlers2026,nextjsloading2026} & Marco principal de aplicación, rutas, layouts, \textit{Route Handlers}, carga por segmento y coordinación entre interfaz y servidor. & Permite construir una solución \textit{full-stack} sin dividir el sistema en productos separados. \\
+\hline
+\texttt{React 19} \citep{reactdocs2026} & Construcción de componentes reutilizables, pantallas por rol y estados de interfaz. & Encaja con una interfaz modular repetida en administrador, comercial y cliente profesional. \\
+\hline
+\texttt{TypeScript 5} \citep{typescriptdocs2026} & Tipado de contratos, DTOs, respuestas, servicios de dominio y estructuras compartidas. & Reduce errores de integración entre cliente, API interna y persistencia. \\
+\hline
+\texttt{Tailwind CSS 4} \citep{tailwinddocs2026} & Sistema de estilos de la interfaz \textit{responsive}. & Facilita consistencia visual sin crear una librería propia de estilos desde cero. \\
+\hline
+\texttt{Motion for React} \citep{motionreactdocs2026} & Transiciones y microinteracciones de interfaz. & Se utiliza de forma puntual para mejorar percepción de continuidad sin afectar reglas de negocio. \\
+\hline
+\texttt{Auth.js} \citep{authjsdocs2026} & Autenticación, sesión y base de control de acceso. & Se integra con roles, rutas protegidas y validaciones de servidor. \\
+\hline
+\texttt{PostgreSQL} \citep{postgresdocs2026} & Persistencia relacional del dato estructurado del negocio. & Actúa como fuente de verdad para usuarios, clientes, catálogo, visitas, pedidos, comunicaciones y auditoría. \\
+\hline
+\texttt{TypeORM} \citep{typeormentities2026,typeormmigrations2026} & Entidades, servicios de acceso a datos y migraciones. & Mantiene trazable la evolución del esquema físico y su relación con el código. \\
+\hline
+\texttt{Cloudinary} \citep{cloudinaryupload2026,cloudinarypricing2026} & Almacenamiento externo de imágenes y documentos. & Evita guardar binarios pesados dentro de la base de datos; la aplicación persiste URLs y metadatos. \\
+\hline
+\texttt{Nominatim} y \texttt{OSRM} \citep{nominatimapi2026,osrmdocs2026} & Geocodificación, cálculo de rutas y estimaciones asociadas a visitas o repartos. & Separan los cálculos geográficos del núcleo transaccional del sistema. \\
+\hline
+\texttt{QuickChart} \citep{quickchartqr2026,quickchartpricing2026} & Generación visual de códigos \textit{QR}. & Permite regenerar el QR desde datos persistidos sin almacenar imágenes por reparto. \\
+\hline
+\texttt{Nodemailer} y \texttt{web-push} \citep{nodemailersmtp2026,webpushlibs2026} & Canales complementarios de comunicación externa. & Amplían las notificaciones internas con correo transaccional y avisos de dispositivo cuando el entorno está configurado. \\
+\hline
+\end{tabular}
+}
+\end{table}
+
+Además de la responsabilidad de cada herramienta, el diseño incorpora tres criterios transversales que afectan a varias capas de la aplicación:
+
+\begin{itemize}
+    \item \textbf{Soporte \textit{PWA} y uso móvil}: el diseño incluye manifiesto web, iconos, \textit{service worker}, pantalla sin conexión y suscripciones \textit{Web Push}. Esta capa permite una experiencia más próxima a aplicación móvil, especialmente útil para comerciales y clientes profesionales que acceden desde dispositivos pequeños durante visitas, repartos o trabajo en salón. No obstante, la solución no se plantea como una experiencia \textit{offline-first} completa: el \textit{service worker} evita cachear rutas de API y zonas privadas, y la navegación sin red se degrada hacia una pantalla informativa segura.
+    \item \textbf{Navegación percibida}: el \textit{App Router} permite definir estados de carga por segmento. En rutas con consultas de servidor relevantes, como catálogo, coloración, pedidos, fichas de salón, rutas, comunicaciones, auditoría u operaciones administrativas, el usuario visualiza una estructura provisional mientras se resuelven los datos.
+    \item \textbf{Optimización y cache controlada}: las imágenes principales de catálogo, cartas de color y galerías técnicas se sirven mediante \texttt{next/image}, declarando tamaños \textit{responsive} cuando una misma imagen puede ocupar espacios distintos según el dispositivo \citep{nextjsimage2026}. Además, la cache de \texttt{Next.js} se aplica de forma conservadora sobre lecturas casi estáticas de catálogo y coloración, con etiquetas de invalidación y revalidación temporal corta. No se cachean pedidos, rutas, promociones activas, sesiones, perfiles ni datos privados de operación diaria \citep{nextjscaching2026}.
+\end{itemize}
+
+\subsection{Vista de contexto e integraciones externas}
+
+La Figura~\ref{fig:system-context} presenta la \textbf{vista de contexto} del sistema. Esta vista sitúa KinEstilistas frente a sus tres perfiles principales de uso y frente a los servicios externos que soportan capacidades auxiliares.
+
+\begin{figure}[p]
+    \centering
+    \rotatebox{90}{\includegraphics[width=0.95\textheight,height=\textwidth,keepaspectratio]{./figures/Arquitectura/system-context.pdf}}
+    \caption{Vista de contexto e integraciones externas}
+    \label{fig:system-context}
+\end{figure}
+
+Los actores diferenciados son \textbf{administrador}, \textbf{comercial} y \textbf{cliente profesional}. Cada uno accede a la aplicación desde una experiencia adaptada a su rol, pero todos operan contra el mismo sistema central. Alrededor de la aplicación aparecen las dependencias externas resumidas en la Tabla~\ref{tab:design-technologies-summary}: almacenamiento multimedia, persistencia relacional, servicios geográficos, representación de \textit{QR} y canales complementarios de comunicación.
+
+Esta vista permite justificar que el sistema no delega reglas de negocio en servicios externos. Las integraciones se utilizan como soporte especializado, mientras que la decisión sobre usuarios, pedidos, promociones, visitas, cobros o permisos permanece dentro de la aplicación.
+
+\subsection{Vista lógica de la solución}
+
+La Figura~\ref{fig:system-containers} recoge la \textbf{vista lógica} de la solución. Su objetivo no es separar el proyecto en varios productos independientes, sino mostrar las grandes responsabilidades que colaboran dentro de una misma aplicación web \textit{full-stack}.
+
+\begin{figure}[p]
+    \centering
+    \rotatebox{90}{\includegraphics[width=0.95\textheight,height=\textwidth,keepaspectratio]{./figures/Arquitectura/system-containers.pdf}}
+    \caption{Vista lógica de la solución}
+    \label{fig:system-containers}
+\end{figure}
+
+El diseño lógico distingue los siguientes bloques:
+
+\begin{itemize}
+    \item \textbf{Cliente web / PWA}: representa la interfaz por rol, los formularios, los mapas y la lectura de cámara.
+    \item \textbf{Servidor de aplicación}: concentra la autenticación, la protección de rutas, las operaciones internas, la validación de entrada y la orquestación de servicios de dominio.
+    \item \textbf{Persistencia}: conserva los datos estructurados del negocio y permite reconstruir la evolución del esquema mediante migraciones.
+    \item \textbf{Servicios externos}: proporcionan capacidades auxiliares que no forman parte del núcleo de negocio, como imágenes, rutas, geocodificación, correo, avisos o representación de \textit{QR}.
+    \item \textbf{Soporte instalable}: agrupa manifiesto, iconos, \textit{service worker}, pantalla sin conexión y suscripciones de notificación.
+\end{itemize}
+
+La decisión principal de diseño consiste en mantener una \textbf{arquitectura monolítica modular} para el alcance del TFG. La interfaz, la API interna, los servicios de dominio y el acceso a datos conviven en una única base de código, pero se organizan mediante fronteras internas claras. Esta opción reduce la complejidad operativa de mantener varios despliegues, evita duplicar contratos entre aplicaciones separadas y facilita la trazabilidad entre requisitos, código, pruebas y memoria técnica.
+
+\paragraph{Fronteras de responsabilidad}
+
+El diseño mantiene varias fronteras internas:
+
+\begin{itemize}
+    \item La \textbf{interfaz} inicia operaciones y presenta estados, pero no accede directamente a la base de datos;
+    \item La \textbf{frontera HTTP interna} concentra las operaciones sensibles y valida la entrada antes de llegar al dominio;
+    \item Los \textbf{servicios de dominio} aplican reglas de negocio, coordinan entidades y encapsulan el acceso persistente;
+    \item Las \textbf{integraciones externas} se invocan desde utilidades o servicios concretos, evitando dispersar llamadas de terceros por componentes visuales;
+    \item La \textbf{capa de seguridad} protege sesión, roles, rutas privadas, acciones administrativas y operaciones con impacto de negocio.
+\end{itemize}
+
+\paragraph{Justificación de la organización lógica}
+
+El diseño evita introducir microservicios o aplicaciones independientes porque el problema abordado se centra en digitalizar procesos comerciales de un distribuidor concreto, no en construir una plataforma distribuida de gran escala. La separación se realiza dentro del propio código: módulos funcionales, servicios de dominio, contratos compartidos, entidades persistentes e integraciones encapsuladas.
+
+Esta organización también facilita una evolución posterior. Si en el futuro alguna capacidad creciera lo suficiente, por ejemplo automatización con sistemas empresariales externos o procesamiento inteligente de diagnóstico capilar, podría extraerse sobre fronteras ya identificadas sin rediseñar todo el sistema.
+
+\subsection{Vista de implementación interna}
+
+La Figura~\ref{fig:next-components} resume la \textbf{vista de implementación interna}. Esta vista muestra cómo se traduce el diseño lógico a carpetas y piezas de código relevantes, sin sustituir al modelo conceptual ni pretender listar cada clase del sistema.
+
+\begin{figure}[p]
+    \centering
+    \rotatebox{90}{\includegraphics[width=0.95\textheight,height=\textwidth,keepaspectratio]{./figures/Arquitectura/next-components.pdf}}
+    \caption{Vista de implementación interna de la aplicación}
+    \label{fig:next-components}
+\end{figure}
+
+La estructura del código combina una organización por responsabilidades técnicas con subdirectorios funcionales asociados a las áreas principales del dominio:
+
+\begin{itemize}
+    \item \textbf{Rutas por rol}: \texttt{app/admin/}, \texttt{app/commercials/} y \texttt{app/clients/} actúan como entrada funcional para administrador, comercial y cliente profesional.
+    \item \textbf{\textit{Route Handlers}}: \texttt{app/api/} concentra los \textit{endpoints} internos segmentados por área de negocio.
+    \item \textbf{Componentes reutilizables}: \texttt{app/components/} agrupa formularios, mapas, tablas y vistas especializadas de pedido o reparto.
+    \item \textbf{Acceso cliente a la API}: \texttt{app/hooks/api/} encapsula consumo HTTP, estados de carga y tratamiento común de errores.
+    \item \textbf{Contratos compartidos}: \texttt{lib/contracts/} contiene DTOs y estructuras comunes entre cliente y servidor.
+    \item \textbf{Lógica comercial}: \texttt{lib/commercial/} concentra planificación de rutas y cálculo temporal reutilizable.
+    \item \textbf{Zona cliente}: \texttt{lib/clients/} recoge la lectura de \textit{ETA} y el resumen de reparto visible para clientes.
+    \item \textbf{Dominio de pedidos}: \texttt{lib/orders/} incorpora utilidades operativas como soporte \textit{QR} y generación de etiquetas.
+    \item \textbf{Comunicaciones}: \texttt{lib/notifications/} y los servicios asociados coordinan notificaciones internas, correo y entrega \textit{Web Push}.
+    \item \textbf{Integraciones y soporte}: \texttt{lib/integrations/}, \texttt{lib/support/} y \texttt{lib/admin/} agrupan inventarios técnicos, soporte PWA, exportaciones, diagnóstico e informes operativos.
+    \item \textbf{Cache y optimización}: \texttt{lib/cache/} encapsula lecturas cacheables de catálogo y coloración, con invalidación controlada tras cambios administrativos.
+    \item \textbf{Servicios geográficos}: \texttt{lib/geocoding/} normaliza direcciones y coordina consultas geográficas.
+    \item \textbf{Seguridad transversal}: \texttt{lib/security/} agrupa políticas y utilidades de protección común.
+    \item \textbf{Persistencia}: \texttt{lib/typeorm/entities/} y \texttt{lib/typeorm/services/} contienen el modelo persistente y servicios de dominio asociados a la base de datos.
+    \item \textbf{Migraciones}: \texttt{migrations/typeorm/} registra la evolución versionada del esquema.
+\end{itemize}
+
+\paragraph{Flujo interno de una operación protegida}
+
+El flujo interno de una operación sensible sigue de forma general los siguientes pasos:
+
+\begin{enumerate}
+    \item La petición llega a la capa de protección disponible en el entorno: \texttt{proxy.hosting.ts} cuando se activa como \texttt{proxy.ts} en un hosting compatible, o layouts protegidos y \textit{Route Handlers} reforzados en la demo de \texttt{Netlify}.
+    \item La página o el \textit{endpoint} correspondiente obtiene la sesión y comprueba el rol requerido.
+    \item El \textit{Route Handler} delega la lógica de negocio en servicios o helpers de \texttt{lib/}.
+    \item Si se requiere persistencia, la operación utiliza entidades, servicios y migraciones asociados al modelo relacional.
+    \item La respuesta se normaliza y se devuelve al cliente mediante contratos compartidos.
+\end{enumerate}
+
+Este flujo conecta la vista de implementación con el modelo de comportamiento de la Sección~\ref{sec:behaviorModel}, donde se representan recorridos concretos de acceso, pedido, reparto y cobro.
+
+\subsection{Relación entre módulos y arquitectura}
+
+La arquitectura no separa los módulos como aplicaciones distintas, pero sí mantiene responsabilidades de dominio claras:
+
+\begin{itemize}
+    \item \texttt{M1} aporta \textbf{autenticación}, roles, sesión y trazabilidad, y se reutiliza en todo el sistema.
+    \item \texttt{M2} centraliza \textbf{clientes}, comerciales, visitas y rutas, y presta soporte lógico directo a \texttt{M4}.
+    \item \texttt{M3} expone el \textbf{catálogo} y la coloración consumidos por cliente, comercial y administrador.
+    \item \texttt{M4} reutiliza visitas de \texttt{M2} para reparto y referencias de \texttt{M3} para las líneas de pedido.
+    \item \texttt{M5} se apoya en el catálogo de \texttt{M3} para registrar productos y tonalidades usadas en servicios técnicos del salón.
+    \item \texttt{M6} concentra promociones, formaciones, notificaciones y canales de comunicación internos o externos.
+    \item \texttt{M7} actúa como soporte transversal de auditoría, configuración, diagnóstico técnico, exportaciones y preparación de integraciones.
+    \item \texttt{M8} queda fuera del comportamiento operativo actual y se mantiene como línea de evolución futura.
+\end{itemize}
+
+Esta lectura modular permite relacionar el diseño con los requisitos de la Sección~4.4, con el modelo conceptual de la Sección~\ref{sec:conceptualmodel} y con la implementación real descrita en el capítulo siguiente.
+
+\subsection{Criterios de evolución del diseño}
+
+La arquitectura actual es adecuada para el alcance ya construido porque separa claramente \textbf{vistas por rol}, componentes reutilizables, integraciones externas, persistencia y migraciones. No obstante, el crecimiento conjunto de los módulos comercial, catálogo y pedidos apunta a una evolución natural: reforzar la agrupación por \textit{feature} para reducir la dispersión entre componentes, \textit{hooks}, contratos y servicios relacionados con una misma capacidad de negocio.
+
+Esta evolución no implicaría abandonar el diseño actual, sino hacerlo más explícito. La base seguiría siendo una aplicación modular, pero cada área funcional podría agrupar con mayor claridad su interfaz, sus contratos, sus servicios y sus pruebas asociadas.

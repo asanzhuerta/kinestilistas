@@ -1,0 +1,153 @@
+\section{Requisitos de información}
+\label{sec:InformationRequirements}
+
+En esta sección se resumen los requisitos de información que el sistema debe almacenar, consultar y mantener. Para evitar duplicidad con el modelo conceptual de la \autoref{sec:conceptualmodel}, la Tabla~\ref{tab:information-requirements-executive} presenta el detalle como diccionario compacto: entidad, atributos clave y relaciones principales.
+
+{\scriptsize
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.10}
+\newcommand{\RIModuleHeader}[1]{%
+\hline
+\rowcolor{black!8}
+\multicolumn{4}{|>{\raggedright\arraybackslash}p{0.93\linewidth}|}{\textbf{#1}}\\
+\hline
+}
+\tablecaption{Diccionario ejecutivo de requisitos de información agrupado por módulos\label{tab:information-requirements-executive}}
+\tablefirsthead{%
+\hline
+\textbf{Módulo} & \textbf{Entidad} & \textbf{Atributos clave} & \textbf{Relaciones principales} \\
+\hline}
+\tablehead{%
+\hline
+\textbf{Módulo} & \textbf{Entidad} & \textbf{Atributos clave} & \textbf{Relaciones principales} \\
+\hline}
+\begin{supertabular}{|>{\raggedright\arraybackslash}p{0.08\linewidth}|>{\raggedright\arraybackslash}p{0.22\linewidth}|>{\raggedright\arraybackslash}p{0.40\linewidth}|>{\raggedright\arraybackslash}p{0.23\linewidth}|}
+\RIModuleHeader{M1. Acceso, usuarios y auditoría}
+\texttt{RI-M1} & Usuario & Identificador, email, contraseña cifrada, nombre, teléfono, empresa, imagen, último acceso, fechas de creación y actualización. & Rol, estado de usuario, cliente profesional o comercial cuando aplique. \\
+\hline
+\texttt{RI-M1} & Rol & Código, nombre y descripción del perfil de acceso. & Usuarios asociados y reglas de autorización por interfaz. \\
+\hline
+\texttt{RI-M1} & Estado de usuario & Código y nombre del estado operativo de la cuenta. & Usuarios y solicitudes administrativas. \\
+\hline
+\texttt{RI-M1} & Solicitud de registro & Email, datos del solicitante, rol solicitado, origen, estado, fechas de solicitud y revisión, motivo de rechazo. & Estado de solicitud, origen, usuario revisor y usuario creado si se aprueba. \\
+\hline
+\texttt{RI-M1} & Catálogos de solicitud & Estados y orígenes controlados de las peticiones de alta. & Solicitudes de registro. \\
+\hline
+\texttt{RI-M1} & Registro de gestión de usuarios & Usuario afectado, administrador, acción, estado/rol anterior y nuevo, motivo, fecha. & Usuario objetivo, usuario administrador y tipo de acción. \\
+\hline
+\texttt{RI-M1} & Registro de acceso & Usuario, email intentado, tipo de evento, resultado, IP, agente, token de sesión, fecha. & Usuario, tipo de evento y tipo de resultado. \\
+\hline
+\RIModuleHeader{M2. Clientes profesionales, comerciales y rutas}
+\texttt{RI-M2} & Cliente profesional & Usuario vinculado, comercial asignado, nombre, contacto, dirección, ciudad, provincia, geolocalización, ventana de visita y observaciones. & Usuario, comerciales, visitas, pedidos, segmentos y clientes del salón. \\
+\hline
+\texttt{RI-M2} & Comercial & Usuario vinculado, código, zona, datos operativos, horario y preferencias de ruta. & Usuario, clientes asignados, visitas y rutas. \\
+\hline
+\texttt{RI-M2} & Asignación comercial-cliente & Cliente, comercial, fecha de asignación, fecha de fin, motivo y usuario responsable. & Cliente profesional y comercial. \\
+\hline
+\texttt{RI-M2} & Visita comercial & Cliente, comercial, tipo, estado, fecha planificada, resultado, observaciones y contexto de replanificación. & Cliente, comercial, ruta, pedidos de reparto y notificaciones. \\
+\hline
+\texttt{RI-M2} & Catálogos de visita & Estados y tipos de visita comercial. & Visitas comerciales. \\
+\hline
+\texttt{RI-M2} & Ruta comercial & Comercial, fecha, estado, origen, destino, distancia, duración estimada y configuración de jornada. & Comercial, estado de ruta y visitas en ruta. \\
+\hline
+\texttt{RI-M2} & Visita en ruta & Ruta, visita, orden, ETA, distancia acumulada y duración estimada. & Ruta comercial y visita comercial. \\
+\hline
+\RIModuleHeader{M3. Catálogo, productos y coloración}
+\texttt{RI-M3} & Producto & Nombre, referencia, descripción, categoría, línea, subcategoría, estado, imagen e información técnica. & Categoría, línea, subcategoría, estado, recursos, pedidos y productos usados en servicios. \\
+\hline
+\texttt{RI-M3} & Categoría de producto & Nombre, descripción, imagen y orden de visualización. & Líneas comerciales y productos. \\
+\hline
+\texttt{RI-M3} & Línea comercial & Categoría, nombre, descripción, imagen y orden. & Categoría, subcategorías, productos y cartas de color. \\
+\hline
+\texttt{RI-M3} & Subcategoría de producto & Línea, subcategoría padre, nombre, descripción, imagen y orden. & Línea, jerarquía de subcategorías y productos. \\
+\hline
+\texttt{RI-M3} & Recurso de apoyo & Título, descripción, tipo, URL, producto asociado y orden. & Producto y tipo de recurso. \\
+\hline
+\texttt{RI-M3} & Carta de color & Nombre, descripción, línea, imagen y orden. & Línea comercial y referencias de color. \\
+\hline
+\texttt{RI-M3} & Referencia de color & Carta, código, nombre, tono, equivalencia, imagen y orden. & Carta de color, líneas de pedido y fichas técnicas. \\
+\hline
+\texttt{RI-M3} & Catálogos de catálogo & Estados de producto y tipos de recurso. & Productos y recursos de apoyo. \\
+\hline
+\RIModuleHeader{M4. Pedidos, reparto y cobro}
+\texttt{RI-M4} & Pedido & Cliente, comercial, estado, estado de cobro, importe, método de entrega, cargo de agencia, fechas y notas. & Cliente, comercial, estado, líneas de pedido, repartos y pagos. \\
+\hline
+\texttt{RI-M4} & Línea de pedido & Pedido, producto, referencia de color, cantidad, precio y observaciones. & Pedido, producto y referencia cromática. \\
+\hline
+\texttt{RI-M4} & Estados de pedido y cobro & Código, nombre y descripción de estados operativos. & Pedidos. \\
+\hline
+\texttt{RI-M4} & Reparto de pedido & Pedido, comercial, visita vinculada, estado, método de entrega, bultos manuales, notas, fecha de entrega y usuarios responsables. & Pedido, comercial, visita comercial, líneas de reparto y etiqueta logística. \\
+\hline
+\texttt{RI-M4} & Línea de reparto & Reparto, línea de pedido y cantidad servida en ese reparto. & Reparto y línea de pedido. \\
+\hline
+\texttt{RI-M4} & Pago de pedido & Pedido, importe, método, fecha de pago, notas y usuario que registra el cobro. & Pedido y usuario responsable. \\
+\hline
+\texttt{RI-M4} & Visita de reparto vinculada & Visita comercial que actúa como soporte logístico de entrega para repartos gestionados por comercial. & Reparto, pedido, cliente, comercial y ETA mostrada al cliente. \\
+\hline
+\RIModuleHeader{M5. Gestión técnica del salón}
+\texttt{RI-M5} & Cliente del salón & Cliente profesional propietario, nombre, teléfono, email, observaciones y fechas. & Cliente profesional, servicios, sugerencias y reservas futuras. \\
+\hline
+\texttt{RI-M5} & Servicio realizado & Cliente del salón, fecha, tipo, descripción, resultado, observaciones e imágenes. & Cliente del salón, ficha técnica, productos usados e imágenes. \\
+\hline
+\texttt{RI-M5} & Ficha técnica del servicio & Diagnóstico, fórmula, tonalidad, tiempo de exposición, notas técnicas y resultado. & Servicio realizado y referencias de color. \\
+\hline
+\texttt{RI-M5} & Producto utilizado en servicio & Servicio, producto, referencia cromática, cantidad, uso y observaciones. & Servicio, producto y referencia de color. \\
+\hline
+\texttt{RI-M5} & Plantilla de servicio & Cliente profesional, nombre, descripción y configuración reutilizable. & Cliente profesional y productos de plantilla. \\
+\hline
+\texttt{RI-M5} & Imagen de resultado & Servicio, URL, descripción, orden y fecha de subida. & Servicio realizado. \\
+\hline
+\texttt{RI-M5} & Sugerencia de producto & Cliente del salón, producto, motivo, prioridad y fecha. & Cliente del salón y producto. \\
+\hline
+\texttt{RI-M5} & Correo técnico generado & Servicio, destinatario, asunto, contenido y fecha de generación. & Servicio y ficha técnica. \\
+\hline
+\RIModuleHeader{M6. Comunicaciones, promociones y formación}
+\texttt{RI-M6} & Promoción & Título, descripción, tipo de descuento, beneficio, porcentaje, umbral de compra, regalo, adjuntos, vigencia, estado, segmento y condiciones. & Productos, segmentos, clientes, tipos de promoción y pedidos con descuento. \\
+\hline
+\texttt{RI-M6} & Tipo de promoción & Código, nombre, descripción, orden de visualización y estado de actividad. & Promociones comerciales. \\
+\hline
+\texttt{RI-M6} & Segmento de cliente & Código, nombre, criterio, descripción y fechas. & Clientes profesionales, promociones y asignaciones. \\
+\hline
+\texttt{RI-M6} & Asignación de segmento & Cliente, segmento, origen, fecha de asignación y usuario responsable. & Cliente profesional y segmento. \\
+\hline
+\texttt{RI-M6} & Producto promocionado & Promoción, producto y condición de aplicación. & Promoción y producto. \\
+\hline
+\texttt{RI-M6} & Notificación interna & Destinatario, título, mensaje, tipo, canal, estado de lectura y fechas. & Usuario, cliente, visita, promoción o formación según origen. \\
+\hline
+\texttt{RI-M6} & Suscripción push & Usuario, endpoint, claves, estado, agente, último uso y revocación. & Usuario y notificaciones Web Push. \\
+\hline
+\texttt{RI-M6} & Recordatorio & Usuario, título, mensaje, fecha programada, estado y origen. & Usuario y evento funcional relacionado. \\
+\hline
+\texttt{RI-M6} & Formación e inscripción & Datos de formación, fecha, modalidad, aforo, estado, usuario inscrito y estado de inscripción. & Formación, usuario e integración externa si aplica. \\
+\hline
+\RIModuleHeader{M7. Administración transversal}
+\texttt{RI-M7} & Configuración del sistema & Clave, valor, tipo, ámbito, descripción y fecha de actualización, incluyendo cargo por agencia y política de umbrales/recálculo de rangos. & Usuario administrador y servicios transversales. \\
+\hline
+\texttt{RI-M7} & Política de rate limiting & Ámbito, límite, ventana temporal, estado y descripción. & Sobrescritura técnica y endpoints protegidos. \\
+\hline
+\texttt{RI-M7} & Servicio auxiliar transversal & Nombre, tipo, estado, configuración básica, último chequeo y observaciones. & Comunicaciones, configuración del sistema y servicios de soporte. \\
+\hline
+\texttt{RI-M7} & Registro técnico transversal & Servicio, tipo de operación, estado, resultado, error si existe y fechas. & Servicio auxiliar y eventos técnicos asociados. \\
+\hline
+\texttt{RI-M7} & Propuesta de pedido a proveedor & Proveedor, estado, criterio de generación, importe estimado, fecha y observaciones. & Productos activos y líneas de propuesta. \\
+\hline
+\texttt{RI-M7} & Línea de propuesta a proveedor & Propuesta, producto, cantidad, motivo y datos de reposición. & Propuesta y producto. \\
+\hline
+\RIModuleHeader{M8. Funcionalidades inteligentes previstas}
+\texttt{RI-M8} & Diagnóstico con capilógrafo & Usuario, cliente del salón, mediciones o capturas del capilógrafo, tipo y estado del cabello, cuero cabelludo, tratamientos previos, observaciones y validación profesional. & Usuario, cliente del salón y recomendaciones generadas. \\
+\hline
+\texttt{RI-M8} & Recomendación de tratamiento & Diagnóstico, producto sugerido, descripción, prioridad, motivo, fuente de la recomendación y revisión del profesional. & Diagnóstico capilar y producto. \\
+\hline
+\texttt{RI-M8} & Simulación de estilo o coloración & Usuario, captura de cámara móvil o imagen origen, cambio solicitado, resultado, producto o tono asociado y fecha. & Usuario y posible referencia de producto. \\
+\hline
+\texttt{RI-M8} & Reconocimiento de producto & Usuario, imagen, código detectado, producto, propósito y fecha. & Usuario, producto y propósito de reconocimiento. \\
+\hline
+\texttt{RI-M8} & Reserva online & Cliente profesional, cliente del salón, contacto, servicio, fecha y estado. & Cliente profesional, cliente del salón y estado de reserva. \\
+\hline
+\texttt{RI-M8} & Conversación con asistente virtual & Usuario, rol, tema, pregunta, respuesta, contexto utilizado, fecha y valoración opcional. & Usuario, catálogo, tratamientos, pedidos o documentación de ayuda según la consulta. \\
+\hline
+\texttt{RI-M8} & Automatización de servicio externo & Servicio externo, tipo de operación, entidad afectada, payload, resultado, estado, error, reintentos y fecha. & Factusol, n8n, pedidos, clientes, productos y documentos comerciales futuros. \\
+\hline
+\end{supertabular}
+}

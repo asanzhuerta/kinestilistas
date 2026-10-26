@@ -1,0 +1,77 @@
+En este último capítulo se resumen los \textbf{resultados obtenidos} tras el desarrollo del proyecto, se valora el \textbf{grado de cumplimiento de los objetivos} definidos inicialmente y se identifican las principales \textbf{lecciones aprendidas}. También se recogen posibles \textbf{líneas de evolución futura} coherentes con la arquitectura y con el alcance funcional ya construido.
+
+\section{Objetivos alcanzados}
+
+El objetivo principal del proyecto era desarrollar una \textbf{aplicación web} que centralizase y digitalizase los procesos más relevantes de la actividad comercial de un distribuidor de productos capilares profesionales. El resultado obtenido cumple este propósito dentro del alcance definido para el \textit{Trabajo Fin de Grado}, ya que el sistema permite trabajar desde una \textbf{única plataforma} sobre usuarios, clientes profesionales, visitas, rutas, catálogo, coloración, pedidos, preparación de repartos, entrega por comercial o agencia, pagos parciales, seguimiento técnico del salón, promociones, formaciones, notificaciones internas y multicanal y administración transversal.
+
+La Tabla~\ref{tabla_objetivos_alcanzados} compara los objetivos específicos definidos inicialmente en la Sección~\ref{sec:objectives} con el resultado alcanzado al finalizar el desarrollo.
+
+{\footnotesize
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.14}
+\tablecaption{Comparación entre objetivos iniciales y objetivos alcanzados\label{tabla_objetivos_alcanzados}}
+\tablefirsthead{%
+\hline
+\rowcolor{black!8}
+\textbf{Objetivo inicial} & \textbf{Resultado alcanzado}\\
+\hline}
+\tablehead{%
+\hline
+\rowcolor{black!8}
+\textbf{Objetivo inicial} & \textbf{Resultado alcanzado}\\
+\hline}
+\begin{supertabular}{|>{\raggedright\arraybackslash}p{0.35\linewidth}|>{\raggedright\arraybackslash}p{0.57\linewidth}|}
+\textbf{Centralizar la información operativa del distribuidor} & El sistema reúne en una misma base de datos usuarios, clientes profesionales, comerciales, catálogo, pedidos, visitas, rutas, comunicaciones, auditoría, configuraciones operativas e información administrativa relevante.\\
+\hline
+\textbf{Digitalizar la relación con los clientes profesionales} & Los salones disponen de un área propia para consultar catálogo, coloración, pedidos, reparto previsto, promociones, formaciones, avisos, perfil y seguimiento técnico interno del salón.\\
+\hline
+\textbf{Facilitar el trabajo diario de los comerciales} & El perfil comercial permite consultar clientes asignados, planificar visitas, revisar rutas, gestionar visitas aplazadas, preparar pedidos, organizar repartos, validar entregas mediante \textit{QR} y registrar pagos parciales.\\
+\hline
+\textbf{Estructurar un catálogo técnico-comercial} & Se ha desarrollado la gestión de categorías, líneas, subcategorías, productos, recursos de apoyo, cartas de color y referencias cromáticas, vinculando la consulta comercial con información técnica de producto.\\
+\hline
+\textbf{Gestionar el ciclo operativo de pedidos} & El flujo cubre borradores, confirmación, líneas de pedido, descuentos, elección de entrega, preparación de repartos, etiquetas \textit{QR} o agencia, entrega por comercial o agencia, trazabilidad de estados y pagos parciales.\\
+\hline
+\textbf{Incorporar soporte al seguimiento técnico del salón} & El módulo de salón permite registrar fichas, servicios, productos utilizados, tonalidades, imágenes finales, plantillas reutilizables, sugerencias derivadas del historial y borradores técnicos de correo.\\
+\hline
+\textbf{Mejorar la comunicación comercial y la fidelización} & Se han incorporado avisos internos, recordatorios, promociones segmentadas, descuentos aplicables al pedido, rangos comerciales, formaciones, correo \textit{SMTP} opcional y notificaciones \textit{Web Push}.\\
+\hline
+\textbf{Garantizar seguridad, trazabilidad y separación por roles} & El sistema diferencia roles de administrador, comercial y cliente, protege rutas y operaciones sensibles, aplica validaciones de servidor, registra accesos y acciones administrativas, y contempla políticas de \textit{rate limiting}.\\
+\hline
+\textbf{Preparar una base técnica extensible} & La aplicación se apoya en una arquitectura \textit{full-stack} con \texttt{Next.js}, persistencia relacional con \texttt{PostgreSQL}, migraciones versionadas, soporte \textit{PWA}, integración con servicios externos y documentación de \texttt{M8} como evolución futura.\\
+\hline
+\end{supertabular}
+}
+\renewcommand{\arraystretch}{1}
+
+El resultado obtenido se apoya en una implementación funcional con \textbf{persistencia real} en \texttt{PostgreSQL}, migraciones versionadas, control de acceso por rol, validaciones de negocio, servicios de dominio, rutas \textit{API}, pantallas operativas y comprobaciones de cierre para los módulos desarrollados. Los módulos \texttt{M1} a \texttt{M7} quedan respaldados por las pruebas descritas en el Capítulo~\ref{chap:testing}, mientras que \texttt{M8} se mantiene expresamente delimitado como \textbf{evolución futura}.
+
+\section{Lecciones aprendidas}
+
+El desarrollo de este \textit{Trabajo Fin de Grado} no ha supuesto únicamente la construcción de una aplicación web, sino también un aprendizaje sobre cómo convertir un problema real, inicialmente amplio y poco estructurado, en un sistema funcional, documentado y justificado técnicamente. La principal lección ha sido entender que un proyecto de ingeniería no consiste solo en programar funcionalidades, sino en mantener la coherencia entre requisitos, análisis, diseño, implementación, pruebas y documentación.
+
+Entre las lecciones técnicas más relevantes destacan:
+
+\begin{itemize}
+    \item \textbf{Diseñar antes de implementar}: el modelado de requisitos, módulos, casos de uso, modelos de datos y flujos de comportamiento ha sido esencial para evitar construir funcionalidades aisladas sin una visión global del sistema.
+
+    \item \textbf{Separar responsabilidades}: el proyecto ha reforzado la importancia de distinguir entre interfaz, rutas \textit{API}, servicios de dominio, persistencia y validaciones, especialmente en una aplicación con muchos perfiles de usuario y procesos conectados.
+
+    \item \textbf{Trabajar con persistencia real}: el uso de \texttt{PostgreSQL}, \texttt{TypeORM} y migraciones versionadas ha permitido comprender mejor cómo evoluciona una base de datos cuando el sistema crece y aparecen nuevas necesidades funcionales.
+
+    \item \textbf{Tratar la seguridad como parte del diseño}: la autenticación, la autorización por rol, la protección de rutas, el \textit{rate limiting} y la validación en servidor han dejado de ser aspectos secundarios para convertirse en decisiones transversales que condicionan todo el sistema.
+
+    \item \textbf{Integrar servicios externos con criterio}: el uso de herramientas como Cloudinary, Nominatim, OSRM, QuickChart, correo \textit{SMTP} o notificaciones \textit{Web Push} ha mostrado la importancia de decidir qué debe resolver la aplicación y qué puede delegarse en servicios especializados.
+
+    \item \textbf{Validar de forma progresiva}: las pruebas unitarias, de integración, funcionales y de sistema han ayudado a comprobar que los módulos desarrollados no funcionan solo de manera aislada, sino también dentro de los flujos principales de la aplicación.
+\end{itemize}
+
+Desde el punto de vista personal y académico, el proyecto también ha reforzado habilidades propias del trabajo de un ingeniero. Ha sido necesario investigar alternativas, contrastar fuentes y justificar decisiones. También ha sido necesario acotar funcionalidades cuando el alcance aumentaba, manteniendo una separación clara entre lo implementado y lo planteado como trabajo futuro.
+
+También ha sido especialmente importante aprender a convivir con la documentación como parte del propio desarrollo. La memoria no se ha elaborado únicamente al final, sino que ha servido para detectar incoherencias, revisar decisiones, actualizar diagramas, reorganizar capítulos y comprobar que lo descrito coincidía con el estado real del repositorio.
+
+Por último, el enfoque iterativo e incremental ha resultado adecuado para un proyecto de este tamaño. Dividir el sistema en módulos ha permitido avanzar por bloques, corregir decisiones anteriores, cerrar funcionalidades de forma progresiva y mantener una trazabilidad razonable entre planificación, requisitos, implementación y pruebas.
+
+\section{Trabajo futuro}
+\label{sec:futurework}
+\input{./sections/epilogue/conclusions/futurework.tex}

@@ -1,0 +1,81 @@
+\section{Reglas de negocio}
+\label{sec:BusinessRules}
+
+Las reglas de negocio describen las restricciones operativas que el sistema debe respetar para representar de forma coherente la actividad del distribuidor, sus comerciales y sus clientes profesionales. La Tabla~\ref{tab:business-rules} recoge el catálogo principal de reglas identificadas, indicando el ámbito afectado, la restricción aplicada y los módulos sobre los que tiene impacto.
+
+{\scriptsize
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.10}
+\tablecaption{Catálogo de reglas de negocio del sistema\label{tab:business-rules}}
+\tablefirsthead{%
+\hline
+\rowcolor{black!8}
+\textbf{ID} & \textbf{Ámbito} & \textbf{Regla de negocio} & \textbf{Módulos} \\
+\hline}
+\tablehead{%
+\hline
+\rowcolor{black!8}
+\textbf{ID} & \textbf{Ámbito} & \textbf{Regla de negocio} & \textbf{Módulos} \\
+\hline}
+
+\begin{supertabular}{|>{\raggedright\arraybackslash}p{0.08\linewidth}|>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.51\linewidth}|>{\raggedright\arraybackslash}p{0.11\linewidth}|}
+
+\texttt{RN-01} & Acceso y autorización & Solo los usuarios \textbf{autenticados}, con cuenta \textbf{activa} y con un rol autorizado pueden acceder a funcionalidades protegidas. El sistema distingue entre \textbf{administrador}, \textbf{comercial} y \textbf{cliente profesional}, restringiendo rutas, vistas y operaciones según la sesión. & M1 \\
+\hline
+
+\texttt{RN-02} & Alta de usuarios & El registro público no concede acceso inmediato. Las solicitudes de alta quedan pendientes hasta su aprobación o rechazo por administración. La creación directa desde administración genera una cuenta activa, conservando trazabilidad sobre el origen y la acción realizada. & M1 \\
+\hline
+
+\texttt{RN-03} & Sesiones, credenciales y auditoría & Los accesos correctos y fallidos quedan registrados, las credenciales deben cumplir la política de contraseña definida y las acciones administrativas relevantes sobre usuarios, roles, estados o contraseñas conservan historial. Al desactivar una cuenta o cambiar credenciales, las sesiones persistentes asociadas dejan de considerarse válidas. & M1, M7 \\
+\hline
+
+\texttt{RN-04} & Asignación comercial de clientes & Cada cliente profesional puede tener \textbf{una única asignación comercial activa} en cada momento. Las reasignaciones cierran la relación anterior y crean una nueva, manteniendo el histórico de asignación, reasignación o desasignación. Un comercial solo puede consultar u operar sobre sus clientes asignados. & M2 \\
+\hline
+
+\texttt{RN-05} & Visitas comerciales & Toda visita debe estar asociada a un cliente existente y a un comercial responsable. Sus estados evolucionan de forma controlada entre planificada, completada, aplazada o cancelada. Solo las visitas planificadas permiten ajustar planificación, pedidos o repartos vinculados, y para completar una visita debe registrarse un resultado operativo. & M2, M4 \\
+\hline
+
+\texttt{RN-06} & Estimación de llegada & La hora mostrada al cliente se trata como una \textbf{estimación} calculada a partir de la planificación diaria, no como una hora exacta introducida manualmente. El cliente solo visualiza una \textit{ETA} cuando existe una asignación comercial activa, una visita de reparto válida y pedidos o repartos coherentes para esa jornada. & M2, M4 \\
+\hline
+
+\texttt{RN-07} & Coherencia del catálogo & Las categorías, líneas comerciales, subcategorías, productos, cartas de color, referencias cromáticas y recursos de apoyo deben mantener relaciones válidas. Una línea pertenece a una categoría, una subcategoría pertenece a una línea y las referencias de color conservan su relación con la carta correspondiente y, cuando sean pedibles, con el producto asociado. & M3 \\
+\hline
+
+\texttt{RN-08} & Productos pedibles & Los pedidos solo pueden construirse con productos activos. Si un producto dispone de referencias de color pedibles, debe indicarse el tono exacto y este debe estar marcado como pedible y pertenecer al producto seleccionado. El pedido conserva instantáneas de precio, descuento, referencia y variante para evitar que cambios posteriores del catálogo alteren pedidos registrados. & M3, M4 \\
+\hline
+
+\texttt{RN-09} & Ciclo de pedido & Los pedidos pueden iniciarse como borrador, confirmarse, cancelarse o quedar entregados mediante transiciones controladas. Un cliente no puede acumular más de dos pedidos abiertos pendientes de cobro al mismo tiempo. Las líneas de pedido deben tener cantidades enteras positivas y el sistema agrupa líneas equivalentes de producto y referencia de color. & M4 \\
+\hline
+
+\texttt{RN-10} & Preparación de repartos & Solo pueden prepararse repartos desde pedidos confirmados del cliente correcto. Las cantidades preparadas no pueden superar las unidades pendientes, no se pueden servir líneas canceladas o ajenas al pedido, y el número de bultos se registra manualmente porque depende de la preparación física realizada por el distribuidor. & M4 \\
+\hline
+
+\texttt{RN-11} & Entrega por comercial o agencia & La entrega por comercial se vincula a una visita de reparto y requiere validación mediante \textit{QR} asociado al reparto correspondiente. La entrega por agencia se diferencia mediante etiqueta logística propia y aplica el cargo configurable definido para este método, sin tratarse como una visita comercial con \textit{QR} de reparto. & M4 \\
+\hline
+
+\texttt{RN-12} & Cierre logístico & Una visita de reparto no puede completarse sin repartos vinculados. Cuando todos los repartos comerciales asociados quedan entregados, la visita puede cerrarse y el pedido pasa a entregado si todas sus líneas han quedado cubiertas. Si una visita se aplaza o cancela, el sistema libera o reajusta los vínculos necesarios para evitar estados huérfanos entre visita, reparto, pedido y \textit{ETA}. & M2, M4 \\
+\hline
+
+\texttt{RN-13} & Cobros & Los cobros solo se registran sobre pedidos entregados. El sistema admite pagos parciales o totales, conserva historial de pagos, usuario responsable, fecha, método, notas e importe, y actualiza el estado de cobro según el importe acumulado. Esta gestión no equivale a facturación, conciliación contable avanzada ni integración con un \textit{ERP}. & M4 \\
+\hline
+
+\texttt{RN-14} & Gestión técnica del salón & Las fichas de clientes finales del salón, servicios, plantillas, fichas técnicas, productos utilizados e imágenes de resultado pertenecen al cliente profesional que las crea. Un cliente profesional no puede acceder a fichas internas de otro salón. Las sugerencias de producto se generan a partir del historial técnico registrado y de productos realmente vinculados a servicios previos. & M5 \\
+\hline
+
+\texttt{RN-15} & Promociones y descuentos & Las promociones aplicables a pedidos deben estar activas, dentro de su periodo de vigencia y dirigidas al cliente, a su rango, a un producto, a una línea o al público general. Cuando varias promociones económicas son candidatas para una misma línea, se aplica una única promoción, priorizando el mayor descuento y la regla más específica. Los descuentos por volumen solo se aplican si el pedido alcanza el importe mínimo configurado. & M4, M6 \\
+\hline
+
+\texttt{RN-16} & Rangos comerciales & Los rangos Plata, Oro y Platino se tratan como segmentos comerciales jerárquicos. La pertenencia del cliente a un rango condiciona la visibilidad de promociones y ventajas asociadas, y su recálculo se basa en los umbrales de compra definidos por administración. & M6 \\
+\hline
+
+\texttt{RN-17} & Formaciones y comunicaciones & Las formaciones solo son visibles para inscripción cuando están publicadas. Si tienen capacidad limitada, no se admiten nuevas inscripciones al alcanzarse el cupo disponible. Las promociones, formaciones, recordatorios y avisos generan notificaciones internas y, cuando procede, distribución por canales externos como correo \textit{SMTP} o \textit{Web Push}. & M6, M7 \\
+\hline
+
+\texttt{RN-18} & Configuración transversal & Los parámetros compartidos, como canales de aviso, cargo por agencia, umbrales de rangos o políticas de protección frente a abuso, se gestionan como configuración del sistema. Las políticas de \textit{rate limiting} forman parte de la seguridad técnica y no de la operativa comercial ordinaria. & M1, M7 \\
+\hline
+
+\texttt{RN-19} & Funcionalidades no activas & La automatización con \textit{Factusol}, flujos con \textit{n8n}, asistentes inteligentes, simulación mediante cámara y reserva \textit{online} pertenecen a líneas de trabajo futuro. Por tanto, no generan reglas de negocio activas dentro de la versión implementada. & M8 \\
+\hline
+\end{supertabular}
+}

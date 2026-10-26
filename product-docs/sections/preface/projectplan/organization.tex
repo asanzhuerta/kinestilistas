@@ -1,0 +1,55 @@
+La organización del proyecto se define atendiendo a su naturaleza académica y al hecho de que el desarrollo será realizado por un único estudiante. A pesar de ello, el proyecto contará con distintos perfiles implicados, tanto desde el punto de vista de supervisión académica como desde el conocimiento del dominio del problema.
+
+\subsection{Personas y roles involucrados}
+
+Los principales roles involucrados en el proyecto son los siguientes:
+
+\begin{itemize}
+    \item \textbf{Autor del proyecto:} será responsable del análisis, diseño, implementación, pruebas y documentación del sistema. Asumirá las tareas propias de analista, diseñador, desarrollador y responsable de documentación.
+    \item \textbf{Director del Trabajo Fin de Grado:} orientará el desarrollo académico del proyecto, revisará el avance de la memoria y supervisará que el trabajo se ajuste a los objetivos propios de un Trabajo Fin de Grado.
+    \item \textbf{Cliente o usuario experto:} aportará información sobre la situación actual, los procesos de negocio y las necesidades reales del dominio.
+    \item \textbf{Usuarios finales previstos:} son los perfiles que podrían utilizar el sistema una vez evolucionado, incluyendo administrador o distribuidor, comerciales y peluquerías profesionales.
+\end{itemize}
+
+La comunicación con el cliente o usuario experto será especialmente relevante durante la fase de captura de requisitos, ya que permitirá comprender la operativa real del distribuidor y detectar las carencias de los procesos actuales. Por su parte, las revisiones académicas servirán para orientar la estructura de la memoria y ajustar el alcance del sistema al contexto del proyecto.
+
+Al tratarse de un \textbf{proyecto individual}, las tareas de \textbf{gestión}, \textbf{análisis}, \textbf{diseño}, \textbf{implementación}, \textbf{validación} y \textbf{documentación} serán asumidas por el autor del proyecto, con revisiones periódicas del director del \textit{Trabajo Fin de Grado} y aportaciones del cliente durante la captura de requisitos.
+
+\subsection{Recursos previstos}
+
+Para el desarrollo del proyecto se emplearán recursos hardware, software y servicios externos. La Tabla~\ref{tab:project-resources} resume los principales recursos previstos.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Recursos previstos en el proyecto}
+    \label{tab:project-resources}
+    \begin{tabularx}{\textwidth}{|L{3.2cm}|L{3.5cm}|Y|}
+        \hline
+        \rowcolor{black!8}
+        \textbf{Tipo de recurso} & \textbf{Recurso} & \textbf{Uso previsto en el proyecto} \\
+        \hline
+        Hardware & Equipo de desarrollo & Implementación, pruebas locales, documentación y ejecución del entorno de desarrollo. \\
+        \hline
+        Software base & Windows 11 & Sistema operativo que se utilizará para el desarrollo del proyecto. \\
+        \hline
+        Entorno de desarrollo & Visual Studio Code & Edición de código fuente, documentación \LaTeX{} y gestión del proyecto. \\
+        \hline
+        Control de versiones & Git & Registro de cambios, seguimiento de versiones y control del código fuente. \\
+        \hline
+        Repositorio remoto & GitHub & Almacenamiento remoto del código fuente y respaldo del proyecto. \\
+        \hline
+        Base de datos & \textit{PostgreSQL} & Persistencia de los datos principales de la aplicación \citep{postgresdocs2026}. \\
+        \hline
+        Contenedores & \textit{Docker} y \textit{Docker Compose} & Ejecución de servicios locales y reproducción del entorno de desarrollo. \\
+        \hline
+        Documentación & \LaTeX{} & Elaboración de la memoria académica del \textit{Trabajo Fin de Grado}. \\
+        \hline
+        Diagramas & \textit{Draw.io} e \textit{Inkscape} & Elaboración y adaptación de diagramas incluidos en la documentación. \\
+        \hline
+        Pruebas externas & \textit{Port Forwarding} de \textit{Visual Studio Code} (\textit{Microsoft Dev Tunnels}) & Acceso temporal al entorno local desde otros dispositivos durante las pruebas, con una URL pública reutilizable cómoda para validar la PWA en móvil. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+La combinación de estos recursos permitirá desarrollar una solución reproducible, documentada y preparada para continuar su evolución en fases posteriores.

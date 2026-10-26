@@ -1,0 +1,337 @@
+<mxfile host="65bd71144e">
+    <diagram name="M1 - Modelo conceptual de datos" id="m1-mcd-conceptual">
+        <mxGraphModel dx="1338" dy="1987" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="994" pageHeight="920" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="entity-usuario" value="Usuario" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="262" y="212" width="172" height="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a0" value="+ id: Long" style="text;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="30" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a1" value="+ email: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="50" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a2" value="+ passwordHash: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="70" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a3" value="+ nombre: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="90" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a4" value="+ teléfono: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="110" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a5" value="+ empresa: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="130" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a6" value="+ rol: Rol" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="150" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a7" value="+ estado: Estado" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="170" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a8" value="+ imagenPerfil: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="190" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-usuario-a9" value="+ últimoAcceso: DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-usuario" vertex="1">
+                    <mxGeometry y="210" width="172" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-rol" value="Rol" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="273" y="33" width="150" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-rol-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-rol" vertex="1">
+                    <mxGeometry y="30" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-rol-a1" value="+ código: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-rol" vertex="1">
+                    <mxGeometry y="50" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-rol-a2" value="+ nombre: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-rol" vertex="1">
+                    <mxGeometry y="70" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-rol-a3" value="+ descripción: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-rol" vertex="1">
+                    <mxGeometry y="90" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-estado-de-usuario" value="Estado de usuario" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="23" y="282" width="150" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-estado-de-usuario-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-estado-de-usuario" vertex="1">
+                    <mxGeometry y="30" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-estado-de-usuario-a1" value="+ código: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-estado-de-usuario" vertex="1">
+                    <mxGeometry y="50" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-estado-de-usuario-a2" value="+ nombre: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-estado-de-usuario" vertex="1">
+                    <mxGeometry y="70" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-solicitud-de-registro" value="Solicitud de registro" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="511" y="143" width="177" height="190" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-solicitud-de-registro-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-solicitud-de-registro" vertex="1">
+                    <mxGeometry y="30" width="177" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-solicitud-de-registro-a1" value="+ email: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-solicitud-de-registro" vertex="1">
+                    <mxGeometry y="50" width="177" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-solicitud-de-registro-a2" value="+ datosSolicitante: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-solicitud-de-registro" vertex="1">
+                    <mxGeometry y="70" width="177" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-solicitud-de-registro-a3" value="+ rolSolicitado: Rol" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-solicitud-de-registro" vertex="1">
+                    <mxGeometry y="90" width="177" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-solicitud-de-registro-a4" value="+ estado: Estado" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-solicitud-de-registro" vertex="1">
+                    <mxGeometry y="110" width="177" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-solicitud-de-registro-a5" value="+ origen: OrigenSolicitud" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-solicitud-de-registro" vertex="1">
+                    <mxGeometry y="130" width="177" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-solicitud-de-registro-a6" value="+ fechaSolicitud: DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-solicitud-de-registro" vertex="1">
+                    <mxGeometry y="150" width="177" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-solicitud-de-registro-a7" value="+ fechaRevision: DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-solicitud-de-registro" vertex="1">
+                    <mxGeometry y="170" width="177" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-estado-de-solicitud" value="Estado de solicitud" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="760" y="193" width="150" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-estado-de-solicitud-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-estado-de-solicitud" vertex="1">
+                    <mxGeometry y="30" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-estado-de-solicitud-a1" value="+ código: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-estado-de-solicitud" vertex="1">
+                    <mxGeometry y="50" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-estado-de-solicitud-a2" value="+ nombre: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-estado-de-solicitud" vertex="1">
+                    <mxGeometry y="70" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-origen-de-solicitud" value="Origen de solicitud" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="524.5" y="-40" width="150" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-origen-de-solicitud-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-origen-de-solicitud" vertex="1">
+                    <mxGeometry y="30" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-origen-de-solicitud-a1" value="+ código: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-origen-de-solicitud" vertex="1">
+                    <mxGeometry y="50" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-origen-de-solicitud-a2" value="+ nombre: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-origen-de-solicitud" vertex="1">
+                    <mxGeometry y="70" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-gestion" value="Registro de gestión" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="511" y="370" width="220" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-gestion-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-gestion" vertex="1">
+                    <mxGeometry y="30" width="220" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-gestion-a1" value="+ usuarioObjetivo: Usuario" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-gestion" vertex="1">
+                    <mxGeometry y="50" width="220" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-gestion-a2" value="+ administrador: Usuario" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-gestion" vertex="1">
+                    <mxGeometry y="70" width="220" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-gestion-a3" value="+ acción: TipoAccionAdministrativa" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-gestion" vertex="1">
+                    <mxGeometry y="90" width="220" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-gestion-a4" value="+ estadoAnterior: EstadoUsuario" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-gestion" vertex="1">
+                    <mxGeometry y="110" width="220" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-gestion-a5" value="+ estadoNuevo: EstadoUsuario" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-gestion" vertex="1">
+                    <mxGeometry y="130" width="220" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-gestion-a6" value="+ motivo: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-gestion" vertex="1">
+                    <mxGeometry y="150" width="220" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-tipo-de-accion-administrativa" value="Tipo de acción administrativa" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="820" y="410" width="214" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-tipo-de-accion-administrativa-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-tipo-de-accion-administrativa" vertex="1">
+                    <mxGeometry y="30" width="214" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-tipo-de-accion-administrativa-a1" value="+ código: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-tipo-de-accion-administrativa" vertex="1">
+                    <mxGeometry y="50" width="214" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-tipo-de-accion-administrativa-a2" value="+ nombre: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-tipo-de-accion-administrativa" vertex="1">
+                    <mxGeometry y="70" width="214" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-acceso" value="Registro de acceso" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="245" y="545" width="206" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-acceso-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-acceso" vertex="1">
+                    <mxGeometry y="30" width="206" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-acceso-a1" value="+ usuario: Usuario" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-acceso" vertex="1">
+                    <mxGeometry y="50" width="206" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-acceso-a2" value="+ emailIntentado: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-acceso" vertex="1">
+                    <mxGeometry y="70" width="206" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-acceso-a3" value="+ tipoEvento: TipoEventoAcceso" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-acceso" vertex="1">
+                    <mxGeometry y="90" width="206" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-acceso-a4" value="+ resultado: ResultadoAcceso" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-acceso" vertex="1">
+                    <mxGeometry y="110" width="206" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-acceso-a5" value="+ ip: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-acceso" vertex="1">
+                    <mxGeometry y="130" width="206" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-registro-de-acceso-a6" value="+ fecha: DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-registro-de-acceso" vertex="1">
+                    <mxGeometry y="150" width="206" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-tipo-de-evento-de-acceso" value="Tipo de evento de acceso" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="4" y="590" width="188" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-tipo-de-evento-de-acceso-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-tipo-de-evento-de-acceso" vertex="1">
+                    <mxGeometry y="30" width="188" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-tipo-de-evento-de-acceso-a1" value="+ código: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-tipo-de-evento-de-acceso" vertex="1">
+                    <mxGeometry y="50" width="188" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-tipo-de-evento-de-acceso-a2" value="+ nombre: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-tipo-de-evento-de-acceso" vertex="1">
+                    <mxGeometry y="70" width="188" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-resultado-de-acceso" value="Resultado de acceso" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fontColor=#333333;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="585" width="158" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-resultado-de-acceso-a0" value="+ id: Long" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-resultado-de-acceso" vertex="1">
+                    <mxGeometry y="30" width="158" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-resultado-de-acceso-a1" value="+ código: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-resultado-de-acceso" vertex="1">
+                    <mxGeometry y="50" width="158" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="entity-resultado-de-acceso-a2" value="+ nombre: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontColor=#000000;fontSize=11;" parent="entity-resultado-de-acceso" vertex="1">
+                    <mxGeometry y="70" width="158" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-0" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;" parent="1" source="entity-usuario" target="entity-rol" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-0-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-0" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="12" y="-7" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-0-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-0" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint x="12" y="12" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-1" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;" parent="1" source="entity-usuario" target="entity-estado-de-usuario" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-1-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-1" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="-6" y="-11" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-1-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-1" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint x="4" y="-11" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-2" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;" parent="1" source="entity-solicitud-de-registro" target="entity-estado-de-solicitud" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-2-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-2" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="7" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-2-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-2" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-3" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;" parent="1" source="entity-solicitud-de-registro" target="entity-origen-de-solicitud" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-3-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-3" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="21" y="-6" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-3-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-3" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint x="11" y="4" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-4" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;entryX=1.001;entryY=-0.031;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.002;exitY=0.395;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="entity-solicitud-de-registro-a4" target="entity-usuario-a1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-4-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-4" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="-9" y="-11" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-4-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-4" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint y="-11" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-5" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" target="entity-usuario-a8" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="510" y="412" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-5-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-5" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="-8" y="-12" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-5-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-5" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint x="4" y="-12" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-6" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;" parent="1" source="entity-registro-de-gestion" target="entity-tipo-de-accion-administrativa" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-6-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-6" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="13" y="-15" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-6-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-6" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint x="-4" y="-15" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-7" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;" parent="1" source="entity-registro-de-acceso" target="entity-usuario" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-7-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-7" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="-13" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-7-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-7" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint x="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-8" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="entity-registro-de-acceso" target="entity-tipo-de-evento-de-acceso-a0" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-8-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-8" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="-11" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-8-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-8" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-9" value="" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#666666;" parent="1" source="entity-registro-de-acceso" target="entity-resultado-de-acceso" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="rel-9-s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-9" connectable="0" vertex="1">
+                    <mxGeometry x="-0.86" relative="1" as="geometry">
+                        <mxPoint x="8" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="rel-9-t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#000000;labelBackgroundColor=#ffffff;" parent="rel-9" connectable="0" vertex="1">
+                    <mxGeometry x="0.86" relative="1" as="geometry">
+                        <mxPoint x="-4" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

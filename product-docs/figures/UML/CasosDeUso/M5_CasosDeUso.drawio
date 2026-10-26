@@ -1,0 +1,156 @@
+<mxfile host="65bd71144e">
+    <diagram name="Página-1" id="M5-CasosDeUso">
+        <mxGraphModel dx="1048" dy="719" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="860" pageHeight="560" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="boundary" value="&lt;h1&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;M5. Gestión técnica del salón&lt;/font&gt;&lt;/h1&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;spacing=0;labelPosition=center;verticalLabelPosition=middle;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="20" width="545" height="430" as="geometry"/>
+                </mxCell>
+                <mxCell id="actor_comercial" value="Comercial" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="35" y="135" width="50" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="actor_cliente" value="Cliente&lt;br&gt;profesional" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="35" y="306" width="50" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="actor_admin" value="Admin" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="780" y="240" width="50" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_fichas" value="Gestionar fichas del salón" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="235" y="95" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_servicios" value="Registrar servicios realizados" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="95" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_tecnica" value="Mantener ficha técnica" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="235" y="190" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_historial" value="Consultar historial técnico" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="510" y="150" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_productos" value="Registrar productos utilizados" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="235" y="280" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_plantillas" value="Gestionar plantillas reutilizables" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="230" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_imagenes" value="Adjuntar imágenes de resultado" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="235" y="332" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_sugerencias" value="Generar sugerencias derivadas" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="310" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_borrador" value="Preparar borrador técnico" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="235" y="390" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_fichas" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_comercial" target="uc_fichas" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_servicios" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_comercial" target="uc_servicios" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_tecnica" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_comercial" target="uc_tecnica" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_historial" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_comercial" target="uc_historial" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_productos" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_comercial" target="uc_productos" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_imagenes" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0.098;entryY=0.264;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="actor_comercial" target="uc_imagenes" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_sugerencias" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0.216;entryY=0.1;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="actor_comercial" target="uc_sugerencias" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_borrador" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0.007;entryY=0.358;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="actor_comercial" target="uc_borrador" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_cliente_borrador" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="actor_cliente" target="uc_borrador" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_admin_historial" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_admin" target="uc_historial" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_admin_plantillas" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_admin" target="uc_plantillas" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_include_tecnica" value="" style="endArrow=open;dashed=1;html=1;dashPattern=1 3;strokeWidth=1;rounded=0;endFill=0;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" parent="1" source="uc_servicios" target="uc_tecnica" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="470" y="115"/>
+                            <mxPoint x="470" y="210"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="label_include_tecnica" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" parent="edge_include_tecnica" connectable="0" vertex="1">
+                    <mxGeometry x="-0.1" relative="1" as="geometry">
+                        <mxPoint y="-4" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge_include_productos" value="" style="endArrow=open;dashed=1;html=1;dashPattern=1 3;strokeWidth=1;rounded=0;endFill=0;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="uc_tecnica" target="uc_productos" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="337" y="230"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="label_include_productos" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" parent="edge_include_productos" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint y="-11" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge_include_imagenes" value="" style="endArrow=open;dashed=1;html=1;dashPattern=1 3;strokeWidth=1;rounded=0;endFill=0;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="uc_tecnica" target="uc_imagenes" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="190" y="210"/>
+                            <mxPoint x="190" y="352"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="label_include_imagenes" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" parent="edge_include_imagenes" connectable="0" vertex="1">
+                    <mxGeometry x="-0.1" relative="1" as="geometry">
+                        <mxPoint x="20" y="1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge_extend_sugerencias" value="" style="endArrow=open;dashed=1;html=1;dashPattern=1 3;strokeWidth=1;rounded=0;endFill=0;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="uc_historial" target="uc_sugerencias" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="650" y="190"/>
+                            <mxPoint x="650" y="290"/>
+                            <mxPoint x="603" y="290"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="label_extend_sugerencias" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" parent="edge_extend_sugerencias" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge_include_borrador_plantillas" value="" style="endArrow=open;dashed=1;html=1;dashPattern=1 3;strokeWidth=1;rounded=0;endFill=0;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=1;exitY=0;entryX=0.5;entryY=1;exitDx=0;exitDy=0;" parent="1" source="uc_borrador" target="uc_plantillas" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="490" y="396"/>
+                            <mxPoint x="490" y="290"/>
+                            <mxPoint x="513" y="290"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="label_include_borrador_plantillas" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" parent="edge_include_borrador_plantillas" connectable="0" vertex="1">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="-10" y="-13" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge_include_borrador_sugerencias" value="" style="endArrow=open;dashed=1;html=1;dashPattern=1 3;strokeWidth=1;rounded=0;endFill=0;edgeStyle=orthogonalEdgeStyle;curved=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;exitDx=0;exitDy=0;" parent="1" source="uc_borrador" target="uc_sugerencias" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="label_include_borrador_sugerencias" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" parent="edge_include_borrador_sugerencias" connectable="0" vertex="1">
+                    <mxGeometry x="-0.2" relative="1" as="geometry">
+                        <mxPoint x="-18" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

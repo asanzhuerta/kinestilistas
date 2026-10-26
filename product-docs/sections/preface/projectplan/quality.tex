@@ -1,0 +1,28 @@
+El aseguramiento de calidad se plantea como una actividad transversal del proyecto, no como una comprobación aislada al final del desarrollo. Su finalidad será mantener la coherencia entre requisitos, diseño, implementación, configuración y documentación, de manera que cada incremento del sistema pueda revisarse sin perder trazabilidad ni introducir decisiones técnicas difíciles de mantener.
+
+Como referencia general se utilizará el modelo de calidad ISO/IEC 25010, especialmente en los atributos de \textbf{mantenibilidad}, \textbf{seguridad}, \textbf{usabilidad}, \textbf{fiabilidad}, \textbf{compatibilidad} y \textbf{adecuación funcional} \citep{iso25010}. A partir de estos criterios, el proyecto concretará la calidad en las siguientes líneas de trabajo:
+
+\begin{itemize}
+    \item \textbf{Código legible y mantenible:} se aplicarán criterios inspirados en \textit{Clean Code} \citep{martin2008cleancode}, dando prioridad a nombres descriptivos, funciones con responsabilidad clara, eliminación de duplicidades innecesarias y separación entre lógica de negocio, acceso a datos e interfaz.
+    \item \textbf{Organización técnica con bajo acoplamiento:} se buscará una estructura mantenible inspirada en principios de \textit{Clean Architecture} \citep{martin2017cleanarchitecture}, sin presentar el sistema como una arquitectura hexagonal estricta. La interfaz, las rutas de servidor, los servicios de dominio, la persistencia y la configuración deberán conservar límites reconocibles.
+    \item \textbf{Prevención temprana de errores:} se utilizarán \textit{TypeScript} y \textit{ESLint} como barreras de calidad antes de la ejecución, de forma que errores de tipado, contratos inconsistentes o patrones de código problemáticos puedan detectarse durante la construcción del sistema \citep{typescriptdocs2026,eslintdocs2026}.
+    \item \textbf{Construcción reproducible:} se mantendrá una secuencia de comandos de comprobación que permita verificar que la aplicación puede compilarse y ejecutarse de forma consistente en el entorno previsto.
+    \item \textbf{Calidad de interfaz y accesibilidad:} se incorporarán revisiones auxiliares con herramientas como \textit{React Doctor} y \textit{WAVE} para detectar problemas de mantenibilidad en componentes, rendimiento percibido, accesibilidad básica y experiencia de uso en escritorio y móvil \citep{reactdoctor2026,wavewebaim2026}.
+\end{itemize}
+
+El detalle de las pruebas, comandos ejecutados, evidencias generadas y resultados concretos no se duplica en esta sección, sino que se desarrolla en el Capítulo~\ref{chap:testing}. De este modo, el presente apartado fija el criterio de calidad y el capítulo de pruebas recoge la evidencia técnica asociada.
+
+\subsection{Verificación, validación y control de calidad}
+\label{subsec:quality-verification-validation}
+
+La \textbf{verificación} se orientará a comprobar que el sistema se construye conforme a las decisiones técnicas y requisitos documentados. La \textbf{validación} se centrará en revisar que la solución responde al problema real del distribuidor. El \textbf{control de calidad} actuará como filtro para decidir si un incremento puede mantenerse, debe corregirse o debe quedar documentado como limitación.
+
+\textbf{Revisión incremental:} al tratarse de un desarrollo individual, no se organizarán revisiones cruzadas formales entre varios programadores. En su lugar, cada cambio relevante se revisará atendiendo a legibilidad, separación de responsabilidades, permisos por rol, consistencia del modelo de datos, configuración necesaria y alineación con la memoria.
+
+\textbf{Criterio de aceptación:} una funcionalidad se considerará aceptable cuando esté vinculada a una necesidad documentada, respete el alcance definido, no rompa flujos previamente estabilizados, mantenga las restricciones de seguridad previstas y pueda justificarse mediante alguna evidencia de validación. Las evidencias concretas se recogerán en el Capítulo~\ref{chap:testing}.
+
+\textbf{Criterio de revisión:} una funcionalidad deberá revisarse cuando mezcle responsabilidades de forma innecesaria, introduzca dependencias externas no justificadas, requiera configuración sensible no documentada, reduzca la trazabilidad del sistema o genere incoherencias entre requisitos, diseño, implementación y pruebas.
+
+\textbf{Acciones correctivas y preventivas:} cuando se detecte una desviación, se actuará sobre el origen del problema y no solo sobre su síntoma inmediato. La corrección podrá implicar ajustar código, datos de prueba, configuración, documentación o alcance. Como acción preventiva, se revisará si la incidencia exige ampliar una comprobación, aclarar una restricción o documentar mejor una decisión técnica.
+
+Con este enfoque, la calidad del proyecto se apoyará en una combinación de criterios técnicos, trazabilidad documental y validación progresiva, manteniendo el sistema dentro de un alcance realista y preparado para evolucionar tras el \textit{Trabajo Fin de Grado}.

@@ -1,0 +1,128 @@
+<mxfile host="65bd71144e">
+    <diagram name="Pagina-1" id="M8-CasosDeUso">
+        <mxGraphModel dx="873" dy="599" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="860" pageHeight="560" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="boundary" value="&lt;h1&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;M8. Funcionalidades adicionales&lt;/font&gt;&lt;/h1&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;spacing=0;labelPosition=center;verticalLabelPosition=middle;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="25" width="500" height="405" as="geometry"/>
+                </mxCell>
+                <mxCell id="actor_cliente_profesional" value="Cliente&lt;br&gt;profesional" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="50" width="50" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="actor_cliente_final" value="Cliente final" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="326" width="50" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="actor_comercial" value="Comercial" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="775" y="125" width="50" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="actor_admin" value="Admin" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="775" y="250" width="50" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="actor_servicios_externos" value="Servicios externos&lt;br&gt;IA / Factusol / n8n" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="200" width="50" height="92" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_diagnostico_capilografo" value="Realizar diagnóstico con&lt;br&gt;capilógrafo e IA" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="237.5" y="110" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_recomendacion_tratamientos" value="Obtener recomendación&lt;br&gt;de tratamientos" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="485" y="85" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_simular_estilo" value="Simular estilo o coloración&lt;br&gt;con cámara móvil" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="237.5" y="170" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_reconocer_productos" value="Reconocer productos&lt;br&gt;mediante cámara" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="485" y="170" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_asistente_virtual" value="Consultar asistente&lt;br&gt;virtual" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="355" y="290" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_automatizar_servicios" value="Automatizar servicios&lt;br&gt;externos" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="485" y="370" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_sincronizar_factusol" value="Sincronizar con Factusol&lt;br&gt;o n8n" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="370" width="205" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_cliente_profesional_diagnostico_capilografo_0" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_cliente_profesional" target="uc_diagnostico_capilografo" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_cliente_profesional_simular_estilo_1" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0;entryY=0;entryDx=0;entryDy=0;" parent="1" source="actor_cliente_profesional" target="uc_simular_estilo" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_cliente_profesional_reservas_online_2" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0;entryY=0;entryDx=0;entryDy=0;" parent="1" source="actor_cliente_profesional" target="uc_reservas_online" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_cliente_profesional_asistente_virtual_3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0.043;entryY=0.238;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="actor_cliente_profesional" target="uc_asistente_virtual" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_cliente_final_reservas_online_4" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0;entryY=1;entryDx=0;entryDy=0;" parent="1" source="actor_cliente_final" target="uc_reservas_online" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_cliente_final_asistente_virtual_5" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="actor_cliente_final" target="uc_asistente_virtual" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_diagnostico_capilografo_6" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_comercial" target="uc_diagnostico_capilografo" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_reconocer_productos_7" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_comercial" target="uc_reconocer_productos" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_comercial_asistente_virtual_8" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_comercial" target="uc_asistente_virtual" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_admin_reservas_online_9" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_admin" target="uc_reservas_online" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_admin_automatizar_servicios_10" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_admin" target="uc_automatizar_servicios" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_admin_sincronizar_factusol_11" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_admin" target="uc_sincronizar_factusol" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_servicios_externos_diagnostico_capilografo_12" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0.086;entryY=0.775;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="actor_servicios_externos" target="uc_diagnostico_capilografo" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_servicios_externos_automatizar_servicios_13" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_servicios_externos" target="uc_automatizar_servicios" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_servicios_externos_sincronizar_factusol_14" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" parent="1" source="actor_servicios_externos" target="uc_sincronizar_factusol" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="edge_include_diagnostico_capilografo_recomendacion_tratamientos_0" value="" style="endArrow=open;dashed=1;html=1;dashPattern=1 3;strokeWidth=1;rounded=0;endFill=0;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="uc_diagnostico_capilografo" target="uc_recomendacion_tratamientos" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="label_include_diagnostico_capilografo_recomendacion_tratamientos_0" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" parent="edge_include_diagnostico_capilografo_recomendacion_tratamientos_0" connectable="0" vertex="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge_include_simular_estilo_reconocer_productos_1" value="" style="endArrow=open;dashed=1;html=1;dashPattern=1 3;strokeWidth=1;rounded=0;endFill=0;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="uc_simular_estilo" target="uc_reconocer_productos" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="label_include_simular_estilo_reconocer_productos_1" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" parent="edge_include_simular_estilo_reconocer_productos_1" connectable="0" vertex="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-4" y="10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge_include_automatizar_servicios_sincronizar_factusol_2" value="" style="endArrow=open;dashed=1;html=1;dashPattern=1 3;strokeWidth=1;rounded=0;endFill=0;edgeStyle=orthogonalEdgeStyle;curved=1;" parent="1" source="uc_automatizar_servicios" target="uc_sincronizar_factusol" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="label_include_automatizar_servicios_sincronizar_factusol_2" value="&lt;span style=&quot;color: rgb(0, 0, 0);&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;" parent="edge_include_automatizar_servicios_sincronizar_factusol_2" connectable="0" vertex="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="3" y="10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;entryX=0.015;entryY=0.506;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="actor_cliente_profesional" target="uc_diagnostico_capilografo">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="100" y="99" as="sourcePoint"/>
+                        <mxPoint x="254" y="119" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="uc_reservas_online" value="Gestionar reservas&lt;br&gt;online" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="270" y="234" width="205" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

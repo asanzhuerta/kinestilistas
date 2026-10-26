@@ -1,0 +1,186 @@
+Este capítulo cubre el \textbf{análisis del sistema} a desarrollar, haciendo uso del lenguaje de modelado \textit{UML}.
+
+\section{Modelo de Casos de Uso}
+\label{sec:usecases}
+\input{./sections/development/analysis/usecases.tex}
+
+\section{Modelo Conceptual}
+\label{sec:conceptualmodel}
+\input{./sections/development/analysis/conceptualmodel.tex}
+
+\section{Modelo de Interfaz de Usuario}
+\label{sec:uiModel}
+La interfaz finalmente implementada responde a una aplicación web \textit{responsive} orientada a tres perfiles principales: \textbf{administrador}, \textbf{comercial} y \textbf{cliente profesional}. En lugar de una única vista común para todos los usuarios, el sistema deriva a cada rol hacia un \textbf{espacio operativo propio} tras el inicio de sesión, conservando componentes compartidos como cabeceras, tarjetas de resumen, listados, formularios y vistas de detalle.
+
+La construcción visual del sistema ha seguido una aproximación \textbf{iterativa}: primero se definieron pantallas operativas mínimas para cubrir acceso, clientes, catálogo y pedidos, y posteriormente se incorporaron los flujos de salón, comunicaciones, promociones, formaciones y administración transversal. Los refinamientos más sensibles se concentraron en detalle de visitas, preparación de pedidos, confirmación de entregas, seguimiento de cobros, fichas técnicas del salón y avisos por rol. Por ello, el modelo de interfaz presentado a continuación debe interpretarse como un \textit{wireframe} funcional de baja fidelidad derivado de la interfaz realmente desplegada.
+
+\subsection{Wireframes de baja fidelidad}
+
+La Figura~\ref{fig:UIWireframes} resume tres \textbf{patrones de pantalla} que se repiten a lo largo de la aplicación: \textbf{acceso}, \textbf{trabajo operativo sobre pedidos} y \textbf{detalle de visita de reparto}.
+
+\begin{figure}[H]
+    \centering
+    \setlength{\fboxsep}{8pt}
+    \fbox{
+        \begin{minipage}{0.88\textwidth}
+            \textbf{Wireframe A. Acceso al sistema}\\[0.4em]
+            \rule{\textwidth}{0.4pt}\\[-0.1em]
+            Logo / nombre de la aplicación\\
+            Campo de identificador\\
+            Campo de contraseña\\
+            Mensaje de error o bloqueo por \textit{rate limiting}\\
+            Botón de acceso\\
+            Enlace a registro / recuperación de contexto de usuario
+        \end{minipage}
+    }
+
+    \vspace{0.9em}
+
+    \fbox{
+        \begin{minipage}{0.88\textwidth}
+            \textbf{Wireframe B. Espacio operativo de pedidos}\\[0.4em]
+            \rule{\textwidth}{0.4pt}\\[-0.1em]
+            Cabecera con título, resumen y acciones principales\\
+            Selector de cliente cuando el rol es comercial\\
+            Líneas de pedido con producto, referencia cromática opcional y cantidad\\
+            Acciones de borrador / confirmación\\
+            Historial de pedidos en la misma vista o en panel inferior\\
+            Acceso al detalle completo del pedido
+        \end{minipage}
+    }
+
+    \vspace{0.9em}
+
+    \fbox{
+        \begin{minipage}{0.88\textwidth}
+            \textbf{Wireframe C. Detalle de visita de reparto}\\[0.4em]
+            \rule{\textwidth}{0.4pt}\\[-0.1em]
+            Cabecera compacta con volver, estado y tipo de visita\\
+            Bloques desplegables de información de visita, cliente y comercial\\
+            Listado visible de pedidos vinculados al reparto\\
+            Panel plegable de acciones sobre la visita\\
+            Flujo de escaneo/introducción de \textit{QR} y confirmación de entrega
+        \end{minipage}
+    }
+    \caption{\textit{Wireframes} funcionales de baja fidelidad basados en la interfaz implementada}
+    \label{fig:UIWireframes}
+\end{figure}
+
+Estos \textit{wireframes} sintetizan \textbf{decisiones de diseño} que se mantienen en toda la aplicación:
+
+\begin{itemize}
+    \item \textbf{Prioridad del uso móvil} para comerciales y clientes, con navegación lateral desplegable, identificación visual del rol y vistas compactas;
+    \item \textbf{Acceso rápido} a operaciones frecuentes desde la pantalla principal de cada rol;
+    \item \textbf{Separación clara} entre listados, detalle y acciones de actualización;
+    \item Uso de \textbf{estados visuales}, tarjetas resumen y bloques plegables para reducir ruido en vistas con mucha información operativa.
+\end{itemize}
+
+\subsection{Modelo de navegación}
+
+La navegación real del sistema parte de una \textbf{entrada común} en \texttt{/login}. Tras autenticarse, cada usuario es redirigido a la \textbf{raíz funcional de su rol}, desde donde accede a sus módulos disponibles. La Figura~\ref{fig:NavigationModel} resume este comportamiento.
+
+\begin{figure}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabularx}{\textwidth}{|p{0.2\textwidth}|X|}
+        \hline
+        \textbf{Rol / punto de entrada} & \textbf{Secuencia principal de navegación implementada} \\
+        \hline
+        \textbf{Acceso común} & \texttt{/login} $\rightarrow$ redirección a \texttt{/admin}, \texttt{/commercials} o \texttt{/clients} según el rol autenticado. \\
+        \hline
+        \textbf{Administrador} & \texttt{/admin} $\rightarrow$ usuarios, solicitudes, clientes, auditoría, catálogo, pedidos globales, comunicaciones y \texttt{/admin/settings}. Desde estos espacios se accede a listados, detalle, formularios de alta, exportación de auditoría y configuración de canales de avisos. Las pantallas de diagnóstico técnico de \texttt{M7} no forman parte de la navegación ordinaria del administrador. \\
+        \hline
+        \textbf{Comercial} & \texttt{/commercials} $\rightarrow$ clientes, visitas, rutas, catálogo, coloración, pedidos, promociones, formaciones, avisos y ajustes personales. Desde \texttt{/commercials/orders} se accede al detalle del pedido y al seguimiento del cobro, y desde \texttt{/commercials/visits} al detalle operativo de la visita de reparto. \\
+        \hline
+        \textbf{Cliente profesional} & \texttt{/clients} $\rightarrow$ estimación de reparto, catálogo, coloración y pedidos. Desde \texttt{/clients/orders} se accede al historial y al detalle de cada pedido. \\
+        \hline
+        \textbf{Flujos transversales} & \texttt{/profile} y \texttt{/profile/change-password} quedan disponibles como espacios comunes de perfil. El sistema contempla además \texttt{/register}, \texttt{/unsupported-browser}, páginas de error y rutas \textit{API} protegidas asociadas a cada área funcional. \\
+        \hline
+    \end{tabularx}
+    \caption{Modelo de navegación simplificado a partir de las rutas implementadas}
+    \label{fig:NavigationModel}
+\end{figure}
+
+Desde el punto de vista funcional, esta navegación presenta varias propiedades relevantes para el análisis:
+
+\begin{itemize}
+    \item El \textbf{administrador} concentra las tareas de gobierno del sistema y de mantenimiento de datos maestros;
+    \item El \textbf{comercial} dispone del mayor número de pantallas operativas, al combinar seguimiento de clientes, visitas, rutas y pedidos;
+    \item El \textbf{cliente profesional} accede a una versión más acotada, enfocada en consulta de catálogo, coloración y ciclo de pedido;
+    \item Los \textbf{flujos de detalle} siempre se subordinan a un listado o panel principal, evitando navegaciones profundas sin contexto previo;
+    \item Las vistas de \texttt{M4} enlazan entre pedido, visita de reparto y seguimiento de cobro para mantener \textbf{trazabilidad} entre operaciones relacionadas.
+\end{itemize}
+
+\subsection{Mockups}
+\label{sec:uiMockups}
+
+Como complemento a los \textit{wireframes} anteriores, se ha preparado una serie de \textbf{mockups visuales} mediante \textbf{Google Stitch}. Esta herramienta de Google Labs permite generar propuestas de interfaz a partir de descripciones en lenguaje natural o referencias visuales, y se plantea como apoyo para transformar una idea de pantalla en un diseño de mayor fidelidad \citep{google-stitch,google-stitch-developers-blog}.
+
+En este proyecto, los \textit{mockups} no se utilizan como \textbf{capturas reales} de la aplicación ni como implementación automática de la interfaz. Su función es documentar una \textbf{dirección visual} coherente con el dominio de la aplicación: una experiencia móvil, clara, orientada a clientes profesionales, comerciales y administradores, con tarjetas, navegación inferior y acciones frecuentes accesibles. Por este motivo, las pantallas se han clasificado en dos grupos: las que se alinean con funcionalidades contempladas en el alcance principal y las que representan ideas de evolución futura.
+
+La Figura~\ref{fig:StitchMockupsCurrent} recoge los \textit{mockups} que se consideran más cercanos a las funcionalidades documentadas en los módulos principales del sistema. En concreto, se relacionan con el panel inicial y formaciones, el catálogo de productos, la consulta de coloración, el pedido abierto y la gestión de tratamientos o ficha técnica del salón.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[height=0.23\textheight,keepaspectratio]{./figures/Mockups/stitch-inicio-formaciones.png}
+        \caption{Inicio y formaciones}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[height=0.23\textheight,keepaspectratio]{./figures/Mockups/stitch-productos.png}
+        \caption{Catálogo de productos}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[height=0.23\textheight,keepaspectratio]{./figures/Mockups/stitch-coloracion.png}
+        \caption{Coloración}
+    \end{subfigure}
+
+    \vspace{0.8em}
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[height=0.23\textheight,keepaspectratio]{./figures/Mockups/stitch-pedido-abierto.png}
+        \caption{Pedido abierto}
+    \end{subfigure}
+    \hspace{0.08\textwidth}
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[height=0.23\textheight,keepaspectratio]{./figures/Mockups/stitch-tratamientos.png}
+        \caption{Tratamientos}
+    \end{subfigure}
+    \caption{\textit{Mockups} generados con Google Stitch alineados con funcionalidades del alcance principal}
+    \label{fig:StitchMockupsCurrent}
+\end{figure}
+
+La Figura~\ref{fig:StitchMockupsFuture} muestra otras propuestas generadas durante la misma exploración visual, pero vinculadas principalmente a \textbf{trabajo futuro}. Estas pantallas encajan con funcionalidades adicionales del módulo \texttt{M8}, como agenda de citas, reserva \textit{online} y simulación de estilo o coloración mediante cámara móvil.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[height=0.25\textheight,keepaspectratio]{./figures/Mockups/stitch-agenda.png}
+        \caption{Agenda}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[height=0.25\textheight,keepaspectratio]{./figures/Mockups/stitch-mis-citas.png}
+        \caption{Mis citas}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[height=0.25\textheight,keepaspectratio]{./figures/Mockups/stitch-simulador.png}
+        \caption{Simulador}
+    \end{subfigure}
+    \caption{\textit{Mockups} generados con Google Stitch asociados a funcionalidades futuras}
+    \label{fig:StitchMockupsFuture}
+\end{figure}
+
+\clearpage
+\input{./sections/development/analysis/behavior.tex}

@@ -1,0 +1,152 @@
+\section{Preparación del entorno de trabajo}
+
+En esta sección se describen los \textbf{requisitos reales} necesarios para desarrollar, validar y ejecutar el proyecto en local.
+
+\subsection{Requisitos hardware}
+
+No se requieren características especiales más allá de un equipo capaz de ejecutar herramientas modernas de desarrollo web, un navegador actual y contenedores \texttt{Docker}. La configuración utilizada durante el desarrollo se ha movido cómodamente en el siguiente rango:
+
+\begin{itemize}
+    \item \textbf{Sistema operativo}: \texttt{Windows 11} de 64 bits;
+    \item \textbf{Memoria}: 16 GB de memoria RAM;
+    \item \textbf{Almacenamiento}: al menos 10 GB de espacio libre;
+    \item \textbf{Procesador}: gama media actual.
+\end{itemize}
+
+\subsection{Requisitos software}
+
+Los requisitos de \textit{software} se dividen en la \textbf{base mínima del entorno}, las \textbf{dependencias principales de la aplicación} y las \textbf{herramientas auxiliares} utilizadas durante el desarrollo y la documentación.
+
+\subsubsection*{Base del entorno}
+
+\begin{itemize}
+    \item \texttt{Node.js 20} o superior;
+    \item Gestor \texttt{npm};
+    \item \texttt{Docker Desktop} o equivalente;
+    \item \texttt{Git}.
+\end{itemize}
+
+\subsubsection*{Dependencias principales del proyecto}
+
+La aplicación utiliza actualmente:
+
+\begin{itemize}
+    \item \texttt{Next.js 16};
+    \item \texttt{React 19};
+    \item \texttt{TypeScript 5};
+    \item \texttt{Tailwind CSS 4};
+    \item \texttt{Motion for React};
+    \item \texttt{Auth.js / NextAuth 5 beta};
+    \item \texttt{TypeORM 0.3};
+    \item \texttt{PostgreSQL};
+    \item \texttt{Cloudinary};
+    \item \texttt{Leaflet} y \texttt{react-leaflet};
+    \item \texttt{Nodemailer};
+    \item Paquete \texttt{web-push};
+    \item \texttt{Sharp}.
+\end{itemize}
+
+\subsubsection*{Herramientas auxiliares}
+
+\begin{itemize}
+    \item \texttt{Visual Studio Code} para edición y depuración;
+    \item \texttt{MiKTeX} y \texttt{latexmk} para compilar la memoria;
+    \item \texttt{Port Forwarding} de \texttt{Visual Studio Code}, basado en \texttt{Microsoft Dev Tunnels}, para pruebas desde dispositivos físicos sobre una URL pública reutilizable.
+\end{itemize}
+
+En fases anteriores se utilizó también \texttt{Cloudflare Tunnel} para este mismo propósito, pero en la iteración actual resulta más cómodo trabajar con la solución integrada en \texttt{Visual Studio Code}, ya que no exige una herramienta adicional, se integra sin coste extra en el flujo habitual de desarrollo y facilita conservar una \textit{URL} estable de pruebas para la \textit{PWA} instalada en móvil.
+
+\subsection{Configuración local}
+
+La \textbf{configuración local} se organiza en tres bloques: preparación de la base de datos, puesta en marcha de la aplicación web y definición de las variables de entorno necesarias para ejecutar el sistema.
+
+\subsubsection*{Base de datos}
+
+El servicio \texttt{PostgreSQL} se define en \texttt{docker-compose.yml} en la raíz del repositorio. Para arrancarlo:
+
+\begin{lstlisting}[language=bash]
+docker compose up -d
+\end{lstlisting}
+
+Por defecto queda expuesto en el puerto \texttt{5432}. El repositorio mantiene también la carpeta \texttt{db/init/} con scripts auxiliares de inicialización.
+
+\subsubsection*{Aplicación web}
+
+Una vez levantada la base de datos, la aplicación se prepara desde la carpeta \texttt{app-tfg/}:
+
+\begin{lstlisting}[language=bash]
+cd app-tfg
+npm install
+\end{lstlisting}
+
+\subsubsection*{Variables de entorno}
+
+Las variables mínimas necesarias son:
+
+\begin{lstlisting}[language=bash]
+DATABASE_URL=postgres://kin:kin@localhost:5432/kin
+AUTH_SECRET=valor-seguro
+\end{lstlisting}
+
+Las \textbf{variables opcionales} dependen de las integraciones que se quieran activar:
+
+\begin{itemize}
+    \item \textbf{\texttt{CLOUDINARY\_*}}: subida de imágenes de perfil, catálogo, resultados de salón, adjuntos de promociones y documentos de apoyo. Además de las credenciales, pueden definirse:
+    \begin{itemize}[nosep]
+        \item \texttt{CLOUDINARY\_PROFILE\_IMAGES\_FOLDER};
+        \item \texttt{CLOUDINARY\_CATALOG\_IMAGES\_FOLDER};
+        \item \texttt{CLOUDINARY\_SALON\_RESULT\_IMAGES\_FOLDER};
+        \item \texttt{CLOUDINARY\_PROMOTION\_ATTACHMENTS\_FOLDER};
+        \item \texttt{CLOUDINARY\_CATALOG\_DOCUMENTS\_FOLDER}.
+    \end{itemize}
+    \item \textbf{\texttt{GEOCODING\_*}}: personalización del comportamiento de geocodificación con \texttt{Nominatim}.
+    \item \textbf{\texttt{OSRM\_BASE\_URL} y \texttt{NEXT\_PUBLIC\_OSRM\_BASE\_URL}}: sustitución del proveedor de rutas.
+    \item \textbf{Variables \textit{SMTP}}: \texttt{SMTP\_HOST}, \texttt{SMTP\_PORT}, \texttt{SMTP\_SECURE}, \texttt{SMTP\_USER}, \texttt{SMTP\_PASSWORD} o \texttt{SMTP\_PASS}, y \texttt{SMTP\_FROM} o \texttt{MAIL\_FROM} para correo transaccional.
+    \item \textbf{Variables \textit{VAPID}}: \path{VAPID_PUBLIC_KEY}, \path{VAPID_PRIVATE_KEY} y \path{VAPID_SUBJECT} para \textit{Web Push}.
+    \item \textbf{Variables de URL pública}: \path{APP_BASE_URL}, \path{NEXTAUTH_URL} y \path{NEXT_PUBLIC_APP_URL} para construir enlaces absolutos en despliegue.
+    \item \textbf{\texttt{ADMIN\_RATE\_LIMIT\_SETTINGS\_ENABLED}}: habilitación, solo en entorno técnico, de los \textit{endpoints} de ajuste de políticas de \textit{rate limiting}.
+\end{itemize}
+
+\subsubsection*{Migraciones y arranque}
+
+Tras definir el entorno:
+
+\begin{lstlisting}[language=bash]
+npm run migration:run
+npm run dev
+\end{lstlisting}
+
+La aplicación queda disponible en \texttt{http://localhost:3000}.
+
+\subsection{Compilación y comprobaciones}
+
+Los \textbf{comandos recomendados} durante el desarrollo son:
+
+\begin{lstlisting}[language=bash]
+npm run typecheck
+npm run lint
+npm run build
+npm run migration:run
+\end{lstlisting}
+
+Para una \textbf{validación completa} por módulos y calidad de interfaz:
+
+\begin{lstlisting}[language=bash]
+npm run test:static
+npm run test:modules
+npm run test:all
+npm run quality:ui
+\end{lstlisting}
+
+Cuando el cambio se limita a un área concreta, pueden ejecutarse las comprobaciones específicas \path{test:m1-m3:foundation}, \path{test:m2:route-points}, \path{test:m4}, \path{test:m4:ui}, \path{test:m5}, \path{test:m6} o \path{test:m7}. Estas pruebas no sustituyen la revisión manual por rol cuando se modifica una pantalla o un flujo de negocio, pero sí ofrecen una base reproducible para detectar regresiones.
+
+\subsection{Documentación técnica}
+
+La memoria del \textit{TFG} se mantiene en \texttt{docs/}. Su compilación puede realizarse mediante:
+
+\begin{lstlisting}[language=bash]
+cd docs
+latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
+\end{lstlisting}
+
+La carpeta de documentación debe evolucionar en paralelo al código cuando se incorporen nuevas funcionalidades, nuevas integraciones o se reorganicen módulos ya existentes.

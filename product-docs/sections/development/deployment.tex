@@ -1,0 +1,245 @@
+Este capítulo describe el despliegue y la operación técnica del sistema a partir de la arquitectura necesaria para ejecutar la aplicación. El enfoque se centra en una aplicación web \textit{full-stack} desplegable sobre un único servicio de aplicación, una base de datos relacional y varias integraciones externas de apoyo, evitando introducir infraestructura corporativa que no forma parte de la solución construida.
+
+\section{Arquitectura Física}
+
+La arquitectura física realmente necesaria para ejecutar la aplicación puede resumirse en varias piezas acotadas:
+
+\begin{itemize}
+    \item \textbf{Nodo de aplicación}: ejecuta \texttt{Next.js} en entorno \texttt{Node.js};
+    \item \textbf{Base de datos}: mantiene una instancia \texttt{PostgreSQL} accesible desde la aplicación \citep{postgresdocs2026};
+    \item \textbf{Almacenamiento externo}: utiliza \texttt{Cloudinary} para contenido multimedia y documental \citep{cloudinaryupload2026};
+    \item \textbf{Servicios \textit{HTTP} de apoyo}: cubren geocodificación, rutas y representación de \textit{QR} de reparto mediante \texttt{Nominatim}, \texttt{OSRM} y \texttt{QuickChart} \citep{nominatimapi2026,osrmdocs2026,quickchartqr2026};
+    \item \textbf{Canales de comunicación}: permiten comunicación externa opcional mediante \textit{SMTP} con \texttt{Nodemailer} y notificaciones \textit{Web Push} con claves \textit{VAPID} \citep{nodemailersmtp2026,webpushapi2026,webpushlibs2026}.
+\end{itemize}
+
+Desde el punto de vista del despliegue, la aplicación no separa \textit{frontend} y \textit{backend} en productos distintos. La misma instancia de \texttt{Next.js} sirve la interfaz web, resuelve los \textit{Route Handlers}, aplica autenticación, \textit{rate limiting} y control de acceso, y coordina la lectura y escritura sobre la base de datos.
+
+En el despliegue de demostración sobre \texttt{Netlify} se mantiene una adaptación específica: el \textit{proxy} global de \texttt{Next.js} se conserva en el repositorio como \texttt{app-tfg/proxy.hosting.ts}, pero no se publica con el nombre activo \texttt{proxy.ts}. La razón es una incompatibilidad observada entre el \textit{runtime Edge} de \texttt{Netlify} y \texttt{Next.js 16}, que provocaba el error \texttt{nextHandler is not a function}. Para no perder seguridad en la demostración, el \textit{rate limiting} se aplica también dentro de los \textit{Route Handlers} mediante \texttt{enforceApiRateLimit(request)}, mientras que la protección de sesión y rol permanece en \textit{layouts} y \textit{endpoints} de servidor. En un \textit{hosting} compatible con el \textit{proxy} de \texttt{Next.js}, basta con renombrar \texttt{proxy.hosting.ts} a \texttt{proxy.ts} para reactivar esa capa previa.
+
+En la demostración publicada se ha utilizado la combinación \texttt{Netlify + Neon + Cloudinary}. En este escenario resulta conveniente distinguir entre dos usos de la base de datos: para el tiempo de ejecución web, \texttt{Netlify} utiliza la cadena \textit{pooled} de \texttt{Neon} como \texttt{DATABASE\_URL}; para migraciones manuales, restauración de datos o \textit{scripts} locales puede emplearse una conexión directa equivalente si el proveedor la ofrece. Esta separación evita penalizar la capa web y reduce incidencias en tareas operativas puntuales.
+
+La Figura~\ref{fig:physical-deployment} resume esta arquitectura física de referencia, válida tanto para el entorno local de desarrollo como para el despliegue de demostración con base de datos gestionada.
+
+\begin{figure}[H]
+    \centering
+    \makebox[\textwidth][c]{%
+        \includegraphics[width=1.12\textwidth,height=0.42\textheight,keepaspectratio]{./figures/Arquitectura/physical-deployment.pdf}%
+    }
+    \caption{Arquitectura física / despliegue local-producción}
+    \label{fig:physical-deployment}
+\end{figure}
+
+\textbf{En desarrollo local}, \texttt{PostgreSQL} se levanta habitualmente con \texttt{Docker Desktop} a partir del \texttt{docker-compose.yml} del repositorio \citep{dockerdocs2026}. \textbf{En producción}, la base de datos puede residir en un servicio gestionado equivalente siempre que proporcione compatibilidad con \texttt{PostgreSQL} y conectividad estable con la aplicación.
+
+\section{Instrucciones de despliegue}
+
+En esta sección se describen los pasos necesarios para preparar un entorno de despliegue, configurar los servicios externos, ejecutar migraciones y publicar la aplicación.
+
+\subsection{Requisitos previos}
+
+Antes de desplegar la aplicación es necesario comprobar la infraestructura mínima disponible y las credenciales de los servicios externos que sostienen las funcionalidades auxiliares.
+
+\subsubsection*{Infraestructura mínima}
+
+\begin{itemize}
+    \item \textbf{Entorno de ejecución}: capaz de ejecutar \texttt{Node.js 20} o superior; para la demo desplegada se ha fijado \texttt{Node.js 22}.
+    \item \textbf{Base de datos}: instancia accesible de \texttt{PostgreSQL}.
+    \item \textbf{Configuración}: acceso a las variables de entorno de la aplicación.
+    \item \textbf{Conectividad}: conexión saliente \textit{HTTPS} hacia los servicios externos utilizados.
+\end{itemize}
+
+\subsubsection*{Servicios externos}
+
+En el estado actual del proyecto, los servicios externos relevantes son:
+
+\begin{itemize}
+    \item \textbf{\texttt{Cloudinary}}: imágenes de perfil, imágenes de catálogo, resultados visuales de salón, adjuntos de promociones y documentos de apoyo del catálogo.
+    \item \textbf{\texttt{Nominatim}}: geocodificación de direcciones.
+    \item \textbf{\texttt{OSRM}}: cálculo de geometrías de ruta y trayectos.
+    \item \textbf{\texttt{QuickChart}}: generación de la imagen \textit{QR} asociada a los repartos comerciales.
+    \item \textbf{\textit{SMTP} con \texttt{Nodemailer}}: envío opcional de correos de notificación.
+    \item \textbf{\textit{Web Push}}: notificaciones de dispositivo cuando el usuario concede permiso y existen claves \textit{VAPID} configuradas.
+\end{itemize}
+
+De ellos, \texttt{Cloudinary} requiere credenciales para los flujos de subida, mientras que \textit{SMTP} y \textit{Web Push} solo se activan si el entorno define sus variables específicas. Las demás integraciones pueden mantenerse con sus \textit{endpoints} públicos por defecto o sustituirse mediante configuración.
+
+\subsection{Inventario de componentes}
+
+La versión actual del producto incorpora, como mínimo, los siguientes componentes software:
+
+\begin{itemize}
+    \item \textbf{Aplicación web}: \texttt{Next.js} con \texttt{App Router};
+    \item \textbf{Interfaz}: componentes \texttt{React};
+    \item \textbf{\textit{API} interna}: \textit{Route Handlers} propios de la aplicación;
+    \item \textbf{Persistencia}: \texttt{TypeORM} sobre \texttt{PostgreSQL};
+    \item \textbf{Autenticación}: sesión y control de acceso con \texttt{Auth.js};
+    \item \textbf{Capa \textit{PWA}}: \textit{service worker} y \texttt{manifest};
+    \item \textbf{Comunicaciones}: envío opcional mediante \texttt{Nodemailer} y \textit{Web Push};
+    \item \textbf{Soporte operativo}: \textit{scripts} de validación técnica y migraciones versionadas.
+\end{itemize}
+
+\subsection{Procedimiento de instalación}
+
+La secuencia mínima para desplegar una instancia funcional es la siguiente:
+
+\begin{enumerate}
+    \item Disponer del código fuente del repositorio;
+    \item Instalar dependencias en \texttt{app-tfg/};
+    \item Configurar las variables de entorno;
+    \item Ejecutar las migraciones pendientes;
+    \item Construir la aplicación;
+    \item Arrancar el servidor con \texttt{next start}.
+\end{enumerate}
+
+La configuración mínima requerida incluye:
+
+\begin{lstlisting}[language=bash]
+DATABASE_URL=postgres://usuario:clave@host:5432/basedatos
+AUTH_SECRET=valor-seguro
+\end{lstlisting}
+
+Si se desea habilitar subida de imágenes:
+
+\begin{lstlisting}[language=bash]
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+CLOUDINARY_PROFILE_IMAGES_FOLDER=kinestilistas/profile-images
+CLOUDINARY_CATALOG_IMAGES_FOLDER=kinestilistas/catalog
+CLOUDINARY_SALON_RESULT_IMAGES_FOLDER=kinestilistas/salon-results
+CLOUDINARY_PROMOTION_ATTACHMENTS_FOLDER=kinestilistas/promotion-attachments
+CLOUDINARY_CATALOG_DOCUMENTS_FOLDER=kinestilistas/catalog-documents
+\end{lstlisting}
+
+Si se desea personalizar geocodificación o rutas:
+
+\begin{lstlisting}[language=bash]
+GEOCODING_PROVIDER=nominatim
+GEOCODING_BASE_URL=https://nominatim.openstreetmap.org
+GEOCODING_COUNTRY_CODE=es
+GEOCODING_COUNTRY_NAME=Espana
+GEOCODING_EMAIL=
+GEOCODING_USER_AGENT=KinestilistasTFG/1.0
+NEXT_PUBLIC_OSRM_BASE_URL=https://router.project-osrm.org
+OSRM_BASE_URL=https://router.project-osrm.org
+\end{lstlisting}
+
+Si se quieren activar canales externos de comunicación, se añaden las variables correspondientes. En ausencia de estas credenciales, la aplicación conserva el aviso interno como canal persistente:
+
+\begin{lstlisting}[language=bash]
+SMTP_HOST=smtp.ejemplo.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=usuario
+SMTP_PASSWORD=clave
+SMTP_FROM=notificaciones@ejemplo.com
+MAIL_FROM=notificaciones@ejemplo.com
+VAPID_PUBLIC_KEY=...
+VAPID_PRIVATE_KEY=...
+VAPID_SUBJECT=mailto:notificaciones@ejemplo.com
+\end{lstlisting}
+
+Para una demo equivalente a la publicada en \texttt{Netlify}, la configuración práctica queda resumida en:
+
+\begin{lstlisting}[language=bash]
+DATABASE_URL=postgresql://<cadena-pooled-de-neon>
+NODE_VERSION=22
+AUTH_SECRET=<valor-seguro>
+AUTH_TRUST_HOST=true
+AUTH_URL=https://<tu-site>.netlify.app
+NEXTAUTH_URL=https://<tu-site>.netlify.app
+APP_BASE_URL=https://<tu-site>.netlify.app
+NEXT_PUBLIC_APP_URL=https://<tu-site>.netlify.app
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+CLOUDINARY_PROFILE_IMAGES_FOLDER=kinestilistas/profile-images
+CLOUDINARY_CATALOG_IMAGES_FOLDER=kinestilistas/catalog
+CLOUDINARY_SALON_RESULT_IMAGES_FOLDER=kinestilistas/salon-results
+CLOUDINARY_PROMOTION_ATTACHMENTS_FOLDER=kinestilistas/promotion-attachments
+CLOUDINARY_CATALOG_DOCUMENTS_FOLDER=kinestilistas/catalog-documents
+SMTP_HOST=...
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=...
+SMTP_PASSWORD=...
+SMTP_FROM=...
+MAIL_FROM=...
+VAPID_PUBLIC_KEY=...
+VAPID_PRIVATE_KEY=...
+VAPID_SUBJECT=mailto:<correo-de-contacto>
+ADMIN_RATE_LIMIT_SETTINGS_ENABLED=false
+\end{lstlisting}
+
+Si se quiere forzar una URL distinta para el cálculo servidor de duraciones de ruta, puede añadirse además:
+
+\begin{lstlisting}[language=bash]
+OSRM_BASE_URL=https://router.project-osrm.org
+NEXT_PUBLIC_OSRM_BASE_URL=https://router.project-osrm.org
+\end{lstlisting}
+
+La puesta en marcha local de referencia queda:
+
+\begin{lstlisting}[language=bash]
+docker compose up -d
+cd app-tfg
+npm install
+npm run migration:run
+npm run build
+npm run start
+\end{lstlisting}
+
+\subsection{Pruebas de implantación}
+
+Tras el despliegue conviene validar, al menos, los siguientes puntos:
+
+\begin{itemize}
+    \item \textbf{Acceso inicial}: página de \textit{login};
+    \item \textbf{Sesión y navegación}: construcción correcta de sesión y navegación por rol;
+    \item \textbf{Persistencia}: conexión efectiva con la base de datos;
+    \item \textbf{Datos de negocio}: lectura de clientes, visitas, catálogo y pedidos;
+    \item \textbf{Capa \textit{PWA}}: carga del \texttt{manifest} y del \textit{service worker};
+    \item \textbf{Contenido externo}: subida de imágenes y documentos a \texttt{Cloudinary}, si la integración está habilitada;
+    \item \textbf{Servicios geográficos}: geocodificación y ruta, si el entorno dispone de conectividad hacia \texttt{Nominatim} y \texttt{OSRM};
+    \item \textbf{Comunicaciones}: envío de avisos internos y degradación correcta cuando \textit{SMTP}, \textit{VAPID} o una suscripción \textit{push} no están configurados;
+    \item \textbf{Administración}: exportación \textit{CSV} de auditoría y lectura de configuración administrativa visible.
+\end{itemize}
+
+Además de la comprobación manual, el repositorio ya incluye una batería técnica reproducible basada en:
+
+\begin{lstlisting}[language=bash]
+npm run typecheck
+npm run lint
+npm run build
+npm run migration:run
+npm run test:static
+npm run test:modules
+npm run test:all
+npm run quality:ui
+\end{lstlisting}
+
+\section{Instrucciones para la operación del sistema y mantenimiento del nivel de servicio}
+
+En el alcance actual del proyecto, el mantenimiento preventivo se concentra en los siguientes frentes:
+
+\begin{itemize}
+    \item \textbf{Base de datos}: monitorizar la disponibilidad de \texttt{PostgreSQL} y la ejecución correcta de migraciones;
+    \item \textbf{Seguridad}: revisar los errores de autenticación, sesión y \textit{rate limiting} en los \textit{logs} de aplicación;
+    \item \textbf{Almacenamiento externo}: vigilar las credenciales, carpetas configuradas y cuotas de \texttt{Cloudinary};
+    \item \textbf{Servicios auxiliares}: comprobar el comportamiento de \texttt{Nominatim}, \texttt{OSRM} y \texttt{QuickChart} cuando haya incidencia de red o cambios de proveedor;
+    \item \textbf{Comunicaciones}: comprobar la configuración \textit{SMTP}, las claves \textit{VAPID} y la validez de suscripciones \textit{Web Push};
+    \item \textbf{Mantenimiento documental}: depurar periódicamente imágenes, documentos o adjuntos obsoletos o reemplazados en \texttt{Cloudinary};
+    \item \textbf{Copias de demostración}: conservar datos mediante los \textit{scripts} \texttt{db:backup-data}, \texttt{db:restore-data} y \texttt{db:prepare-demo}.
+\end{itemize}
+
+También conviene tener en cuenta varias degradaciones controladas ya presentes en el código:
+
+\begin{itemize}
+    \item \textbf{Imágenes remotas}: si una imagen falla, la interfaz recurre a \textit{fallbacks} visuales;
+    \item \textbf{Estimaciones de reparto}: si no puede calcularse una \textit{ETA} coherente, el cliente no recibe una hora inventada;
+    \item \textbf{Validación de entrega}: si el dispositivo no puede leer el \textit{QR} desde la captura, el flujo permite seguir introduciendo el valor manualmente;
+    \item \textbf{Servicios geográficos}: si un servicio externo falla, la aplicación mantiene el resto de la operativa siempre que la acción no dependa estrictamente de esa integración;
+    \item \textbf{Canales externos}: si no existe configuración \textit{SMTP}, \textit{VAPID} o suscripción \textit{push}, el aviso interno sigue quedando registrado para el usuario.
+\end{itemize}
+
+Esta combinación de dependencias externas acotadas, persistencia relacional centralizada y validación técnica repetible cubre las necesidades del despliegue definido para el alcance implementado hasta la fecha.

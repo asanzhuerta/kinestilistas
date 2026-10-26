@@ -1,0 +1,87 @@
+Durante el desarrollo del presente proyecto se han identificado diversas \textbf{oportunidades de mejora} y \textbf{líneas de evolución del sistema} que no han sido abordadas en la versión actual, pero que resultan coherentes con la arquitectura y con el alcance funcional definido en el análisis. Estas líneas de trabajo futuro no deben entenderse como una corrección del alcance actual, sino como posibles ampliaciones coherentes con el sistema desarrollado y documentado. El módulo \texttt{M8}, por su carácter más exploratorio, se mantiene como una \textbf{línea de evolución posterior}.
+
+\subsection*{M1. Gestión de acceso, alta y autorización de usuarios}
+\begin{itemize}
+    \item \textbf{Recuperación de contraseña}: incorporación de verificación de cuenta y notificaciones asociadas al ciclo de alta.
+    \item \textbf{Gestión avanzada de sesiones}: visualización de sesiones activas y revocación explícita por parte del usuario o del administrador.
+    \item \textbf{Auditoría operativa}: explotación analítica de los registros de acceso y de las acciones administrativas.
+\end{itemize}
+
+\subsection*{M2. Gestión comercial y clientes}
+\begin{itemize}
+    \item \textbf{Vistas históricas}: incorporación de métricas agregadas sobre visitas, actividad comercial y cumplimiento de rutas.
+    \item \textbf{Replanificación diaria}: mejora ante incidencias, cambios de franja o cancelaciones de última hora.
+    \item \textbf{Preparación de jornadas}: mayor automatización mediante reutilización de patrones de visitas y configuraciones recurrentes.
+\end{itemize}
+
+\subsection*{M3. Catálogo, productos y coloración}
+\begin{itemize}
+    \item \textbf{Importación masiva}: refuerzo del módulo con carga de productos y mantenimiento asistido del catálogo.
+    \item \textbf{Flujos editoriales}: incorporación de estados de borrador/publicación para contenidos comerciales y técnicos.
+    \item \textbf{Búsqueda semántica}: mejora del filtrado avanzado y de la reutilización de recursos de apoyo entre líneas relacionadas.
+    \item \textbf{Experiencia de coloración}: ampliación con comparativas, agrupaciones comerciales adicionales y material visual complementario.
+\end{itemize}
+
+\subsection*{M4. Pedidos, entregas y cobros}
+\begin{itemize}
+    \item \textbf{Cobros}: extensión del subflujo parcial hacia vencimientos, conciliación bancaria e informes económicos avanzados.
+    \item \textbf{Facturación}: incorporación de facturación o documentos comerciales derivados del pedido.
+    \item \textbf{Logística}: refuerzo con incidencias de entrega, intentos fallidos, seguimiento externo de agencia y pendientes de servir.
+    \item \textbf{Validación móvil}: mejora de la captura operativa del \textit{QR} y de la experiencia asociada a la confirmación de entrega.
+    \item \textbf{Informes}: generación de informes sobre pagos, repartos preparados, agencia y tiempos de entrega.
+\end{itemize}
+
+\subsection*{M5. Gestión técnica del salón}
+\begin{itemize}
+    \item \textbf{Mensajería técnica}: integración del borrador técnico ya disponible con un proveedor real, trazabilidad de envíos y estados de entrega o apertura.
+    \item \textbf{Historial técnico}: exportación y trazabilidad documental asociada a cada ficha, aprovechando las plantillas y el seguimiento técnico ya disponibles.
+    \item \textbf{Galería visual}: gestión avanzada del resultado final, incorporando reordenación manual, anotaciones sobre cada imagen y posibles comparativas antes/después.
+    \item \textbf{Motor de sugerencias}: mejora para considerar fórmulas, recurrencia temporal y afinidad entre familias de producto, no solo uso histórico agregado.
+\end{itemize}
+
+\subsection*{M6. Promociones, notificaciones y formaciones}
+\begin{itemize}
+    \item \textbf{Notificaciones multicanal}: extensión hacia \textit{WhatsApp}, otros proveedores de mensajería y trazabilidad avanzada de entrega o apertura.
+    \item \textbf{Planificación en segundo plano}: incorporación de un planificador para disparar recordatorios por correo o \textit{push} aunque el usuario no abra la aplicación.
+    \item \textbf{Segmentación de clientes}: automatización a partir de actividad comercial, consumo o uso de la aplicación, manteniendo la asignación manual actual como mecanismo de control.
+    \item \textbf{Formaciones}: mejora del seguimiento con asistencia real, listas de espera, materiales descargables y métricas de participación.
+\end{itemize}
+
+\subsection*{M7. Administración transversal}
+\begin{itemize}
+    \item \textbf{Configuración global}: evolución hacia un panel administrativo más amplio de parámetros de aplicación.
+    \item \textbf{Servicios auxiliares}: mejora de los servicios transversales y de los parámetros compartidos por los distintos módulos.
+    \item \textbf{Observabilidad técnica}: mejora del seguimiento de errores y del control operativo del sistema.
+\end{itemize}
+
+\subsection*{M8. Funcionalidades adicionales}
+
+\begin{itemize}
+    \item \textbf{Asistente inteligente}: desarrollo de un diagnóstico capilar basado en \textbf{capilógrafo} y en una presentación técnica de diagnóstico capilar cedida por la marca.
+    \item \textbf{Inteligencia artificial}: integración para convertir datos del diagnóstico, observaciones técnicas e historial del cliente del salón en recomendaciones de tratamientos y productos revisables por el profesional.
+    \item \textbf{Simulación visual}: incorporación de estilos o coloración mediante la cámara del móvil, orientada a apoyar la decisión técnica antes de realizar el servicio.
+    \item \textbf{Asistente virtual}: creación de un \textit{chatbot} para resolver dudas sobre el uso de la aplicación, el catálogo, los tratamientos capilares y los procesos comerciales.
+    \item \textbf{Reservas \textit{online}}: ampliación junto con el reconocimiento de productos mediante cámara o imagen como funciones avanzadas del ecosistema.
+    \item \textbf{Automatización administrativa}: conexión futura con sistemas empresariales externos para transformar la operativa de pedidos y reparto en documentos comerciales, albaranes, facturas o estados administrativos sincronizados.
+\end{itemize}
+
+\subsection*{Estudio preliminar para M8: integración empresarial}
+
+Además de las funcionalidades orientadas al diagnóstico, la asistencia inteligente y la experiencia del salón, \texttt{M8} contempla una posible evolución hacia la \textbf{integración empresarial} con herramientas administrativas externas. Como primer avance de esta línea futura, se ha realizado una revisión inicial de viabilidad centrada en la automatización de albaranes y facturación con \textbf{TeamSystem Factusol}.
+
+La idea de partida consiste en conectar el flujo de pedidos y reparto de la aplicación con Factusol mediante una capa de automatización externa. Esta integración permitiría convertir pedidos confirmados o entregados en documentos comerciales, sincronizar clientes y artículos, generar albaranes, marcar documentos como facturados y devolver a la aplicación estados administrativos de facturación o cobro.
+
+Una alternativa técnica razonable sería utilizar \texttt{n8n} como \textbf{orquestador de procesos}, ya que permitiría desacoplar la aplicación principal de la lógica específica de integración y reducir el impacto de mantenimiento sobre el núcleo del sistema. Sus nodos de \textit{webhook} permiten iniciar flujos desde llamadas \textit{HTTP} entrantes, mientras que el nodo \textit{HTTP Request} permite consumir servicios \textit{REST} de terceros \citep{n8n-webhook,n8n-http-request}. En este escenario, la aplicación podría publicar un evento cuando un pedido pasase a estado entregado; \texttt{n8n} validaría el pedido, transformaría las líneas al formato esperado por Factusol y llamaría a la \textit{API} correspondiente.
+
+La viabilidad concreta depende de la modalidad contratada por el cliente. TeamSystem indica que Factusol puede trabajar en local o con datos en nube, y que su ciclo comercial incluye presupuestos, pedidos, albaranes, facturas, cobros, generación de facturas desde albaranes y exportación de documentos \citep{sdelsol-factusol}. Además, \textbf{API DELSOL} permite acceder de forma automatizada a datos de sus soluciones en nube, incluyendo TeamSystem Factusol, y su documentación expone operaciones de autenticación, lectura, inserción y actualización de registros \citep{sdelsol-api,sdelsol-api-doc}. Por tanto, si el cliente dispone de Factusol en nube con acceso a \textit{API}, la integración debería plantearse como un flujo \textit{API-to-API}.
+
+Si el cliente trabaja exclusivamente con Factusol local, la integración sería menos directa. En ese caso habría que valorar alternativas como exportación/importación controlada de ficheros, sincronización periódica, uso de herramientas oficiales como TeamSystem Preventa para el trabajo comercial en ruta, o automatización asistida sobre escritorio. Preventa enlaza con Factusol o Delsol para transmitir ventas y recibir datos, aunque la propia documentación indica que la conexión no es en tiempo real: la información se transfiere antes de su uso y se devuelve al finalizar la jornada \citep{sdelsol-preventa}. Esta opción podría encajar si el objetivo prioritario fuese automatizar la operativa comercial móvil, pero no sustituye a una integración directa desde la aplicación desarrollada.
+
+Como propuesta de implantación gradual, se recomienda abordar primero una \textbf{prueba de concepto limitada}: sincronizar catálogo y clientes, generar un albarán desde un pedido entregado, registrar en la aplicación el identificador devuelto por Factusol y dejar constancia de errores o reintentos. Solo después debería ampliarse hacia generación de facturas, conciliación de cobros, facturación electrónica o automatización fiscal, ya que estas áreas tienen mayor impacto administrativo y normativo.
+
+\subsection*{Evolución técnica transversal}
+\begin{itemize}
+    \item \textbf{Pruebas automatizadas}: incorporación progresiva de pruebas de integración y de interfaz para reducir regresiones manuales.
+    \item \textbf{Organización interna}: reorganización adicional del código por \textit{feature}, especialmente en las áreas comercial, catálogo y pedidos.
+    \item \textbf{Capa \textit{PWA}}: profundización de la experiencia \textit{offline} más allá del \textit{app shell} actual.
+\end{itemize}

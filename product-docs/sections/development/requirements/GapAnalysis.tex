@@ -1,0 +1,56 @@
+\section{Análisis GAP}
+\label{sec:GapAnalysis}
+
+El análisis se ha estructurado siguiendo el enfoque propuesto por el \textit{International Institute of Business Analysis}, basado en comparar el estado actual con el estado objetivo, identificar las brechas relevantes y documentar recomendaciones o respuestas de actuación \citep{iiba-gap-analysis}. En este caso, dicho enfoque se traslada a una matriz práctica formada por cinco elementos: dimensión funcional, situación actual, estado objetivo, brecha identificada y respuesta del proyecto.
+
+El análisis se centra en las \textbf{capacidades que debe alcanzar el sistema}: gestión de usuarios, clientes profesionales, catálogo técnico, visitas comerciales, rutas, pedidos, repartos, cobros, comunicaciones, trazabilidad y acceso diferenciado por roles. A partir de esa comparación, se identifica para cada dimensión la respuesta funcional prevista.
+
+La Tabla~\ref{tab:gap-analysis} organiza el análisis por dimensiones funcionales. Para cada una de ellas se recoge la situación actual, el estado objetivo perseguido, la brecha identificada y la respuesta planteada por el proyecto.
+
+{\scriptsize
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.04}
+\tablecaption{Matriz GAP entre situación actual, estado objetivo y respuesta del sistema\label{tab:gap-analysis}}
+\tablefirsthead{%
+\hline
+\rowcolor{black!8}
+\textbf{Dimensión} & \textbf{Situación actual} & \textbf{Estado objetivo} & \textbf{Brecha identificada} & \textbf{Respuesta del proyecto} \\
+\hline}
+\tablehead{%
+\hline
+\rowcolor{black!8}
+\textbf{Dimensión} & \textbf{Situación actual} & \textbf{Estado objetivo} & \textbf{Brecha identificada} & \textbf{Respuesta del proyecto} \\
+\hline}
+
+\begin{supertabular}{|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.19\linewidth}|>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|}
+
+\textbf{Usuarios, roles y seguridad} & El acceso a la información depende de controles manuales, conocimiento interno y herramientas no integradas. No existe un circuito único para altas, activaciones, bloqueos o permisos. & Disponer de un sistema con \textbf{autenticación}, revisión de altas, estados de cuenta, roles diferenciados y trazabilidad básica de accesos. & Falta un mecanismo centralizado que controle quién accede, qué puede hacer y cómo se auditan las acciones relevantes. & M1 agrupa el acceso, el alta y la seguridad de cuentas; se apoya en requisitos funcionales, no funcionales y reglas de negocio de control de acceso. \\
+\hline
+
+\textbf{Clientes profesionales y salones} & La información de peluquerías, responsables, datos técnicos, condiciones comerciales y relación con comerciales se encuentra dispersa entre conversaciones, documentos y conocimiento operativo. & Mantener una ficha única del cliente profesional, con datos comerciales, técnicos, de contacto, asignaciones y estado administrativo. & No hay una visión consolidada del cliente que conecte la actividad comercial, la información técnica del salón y la gestión administrativa. & M2 centraliza la gestión de clientes profesionales y salones, enlazando requisitos funcionales y de información sobre clientes, contactos y datos técnicos. \\
+\hline
+
+\textbf{Catálogo técnico y productos} & El catálogo y la información técnica se consultan mediante canales externos, catálogos de marca o documentación no conectada con la operativa diaria del distribuidor. & Gestionar un catálogo propio con productos, categorías, imágenes, referencias técnicas y cartas de color vinculadas al uso comercial. & Las soluciones existentes aportan consulta de producto, pero no conectan el catálogo con pedidos, promociones, roles y gestión local del distribuidor. & M3 agrupa catálogo, productos, familias, cartas de color y recursos gráficos necesarios para la venta y la consulta técnica. \\
+\hline
+
+\textbf{Visitas comerciales y rutas} & La planificación de visitas y desplazamientos se realiza de forma operativa, apoyada en criterio del comercial, acuerdos puntuales y herramientas de mapas externas. & Registrar visitas, organizar rutas, consultar ubicaciones, asignar comerciales y facilitar una planificación diaria coherente con clientes y pedidos. & La capa geográfica y la actividad comercial no están conectadas con la información de clientes, pedidos y seguimiento del trabajo realizado. & M2 concentra la gestión comercial, las visitas, la planificación de rutas, la geolocalización y el apoyo a la actividad presencial del comercial. \\
+\hline
+
+\textbf{Pedidos, repartos y cobros} & Los pedidos, entregas y cobros forman parte de un flujo operativo que puede quedar repartido entre mensajes, documentos, anotaciones y sistemas administrativos externos. & Integrar el ciclo desde la solicitud del pedido hasta la preparación, reparto, confirmación de entrega y seguimiento económico. & No existe continuidad digital entre venta, logística y control económico, lo que dificulta saber el estado real de cada operación. & M4 cubre pedidos, preparación, reparto, validación mediante \textit{QR}, estados y control operativo de cobros. \\
+\hline
+
+\textbf{Comunicaciones y promociones} & Las comunicaciones comerciales, avisos y promociones pueden depender de canales externos o intercambios individuales, sin trazabilidad uniforme dentro del sistema. & Disponer de avisos, notificaciones, promociones y mensajes operativos asociados a usuarios, clientes, pedidos o campañas concretas. & La comunicación no queda unida al dato de negocio ni al historial de interacción con el cliente profesional. & M6 agrupa promociones, notificaciones, comunicaciones y formaciones, apoyándose en M7 para la configuración transversal cuando sea necesario. \\
+\hline
+
+\textbf{Uso móvil y experiencia unificada} & Los distintos procesos pueden apoyarse en herramientas independientes que no ofrecen una experiencia común para administrador, comercial y cliente profesional. & Ofrecer una aplicación web responsive, con base \textit{PWA}, accesible desde escritorio y móvil para los distintos perfiles de usuario. & La movilidad existe en herramientas concretas, pero no como experiencia integrada alrededor del dominio completo del distribuidor. & Los requisitos no funcionales y la arquitectura web del sistema establecen la base de uso multiplataforma y acceso desde dispositivos móviles. \\
+\hline
+
+\textbf{Integraciones y evolución futura} & Sistemas externos como Factusol, automatizaciones específicas, asistentes inteligentes o simulación capilar no forman parte de un flujo integrado inicial. & Preparar el sistema para evolucionar hacia integraciones empresariales, automatización de procesos y funcionalidades inteligentes vinculadas al dominio capilar. & Algunas necesidades aportan valor, pero exceden el alcance principal del primer sistema y deben tratarse como evolución planificada. & M8 documenta el trabajo futuro: integración con Factusol, automatización, asistente virtual, diagnóstico con capilógrafo y simulación mediante cámara móvil. \\
+\hline
+\end{supertabular}
+}
+
+El resultado del análisis muestra que la brecha principal no se encuentra en una funcionalidad aislada, sino en la falta de continuidad entre tres dimensiones: la \textbf{gestión comercial interna del distribuidor}, la \textbf{experiencia digital del cliente profesional} y el \textbf{seguimiento logístico y económico} de pedidos y repartos. Las herramientas revisadas en el estado del arte pueden cubrir partes concretas de esa cadena, pero no resuelven de forma conjunta el flujo operativo completo.
+
+Por tanto, el sistema propuesto se justifica como una \textbf{solución específica} y no como una simple sustitución de una hoja de cálculo, un catálogo digital, un \textit{CRM}, un \textit{ERP} o una herramienta de rutas. El análisis orienta la solución hacia la centralización del dominio del distribuidor sobre una misma base de datos, con \textbf{roles diferenciados}, \textbf{trazabilidad operativa}, soporte \textit{PWA} \citep{webdev-pwa} y una estructura modular preparada para integrar en el futuro herramientas externas como Factusol, flujos con \textit{n8n} o servicios especializados de automatización \citep{sdelsol-factusol,n8n-webhook,n8n-http-request}.

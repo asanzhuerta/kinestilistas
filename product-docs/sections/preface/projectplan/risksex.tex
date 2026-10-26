@@ -1,0 +1,40 @@
+La gestión de riesgos permite identificar posibles eventos que podrían afectar al desarrollo del proyecto, valorar su probabilidad e impacto y definir medidas preventivas o de contingencia. En este proyecto, los riesgos identificados se analizan teniendo en cuenta tanto el contexto académico como la complejidad técnica y funcional del sistema.
+
+La Tabla~\ref{tab:project-risks} resume los principales riesgos identificados.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Riesgos del proyecto}
+    \label{tab:project-risks}
+    \begin{tabularx}{\textwidth}{|L{0.9cm}|L{3.4cm}|L{2.5cm}|L{1.6cm}|Y|}
+        \hline
+        \rowcolor{black!8}
+        \textbf{ID} & \textbf{Riesgo} & \textbf{Probabilidad} & \textbf{Impacto} & \textbf{Medidas de mitigación} \\
+        \hline
+        R1 & Ampliación excesiva del alcance funcional & Media & Alto & Priorizar un núcleo funcional viable y dejar módulos avanzados como trabajo futuro. \\
+        \hline
+        R2 & Cambios en los requisitos del cliente & Media & Medio & Mantener una definición modular del sistema y documentar claramente el alcance de la versión prevista. \\
+        \hline
+        R3 & Retrasos por carga académica o falta de tiempo & Media & Alto & Dividir el trabajo en hitos pequeños y priorizar las tareas críticas para la entrega. \\
+        \hline
+        R4 & Dificultad en integraciones externas & Media & Medio & Diseñar el sistema de forma extensible y documentar las integraciones no implementadas como líneas futuras. \\
+        \hline
+        R5 & Problemas de despliegue o configuración del entorno & Baja & Medio & Utilizar Docker Compose y documentar los pasos de instalación y arranque. \\
+        \hline
+        R6 & Errores en autenticación o control de acceso & Baja & Alto & Validar los flujos de login, roles y permisos mediante pruebas manuales y revisión del código. \\
+        \hline
+        R7 & Pérdida o corrupción de datos durante el desarrollo & Baja & Alto & Utilizar control de versiones, scripts de base de datos y copias del proyecto. \\
+        \hline
+        R8 & Documentación incompleta o desactualizada & Media & Medio & Actualizar la memoria de forma paralela al desarrollo y revisar la coherencia entre requisitos, diseño y construcción. \\
+        \hline
+        R9 & Incompatibilidades en dispositivos móviles & Media & Medio & Realizar pruebas en distintos tamaños de pantalla y validar el comportamiento PWA en dispositivos reales. \\
+        \hline
+        R10 & Dependencia de herramientas externas & Baja & Medio & Mantener alternativas técnicas y evitar que el núcleo funcional dependa de servicios externos no imprescindibles. \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+Una vez identificados los riesgos, se aplicarán dos estrategias principales. En primer lugar, se limitará el alcance a un núcleo funcional viable, centrado en la base técnica del sistema. En segundo lugar, se documentarán las funcionalidades avanzadas e integraciones externas como parte de la evolución futura del proyecto.
+
+Esta gestión permitirá mantener la viabilidad del Trabajo Fin de Grado sin perder la visión global del sistema propuesto.

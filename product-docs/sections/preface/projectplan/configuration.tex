@@ -1,0 +1,43 @@
+Para el control de versiones del código fuente y la gestión de la configuración del proyecto, se utilizará \textbf{Git} como herramienta principal, apoyándose en \textbf{GitHub} como repositorio remoto central. El repositorio empleado durante el desarrollo del \textit{Trabajo Fin de Grado} se encuentra disponible en \url{https://github.com/asanzhuerta/kinestilistas/}. Esta decisión permitirá mantener un histórico de cambios sobre la aplicación, la documentación, los scripts de apoyo, las migraciones de base de datos y los ficheros de configuración necesarios para reproducir el trabajo.
+
+\subsection{Control de versiones}
+
+Git permite registrar de forma estructurada los cambios realizados durante el desarrollo. Cada modificación quedará asociada a un \textit{commit}, lo que facilitará identificar cuándo se introdujo una funcionalidad, una corrección, un ajuste de configuración o una actualización documental. El uso de mensajes descriptivos en los \textit{commits} ayudará a reconocer el objetivo de cada cambio y a valorar su impacto sobre el resto del sistema.
+
+En este proyecto, al tratarse de un desarrollo individual, no se aplicará un flujo complejo de ramas. La rama principal \texttt{master} actuará como referencia integrada del trabajo, tanto para el código fuente como para la memoria académica. Aun así, el uso de Git mantendrá la posibilidad de comparar estados, revisar diferencias entre versiones y recuperar un punto anterior si una modificación introduce un error.
+
+\subsection{Gestión de cambios}
+
+Cada cambio relevante se tratará como una unidad de trabajo concreta. Antes de considerarlo consolidado, se revisará que la modificación sea coherente con el alcance del proyecto, que no contradiga requisitos o decisiones ya documentadas y que no introduzca dependencias innecesarias respecto a otras partes del sistema.
+
+Esta gestión resulta especialmente útil en un proyecto iterativo, donde algunas decisiones técnicas podrán ajustarse conforme avance la implementación. El histórico de Git permitirá conservar la trazabilidad de estas decisiones y diferenciar entre cambios funcionales, correcciones, ajustes de despliegue, modificaciones de documentación y revisiones de configuración.
+
+\subsection{Alcance de la configuración versionada}
+
+El repositorio no controlará únicamente el código fuente de la aplicación. También se versionarán la documentación en \LaTeX{}, las migraciones de \textit{TypeORM} \citep{typeormmigrations2026}, los scripts auxiliares y los ficheros de configuración necesarios para construir y ejecutar el sistema. De este modo, se mantendrá un conjunto de artefactos suficiente para revisar el proyecto, reproducirlo y continuar su desarrollo sin depender de información externa no documentada.
+
+Quedarán fuera del control de versiones las dependencias instaladas, salidas de compilación, cachés, copias temporales, resultados locales de ejecución y ficheros con credenciales o valores sensibles de entorno. Estos elementos se excluirán porque podrán reconstruirse o porque pertenecerán a la configuración privada de cada entorno.
+
+\subsection{Migraciones de base de datos}
+
+La evolución del esquema de datos se mantendrá mediante migraciones de \textit{TypeORM} \citep{typeormmigrations2026}. Estas migraciones formarán parte de la gestión de configuración porque documentarán los cambios aplicados sobre la estructura de la base de datos y permitirán reconstruirla en un entorno nuevo sin depender de operaciones manuales.
+
+Su ejecución se realizará mediante el comando:
+
+\begin{lstlisting}[language=bash]
+npm run migration:run
+\end{lstlisting}
+
+Este mecanismo separará la evolución de la estructura de datos de los datos concretos de cada entorno, manteniendo trazabilidad sobre el modelo persistente y reduciendo el riesgo de inconsistencias entre desarrollo, demostración y futuras instalaciones.
+
+\subsection{Configuración sensible}
+
+Las credenciales, cadenas de conexión, claves privadas y valores específicos de cada entorno no se almacenarán directamente en el repositorio. Estos datos se gestionarán mediante variables de entorno y ficheros locales excluidos del control de versiones, de forma que la misma base de código pueda ejecutarse en desarrollo, demostración o futuros entornos sin exponer información sensible.
+
+Esta separación entre código y configuración evitará publicar secretos junto al proyecto y permitirá adaptar el sistema a distintos entornos modificando únicamente sus valores de configuración externos. Además, reducirá el riesgo de que claves de servicios externos, conexiones a base de datos o parámetros privados queden incorporados accidentalmente al histórico del repositorio.
+
+\subsection{Versiones estables}
+
+La rama \texttt{master} actuará como referencia integrada del trabajo. Para la entrega y defensa del proyecto se mantendrá, además, una versión estable etiquetada como \texttt{v1.0} en GitHub, de forma que el código, la documentación y los recursos utilizados puedan identificarse de manera inequívoca frente a cambios posteriores.
+
+Si el sistema evolucionara tras el \textit{Trabajo Fin de Grado}, las futuras versiones podrían continuar esta numeración mediante nuevas etiquetas o \textit{releases}. De este modo, cada estado estable del producto quedaría asociado a un punto concreto del histórico, facilitando la revisión, la reproducción del entorno y la comparación entre versiones.

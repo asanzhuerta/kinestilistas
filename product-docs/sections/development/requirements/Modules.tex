@@ -1,0 +1,78 @@
+\section{División modular de requisitos}
+\label{sec:ModularRequirements}
+
+Con el objetivo de facilitar la comprensión del sistema y organizar las funcionalidades de forma coherente, los requisitos se agrupan en \textbf{módulos funcionales} que representan las principales áreas de responsabilidad de la aplicación. Cada módulo define una parte del dominio del problema, reúne funciones relacionadas y sirve como referencia para los \textbf{requisitos funcionales} y los \textbf{requisitos de información} que se detallan en los apartados posteriores.
+
+La descomposición del sistema en módulos funcionales responde a los principios de diseño arquitectónico en ingeniería del \textit{software}, que promueven la organización del sistema en componentes con \textbf{responsabilidades bien definidas}, \textbf{alta cohesión} y \textbf{bajo acoplamiento}, con el objetivo de facilitar su comprensión, mantenimiento y evolución \citep[Ch.~6--7]{sommerville}.
+
+\subsection{M1. Gestión de acceso, alta y autorización de usuarios}
+
+Este módulo se encarga de la \textbf{identificación}, \textbf{alta}, \textbf{autenticación} y \textbf{autorización} de los usuarios del sistema. Su responsabilidad principal consiste en garantizar que cada persona accede a la aplicación con una cuenta válida y que las operaciones disponibles se ajustan al rol que tiene asignado.
+
+Las funciones agrupadas en este módulo incluyen la creación de usuarios, la gestión de solicitudes de registro, el inicio y cierre de sesión, la recuperación o modificación de credenciales, la administración del perfil personal, el control del estado de las cuentas y la asignación de roles. También agrupa las comprobaciones de permisos necesarias para distinguir entre administradores, comerciales y clientes profesionales.
+
+Además, el módulo incorpora funciones de \textbf{seguridad} y \textbf{trazabilidad} asociadas al acceso: registro de eventos de autenticación, auditoría de acciones administrativas sobre usuarios, bloqueo o desactivación de cuentas cuando corresponda y protección básica frente a abuso mediante políticas de \textit{rate limiting}. De esta forma, el resto de módulos parte de una base común de identidad, permisos y control de acceso.
+
+\subsection{M2. Gestión comercial y clientes}
+
+Este módulo se encarga de gestionar la relación entre el distribuidor, sus comerciales y los \textbf{clientes profesionales}. Su finalidad es centralizar las \textbf{fichas de las peluquerías cliente}, mantener actualizada su información de contacto, dirección, observaciones, horarios de atención, coordenadas geográficas y \textbf{asignación comercial}, de forma que el sistema conserve una visión ordenada de quién atiende a cada cliente y bajo qué condiciones operativas.
+
+Sobre esa base, el módulo agrupa las funciones de \textbf{planificación comercial}: configuración de la jornada de cada comercial, definición de puntos de inicio y finalización, creación y seguimiento de \textbf{visitas}, ordenación de \textbf{rutas}, estimación de tiempos de desplazamiento y reorganización de la agenda cuando una visita no encaja en la ventana horaria prevista. Estas funciones conectan la gestión de clientes con los procesos logísticos, las notificaciones y los repartos asociados al módulo \texttt{M4}.
+
+\subsection{M3. Catálogo, productos y coloración}
+
+Este módulo se encarga de organizar y poner a disposición de los usuarios el \textbf{catálogo técnico y comercial} de productos profesionales. Su responsabilidad consiste en estructurar la oferta del distribuidor para que pueda consultarse de forma clara por administradores, comerciales y clientes profesionales.
+
+Las funciones agrupadas en este módulo incluyen la gestión de \textbf{productos}, \textbf{categorías}, \textbf{líneas comerciales}, subcategorías, imágenes, descripciones, precios, estados de disponibilidad y recursos documentales asociados. También incluye la \textbf{consulta del catálogo} desde los perfiles comerciales y de cliente, de modo que la información de producto pueda utilizarse tanto en la venta como en la preparación de pedidos.
+
+Dentro del mismo módulo se agrupa la gestión de \textbf{coloración}: cartas de color, referencias cromáticas, tonos, numeraciones, recursos visuales y relación opcional entre tonos y productos pedibles. Esta parte permite que la información técnica de color no quede separada del catálogo comercial, facilitando la consulta profesional y la conexión posterior con pedidos o fichas técnicas del salón.
+
+\subsection{M4. Pedidos, entregas y cobros}
+
+Este módulo se encarga de agrupar el \textbf{ciclo comercial de venta} desde la preparación de un pedido hasta su entrega y seguimiento económico básico. Su finalidad es que cliente profesional, comercial y administrador trabajen sobre un mismo flujo trazable, evitando que pedidos, repartos y cobros queden dispersos en canales externos.
+
+\textbf{Las funciones de pedido} incluyen la creación de borradores, la selección de productos y referencias de color, la edición de líneas, la confirmación del pedido, la cancelación cuando proceda, la consulta del estado y la conservación de información relevante como importes, descuentos, observaciones, método de entrega y usuario responsable. El pedido actúa como unidad comercial principal y permite conocer qué se solicita, quién lo solicita y en qué situación se encuentra.
+
+\textbf{Las funciones de entrega} agrupan la preparación de uno o varios repartos asociados a un pedido, la selección de cantidades servidas en cada entrega, el registro de bultos, la generación de etiquetas logísticas y la diferenciación entre reparto realizado por comercial y entrega delegada en agencia. Cuando el reparto depende de un comercial, el módulo se relaciona con la planificación de visitas de \texttt{M2}; cuando se delega en agencia, conserva la información necesaria para identificar el envío y aplicar el cargo correspondiente.
+
+\textbf{Las funciones de cobro} permiten registrar pagos parciales o totales, indicar método de pago, fecha, notas y usuario responsable, así como calcular el importe pendiente y mantener un historial económico mínimo asociado al pedido. El módulo no pretende sustituir a un \textit{ERP} completo ni asumir la facturación avanzada, sino cubrir la \textbf{trazabilidad operativa} imprescindible para saber qué se ha pedido, qué se ha entregado y qué queda pendiente de cobrar.
+
+\subsection{M5. Gestión técnica del salón y seguimiento de servicios}
+
+Este módulo se encarga de proporcionar al cliente profesional herramientas para gestionar la \textbf{información técnica} de los servicios realizados en su propio salón. Su objetivo es trasladar al sistema parte del conocimiento que normalmente queda repartido entre notas internas, conversaciones, fotografías o recordatorios informales.
+
+Las funciones agrupadas en este módulo incluyen la creación y mantenimiento de \textbf{fichas de clientes del salón}, el registro de \textbf{servicios realizados}, la definición de \textbf{fichas técnicas}, la selección de tonalidades, la anotación de fórmulas, observaciones, productos utilizados y resultados obtenidos. También contempla la organización del \textbf{historial de servicios} para que el profesional pueda consultar trabajos anteriores antes de repetir, ajustar o recomendar un tratamiento.
+
+El módulo incorpora además funciones de apoyo profesional como plantillas reutilizables, documentación visual del resultado, sugerencias basadas en información previa y generación de borradores técnicos editables. Estas funciones permiten que la aplicación no se limite a vender producto, sino que también acompañe el uso técnico de esos productos en el contexto real de la peluquería.
+
+\subsection{M6. Promociones, notificaciones y formaciones}
+
+Este módulo se encarga de centralizar la \textbf{comunicación operativa y comercial} entre el distribuidor y sus clientes profesionales. Su finalidad es facilitar la difusión de información relevante sin depender exclusivamente de llamadas, mensajes aislados o comunicaciones no trazables.
+
+\textbf{Las funciones de promociones} incluyen la creación, edición, publicación, segmentación y consulta de campañas comerciales, así como la asociación de descuentos o condiciones promocionales a productos o pedidos cuando corresponda. De este modo, el distribuidor puede comunicar acciones comerciales y el cliente profesional puede conocerlas desde la propia aplicación.
+
+\textbf{Las funciones de formación} cubren la publicación de actividades formativas, la consulta de sesiones disponibles, la inscripción de usuarios y el seguimiento básico de participación. Junto a ello, el módulo agrupa las \textbf{notificaciones internas}, los recordatorios personales y los avisos relacionados con visitas, promociones, formaciones o eventos relevantes del sistema.
+
+Cuando la comunicación requiere canales externos, el módulo contempla el uso de correo \textit{SMTP}, notificaciones \textit{Web Push} y soporte para el comportamiento propio de una \textit{PWA} \citep{nodemailersmtp2026,webpushapi2026,webdev-pwa}. Estas funciones no sustituyen la comunicación personal del distribuidor, pero proporcionan un canal organizado, persistente y alineado con el resto de procesos comerciales.
+
+\subsection{M7. Administración transversal}
+
+Este módulo se encarga de agrupar las capacidades de \textbf{gobierno} y \textbf{configuración} que afectan al sistema de forma transversal. Su responsabilidad no es representar un proceso comercial concreto, sino proporcionar al administrador herramientas para supervisar la operación, mantener parámetros comunes y controlar aspectos generales de funcionamiento.
+
+\textbf{Las funciones administrativas} incluyen la consulta de auditoría, el seguimiento de acciones relevantes, la revisión de accesos, la exportación de información operativa cuando resulte necesario y la gestión de configuraciones globales. También agrupa ajustes que afectan a varios módulos, como canales de aviso, importes configurables, umbrales comerciales, estados auxiliares o criterios que condicionan el comportamiento general del sistema.
+
+En el ámbito transversal, el módulo reúne la información necesaria para gestionar servicios auxiliares ya vinculados a la aplicación, conservar estados básicos de configuración y mantener parámetros comunes que puedan ser reutilizados por otros módulos.
+
+El módulo también contempla funciones técnicas de soporte que no pertenecen a un único proceso de negocio, como políticas de protección frente a abuso, parámetros de ejecución, registros de operación y trazabilidad de comunicaciones. Estas capacidades permiten que la aplicación sea administrable y evolutiva sin mezclar la gestión diaria del negocio con detalles internos de implementación.
+
+\subsection{M8. Funcionalidades adicionales}
+
+Este módulo agrupa funcionalidades identificadas como posibles líneas de evolución del sistema. Su responsabilidad es recoger capacidades que amplían el valor de la aplicación, pero que no forman parte del núcleo operativo principal descrito por los módulos anteriores.
+
+Las funciones previstas incluyen un \textbf{asistente inteligente de diagnóstico capilar} apoyado en el uso de un \textbf{capilógrafo} y en una presentación técnica de diagnóstico capilar cedida por la marca. La intención es trasladar ese proceso a la aplicación e integrarlo con inteligencia artificial para proponer tratamientos o productos a partir de mediciones, observaciones técnicas, historial del cliente del salón y validación profesional.
+
+El módulo también contempla la \textbf{simulación visual de estilos o coloración mediante la cámara del móvil}, el reconocimiento de productos mediante cámara o imagen, la reserva \textit{online} para clientes finales vinculados a una peluquería profesional y un \textbf{asistente virtual tipo \textit{chatbot}} capaz de resolver dudas sobre el uso de la aplicación, el catálogo, los tratamientos capilares y los procesos comerciales.
+
+Por último, \texttt{M8} incorpora como trabajo futuro la \textbf{automatización de servicios externos}, incluyendo posibles flujos con Factusol, \textit{n8n} u otros sistemas de tipo \textit{ERP} \citep{sdelsol-factusol,n8n-webhook,n8n-http-request}. Esta línea permitiría sincronizar clientes o artículos, generar albaranes o facturas a partir de pedidos y devolver a la aplicación estados administrativos, siempre que se definan las condiciones técnicas y operativas necesarias.
+
+Este módulo permite separar las funcionalidades exploratorias del alcance principal del sistema, manteniendo documentadas sus necesidades funcionales e informacionales para que puedan abordarse en iteraciones posteriores sin alterar la estructura de los módulos centrales.

@@ -1,0 +1,57 @@
+La presente sección describe la estructura general de la memoria y los elementos software entregados junto con el documento. El objetivo es facilitar la localización de los contenidos principales y ofrecer una visión global de los artefactos generados durante el desarrollo del Trabajo Fin de Grado.
+
+\subsection{Organización de la memoria}
+
+La memoria está organizada en partes y capítulos que siguen una secuencia lógica acorde con el proceso de ingeniería del software seguido durante el proyecto:
+
+\begin{itemize}
+    \item \textbf{Parte I. Prolegómeno:} introduce el proyecto, su contexto y la planificación seguida durante su desarrollo.
+          \begin{itemize}
+              \item \textbf{Capítulo 1. Introducción:} presenta la motivación del proyecto, los objetivos del sistema, el alcance previsto, el glosario de términos y la organización del documento.
+              \item \textbf{Capítulo 2. Antecedentes:} describe la situación actual del distribuidor, las problemáticas detectadas en sus procesos de trabajo y el análisis de soluciones o herramientas existentes relacionadas con el dominio del proyecto.
+              \item \textbf{Capítulo 3. Plan de gestión de proyecto:} recoge la metodología de desarrollo empleada, la planificación, la organización del proyecto, la estimación de costes, los riesgos, la gestión de la configuración y las actividades de aseguramiento de calidad.
+          \end{itemize}
+
+    \item \textbf{Parte II. Desarrollo:} recoge el proceso de análisis, diseño, construcción, pruebas y despliegue del sistema.
+          \begin{itemize}
+              \item \textbf{Capítulo 4. Requisitos del sistema:} define los objetivos de negocio y del sistema, la metodología de captura de requisitos, la división modular, los requisitos funcionales, no funcionales y de información, las reglas de negocio y el análisis GAP.
+              \item \textbf{Capítulo 5. Análisis del sistema:} presenta el modelo de casos de uso, el modelo conceptual de datos, el modelo de interfaz de usuario y el modelo de comportamiento.
+              \item \textbf{Capítulo 6. Diseño del sistema:} describe la arquitectura del sistema, la parametrización del software base, el diseño físico de datos y el diseño de la interfaz de usuario.
+              \item \textbf{Capítulo 7. Construcción del sistema:} detalla el entorno de construcción, las herramientas empleadas, la organización del código fuente, la implementación de los módulos desarrollados y los scripts de base de datos.
+              \item \textbf{Capítulo 8. Pruebas del sistema:} recoge la estrategia de pruebas, las pruebas unitarias, de integración, de sistema, funcionales, no funcionales y de aceptación realizadas sobre la aplicación.
+              \item \textbf{Capítulo 9. Despliegue del sistema:} expone la arquitectura física, los requisitos previos, los componentes necesarios, los procedimientos de instalación y las instrucciones básicas de operación y mantenimiento.
+          \end{itemize}
+
+    \item \textbf{Parte III. Epílogo:} presenta el cierre del proyecto.
+          \begin{itemize}
+              \item \textbf{Capítulo 10. Conclusiones:} resume los objetivos alcanzados, las lecciones aprendidas durante el desarrollo y las posibles líneas de trabajo futuro.
+              \item \textbf{Información sobre licencia y bibliografía:} incluye la información relativa a la licencia del trabajo y las referencias bibliográficas utilizadas en la memoria.
+          \end{itemize}
+
+    \item \textbf{Parte IV. Anexos:} agrupa documentación complementaria del proyecto.
+          \begin{itemize}
+              \item \textbf{Anexo A. Manual del desarrollador:} describe la preparación del entorno de trabajo, la configuración local, las comprobaciones necesarias y las consideraciones técnicas para continuar el desarrollo.
+              \item \textbf{Anexo B. Manual de usuario:} explica el acceso inicial y el uso básico del sistema por parte de los distintos perfiles contemplados.
+          \end{itemize}
+
+\end{itemize}
+
+\subsection{Organización del software entregado}
+Junto con la presente memoria en formato PDF, se entrega el software desarrollado y los recursos necesarios para su revisión, ejecución y mantenimiento. La entrega se ha organizado de forma que permita distinguir claramente entre el código de la aplicación, los recursos de base de datos, la documentación académica y los elementos auxiliares utilizados durante el desarrollo.
+
+\begin{itemize}
+    \item Directorio \texttt{app-tfg/}: contiene la aplicación web desarrollada con \texttt{Next.js} \citep{nextjsdocs2026}. Dentro de esta carpeta se encuentran las rutas de interfaz y API, los componentes reutilizables, los servicios de dominio, la configuración de autenticación, las migraciones de base de datos y los scripts de comprobación empleados durante el desarrollo.
+    \item Directorio \texttt{app-tfg/app/}: agrupa la estructura principal de la aplicación según el modelo \textit{App Router} \citep{nextjsdocs2026}. Incluye las áreas funcionales de administración, comerciales, clientes, autenticación, registro, perfil de usuario, componentes visuales compartidos y rutas HTTP expuestas bajo \texttt{/api}.
+    \item Directorio \texttt{app-tfg/lib/}: concentra lógica reutilizable que no pertenece directamente a una página concreta. En esta carpeta se ubican servicios de autenticación, acceso a datos, contratos de API, reglas de seguridad, integración con Cloudinary \citep{cloudinaryupload2026}, geocodificación, catálogo, clientes, comerciales, pedidos y utilidades comunes.
+    \item Directorio \texttt{app-tfg/migrations/}: contiene las migraciones versionadas de \texttt{TypeORM} \citep{typeormmigrations2026}. Estos ficheros describen la evolución incremental del esquema de \texttt{PostgreSQL} \citep{postgresdocs2026} y permiten reproducir los cambios estructurales aplicados durante el desarrollo.
+    \item Directorio \texttt{app-tfg/public/}: incluye los recursos estáticos servidos por la aplicación, como iconos, imágenes base y elementos asociados a la instalación como aplicación web progresiva.
+    \item Directorio \texttt{app-tfg/scripts/}: recoge scripts auxiliares utilizados para tareas de validación, comprobación funcional, carga de entorno y pruebas de cierre de módulos.
+    \item Directorio \texttt{db/}: agrupa recursos complementarios de base de datos, incluyendo scripts de inicialización y utilidades de soporte para el entorno local.
+    \item Directorio \texttt{docs/}: contiene la memoria del Trabajo Fin de Grado en \LaTeX{}, su bibliografía, configuración, secciones, anexos y figuras exportadas en los formatos utilizados por el documento.
+    \item Archivo \texttt{docker-compose.yml}: define los servicios necesarios para levantar el entorno local, especialmente la base de datos \texttt{PostgreSQL} utilizada por la aplicación \citep{postgresdocs2026}.
+    \item Archivo \texttt{README.md}: proporciona una descripción general del repositorio y sirve como punto de entrada para localizar la información principal del proyecto.
+\end{itemize}
+
+Además de los ficheros fuente, la entrega incluye los archivos de configuración necesarios para ejecutar, construir y comprobar la aplicación, como \texttt{package.json}, \texttt{tsconfig.json}, la configuración de \texttt{Next.js} \citep{nextjsdocs2026}, la configuración de \texttt{ESLint} \citep{eslintdocs2026} y los ficheros de entorno de ejemplo cuando procede. No forman parte de la entrega conceptual los directorios generados automáticamente por las herramientas, como \texttt{node\_modules/} o \texttt{.next/}, ya que pueden reconstruirse a partir de las dependencias y comandos definidos en el proyecto.
+
+Esta organización permite reproducir el entorno de desarrollo, revisar la implementación realizada, consultar la documentación asociada y facilitar la evolución futura del sistema mediante nuevas funcionalidades o integraciones.

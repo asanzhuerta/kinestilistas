@@ -1,0 +1,416 @@
+Este capítulo describe la \textbf{implementación real del sistema}, centrada en la aplicación web desarrollada en \texttt{Next.js}, la capa de persistencia basada en \texttt{TypeORM} y la evolución ya materializada de los módulos \texttt{M1} a \texttt{M7}. El módulo \texttt{M8} se mantiene como \textbf{trabajo futuro} y no se trata como funcionalidad operativa construida.
+
+\section{Entorno de Construcción}
+\label{sec:ConstructionEnvironment}
+\input{./sections/development/implementation/constructionenvironment.tex}
+
+\section{Código Fuente}
+
+La \textbf{implementación actual} del proyecto se concentra en la carpeta \texttt{app-tfg/}, mientras que la carpeta \texttt{docs/} almacena la memoria técnica en \LaTeX. Dentro de la aplicación principal se distinguen los siguientes bloques:
+
+\begin{itemize}
+    \item Carpeta \textbf{\texttt{app/}}: páginas, \textit{layouts}, \textit{Route Handlers} y componentes de interfaz.
+    \item Carpeta \textbf{\texttt{app/api/}}: \textit{endpoints} internos para autenticación, perfil, administración, clientes, catálogo, pedidos, cobros, comunicaciones, auditoría, soporte técnico y operativa comercial.
+    \item Carpeta \textbf{\texttt{app/components/}}: componentes reutilizables de interfaz, mapas, formularios, tablas y vistas por rol.
+    \item Carpeta \textbf{\texttt{app/hooks/api/}}: \textit{hooks} cliente para encapsular llamadas \textit{HTTP}, estado de carga y mensajes de error.
+    \item Carpeta \textbf{\texttt{lib/}}: contratos compartidos, lógica de negocio, integraciones externas, seguridad y acceso a datos.
+    \item Carpeta \textbf{\texttt{lib/commercial/}}: planificación diaria de rutas y lógica operativa del módulo comercial.
+    \item Carpeta \textbf{\texttt{lib/clients/}}: cálculo reutilizable de \textit{ETA} y lectura de reparto para la zona cliente.
+    \item Carpeta \textbf{\texttt{lib/orders/}}: utilidades transversales del dominio de pedidos, entre ellas la generación y normalización de \textit{QR} y etiquetas de reparto.
+    \item Carpeta \textbf{\texttt{lib/notifications/}}: soporte de notificaciones internas, correo \textit{SMTP} y entrega \textit{Web Push}.
+    \item Carpetas \textbf{\texttt{lib/integrations/}}, \textbf{\texttt{lib/support/}} y \textbf{\texttt{lib/admin/}}: inventarios técnicos, soporte operativo, exportaciones, diagnósticos e informes transversales asociados a \texttt{M7}.
+    \item Carpeta \textbf{\texttt{lib/cache/}}: utilidades de \textit{cache} selectiva para lecturas de catálogo y coloración.
+    \item Carpeta \textbf{\texttt{lib/security/}}: políticas de \textit{rate limiting} y lógica transversal de seguridad.
+    \item Carpeta \textbf{\texttt{lib/typeorm/services/communications/}}: reglas de negocio del centro de comunicaciones, promociones, formaciones, notificaciones y recordatorios.
+    \item Carpeta \textbf{\texttt{migrations/typeorm/}}: migraciones versionadas de base de datos.
+\end{itemize}
+
+\subsection{Criterios transversales de implementación}
+
+La construcción se ha guiado por varios criterios comunes a todos los módulos, con el objetivo de evitar que cada funcionalidad evolucione de forma aislada:
+
+\begin{itemize}
+    \item \textbf{Separación de responsabilidades}: mantener las páginas y componentes centrados en presentación, delegando reglas de negocio en servicios de dominio;
+    \item \textbf{Frontera de servidor}: utilizar \textit{Route Handlers} como frontera entre interfaz y servidor, con validaciones de entrada antes de llegar a persistencia;
+    \item \textbf{Navegación percibida}: aprovechar convenciones del \textit{App Router}, como los estados \path{loading.tsx}, para mejorar la navegación sin mezclar lógica de negocio con la capa visual;
+    \item \textbf{Contratos compartidos}: centralizar contratos y tipos para reducir discrepancias entre cliente y servidor;
+    \item \textbf{Trazabilidad de datos}: versionar cualquier cambio estructural de base de datos mediante migraciones trazables;
+    \item \textbf{Catálogos controlados}: reutilizar catálogos persistentes para roles, estados y tipos operativos, evitando literales dispersos en el código;
+    \item \textbf{Integraciones encapsuladas}: aislar integraciones externas en \textit{helpers} o servicios concretos para facilitar su sustitución o degradación controlada;
+    \item \textbf{Coherencia entre roles}: preservar que una misma entidad de negocio pueda ser consultada desde cliente, comercial o administrador sin duplicar reglas incompatibles.
+\end{itemize}
+
+Estos criterios permiten que el sistema siga siendo comprensible a medida que crecen los módulos y facilitan la localización de responsabilidades cuando se incorporan nuevas funcionalidades.
+
+\subsection{Reutilización y limpieza estructural}
+
+Durante la fase final de consolidación se ha realizado una revisión específica de duplicidades y organización interna. El objetivo ha sido reducir funciones equivalentes repartidas por componentes y servicios, sin alterar las reglas funcionales ya validadas.
+
+Las \textbf{utilidades transversales} se han agrupado en \path{lib/utils/}. Esta carpeta concentra formateo de fechas, serialización temporal, cálculo de zona horaria de Madrid, parseo y formateo monetario, generación de \texttt{CSV}, normalización de búsqueda y validación básica de textos o enteros. Los servicios de dominio siguen conservando sus errores específicos, pero delegan el comportamiento común en estas utilidades para evitar implementaciones divergentes.
+
+En la \textbf{capa cliente} se ha centralizado el patrón de llamadas \textit{HTTP} en \path{lib/api/client.ts}. Los componentes reutilizan \texttt{requestJson}, \texttt{jsonRequestOptions} y \texttt{getClientErrorMessage} para compartir lectura de respuestas, serialización \texttt{JSON} y extracción de mensajes de error. Del mismo modo, los mensajes de éxito o error de formularios se apoyan en \path{app/components/ui/FeedbackMessage.tsx} y las clases comunes de formularios se agrupan en \path{app/components/ui/form-styles.ts}.
+
+También se han dividido \textbf{pantallas extensas} en piezas más pequeñas. En comunicaciones, el \textit{workspace} administrativo separa formularios, listas, resumen, API cliente y \textit{hook} de orquestación. En pedidos, la carga remota del borrador y las mutaciones principales se han extraído de la vista principal. En el módulo de salón, el detalle se organiza por paneles de ficha, formulario de servicio, historial y plantillas. Esta estructura reduce el acoplamiento entre presentación, estado y reglas de negocio, y facilita que futuras ampliaciones se incorporen sobre puntos de extensión más acotados.
+
+Como ajuste transversal de usabilidad, los modales largos comparten ahora un patrón desplazable para móvil basado en un \textit{overlay} con scroll vertical y panel con altura máxima acotada. Esta decisión evita que formularios extensos de visitas o detalle queden bloqueados en pantallas pequeñas y deja el comportamiento documentado como parte de la consolidación final.
+
+\input{./sections/development/implementation/apiroutes.tex}
+
+\subsection{Implementación del módulo M1}
+
+El módulo \texttt{M1} se apoya principalmente en \texttt{auth.ts}, la capa de protección preservada como \texttt{proxy.hosting.ts} para \textit{hostings} compatibles, los \textit{layouts} protegidos, los \textit{endpoints} de \texttt{/api/auth/*}, los servicios de usuario de \texttt{lib/typeorm/services/users/} y las entidades de seguridad y trazabilidad.
+
+Las piezas más relevantes son las siguientes:
+
+\begin{itemize}
+    \item \textbf{Autenticación} mediante proveedor de credenciales de \texttt{Auth.js}, con sesión \texttt{JWT};
+    \item \textbf{Control de acceso por rol} en la capa previa de navegación, preservada como \texttt{proxy.hosting.ts} para despliegues compatibles y reproducida en la demo mediante \textit{layouts} protegidos y validaciones de servidor sobre las rutas \path{/admin}, \path{/commercials} y \path{/clients};
+    \item \textbf{Navegación lateral desplegable por rol} mediante \texttt{RoleSidebar}, disponible en escritorio y móvil, con logo de la aplicación, rol visible y sustitución de la navegación inferior en los \textit{layouts} protegidos;
+    \item \textbf{Registro de solicitudes de alta} y gestión administrativa de estados de cuenta;
+    \item \textbf{Registro de eventos de acceso} y trazabilidad de sesiones exitosas o fallidas;
+    \item \textbf{Gestión y edición del perfil propio}, incluyendo cambio de contraseña, subida de imagen a \texttt{Cloudinary} y reflejo de la foto real en la navegación lateral;
+    \item \textbf{Limitación de intentos de autenticación} y diferenciación explícita entre credenciales incorrectas y bloqueo temporal por \textit{rate limiting}.
+\end{itemize}
+
+La Figura~\ref{fig:implementation-m1-users} muestra la vista administrativa utilizada para la \textbf{gestión de usuarios}, solicitudes de alta y registro directo de nuevas cuentas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m1-users.png}
+    \caption{Captura de la implementación web del módulo M1: gestión de usuarios}
+    \label{fig:implementation-m1-users}
+\end{figure}
+
+\subsection{Implementación del módulo M2}
+
+El módulo \texttt{M2} se reparte entre las \textbf{rutas de administración de clientes}, la \textbf{zona comercial}, la \textbf{zona cliente} y la lógica de planificación diaria ubicada en \texttt{lib/commercial/}.
+
+Actualmente ya están implementados:
+
+\begin{itemize}
+    \item Gestión de clientes profesionales y de sus datos de ficha;
+    \item Asignación, desasignación y reasignación de clientes a comerciales;
+    \item Geolocalización de establecimientos mediante búsqueda de dirección y confirmación manual sobre mapa;
+    \item Configuración operativa del comercial para jornada base, puntos de salida y duración de visitas;
+    \item Alta, consulta y seguimiento de visitas comerciales por fecha, tipo y estado, con filtros compactables en el listado para mantener una interfaz móvil manejable;
+    \item Finalización explícita de visitas rutinarias desde su detalle cuando no existe flujo de reparto asociado;
+    \item Avisos automáticos al cliente cuando se crea una visita o se reubica una visita aplazada, y avisos operativos al comercial cuando el sistema aplaza visitas por horario;
+    \item Previsualización de ruta diaria con orden previsto, tiempos estimados, margen disponible e incidencias de franja horaria;
+    \item Consulta por parte del cliente de la hora aproximada de reparto cuando existe una visita de entrega planificada para el día.
+\end{itemize}
+
+La \textbf{lógica temporal de rutas y estimaciones} no reside en la capa visual, sino que se centraliza en \path{lib/commercial/daily-route-planning.ts}. Esta decisión permite reutilizar el mismo cálculo tanto en el panel comercial como en la tarjeta de \textit{ETA} que visualiza el cliente.
+
+En la revisión final se ha corregido además un desajuste importante entre la \textit{ETA} operativa y la navegación externa. La duración entre paradas ya no depende solo de una velocidad aproximada sobre distancia en línea recta, sino que prioriza tiempos reales por carretera mediante \texttt{OSRM}. Si el servicio no responde, se conserva un \textit{fallback} local por distancia aproximada para no bloquear la operativa. Del mismo modo, el acceso rápido a \texttt{Google Maps} navega hacia la visita actual sin contaminar la \textit{ETA} mostrada con el posible regreso automático al punto de salida al cierre de la jornada.
+
+La Figura~\ref{fig:implementation-m2-routes} recoge la vista comercial de \textbf{ruta del día}, donde se integran planificación, geolocalización, margen operativo y mapa de trabajo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m2-routes.png}
+    \caption{Captura de la implementación web del módulo M2: ruta diaria comercial}
+    \label{fig:implementation-m2-routes}
+\end{figure}
+
+La Figura~\ref{fig:implementation-m2-visits} complementa la evidencia anterior mostrando el \textbf{listado operativo de visitas comerciales}, incluyendo el resumen de estados, la bandeja de repartos preparados sin visita asignada y las acciones de planificación disponibles para el comercial.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m2-visits.png}
+    \caption{Captura de la implementación web del módulo M2: visitas comerciales}
+    \label{fig:implementation-m2-visits}
+\end{figure}
+
+\subsection{Implementación del módulo M3}
+
+El módulo \texttt{M3} se apoya en las \textbf{rutas de administración} bajo \texttt{/admin/catalog}, en las \textbf{vistas de consulta} distribuidas entre las zonas cliente y comercial, y en la lógica de dominio ubicada en \texttt{lib/typeorm/services/catalog/}.
+
+Actualmente ya están implementados:
+
+\begin{itemize}
+    \item Gestión administrativa de categorías, líneas comerciales, subcategorías jerárquicas y productos;
+    \item Gestión de recursos de apoyo vinculados a productos o líneas, como fichas técnicas, catálogos comerciales o materiales formativos;
+    \item Consulta del catálogo de productos activos por parte de clientes y comerciales, con filtros por categoría, línea comercial y subcategoría;
+    \item Visualización de fichas de producto con información comercial, datos técnicos, recursos asociados y enlaces a coloración relacionada cuando procede;
+    \item Gestión y consulta de cartas de color y referencias cromáticas, incluyendo navegación por línea comercial, vista compacta por filas de tono principal, vista por cartas desplegables, listado completo de tonos y detalle de tono asociado a producto cuando procede;
+    \item Subida y reemplazo de imágenes del catálogo mediante \texttt{Cloudinary}, con validación de tamaño, tipo y limpieza de imágenes sustituidas.
+\end{itemize}
+
+Desde el punto de vista interno, \texttt{M3} reutiliza la misma aproximación de \textbf{servicios transaccionales} ya usada en módulos anteriores, pero especializada en el dominio de catálogo. Las validaciones de consistencia entre categoría, línea, subcategoría, estado y recursos asociados se centralizan en servicios internos de catálogo.
+
+La Figura~\ref{fig:implementation-m3-catalog} muestra la consulta del \textbf{catálogo} desde el área cliente, con productos activos, categorías visuales, filtros y acceso al detalle de producto.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m3-catalog.png}
+    \caption{Captura de la implementación web del módulo M3: catálogo de productos}
+    \label{fig:implementation-m3-catalog}
+\end{figure}
+
+La Figura~\ref{fig:implementation-m3-coloration} recoge la vista de \textbf{coloración}, donde se consulta la carta cromática mediante tonos, filas y cartas disponibles, reutilizando la información del catálogo técnico.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m3-coloration.png}
+    \caption{Captura de la implementación web del módulo M3: consulta de coloración}
+    \label{fig:implementation-m3-coloration}
+\end{figure}
+
+\subsection{Implementación del módulo M4}
+
+El módulo \texttt{M4} se construye sobre las \textbf{rutas de pedidos}, \textbf{preparación de repartos} y \textbf{cobros} para cliente, comercial y administrador, los servicios de dominio ubicados en \path{lib/typeorm/services/orders/} y la extensión del subsistema de visitas comerciales para soportar repartos reales.
+
+Actualmente ya están implementados:
+
+\begin{itemize}
+    \item Creación, recuperación y confirmación de borradores de pedido tanto desde cliente como desde comercial, con buscador por producto, selector de referencia, imagen de producto en cada línea y elección entre entrega por comercial o agencia;
+    \item Consulta de historial y detalle de pedidos para cliente, comercial y administrador, con estados de pedido, repartos y cobro diferenciados;
+    \item Regla de negocio que limita a un máximo de dos pedidos abiertos pendientes de cobro por cliente;
+    \item Página comercial de preparación de repartos, donde un pedido confirmado puede dividirse en varios repartos seleccionando líneas y cantidades concretas;
+    \item Registro manual de bultos por reparto, porque el número de paquetes físicos depende de la preparación real del distribuidor y no del número de productos;
+    \item Generación de etiqueta \textit{PDF} por reparto: \textit{QR} para entregas comerciales y marca \texttt{AGENCIA} para entregas delegadas en agencia;
+    \item Vinculación de repartos comerciales a visitas de tipo \texttt{delivery}, con cierre mediante escáner continuo de cámara en un modal de pantalla completa, \textit{fallback} manual y transición del pedido a \texttt{delivered} solo cuando todos sus repartos están completados;
+    \item Liberación automática de los repartos asociados cuando una visita de entrega queda aplazada, para permitir su reasignación posterior sin dejar pedidos bloqueados;
+    \item Configuración administrativa del cargo de agencia, aplicada al total del pedido cuando el cliente o el comercial seleccionan esa modalidad de entrega;
+    \item Flujo de cobro mediante historial de pagos parciales o totales, con registro de importe, método, fecha, notas y usuario que realiza la acción, y cálculo de saldo pendiente;
+    \item Consulta de ETA para cliente solo cuando existe una visita de reparto válida y alineada con un reparto comercial pendiente.
+\end{itemize}
+
+La \textbf{lógica de negocio del módulo} se concentra principalmente en \path{order.ts}, \path{order-delivery.ts}, \path{order-settings.ts} y \path{commercial-visit.ts}. El \textit{helper} \path{lib/orders/qr.ts} encapsula la generación y normalización del \textit{QR} de cada reparto, mientras que \path{lib/orders/qr-pdf.ts} genera la etiqueta logística imprimible. \path{lib/clients/delivery-estimate.ts} resuelve la lectura reutilizable de la información de reparto que consume la zona cliente. Para la verificación del módulo se han incorporado además los scripts \path{m4-orders-delivery-test.ts}, \path{m4-payments-test.ts} y \path{m4-orders-ui-check.mjs}.
+
+La Figura~\ref{fig:implementation-m4-orders} refleja la vista comercial de \textbf{pedidos}, con resumen de estados, pedidos pendientes, modalidad de entrega, bultos e importes promocionales.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m4-orders.png}
+    \caption{Captura de la implementación web del módulo M4: pedidos y seguimiento comercial}
+    \label{fig:implementation-m4-orders}
+\end{figure}
+
+La Figura~\ref{fig:implementation-m4-deliveries} muestra la pantalla de \textbf{preparación de repartos}, en la que el comercial selecciona pedidos confirmados, define bultos y reparte las unidades pendientes antes de planificar la visita de entrega.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m4-deliveries.png}
+    \caption{Captura de la implementación web del módulo M4: preparación de repartos}
+    \label{fig:implementation-m4-deliveries}
+\end{figure}
+
+\subsection{Implementación del módulo M5}
+
+El bloque actual de \texttt{M5} se apoya en las rutas \texttt{/clients/salon-clients}, \texttt{/api/clients/salon-clients/*}, \texttt{/api/clients/salon-service-templates/*} y \texttt{/api/clients/salon-service-result-images}, y en los servicios de dominio ubicados en \path{lib/typeorm/services/salon/}. A nivel persistente, este incremento cubre tanto las tablas del \textbf{historial técnico del salón} como el subsistema de \textbf{plantillas reutilizables}, la referencia cromática concreta utilizada en cada producto de coloración y la galería visual final asociada a cada servicio.
+
+Actualmente ya están implementados:
+
+\begin{itemize}
+    \item Alta y actualización de fichas de clientes finales del salón desde el área \texttt{client};
+    \item Registro de servicios con fecha, tipo de tratamiento, resultado y notas generales;
+    \item Persistencia separada de la ficha técnica del servicio, con descripción técnica, fórmula y observaciones;
+    \item Guardado de plantillas reutilizables de servicio con nombre propio, datos técnicos y productos predefinidos para acelerar registros posteriores;
+    \item Registro estructurado de productos utilizados en cada servicio, reutilizando el catálogo activo ya existente en \texttt{M3} y enlazando la tonalidad concreta cuando el producto procede de una carta de color;
+    \item Carga de varias imágenes del resultado final por servicio, almacenadas en \texttt{Cloudinary} y persistidas en una tabla hija ordenada para su consulta posterior;
+    \item Edición y eliminación posterior de servicios ya registrados, manteniendo coherencia entre ficha técnica, productos usados y sugerencias recalculadas;
+    \item Reconstrucción automática de sugerencias de producto a partir del historial técnico y del uso acumulado de producto por cliente del salón;
+    \item Consulta integrada del historial técnico completo desde la propia ficha del cliente final, con filtros por texto, tipo de servicio y fecha;
+    \item Generación de borradores técnicos por servicio mediante un endpoint específico, con asunto y cuerpo editables en interfaz, copia al portapapeles y apertura opcional del cliente de correo a través de \texttt{mailto}.
+\end{itemize}
+
+Este bloque \textbf{no incorpora todavía} el envío real de correos técnicos a cliente final ni su integración con un proveedor externo, pero deja resuelta la base persistente, el mantenimiento del historial, la reutilización rápida de configuraciones técnicas, la documentación visual del resultado final y la preparación asistida del mensaje técnico para la operativa diaria del salón.
+
+La Figura~\ref{fig:implementation-m5-salon} muestra el área de \textbf{fichas técnicas del salón}, con alta de clientes finales, historial de servicios y acceso a la ficha técnica completa.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m5-salon.png}
+    \caption{Captura de la implementación web del módulo M5: fichas técnicas de salón}
+    \label{fig:implementation-m5-salon}
+\end{figure}
+
+La Figura~\ref{fig:implementation-m5-salon-detail} enseña el \textbf{detalle de una ficha de salón}, con datos base del cliente final, registro de servicio técnico, reutilización de plantillas y bloque de resultado visual.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m5-salon-detail.png}
+    \caption{Captura de la implementación web del módulo M5: detalle de ficha técnica}
+    \label{fig:implementation-m5-salon-detail}
+\end{figure}
+
+\subsection{Implementación del módulo M6}
+
+El módulo \texttt{M6} se apoya en tres bloques principales:
+
+\begin{itemize}
+    \item Área administrativa de comunicaciones en \path{/admin/communications};
+    \item Páginas de consulta para cliente y comercial en promociones, formaciones y avisos;
+    \item \textit{Route Handlers} separados entre administración y consumo por usuario.
+\end{itemize}
+
+La \textbf{lógica de negocio} queda centralizada en \path{lib/typeorm/services/communications/communications.ts}.
+
+Actualmente ya están implementados:
+
+\begin{itemize}
+    \item Gestión administrativa de segmentos de cliente, con alta, edición, borrado, código, nombre, descripción y criterios comerciales;
+    \item Asignación manual de clientes profesionales a segmentos, con trazabilidad del administrador responsable y notas internas;
+    \item Visualización del rango comercial del cliente en \path{/profile} y en la navegación lateral del área cliente mediante un badge metálico, priorizando los segmentos \textit{Platino}, \textit{Oro} y \textit{Plata}, asignando \textit{Plata} como rango base cuando no existe una categoría superior y mostrando las promociones activas disponibles;
+    \item Creación, edición, cambio de estado y borrado con confirmación \textit{inline} de promociones con estado \texttt{draft}, \texttt{active} o \texttt{archived}, periodo de vigencia, asociación opcional a producto, línea comercial, cliente o segmento, adjunto \textit{PDF} y miniatura de imagen;
+    \item Consulta de promociones activas por parte de clientes y comerciales, aplicando en cliente la visibilidad derivada de su asignación a segmentos y de la jerarquía comercial \textit{Plata}, \textit{Oro} y \textit{Platino};
+    \item Aplicación automática de promociones de descuento porcentual directo y descuento porcentual por volumen, manteniendo el descuento y el total final como \textit{snapshot} de línea; las promociones de regalo quedan registradas y visibles como condición comercial sin modificar el importe del pedido;
+    \item Creación, edición, publicación, cancelación, finalización y borrado con confirmación \textit{inline} de formaciones con modalidad, fecha, ubicación, contenido, capacidad opcional y estado de ciclo de vida;
+    \item Inscripción y cancelación de inscripción a formaciones publicadas, validando en servidor la disponibilidad de plazas;
+    \item Generación de notificaciones internas cuando se publican promociones o formaciones relevantes, respetando en promociones el alcance global, por cliente o por segmento definido por administración;
+    \item Selección de canales de entrega para promociones y formaciones mediante \texttt{deliveryChannels}, manteniendo el canal interno y permitiendo añadir correo \textit{SMTP} o \textit{Web Push};
+    \item Activación y revocación de suscripciones \textit{Web Push} por cliente o comercial desde la pantalla de avisos, persistidas en \texttt{user\_push\_subscriptions};
+    \item Envío de correo electrónico mediante \texttt{Nodemailer} cuando existe configuración \textit{SMTP} y envío \textit{Web Push} mediante \textit{VAPID} cuando el usuario tiene suscripciones activas;
+    \item Consulta y marcado de lectura de notificaciones por parte de clientes y comerciales, con indicador de avisos sin leer en sus paneles de inicio;
+    \item Sincronización de recordatorios internos de visitas del día cuando un cliente consulta sus avisos;
+    \item Creación y seguimiento de recordatorios personales con fecha programada y estados \texttt{pending}, \texttt{done} o \texttt{cancelled}.
+\end{itemize}
+
+En la \textbf{aplicación de descuentos promocionales} se ha definido una regla de resolución conservadora para evitar acumulaciones ambiguas. Las promociones no se acumulan entre sí: como máximo se aplica una promoción económica por línea de pedido. Para cada producto incluido en el pedido, el servicio busca las promociones activas aplicables al cliente y al propio producto, considerando promociones globales, promociones asignadas al cliente, promociones por rango comercial y promociones vinculadas a producto o línea. En el caso de los rangos, la elegibilidad es jerárquica: las promociones de \textit{Plata} son aplicables también a clientes \textit{Oro} y \textit{Platino}, y las promociones de \textit{Oro} son aplicables también a clientes \textit{Platino}. Entre todas las promociones candidatas se selecciona la que ofrece mayor porcentaje de descuento. Si existe empate, se prioriza la promoción más específica, ponderando de mayor a menor peso la coincidencia por cliente, rango o segmento, producto y línea comercial. Si el empate persiste, se elige la promoción que caduca antes. En las promociones por volumen, el umbral se evalúa contra el subtotal bruto del pedido antes de aplicar descuentos. El porcentaje finalmente aplicado y el total de la línea quedan persistidos como instantánea económica del pedido, de forma que futuras modificaciones de promociones no alteran pedidos ya registrados.
+
+El alcance actual de \texttt{M6} mantiene la \textbf{notificación interna} como fuente principal, pero ya incorpora entrega multicanal opcional por correo electrónico y \textit{Web Push}. Si \textit{SMTP}, \textit{VAPID} o la suscripción \textit{push} no están disponibles, el sistema degrada de forma controlada y conserva la notificación dentro de la aplicación. No se realiza todavía envío por \textit{WhatsApp} ni ejecución autónoma de recordatorios mediante un planificador en segundo plano; estas integraciones quedan documentadas como evolución futura.
+
+La Figura~\ref{fig:implementation-m6-communications} recoge el centro administrativo de \textbf{comunicaciones}, desde el que se gestionan promociones, formaciones, rangos y asignaciones.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m6-communications.png}
+    \caption{Captura de la implementación web del módulo M6: comunicaciones y promociones}
+    \label{fig:implementation-m6-communications}
+\end{figure}
+
+La Figura~\ref{fig:implementation-m6-client-promotions} muestra la consulta de \textbf{promociones activas} desde el área cliente, incluyendo el contenido comercial, el adjunto asociado y la condición promocional disponible para el salón.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m6-client-promotions.png}
+    \caption{Captura de la implementación web del módulo M6: promociones visibles para cliente}
+    \label{fig:implementation-m6-client-promotions}
+\end{figure}
+
+La Figura~\ref{fig:implementation-m6-client-notifications} recoge la vista de \textbf{avisos y recordatorios}, donde el cliente puede consultar notificaciones internas, marcar avisos como leídos y gestionar recordatorios personales.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m6-client-notifications.png}
+    \caption{Captura de la implementación web del módulo M6: avisos y recordatorios}
+    \label{fig:implementation-m6-client-notifications}
+\end{figure}
+
+\subsection{Implementación del módulo M7}
+
+La aplicación incorpora además varias \textbf{capacidades transversales de \texttt{M7}} que completan la administración, la seguridad técnica y la preparación de integraciones futuras:
+
+\begin{itemize}
+    \item Vista de auditoría administrativa y de accesos desde el área \texttt{/admin};
+    \item Exportación \texttt{CSV} de accesos y acciones administrativas desde \path{/admin/audit}, protegida por rol de administrador;
+    \item Configuración visible de canales de avisos automáticos, cargo de agencia y política de umbrales/recálculo de rangos desde \path{/admin/settings}, con ejecución manual de la reasignación sobre el periodo configurado;
+    \item Políticas de \textit{rate limiting} persistidas y diagnosticables desde servicios internos, sin exposición como ajuste ordinario del administrador;
+    \item Inventarios técnicos de integraciones y soporte, conservados para scripts, validación y mantenimiento;
+    \item Base persistente para integraciones externas, operaciones de intercambio y propuestas de pedido a proveedor;
+    \item Estados de carga por segmento para rutas con consultas de servidor relevantes, entre ellas catálogo, coloración, pedidos, fichas de salón, rutas, comunicaciones, auditoría y operaciones;
+    \item Optimización \textit{responsive} de imágenes con \texttt{next/image}, especialmente en catálogo, cartas de color y galerías técnicas de servicios;
+    \item \textit{Cache} selectiva de lecturas casi estáticas de catálogo y coloración, con invalidación tras escrituras administrativas;
+    \item Soporte \textit{PWA} básico mediante manifiesto web, iconos, \textit{service worker} y pantalla \textit{offline} segura;
+    \item Compatibilidad mínima de navegador con redirección a pantalla específica de no soporte.
+\end{itemize}
+
+El \textbf{inventario de integraciones de soporte} se calcula en \path{lib/integrations/operational-status.ts} y se expone también mediante \path{/api/admin/integrations/status}. En la versión final de esta iteración no se presenta como una página de trabajo del administrador, sino como una lectura técnica que ayuda a validar qué servicios auxiliares sostienen los módulos implementados.
+
+La \textbf{operación empresarial persistente} se centraliza en \path{lib/typeorm/services/admin/enterprise-operations.ts}. Este servicio lista configuraciones, integraciones externas, operaciones recientes y propuestas a proveedor; además permite registrar nuevas operaciones de integración y generar propuestas de reposición desde productos activos del catálogo. La pantalla visible de diagnóstico queda fuera del flujo ordinario, pero los \textit{endpoints} \path{/api/admin/enterprise-operations}, \path{/api/admin/enterprise-operations/operations} y \path{/api/admin/enterprise-operations/supplier-proposals} se conservan como base para futuras integraciones reales.
+
+El \textbf{inventario de soporte técnico} se calcula en \path{lib/support/operational-support.ts} y se expone mediante \path{/api/admin/support/status}. No requiere migraciones ni tablas nuevas, ya que inspecciona activos y configuraciones existentes del propio proyecto: \path{proxy.hosting.ts}, \path{app/manifest.ts}, \path{public/sw.js}, iconos \textit{PWA} y componentes transversales. Su utilidad queda ligada a mantenimiento y pruebas, no a la operativa diaria del negocio.
+
+La \textbf{vista agregada de operación} se calcula en \path{lib/admin/operational-overview.ts} y se expone mediante \path{/api/admin/operations/status}. Este servicio combina contadores de auditoría, estado de políticas de \textit{rate limiting}, resúmenes de los inventarios de integración y soporte, y métricas del registro empresarial persistente para ofrecer una lectura técnica del estado de \texttt{M7}. Como ocurre con las rutas anteriores, queda fuera de la navegación final para no convertir la administración en una documentación viva del sistema.
+
+El \textbf{informe operativo exportable} se genera en \path{lib/admin/operational-report.ts} y se expone mediante \path{/api/admin/operations/report}. Su contenido transforma las secciones y métricas del resumen de operación en un fichero \texttt{CSV}, útil para conservar evidencias de revisión técnica sin introducir una nueva entidad persistente.
+
+La \textbf{exportación de auditoría} se centraliza en \path{lib/admin/audit-export.ts} y se publica mediante \path{/api/admin/audit/export}. El servicio genera bajo demanda ficheros \texttt{CSV} para accesos y acciones administrativas recientes, con límite de filas y ventana temporal configurable por \textit{query string}. De este modo, el administrador puede conservar evidencias sin duplicar información ni añadir nuevas tablas al modelo físico.
+
+El \textbf{diagnóstico de \textit{rate limiting}} se calcula en \path{lib/admin/rate-limit-diagnostics.ts}. Los \textit{endpoints} \path{/api/admin/settings/rate-limits/status} y \path{/api/admin/settings/rate-limits} quedan desactivados por defecto y solo responden si el entorno técnico habilita \texttt{ADMIN\_RATE\_LIMIT\_SETTINGS\_ENABLED=true}. La vista \path{/admin/settings} ya no permite editar estas políticas; se limita a la configuración funcional de avisos automáticos, cargo de agencia y política comercial de rangos.
+
+La Figura~\ref{fig:implementation-m7-settings} muestra una de las vistas transversales de \textbf{administración}, centrada en ajustes globales, cargo de agencia, rangos comerciales y canales de aviso.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m7-settings.png}
+    \caption{Captura de la implementación web del módulo M7: configuración transversal}
+    \label{fig:implementation-m7-settings}
+\end{figure}
+
+La Figura~\ref{fig:implementation-m7-audit} evidencia la vista de \textbf{auditoría administrativa}, con registros de acceso, acciones de gestión y exportación de trazabilidad en formato \texttt{CSV}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/Capturas/Implementacion/implementation-m7-audit.png}
+    \caption{Captura de la implementación web del módulo M7: auditoría y trazabilidad}
+    \label{fig:implementation-m7-audit}
+\end{figure}
+
+\section{Migraciones de Base de Datos}
+
+La \textbf{persistencia} se gestiona mediante migraciones de \texttt{TypeORM}. No se han empleado procedimientos almacenados ni disparadores específicos; la lógica de negocio se mantiene en servicios \texttt{TypeScript}, lo que simplifica su trazabilidad junto al resto del código fuente.
+
+Además de las tablas de negocio principales, la base de datos incorpora pequeños \textbf{catálogos normalizados} para roles, estados y tipos operativos. Esta decisión permite que autenticación, auditoría, visitas, rutas, catálogo y pedidos trabajen contra valores controlados y coherentes con las reglas del dominio.
+
+La serie de migraciones actual queda organizada en la Tabla~\ref{tab:database-migrations}.
+
+{\scriptsize
+\setlength{\parskip}{0pt}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.10}
+\tablecaption{Inventario de migraciones de base de datos\label{tab:database-migrations}}
+\tablefirsthead{\hline\rowcolor{black!8}\textbf{Migración} & \textbf{Ámbito} & \textbf{Contenido principal}\\\hline}
+\tablehead{\hline\rowcolor{black!8}\textbf{Migración} & \textbf{Ámbito} & \textbf{Contenido principal}\\\hline}
+\begin{supertabular}{|>{\raggedright\arraybackslash}p{0.14\textwidth}|>{\raggedright\arraybackslash}p{0.16\textwidth}|>{\raggedright\arraybackslash}p{0.62\textwidth}|}
+\texttt{001}--\texttt{005} & \texttt{M1} & Tablas base del módulo, catálogos de roles y estados, usuarios, solicitudes, \textit{logs} de acceso y datos semilla iniciales.\\
+\hline
+\texttt{006}--\texttt{019} & \texttt{M2} & Clientes, comerciales, asignaciones, configuración de ruta, geodatos, tipos de visita, modelo de visitas por jornada y estado aplazado.\\
+\hline
+\texttt{020}--\texttt{028} & \texttt{M3} & Catálogos auxiliares, jerarquía comercial de categorías y líneas, productos, recursos de apoyo, cartas de color, referencias cromáticas, subcategorías jerárquicas y miniaturas de coloración.\\
+\hline
+\texttt{029} & \texttt{M4} & Catálogos auxiliares con estados de pedido y de cobro.\\
+\hline
+\texttt{030} & \texttt{M4} & Tablas \texttt{orders} y \texttt{order\_lines}, incluyendo importes consolidados y trazabilidad de líneas.\\
+\hline
+\texttt{031} & \texttt{M4} & Datos semilla de estados de pedido y estados iniciales de cobro.\\
+\hline
+\texttt{032} & \texttt{M4} & Soporte para referencias cromáticas pedibles y persistencia de borradores.\\
+\hline
+\texttt{033} & \texttt{M4} & Vinculación de pedidos a visitas comerciales de reparto.\\
+\hline
+\texttt{034} & \texttt{M4} & Seguimiento inicial de cobro sobre el propio pedido, con método, notas, fecha y usuario responsable.\\
+\hline
+\texttt{035} & Transversal & Tabla \texttt{app\_rate\_limit\_policies} para sobrescrituras técnicas de políticas de \textit{rate limiting}, no expuestas como ajuste ordinario de administración.\\
+\hline
+\texttt{036} & \texttt{M5} & Base persistente del primer incremento del módulo, con fichas de clientes del salón, servicios, ficha técnica, uso de productos y sugerencias derivadas.\\
+\hline
+\texttt{037} & \texttt{M5} & Plantillas reutilizables de servicio, con cabecera de plantilla y productos predefinidos asociados.\\
+\hline
+\texttt{038} & \texttt{M5} & Tonalidades enlazadas a usos de producto del salón y galería de imágenes de resultado final por servicio.\\
+\hline
+\texttt{039} & \texttt{M6} & Segmentos de cliente, asignaciones cliente-segmento, promociones, formaciones, inscripciones, notificaciones internas y recordatorios.\\
+\hline
+\texttt{040} & \texttt{M7} & Configuraciones del sistema, integraciones externas, operaciones de integración, propuestas de pedido a proveedor y líneas de propuesta.\\
+\hline
+\texttt{041} & \texttt{M6} & Asignación del rango base \textit{Plata} a los clientes sin rango comercial previo, manteniendo la coherencia del sistema de ventajas.\\
+\hline
+\texttt{042} & \texttt{M6}/\texttt{M7} & Ampliación multicanal con suscripciones \textit{Web Push} de usuario e inserción de las integraciones externas \textit{SMTP transaccional} y \textit{Web Push}.\\
+\hline
+\texttt{043} & \texttt{M6} & \textit{Backfill} de rango \textit{Plata} para clientes sin rango comercial.\\
+\hline
+\texttt{044} & \texttt{M3} & Limpieza de imágenes antiguas de subcategorías de producto.\\
+\hline
+\texttt{045} & \texttt{M4} & Tabla \texttt{order\_payments} para registrar pagos parciales o totales asociados a pedidos.\\
+\hline
+\texttt{046} & \texttt{M4} & Tablas \texttt{order\_deliveries} y \texttt{order\_delivery\_lines} para separar pedido y reparto, con bultos manuales y líneas servidas.\\
+\hline
+\texttt{047} & \texttt{M4} & Método de entrega por comercial o agencia, cargo de agencia en pedidos y configuración persistente del importe inicial.\\
+\hline
+\texttt{048} & \texttt{M6}/\texttt{M4} & Tipos estructurados de promoción, adjuntos comerciales, descuentos por volumen, regalos promocionales y configuración persistente de umbrales de rangos.\\
+\hline
+\end{supertabular}
+}
+
+Esta estrategia permite \textbf{reconstruir el esquema} de forma controlada en cualquier entorno, auditar los cambios estructurales del sistema y extender el proyecto sin depender de modificaciones manuales sobre la base de datos.
