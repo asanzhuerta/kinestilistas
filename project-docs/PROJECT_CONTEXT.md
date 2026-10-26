@@ -29,7 +29,11 @@
 | M5 Fichas técnicas de salón, servicios, plantillas | Implementado |
 | M6 Promociones, segmentos/rangos, notificaciones, formaciones | Implementado |
 | M7 Administración e integraciones | Parcial (UI de operaciones e integraciones huérfana) |
-| M8 IA, simulación de color, herramientas cliente final, Factusol/n8n | Solo documentado (trabajo futuro) |
+| M8 Diagnóstico capilar KINACTIF (integración de KinActif) | Pendiente — en alcance (D-23) |
+| M9 Integración con Factusol vía n8n | Pendiente — en alcance |
+| M10 Visión: simulación de color y reconocimiento de productos | Pendiente — en alcance |
+| M11 Asistente inteligente | Pendiente — en alcance |
+| M12 Cliente final y reservas | Pendiente — en alcance |
 
 Detalle y riesgos: `PROJECT_STATUS.md`.
 

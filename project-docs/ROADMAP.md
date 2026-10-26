@@ -59,5 +59,5 @@ Detalle técnico de cada SEC en `AUDIT_REPORT.md` (local).
 - M4: número de pedido legible, notificaciones de cambio de estado, cancelación por el cliente.
 - M5: borrar clientes del salón, editar plantillas, consentimiento RGPD.
 - M6: planificador para recordatorios.
-- M7/M8: primer webhook n8n real que registre `integration_operations` (Factusol); IA y simulación de color solo si entran en alcance.
+- Nuevos módulos en alcance (D-23): M8 Diagnóstico capilar KINACTIF, M9 Factusol vía n8n (registra `integration_operations`), M10 Visión, M11 Asistente inteligente, M12 Cliente final y reservas. La planificación semanal detallada (37 semanas desde el 2026-11-03, 704 h) está en `Desktop/TFG/reunion-comercial/reunion-comercial.tex`.
 - Memoria/defensa: corregir contradicciones detectadas (recuperación de contraseña, pruebas de integración, metodología en futuro, URL de demo).
